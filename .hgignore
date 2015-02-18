@@ -1,0 +1,9 @@
+syntax: glob
+node_modules/
+plugins/sparklinlabs/*/public/**.js
+plugins/sparklinlabs/*/public/**.css
+plugins/sparklinlabs/*/public/**.html
+*.sublime-*
+syntax: regexp
+^projects/
+^public/

@@ -1,0 +1,82 @@
+ol.tree
+  list-style none
+  line-height 1.5
+  margin 0
+  padding 0 0 2em 0
+  width 100%
+  min-height 100%
+
+  *
+    -webkit-user-select none
+
+  ol
+    list-style none
+    margin 0
+    padding-left 24px
+
+    &:last-of-type.drop-below
+      border-bottom 1px solid #888
+      padding-bottom 0
+
+  li.item, li.group
+    background-clip border-box
+    height 28px
+    display flex
+    padding 1px
+    cursor default
+    display flex
+    align-items center
+
+    > .icon, > .toggle
+      margin -1px
+      width 24px
+      height 24px
+
+    span
+      align-self center
+      padding 0.25em
+
+    &:hover
+      background-color #eee
+
+    &.drop-above
+      border-top 1px solid #888
+      padding-top 0
+
+    &.drop-inside
+      border 1px solid #888
+      padding 0
+    
+    &.selected
+      background #beddf4
+
+  li.item
+    > .icon
+      background-image url(images/item.svg)
+
+    &.drop-below
+      border-bottom 1px solid #888
+      padding-bottom 0
+
+  li.group
+    color #444
+
+    > .toggle
+      background-image url(/ui/images/group-open.svg)
+      cursor pointer
+
+    &.drop-below
+      + ol
+        border-bottom 1px solid #888
+        
+        &:empty
+          margin-top -1px
+          pointer-events none
+
+  li.group.collapsed
+    > .toggle
+      background-image url(/ui/images/group-closed.svg)
+
+    + ol
+      > ol, > li
+        display none

@@ -1,0 +1,71 @@
+&
+  display flex
+
+.sidebar
+  width 300px
+  display flex
+  flex-flow column
+  background #eee
+  border-right 1px solid #aaa
+
+  .project-management
+    display flex
+    align-items center
+    padding 0.5em
+
+    .project-name
+      flex 1
+      margin 0
+      text-overflow ellipsis
+      white-space nowrap
+      overflow-x hidden
+
+  .entries-buttons
+    display flex
+    flex-flow column
+
+    > div
+      display flex
+
+    button
+      flex 1
+      font-size smaller
+      white-space nowrap
+
+  .entries-tree-view
+    border-top 1px solid #aaa
+    flex 1
+    position relative
+    background #fff
+    overflow-y auto
+
+    .tree
+      position absolute
+
+    .name
+      white-space pre
+      flex 1
+
+    .diagnostics span
+      background rgba(0,0,0,0.2)
+      color rgba(0,0,0,0.8)
+      font-size 80%
+
+.main
+  flex 1
+  display flex
+  flex-flow column
+
+  .tabs-bar
+    @import 'tabsBar'
+
+  .panes
+    flex 1
+    display flex
+
+    iframe
+      border none
+      flex 1
+
+      &:not(.active)
+        display none

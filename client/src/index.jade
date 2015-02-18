@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    title Superpowers
+    link(rel="stylesheet",href="/client/styles/reset.css")
+    link(rel="stylesheet",href="/client/styles/treeView.css")
+    link(rel="stylesheet",href="index.css")
+
+    template#hub-template
+      include templates/hub
+
+    template#project-template
+      include templates/project
+
+  body
+    script(src="/core/SupCore.js")
+    script(src="/client/SupClient.js")
+    script(src="index.js")

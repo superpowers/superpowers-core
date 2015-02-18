@@ -1,0 +1,36 @@
+ol.tab-strip
+  height 30px
+  display flex
+  margin 0
+  padding 0
+
+  user-select none
+
+  > li
+    display flex
+    align-items center
+    width 160px
+    height 30px
+    border-right 1px solid #bbb
+    background #ddd
+
+    &.dragged
+      position absolute
+      z-index 1000
+      border-left 1px solid #bbb
+      margin-left -1px
+
+    &.drop-placeholder
+      background none
+
+      &:nth-last-child(1)
+        border-right none
+
+    &:not(.active)
+      color #888
+
+    &:hover
+      background #eee
+
+    &.active
+      background #fff

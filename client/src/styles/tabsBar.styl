@@ -1,0 +1,36 @@
+&
+  background #eee
+  cursor default
+  border-bottom 1px solid #aaa
+
+.tab-strip > li
+  display flex
+
+  .icon
+    pointer-events none
+
+  .label
+    pointer-events none
+    padding-left 0.5em
+    flex 1
+    overflow-x hidden
+    text-overflow ellipsis
+    white-space nowrap
+
+  .close
+    margin-right 0.25em
+    width 20px
+    height 20px
+    border none
+    outline none
+
+    background url(images/tabs/close.svg) center center no-repeat
+    opacity 0.5
+
+    &:hover
+      background-image url(images/tabs/close-active.svg)
+      opacity 0.5
+
+    &:active
+      background-image url(images/tabs/close-active.svg)
+      opacity 1
