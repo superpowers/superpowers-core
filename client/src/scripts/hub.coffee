@@ -72,12 +72,12 @@ onSetProjectProperty = (id, key, value) ->
 createProjectElement = (manifest) ->
   liElt = document.createElement('li')
   liElt.dataset.id = manifest.id
-  
+
   nameSpan = document.createElement('span')
   nameSpan.className = 'name'
   nameSpan.textContent = manifest.name
   liElt.appendChild nameSpan
-  
+
   descriptionSpan = document.createElement('span')
   descriptionSpan.className = 'description'
   descriptionSpan.textContent = manifest.description
@@ -88,7 +88,7 @@ createProjectElement = (manifest) ->
 onProjectsTreeViewDrop = -> false
 
 onProjectActivate = ->
-  window.location = "?project=#{ui.projectsTreeView.selectedNodes[0].dataset.id}" 
+  window.location = "?project=#{ui.projectsTreeView.selectedNodes[0].dataset.id}"
   return
 
 onNewProjectClick = ->
@@ -118,7 +118,7 @@ onRenameProjectClick = ->
     alert err if err?
 
     return
-    
+
 onEditDescriptionClick = ->
   return if ui.projectsTreeView.selectedNodes.length != 1
 
@@ -127,7 +127,7 @@ onEditDescriptionClick = ->
 
   newDescription = prompt "New description", project.description
   return if ! newDescription?
-  
+
   socket.emit 'setProperty:projects', project.id, 'description', newDescription, (err) ->
     alert err if err?
 

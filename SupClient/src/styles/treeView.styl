@@ -46,14 +46,11 @@ ol.tree
     &.drop-inside
       border 1px solid #888
       padding 0
-    
+
     &.selected
       background #beddf4
 
   li.item
-    > .icon
-      background-image url(images/item.svg)
-
     &.drop-below
       border-bottom 1px solid #888
       padding-bottom 0
@@ -62,20 +59,20 @@ ol.tree
     color #444
 
     > .toggle
-      background-image url(/ui/images/group-open.svg)
+      background-image url(/images/treeView/group-open.svg)
       cursor pointer
 
     &.drop-below
       + ol
         border-bottom 1px solid #888
-        
+
         &:empty
           margin-top -1px
           pointer-events none
 
   li.group.collapsed
     > .toggle
-      background-image url(/ui/images/group-closed.svg)
+      background-image url(/images/treeView/group-closed.svg)
 
     + ol
       > ol, > li
