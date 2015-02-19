@@ -51,7 +51,8 @@ hub = new ProjectHub io, projectsPath, (err) ->
 
 # Save on exit
 isQuitting = false
-process.on 'SIGINT', ->
+
+onExit = ->
   return if isQuitting
   isQuitting = true
   httpServer.close()
@@ -64,3 +65,6 @@ process.on 'SIGINT', ->
     process.exit()
 
   return
+
+process.on 'SIGINT', onExit
+process.on 'message', (msg) -> if msg == 'stop' then onExit(); return

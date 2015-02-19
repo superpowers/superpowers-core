@@ -1,0 +1,20 @@
+doctype html
+html
+  head
+    title Superpowers
+    link(rel="stylesheet",href="index.css")
+
+  body
+    h1 Launcher
+
+    .server-buttons
+      button.start-server Start server
+      button.stop-server(disabled) Stop server
+      button.open Open
+
+    textarea
+
+    script.
+      window.child_process = require('child_process');
+
+    script(src="index.js")

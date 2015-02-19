@@ -4,6 +4,8 @@ plugins/sparklinlabs/*/public/**.js
 plugins/sparklinlabs/*/public/**.css
 plugins/sparklinlabs/*/public/**.html
 *.sublime-*
+bin/
 syntax: regexp
 ^projects/
 ^public/
+^launcher/public/
