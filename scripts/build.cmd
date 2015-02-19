@@ -1,4 +1,7 @@
-cd ../SupCore
+cd ..
+call npm install
+
+cd SupCore
 call gulp
 
 cd ../SupClient

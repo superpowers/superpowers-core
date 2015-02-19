@@ -1,4 +1,5 @@
-cd ../SupCore && gulp
+cd .. && npm install
+cd SupCore && gulp
 cd ../SupClient && gulp
 cd ../system/SupEngine && npm install && gulp
 cd ../SupRuntime && gulp
