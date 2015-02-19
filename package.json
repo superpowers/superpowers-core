@@ -2,6 +2,10 @@
   "name": "superpowers",
   "version": "1.0.0",
   "main": "./server/index.coffee",
+  "repository" : {
+    "type" : "hg",
+    "url" : "https://bitbucket.org/superpowers/superpowers"
+  },
   "devDependencies": {
     "browserify": "^8.1.3",
     "coffee-script": "^1.9.0",
