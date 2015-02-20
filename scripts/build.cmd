@@ -20,6 +20,9 @@ call gulp
 cd ../../client
 call gulp
 
+cd ../launcher
+call gulp
+
 cd ../plugins/sparklinlabs/scene
 call gulp
 
