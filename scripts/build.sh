@@ -5,6 +5,7 @@ cd ../system/SupEngine && npm install && gulp
 cd ../SupRuntime && gulp
 cd ../player && gulp
 cd ../../client && gulp
+cd ../launcher && gulp
 cd ../plugins/sparklinlabs/scene && gulp
 cd ../script && npm install && gulp
 cd ../sound && gulp
