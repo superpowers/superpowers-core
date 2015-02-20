@@ -17,6 +17,10 @@ app.use '/', express.static "#{__dirname}/../public"
 httpServer = require('http').createServer app
 io = require('socket.io') httpServer, { transports: ['websocket'] }
 
+httpServer.on 'error', (err) =>
+  if err.code == 'EADDRINUSE' then SupCore.log "Could not start the server: another application is already listening on port #{exports.config.port}."
+  else throw err
+
 # Load plugins
 pluginsPaths = { all: [], byAssetType: {} }
 shouldIgnorePlugin = (pluginName) -> pluginName.indexOf('.') != -1 or pluginName == 'node_modules'
@@ -47,9 +51,10 @@ hub = new ProjectHub io, projectsPath, (err) ->
   if err? then SupCore.log "Failed to start server:\n#{err.stack}"; return
 
   SupCore.log "Loaded #{Object.keys(hub.serversById).length} projects."
+
   httpServer.listen exports.config.port, -> SupCore.log "Server started."
 
-# Save on exit
+# Save on exit and handle crashes
 isQuitting = false
 
 onExit = ->
@@ -68,3 +73,8 @@ onExit = ->
 
 process.on 'SIGINT', onExit
 process.on 'message', (msg) -> if msg == 'stop' then onExit(); return
+
+process.on 'uncaughtException', (err) ->
+  SupCore.log "The server crashed.\n#{err.stack}"
+  process.exit 1
+  return
