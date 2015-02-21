@@ -1,3 +1,4 @@
+pushd $(dirname $0)
 cd .. && npm install
 cd SupCore && gulp
 cd ../SupClient && gulp
@@ -11,3 +12,4 @@ cd ../script && npm install && gulp
 cd ../sound && gulp
 cd ../sprite && gulp
 cd ../tileMap && gulp
+popd

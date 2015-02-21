@@ -1,3 +1,5 @@
+pushd %~dp0
+
 cd ..
 call npm install
 
@@ -38,3 +40,5 @@ call gulp
 
 cd ../tileMap
 call gulp
+
+popd
