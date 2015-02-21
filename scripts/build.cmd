@@ -28,7 +28,7 @@ call gulp
 cd ../plugins/sparklinlabs/scene
 call gulp
 
-cd ../script
+cd ../typescript
 call npm install
 call gulp
 

@@ -8,7 +8,7 @@ cd ../player && gulp
 cd ../../client && gulp
 cd ../launcher && gulp
 cd ../plugins/sparklinlabs/scene && gulp
-cd ../script && npm install && gulp
+cd ../typescript && npm install && gulp
 cd ../sound && gulp
 cd ../sprite && gulp
 cd ../tileMap && gulp
