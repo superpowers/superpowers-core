@@ -1,6 +1,6 @@
 {
   "name": "superpowers",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "./server/index.coffee",
   "repository": {
     "type": "hg",
