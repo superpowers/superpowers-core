@@ -1,5 +1,5 @@
 TreeView = require 'dnd-tree-view'
-TabStrip = require './TabStrip'
+TabStrip = require 'tab-strip'
 
 info = {}
 data = null
