@@ -1,11 +1,63 @@
+@import '../../SupClient/src/styles/reset.styl'
+@import '../../SupClient/src/styles/treeView.styl'
 @import 'nib'
 
-html, body
-  height 100%
-
 body
+  background #eee
   display flex
   flex-flow column
 
-textarea
+.pane-buttons
+  background #ccc
+
+  > button
+    background #aaa
+    padding 0.75em 1em
+    border none
+    text-transform uppercase
+
+    &.active
+      background #444
+      color #fff
+      font-weight bold
+
+    &:not(.active):hover
+      background #888
+      color #fff
+
+.panes
   flex 1
+  display flex
+  flex-flow column
+
+  > div
+    flex 1
+
+    &:not(.active)
+      display none
+
+.panes
+  > .home
+    @import 'panes/home.styl'
+  > .servers
+    @import 'panes/servers.styl'
+
+.my-server
+  height 150px
+  display flex
+  flex-flow column
+
+  header
+    padding 0.5em
+    background #ccc
+    display flex
+    align-items center
+
+    .buttons
+      margin 0 0.5em
+      flex 1
+
+  textarea
+    flex 1
+    resize none
+    padding 0.5em

@@ -5,14 +5,28 @@ html
     link(rel="stylesheet",href="index.css")
 
   body
-    h1 Launcher
+    .pane-buttons
+      button.home Home
+      button.servers Servers
+      button.settings Settings
 
-    .server-buttons
-      button.start-server Start server
-      button.stop-server(disabled) Stop server
-      button.open Open
+    .panes
+      .home
+        include panes/home
+      .servers
+        include panes/servers
+      .settings
+        include panes/settings
 
-    textarea
+    .my-server
+      header
+        | My Server 
+        .buttons
+          button.start-stop-server Start
+        .auto-start-server
+          input#auto-start-server(type="checkbox")
+          label(for="auto-start-server") Auto-start server on startup
+      textarea(readonly)
 
     script.
       window.child_process = require('child_process');
