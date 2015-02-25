@@ -42,6 +42,7 @@ cd ../tileMap
 call gulp
 
 cd ../tweenjs
+call npm install
 call gulp
 
 popd
