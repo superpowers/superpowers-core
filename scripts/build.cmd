@@ -41,4 +41,7 @@ call gulp
 cd ../tileMap
 call gulp
 
+cd ../tweenjs
+call gulp
+
 popd
