@@ -34,7 +34,8 @@ for pluginAuthor in fs.readdirSync pluginsPath
     pluginPath = "#{pluginAuthorPath}/#{pluginName}"
 
     pluginsPaths.all.push "#{pluginAuthor}/#{pluginName}"
-    pluginsPaths.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}" for assetType in fs.readdirSync "#{pluginPath}/editors"
+    if fs.existsSync "#{pluginPath}/editors"
+      pluginsPaths.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}" for assetType in fs.readdirSync "#{pluginPath}/editors"
 
     # Load API module
     apiModulePath = "#{pluginPath}/api"
