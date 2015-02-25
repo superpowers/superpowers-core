@@ -31,7 +31,7 @@ module.exports = class TreeById extends EventEmitter
 
     walkRecurse node, null for node in @pub
     return
-    
+
   getPathFromId: (id) ->
     name = @byId[id].name
     parent = @parentNodesById[id]
@@ -39,7 +39,7 @@ module.exports = class TreeById extends EventEmitter
       break if ! parent?
       name = "#{parent.name}/#{name}"
       parent = @parentNodesById[parent.id]
-      
+
     return name
 
   add: (node, parentId, index, callback) ->
@@ -111,7 +111,7 @@ module.exports = class TreeById extends EventEmitter
 
     parentNode = @byId[parentId] if parentId?
     siblings = parentNode?.children ? @pub
-    
+
     oldSiblings = @parentNodesById[id]?.children ? @pub
     oldIndex = oldSiblings.indexOf(node)
     oldSiblings.splice oldIndex, 1
@@ -137,7 +137,7 @@ module.exports = class TreeById extends EventEmitter
     callback()
     @emit 'change'
     return
-    
+
   client_remove: (id) ->
     node = @byId[id]
 
