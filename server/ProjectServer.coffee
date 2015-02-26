@@ -9,17 +9,17 @@ module.exports = class ProjectServer
 
   constructor: (io, @projectPath, manifestData, callback) ->
 
-    @api = assets: new SupCore.api.Assets @
+    @data = assets: new SupCore.data.Assets @
     @scheduledSaveCallbacks = {}
     @nextClientId = 0
     @clientsBySocketId = {}
 
-    @api.assets.on 'itemLoad', @_onAssetLoaded
+    @data.assets.on 'itemLoad', @_onAssetLoaded
 
     loadManifest = (callback) =>
       if manifestData?
-        @api.manifest = new SupCore.api.Manifest manifestData
-        @api.manifest.on 'change', @_onManifestChanged
+        @data.manifest = new SupCore.data.Manifest manifestData
+        @data.manifest.on 'change', @_onManifestChanged
         callback(); return
 
       fs.readFile path.join(@projectPath, 'manifest.json'), { encoding: 'utf8' }, (err, manifestJSON) =>
@@ -31,8 +31,8 @@ module.exports = class ProjectServer
         try schemas.validate manifestData, 'projectManifest'
         catch err then callback err; return
 
-        @api.manifest = new SupCore.api.Manifest manifestData
-        @api.manifest.on 'change', @_onManifestChanged
+        @data.manifest = new SupCore.data.Manifest manifestData
+        @data.manifest.on 'change', @_onManifestChanged
 
         callback(); return
 
@@ -43,8 +43,8 @@ module.exports = class ProjectServer
         try internalsData = JSON.parse internalsJSON
         catch err then callback err; return
 
-        @api.internals = new SupCore.api.Internals internalsData
-        @api.internals.on 'change', @_onInternalsChanged
+        @data.internals = new SupCore.data.Internals internalsData
+        @data.internals.on 'change', @_onInternalsChanged
 
         callback(); return
 
@@ -58,8 +58,8 @@ module.exports = class ProjectServer
         try schemas.validate membersData, 'projectMembers'
         catch err then callback err; return
 
-        @api.members = new SupCore.api.Members membersData
-        @api.members.on 'change', @_onMembersChanged
+        @data.members = new SupCore.data.Members membersData
+        @data.members.on 'change', @_onMembersChanged
 
         callback(); return
 
@@ -73,27 +73,27 @@ module.exports = class ProjectServer
         try schemas.validate entriesData, 'projectEntries'
         catch err then callback err; return
 
-        @api.entries = new SupCore.api.Entries entriesData, @api.internals.pub.nextEntryId
-        @api.entries.on 'change', @_onEntriesChanged
+        @data.entries = new SupCore.data.Entries entriesData, @data.internals.pub.nextEntryId
+        @data.entries.on 'change', @_onEntriesChanged
 
         callback(); return
 
     serve = (callback) =>
       # Setup the project's namespace
-      @io = io.of "/project:#{@api.manifest.pub.id}"
+      @io = io.of "/project:#{@data.manifest.pub.id}"
       @io.on 'connection', @_addSocket
       callback(); return
 
     # prepareAssets() must happen after serve()
     # since diagnostics rely on @io being setup
     prepareAssets = (callback) =>
-      async.each Object.keys(@api.entries.byId), (assetId, cb) =>
+      async.each Object.keys(@data.entries.byId), (assetId, cb) =>
         # Ignore folders
-        if ! @api.entries.byId[assetId].type? then cb(); return
+        if ! @data.entries.byId[assetId].type? then cb(); return
 
-        @api.assets.acquire assetId, (err, asset) =>
+        @data.assets.acquire assetId, (err, asset) =>
           asset.restore()
-          @api.assets.release assetId, skipUnloadDelay: true
+          @data.assets.release assetId, skipUnloadDelay: true
           cb(); return
         return
       , callback
@@ -103,7 +103,7 @@ module.exports = class ProjectServer
       loadInternals, loadEntries, serve, prepareAssets ], callback
 
   log: (message) ->
-    SupCore.log "[#{@api.manifest.pub.id} #{@api.manifest.pub.name}] #{message}"
+    SupCore.log "[#{@data.manifest.pub.id} #{@data.manifest.pub.name}] #{message}"
     return
 
   save: (callback) ->
@@ -176,28 +176,28 @@ module.exports = class ProjectServer
   _onEntriesChanged:  => @_scheduleSave 60, 'entries', @_saveEntries; return
 
   _saveManifest: (callback) =>
-    manifestJSON = JSON.stringify @api.manifest.pub, null, 2
+    manifestJSON = JSON.stringify @data.manifest.pub, null, 2
     fs.writeFile path.join(@projectPath, 'manifest.json'), manifestJSON, callback
     return
 
   _saveInternals: (callback) =>
-    internalsJSON = JSON.stringify @api.internals.pub, null, 2
+    internalsJSON = JSON.stringify @data.internals.pub, null, 2
     fs.writeFile path.join(@projectPath, 'internals.json'), internalsJSON, callback
     return
 
   _saveMembers: (callback) =>
-    membersJSON = JSON.stringify @api.members.pub, null, 2
+    membersJSON = JSON.stringify @data.members.pub, null, 2
     fs.writeFile path.join(@projectPath, 'members.json'), membersJSON, callback
     return
 
   _saveEntries: (callback) =>
-    entriesJSON = JSON.stringify @api.entries.getForStorage(), null, 2
+    entriesJSON = JSON.stringify @data.entries.getForStorage(), null, 2
     fs.writeFile path.join(@projectPath, 'entries.json'), entriesJSON, callback 
     return
 
   _setDiagnostic: (assetId, diagnosticId, type, data) =>
     #console.log "_setDiagnostic #{assetId} #{diagnosticId} #{type}"
-    diagnostics = @api.entries.diagnosticsByEntryId[assetId]
+    diagnostics = @data.entries.diagnosticsByEntryId[assetId]
 
     newDiag = { id: diagnosticId, type, data }
 
@@ -215,7 +215,7 @@ module.exports = class ProjectServer
 
   _clearDiagnostic: (assetId, diagnosticId) =>
     #console.log "_clearDiagnostic #{assetId} #{diagnosticId}"
-    diagnostics = @api.entries.diagnosticsByEntryId[assetId]
+    diagnostics = @data.entries.diagnosticsByEntryId[assetId]
 
     diagnostics.remove diagnosticId, (err) =>
       @io.in('sub:entries').emit 'clear:diagnostics', assetId, diagnosticId
@@ -229,7 +229,7 @@ module.exports = class ProjectServer
 
     for depId in dependencyEntryIds
       depId = parseInt(depId) if typeof depId == 'string'
-      depEntry = @api.entries.byId[depId]
+      depEntry = @data.entries.byId[depId]
       if ! depEntry? then missingAssetIds.push depId; continue
 
       dependentAssetIds = depEntry.dependentAssetIds
@@ -238,7 +238,7 @@ module.exports = class ProjectServer
         addedDependencyEntryIds.push depId
 
     if missingAssetIds.length > 0
-      existingDiag = @api.entries.diagnosticsByEntryId[assetId].byId["missingDependencies"]
+      existingDiag = @data.entries.diagnosticsByEntryId[assetId].byId["missingDependencies"]
       if existingDiag? then missingAssetIds = missingAssetIds.concat existingDiag.data.missingAssetIds
       @_setDiagnostic assetId, "missingDependencies", "error", { missingAssetIds }
 
@@ -254,7 +254,7 @@ module.exports = class ProjectServer
 
     for depId in dependencyEntryIds
       depId = parseInt(depId) if typeof depId == 'string'
-      depEntry = @api.entries.byId[depId]
+      depEntry = @data.entries.byId[depId]
       if ! depEntry? then missingAssetIds.push depId; continue
 
       dependentAssetIds = depEntry.dependentAssetIds
@@ -264,7 +264,7 @@ module.exports = class ProjectServer
         removedDependencyEntryIds.push depId
 
     if missingAssetIds.length > 0
-      existingDiag = @api.entries.diagnosticsByEntryId[assetId].byId["missingDependencies"]
+      existingDiag = @data.entries.diagnosticsByEntryId[assetId].byId["missingDependencies"]
       if existingDiag?
         for missingAssetId in missingAssetIds
           index = existingDiag.data.missingAssetIds.indexOf(missingAssetId)

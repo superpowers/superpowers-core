@@ -32,7 +32,7 @@ exports.componentConfigPlugins = {}
 
 exports.addAssetPlugin = (name, plugin) ->
   if exports.assetPlugins[name]?
-    console.log "SupCore.api.addAssetPlugin: Tried to load two or more plugins named \"#{name}\""
+    console.log "SupCore.data.addAssetPlugin: Tried to load two or more plugins named \"#{name}\""
     return
 
   exports.assetPlugins[name] = plugin
@@ -40,7 +40,7 @@ exports.addAssetPlugin = (name, plugin) ->
 
 exports.addComponentConfigPlugin = (name, plugin) ->
   if exports.componentConfigPlugins[name]?
-    console.log "SupCore.api.addComponentConfigPlugin: Tried to load two or more plugins named \"#{name}\""
+    console.log "SupCore.data.addComponentConfigPlugin: Tried to load two or more plugins named \"#{name}\""
     return
 
   exports.componentConfigPlugins[name] = plugin

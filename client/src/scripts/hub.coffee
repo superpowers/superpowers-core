@@ -37,7 +37,7 @@ onDisconnected = ->
   return
 
 onProjectsReceived = (err, projects) ->
-  data.projects = new SupCore.api.Projects projects
+  data.projects = new SupCore.data.Projects projects
 
   ui.projectsTreeView.clearSelection()
   ui.projectsTreeView.treeRoot.innerHTML = ''

@@ -5,7 +5,7 @@ fs = require 'fs'
 
 module.exports = class Asset extends Hash
 
-  constructor: (pub, schema, @serverAPI) ->
+  constructor: (pub, schema, @serverData) ->
     super pub, schema
     @setup() if pub?
 

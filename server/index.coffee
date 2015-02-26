@@ -37,9 +37,9 @@ for pluginAuthor in fs.readdirSync pluginsPath
     if fs.existsSync "#{pluginPath}/editors"
       pluginsPaths.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}" for assetType in fs.readdirSync "#{pluginPath}/editors"
 
-    # Load API module
-    apiModulePath = "#{pluginPath}/api"
-    require apiModulePath if fs.existsSync apiModulePath
+    # Load data module
+    dataModulePath = "#{pluginPath}/data"
+    require dataModulePath if fs.existsSync dataModulePath
 
     # Expose public
     app.use "/plugins/#{pluginAuthor}/#{pluginName}", express.static "#{pluginsPath}/#{pluginAuthor}/#{pluginName}/public"

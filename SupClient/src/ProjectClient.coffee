@@ -76,7 +76,7 @@ module.exports = class ProjectClient
     subscribers = @subscribersByAssetId[assetId]
     return if ! subscribers?
 
-    asset = @assetsById[assetId] = new SupCore.api.assetPlugins[assetType] assetData
+    asset = @assetsById[assetId] = new SupCore.data.assetPlugins[assetType] assetData
 
     for subscriber in subscribers
       subscriber.onAssetReceived assetId, asset
@@ -109,7 +109,7 @@ module.exports = class ProjectClient
 
 
   _onEntriesReceived: (err, entries) =>
-    @entries = new SupCore.api.Entries entries
+    @entries = new SupCore.data.Entries entries
 
     @socket.on 'add:entries', @_onEntryAdded
     @socket.on 'move:entries', @_onEntryMoved

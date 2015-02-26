@@ -90,13 +90,13 @@ onDisconnected = ->
   return
 
 onManifestReceived = (err, manifest) ->
-  data.manifest = new SupCore.api.Manifest manifest
+  data.manifest = new SupCore.data.Manifest manifest
 
   document.querySelector('.project .project-name').textContent = manifest.name
   return
 
 onEntriesReceived = (err, entries) ->
-  data.entries = new SupCore.api.Entries entries
+  data.entries = new SupCore.data.Entries entries
 
   ui.entriesTreeView.clearSelection()
   ui.entriesTreeView.treeRoot.innerHTML = ''

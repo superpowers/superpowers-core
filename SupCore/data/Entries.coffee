@@ -1,6 +1,6 @@
-SupAPI = require './'
+SupData = require './'
 
-module.exports = class Entries extends SupAPI.base.TreeById
+module.exports = class Entries extends SupData.base.TreeById
 
   @schema =
     name: { type: 'string', minLength: 1, maxLength: 80, mutable: true }
@@ -17,22 +17,22 @@ module.exports = class Entries extends SupAPI.base.TreeById
       return if ! node.type?
 
       node.diagnostics ?= []
-      @diagnosticsByEntryId[node.id] = new SupAPI.Diagnostics node.diagnostics
+      @diagnosticsByEntryId[node.id] = new SupData.Diagnostics node.diagnostics
       node.dependentAssetIds ?= []
       return
 
   add: (node, parentId, index, callback) ->
-    if node.type? and ! SupAPI.assetPlugins[node.type]?
+    if node.type? and ! SupData.assetPlugins[node.type]?
       callback "Invalid asset type"; return
 
     super node, parentId, index, (err, actualIndex) =>
       if err? then callback err; return
 
       siblings = if parentId? then @byId[parentId]?.children else @pub
-      node.name = SupAPI.ensureUniqueName node.id, node.name, siblings
+      node.name = SupData.ensureUniqueName node.id, node.name, siblings
 
       if node.type?
-        diagnostics = new SupAPI.Diagnostics node.diagnostics
+        diagnostics = new SupData.Diagnostics node.diagnostics
         @diagnosticsByEntryId[node.id] = diagnostics
         node.diagnostics = diagnostics.pub
       else
@@ -44,7 +44,7 @@ module.exports = class Entries extends SupAPI.base.TreeById
 
   client_add: (node, parentId, index) ->
     super node, parentId, index
-    @diagnosticsByEntryId[node.id] = new SupAPI.Diagnostics node.diagnostics
+    @diagnosticsByEntryId[node.id] = new SupData.Diagnostics node.diagnostics
     return
 
 
@@ -56,7 +56,7 @@ module.exports = class Entries extends SupAPI.base.TreeById
     siblings = if parentId? then @byId[parentId]?.children else @pub
     if ! siblings? then callback "Invalid parent node id: #{parentId}"; return
 
-    if SupAPI.hasDuplicateName node.id, node.name, siblings
+    if SupData.hasDuplicateName node.id, node.name, siblings
       callback "There's already an entry with this name in this folder"; return
 
     super id, parentId, index, callback
@@ -78,7 +78,7 @@ module.exports = class Entries extends SupAPI.base.TreeById
       value = value.trim()
 
       siblings = @parentNodesById[id]?.children ? @pub
-      if SupAPI.hasDuplicateName id, value, siblings
+      if SupData.hasDuplicateName id, value, siblings
         callback "There's already an entry with this name in this folder"; return
 
     super id, key, value, callback

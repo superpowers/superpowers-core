@@ -1,4 +1,4 @@
-exports.api = require './api'
+exports.data = require './data'
 exports.log = (message) ->
   text = "#{new Date().toISOString()} - #{message}"
   console.log text

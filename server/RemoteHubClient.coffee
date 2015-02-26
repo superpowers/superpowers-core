@@ -35,7 +35,7 @@ module.exports = class RemoteHubClient extends BaseRemoteClient
     projectPath = path.join(@server.projectsPath, projectFolder)
     fs.mkdirSync path.join(projectPath, 'assets')
 
-    @server.api.projects.add manifest, null, (err, actualIndex) =>
+    @server.data.projects.add manifest, null, (err, actualIndex) =>
       if err? then callback? err; return
 
       writeManifest = (callback) =>
@@ -74,7 +74,7 @@ module.exports = class RemoteHubClient extends BaseRemoteClient
     projectServer = @server.serversById[id]
     if ! projectServer? then callback? "Invalid project id"; return
 
-    projectServer.api.manifest.setProperty key, value, (err, value) =>
+    projectServer.data.manifest.setProperty key, value, (err, value) =>
       if err? then callback? err; return
 
       projectServer.io.in('sub:manifest').emit 'setProperty:manifest', key, value

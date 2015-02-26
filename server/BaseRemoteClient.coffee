@@ -25,14 +25,14 @@ module.exports = class BaseRemoteClient
       [ sub, endpoint, id ] = subscription.split ':'
       continue if ! id?
 
-      @server.api[endpoint].release id
+      @server.data[endpoint].release id
 
     @server.removeRemoteClient @socket.id
     return
 
   _onSubscribe: (endpoint, id, callback) =>
-    api = @server.api[endpoint]
-    if ! api? then callback? "No such endpoint"; return
+    data = @server.data[endpoint]
+    if ! data? then callback? "No such endpoint"; return
     if @subscriptions.indexOf(roomName) != -1 then callback? "You're already subscribed to #{id}"; return
 
     roomName =
@@ -43,10 +43,10 @@ module.exports = class BaseRemoteClient
     @subscriptions.push roomName
 
     if ! id?
-      callback null, api.pub
+      callback null, data.pub
       return
 
-    api.acquire id, (err, item) =>
+    data.acquire id, (err, item) =>
       if err?
         roomNameIndex = @subscriptions.indexOf(roomName)
         if roomNameIndex != -1
@@ -60,15 +60,15 @@ module.exports = class BaseRemoteClient
     return
 
   _onUnsubscribe: (endpoint, id) =>
-    api = @server.api[endpoint]
-    if ! api? then callback? "No such endpoint"; return
+    data = @server.data[endpoint]
+    if ! data? then callback? "No such endpoint"; return
 
     index = @subscriptions.indexOf(roomName)
     return if index == -1
 
     if id?
       roomName = "sub:#{endpoint}:#{id}"
-      api.release id
+      data.release id
     else
       roomName = "sub:#{endpoint}"
 

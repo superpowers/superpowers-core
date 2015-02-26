@@ -8,7 +8,7 @@ RemoteHubClient = require './RemoteHubClient'
 module.exports = class ProjectHub
 
   constructor: (@globalIO, @projectsPath, callback) ->
-    @api = {}
+    @data = {}
     @serversById = {}
 
     serveProjects = (callback) =>
@@ -19,8 +19,8 @@ module.exports = class ProjectHub
       return
 
     setupProjectsList = (callback) =>
-      data = ( server.api.manifest.pub for id, server of @serversById )
-      @api.projects = new SupCore.api.Projects data
+      data = ( server.data.manifest.pub for id, server of @serversById )
+      @data.projects = new SupCore.data.Projects data
       callback(); return
 
     serve = (callback) =>
@@ -45,7 +45,7 @@ module.exports = class ProjectHub
     server = new ProjectServer @globalIO, path.join(@projectsPath, projectFolder), manifestData, (err) =>
       if err? then callback err; return
 
-      @serversById[server.api.manifest.pub.id] = server
+      @serversById[server.data.manifest.pub.id] = server
       callback(); return
     return
 
