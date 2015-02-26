@@ -1,6 +1,7 @@
 exports.config = require './config'
 
 # Globals
+global.SupAPI = require '../SupAPI'
 global.SupCore = require '../SupCore'
 # global.SupSystem = require '../SupSystem'
 
@@ -22,7 +23,8 @@ httpServer.on 'error', (err) =>
   else throw err
 
 # Load plugins
-pluginsPaths = { all: [], byAssetType: {} }
+pluginsFullNames = { all: [], byAssetType: {} }
+pluginsList = []
 shouldIgnorePlugin = (pluginName) -> pluginName.indexOf('.') != -1 or pluginName == 'node_modules'
 
 pluginsPath = "#{__dirname}/../plugins"
@@ -32,19 +34,24 @@ for pluginAuthor in fs.readdirSync pluginsPath
   for pluginName in fs.readdirSync pluginAuthorPath
     continue if shouldIgnorePlugin pluginName
     pluginPath = "#{pluginAuthorPath}/#{pluginName}"
+    pluginsList.push { name: pluginName, path: pluginPath, author: pluginAuthor }
 
-    pluginsPaths.all.push "#{pluginAuthor}/#{pluginName}"
+    pluginsFullNames.all.push "#{pluginAuthor}/#{pluginName}"
     if fs.existsSync "#{pluginPath}/editors"
-      pluginsPaths.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}" for assetType in fs.readdirSync "#{pluginPath}/editors"
+      pluginsFullNames.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}" for assetType in fs.readdirSync "#{pluginPath}/editors"
 
-    # Load data module
-    dataModulePath = "#{pluginPath}/data"
-    require dataModulePath if fs.existsSync dataModulePath
+# First, load all scripting API modules
+for plugin in pluginsList
+  apiModulePath = "#{plugin.path}/api"
+  require apiModulePath if fs.existsSync apiModulePath
 
-    # Expose public
-    app.use "/plugins/#{pluginAuthor}/#{pluginName}", express.static "#{pluginsPath}/#{pluginAuthor}/#{pluginName}/public"
+# Then, load data modules and expose public stuff
+for plugin in pluginsList
+  dataModulePath = "#{plugin.path}/data"
+  require dataModulePath if fs.existsSync dataModulePath
+  app.use "/plugins/#{plugin.author}/#{plugin.name}", express.static "#{plugin.path}/public"
 
-fs.writeFileSync "#{__dirname}/../public/plugins.json", JSON.stringify(pluginsPaths)
+fs.writeFileSync "#{__dirname}/../public/plugins.json", JSON.stringify(pluginsFullNames)
 
 # Project hub
 ProjectHub = require './ProjectHub'

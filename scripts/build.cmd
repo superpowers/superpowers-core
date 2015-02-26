@@ -9,6 +9,9 @@ call gulp
 cd ../SupClient
 call gulp
 
+cd ../SupAPI
+call gulp
+
 cd ../system/SupEngine
 call npm install
 call gulp
