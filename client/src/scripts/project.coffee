@@ -58,7 +58,7 @@ module.exports = (projectId) ->
   ui.panesElt.appendChild iframe
 
   # Network
-  socket = SupClient.connect projectId
+  socket = SupClient.connect projectId, { reconnection: true }
 
   socket.on 'connect', onConnected
   socket.on 'disconnect', onDisconnected
@@ -87,6 +87,14 @@ onConnected = ->
 
 onDisconnected = ->
   data = null
+  ui.entriesTreeView.clearSelection()
+  ui.entriesTreeView.treeRoot.innerHTML = ''
+  updateSelectedEntry()
+
+  document.querySelector('.project-buttons .run').disabled = true
+  document.querySelector('.entries-buttons .new-asset').disabled = true
+  document.querySelector('.entries-buttons .new-folder').disabled = true
+  document.querySelector('.connecting').style.display = ''
   return
 
 onManifestReceived = (err, manifest) ->
@@ -100,6 +108,11 @@ onEntriesReceived = (err, entries) ->
 
   ui.entriesTreeView.clearSelection()
   ui.entriesTreeView.treeRoot.innerHTML = ''
+
+  document.querySelector('.connecting').style.display = 'none'
+  document.querySelector('.project-buttons .run').disabled = false
+  document.querySelector('.entries-buttons .new-asset').disabled = false
+  document.querySelector('.entries-buttons .new-folder').disabled = false
 
   walk = (entry, parentEntry, parentElt) ->
     liElt = createEntryElement entry

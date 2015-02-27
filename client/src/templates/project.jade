@@ -3,18 +3,20 @@
     .project-management
       h1.project-name
       .project-buttons
-        button.run Run
+        button(disabled).run Run
 
     .entries-buttons
       div.create
-        button.new-asset New Asset
-        button.new-folder New Folder
+        button(disabled).new-asset New Asset
+        button(disabled).new-folder New Folder
       div.edit
         button(disabled).open-entry.single.asset-only Open
         button(disabled).rename-entry.single Rename
         button(disabled).duplicate-entry.single.asset-only Duplicate
         button(disabled).trash-entry Trash
     .entries-tree-view
+      .connecting
+        div Connecting...
   .main
     .tabs-bar
     .panes

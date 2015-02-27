@@ -10,9 +10,9 @@ pluginsXHR.send null
 if pluginsXHR.status == 200
   exports.pluginPaths = JSON.parse(pluginsXHR.responseText)
 
-exports.connect = (projectId) ->
+exports.connect = (projectId, options={ reconnection: false }) ->
   namespace = if projectId? then "project:#{projectId}" else "hub"
-  io.connect "#{window.location.protocol}//#{window.location.host}/#{namespace}", transports: [ 'websocket' ], reconnection: false
+  io.connect "#{window.location.protocol}//#{window.location.host}/#{namespace}", transports: [ 'websocket' ], reconnection: options.reconnection
 
 exports.onAssetTrashed = ->
   document.body.innerHTML = ''
