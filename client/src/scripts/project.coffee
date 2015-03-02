@@ -324,18 +324,18 @@ onEntryActivate = ->
   return
 
 onNewAssetClick = ->
-  SupClient.dialogs.prompt "Enter the name of the asset", "Enter a name", null, "OK", (name) =>
+  SupClient.dialogs.prompt "Enter a name for the new asset.", "Asset name", null, "Create", (name) =>
     return if ! name?
-    
-    SupClient.dialogs.select "Select the type of the asset", Object.keys(SupClient.pluginPaths.byAssetType), "OK", (type) =>
+
+    SupClient.dialogs.select "Choose a type for the new asset.", Object.keys(SupClient.pluginPaths.byAssetType), "Create", (type) =>
       return if ! type?
-      
+
       socket.emit 'add:entries', name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
     return
   return
 
 onNewFolderClick = ->
-  SupClient.dialogs.prompt "Enter the name of the folder", "Enter a name", null, "OK", (name) =>
+  SupClient.dialogs.prompt "Enter a name for the new folder.", "Enter a name", null, "Create", (name) =>
     return if ! name?
 
     socket.emit 'add:entries', name, null, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
@@ -344,48 +344,48 @@ onNewFolderClick = ->
 
 onTrashEntryClick = ->
   return if ui.entriesTreeView.selectedNodes.length == 0
-  
+
   selectedEntries = []
-  
+
   checkNextEntry = =>
     selectedEntries.splice(0, 1)
     if selectedEntries.length == 0
-      SupClient.dialogs.confirm "Are you sure you want to trash the selected entries?", "Yes", (confirm) =>
+      SupClient.dialogs.confirm "Are you sure you want to trash the selected entries?", "Trash", (confirm) =>
         return if ! confirm
-      
+
         trashEntry = (entry) =>
           if ! entry.type?
             trashEntry entryChild for entryChild in entry.children
-    
+
           socket.emit 'trash:entries', entry.id, (err) ->
             alert err if err?
             return
-    
+
         for selectedNode in ui.entriesTreeView.selectedNodes
           entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
           trashEntry entry
-    
+
         ui.entriesTreeView.clearSelection()
         return
-      
+
     else
       warnBrokenDependence selectedEntries[0]
     return
-  
+
   warnBrokenDependence = (entry) =>
     if ! entry.type?
       selectedEntries.push entryChild for entryChild in entry.children
 
     if entry.dependentAssetIds?.length > 0
       dependentAssetNames = ( data.entries.byId[usingId].name for usingId in entry.dependentAssetIds )
-      SupClient.dialogs.info "#{entry.name} is used in #{dependentAssetNames.join(', ')}.", "OK", =>
+      SupClient.dialogs.info "#{entry.name} is used in #{dependentAssetNames.join(', ')}.", "Close", =>
         checkNextEntry()
         return
     else
       checkNextEntry()
-        
+
   for selectedNode in ui.entriesTreeView.selectedNodes
-    selectedEntries.push data.entries.byId[parseInt(selectedNode.dataset.id)] 
+    selectedEntries.push data.entries.byId[parseInt(selectedNode.dataset.id)]
   warnBrokenDependence selectedEntries[0]
   return
 
@@ -404,7 +404,7 @@ onRenameEntryClick = ->
   selectedNode = ui.entriesTreeView.selectedNodes[0]
   entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
 
-  SupClient.dialogs.prompt "Enter the new name of the asset", null, entry.name, "OK", (newName) =>
+  SupClient.dialogs.prompt "Enter a new name for the asset.", null, entry.name, "Rename", (newName) =>
     return if ! newName? or newName == entry.name
 
     socket.emit 'setProperty:entries', entry.id, 'name', newName, (err) ->
@@ -420,7 +420,7 @@ onDuplicateEntryClick = ->
   entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
   return if ! entry.type?
 
-  SupClient.dialogs.prompt "Enter the name of the new asset", null, entry.name, "OK", (newName) =>
+  SupClient.dialogs.prompt "Enter a name for the new asset.", null, entry.name, "Duplicate", (newName) =>
     return if ! newName?
 
     socket.emit 'duplicate:entries', newName, entry.id, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck

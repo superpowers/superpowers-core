@@ -2,30 +2,30 @@ module.exports = dialogs =
   prompt: (label, placeholder, initialValue, validationLabel, callback) ->
     dialogElt = document.createElement "div"
     dialogElt.className = "dialog"
-    
+
     messageElt = document.createElement "div"
     messageElt.className = "message"
     dialogElt.appendChild messageElt
-    
+
     labelElt = document.createElement "label"
     labelElt.innerHTML = label
     messageElt.appendChild labelElt
-    
+
     inputElt = document.createElement "input"
-    inputElt.placeholder = placeholder
-    inputElt.value = initialValue
+    inputElt.placeholder = placeholder ? ""
+    inputElt.value = initialValue ? ""
     messageElt.addEventListener "keypress", (event) =>
       if event.charCode == 13
         document.body.removeChild dialogElt
         value = if inputElt.value != "" then inputElt.value else null
-        callback?(value) 
+        callback?(value)
       return
     messageElt.appendChild inputElt
-    
+
     buttonsElt = document.createElement "div"
     buttonsElt.className = "buttons"
     messageElt.appendChild buttonsElt
-    
+
     cancelButtonElt = document.createElement "button"
     cancelButtonElt.innerHTML = "Cancel"
     cancelButtonElt.className = "cancel-button"
@@ -34,7 +34,7 @@ module.exports = dialogs =
       callback?(null)
       return
     buttonsElt.appendChild cancelButtonElt
-    
+
     validateButtonElt = document.createElement "button"
     validateButtonElt.innerHTML = validationLabel
     validateButtonElt.className = "validate-button"
@@ -44,27 +44,27 @@ module.exports = dialogs =
       callback?(value)
       return
     buttonsElt.appendChild validateButtonElt
-    
+
     document.body.appendChild dialogElt
     inputElt.focus()
     return
-  
+
   confirm: (label, validationLabel, callback) ->
     dialogElt = document.createElement "div"
     dialogElt.className = "dialog"
-    
+
     messageElt = document.createElement "div"
     messageElt.className = "message"
     dialogElt.appendChild messageElt
-    
+
     labelElt = document.createElement "label"
     labelElt.innerHTML = label
     messageElt.appendChild labelElt
-    
+
     buttonsElt = document.createElement "div"
     buttonsElt.className = "buttons"
     messageElt.appendChild buttonsElt
-    
+
     cancelButtonElt = document.createElement "button"
     cancelButtonElt.innerHTML = "Cancel"
     cancelButtonElt.className = "cancel-button"
@@ -73,7 +73,7 @@ module.exports = dialogs =
       callback?(false)
       return
     buttonsElt.appendChild cancelButtonElt
-    
+
     validateButtonElt = document.createElement "button"
     validateButtonElt.innerHTML = validationLabel
     validateButtonElt.className = "validate-button"
@@ -82,27 +82,27 @@ module.exports = dialogs =
       callback?(true)
       return
     buttonsElt.appendChild validateButtonElt
-    
+
     document.body.appendChild dialogElt
     validateButtonElt.focus()
     return
-  
+
   info: (label, validationLabel, callback) ->
     dialogElt = document.createElement "div"
     dialogElt.className = "dialog"
-    
+
     messageElt = document.createElement "div"
     messageElt.className = "message"
     dialogElt.appendChild messageElt
-    
+
     labelElt = document.createElement "label"
     labelElt.innerHTML = label
     messageElt.appendChild labelElt
-    
+
     buttonsElt = document.createElement "div"
     buttonsElt.className = "buttons"
     messageElt.appendChild buttonsElt
-    
+
     validateButtonElt = document.createElement "button"
     validateButtonElt.innerHTML = validationLabel
     validateButtonElt.className = "validate-button"
@@ -111,29 +111,29 @@ module.exports = dialogs =
       callback?()
       return
     buttonsElt.appendChild validateButtonElt
-    
+
     document.body.appendChild dialogElt
     validateButtonElt.focus()
     return
-  
+
   select: (label, list, validationLabel, callback) ->
     dialogElt = document.createElement "div"
     dialogElt.className = "dialog"
-    
+
     messageElt = document.createElement "div"
     messageElt.className = "message"
     dialogElt.appendChild messageElt
-    
+
     labelElt = document.createElement "label"
     labelElt.innerHTML = label
     messageElt.appendChild labelElt
-    
+
     selectElt = document.createElement "select"
     for option in list
       optionElt = document.createElement "option"
       optionElt.innerHTML = option
       selectElt.appendChild optionElt
-      
+
     messageElt.addEventListener "keypress", (event) =>
       if event.charCode == 13
         document.body.removeChild dialogElt
@@ -141,11 +141,11 @@ module.exports = dialogs =
         callback?(value)
       return
     messageElt.appendChild selectElt
-    
+
     buttonsElt = document.createElement "div"
     buttonsElt.className = "buttons"
     messageElt.appendChild buttonsElt
-    
+
     cancelButtonElt = document.createElement "button"
     cancelButtonElt.innerHTML = "Cancel"
     cancelButtonElt.className = "cancel-button"
@@ -154,7 +154,7 @@ module.exports = dialogs =
       callback?(null)
       return
     buttonsElt.appendChild cancelButtonElt
-    
+
     validateButtonElt = document.createElement "button"
     validateButtonElt.innerHTML = validationLabel
     validateButtonElt.className = "validate-button"
@@ -164,7 +164,7 @@ module.exports = dialogs =
       callback?(value)
       return
     buttonsElt.appendChild validateButtonElt
-    
+
     document.body.appendChild dialogElt
     selectElt.focus()
     return
