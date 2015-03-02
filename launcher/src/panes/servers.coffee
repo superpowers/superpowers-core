@@ -25,29 +25,39 @@ createServerElement = (entry) ->
   liElt
 
 onAddServerClick = ->
-  name = prompt "Server name", "Server"; return if ! name?
-  address = prompt "Server address", "127.0.0.1"; return if ! address?
+  SupClient.dialogs.prompt "Enter the name of the server", "Enter a name", null, "OK", (name) =>
+    return if ! name?
+    
+    SupClient.dialogs.prompt "Enter the address of the server", null, "127.0.0.1", "OK", (address) =>
+      return if ! address?
 
-  liElt = createServerElement { name, address }
-  serversTreeView.append liElt, 'item'
+      liElt = createServerElement { name, address }
+      serversTreeView.append liElt, 'item'
+      return
+    return
   return
 
 onRenameServerClick = ->
   return if serversTreeView.selectedNodes.length != 1
 
   node = serversTreeView.selectedNodes[0]
-  serverName = prompt "New name", node.dataset.name; return if ! serverName?
-  node.dataset.name = serverName
-  node.querySelector('.name').textContent = serverName
+  
+  SupClient.dialogs.prompt "Enter the new name of the server", null, node.dataset.name, "OK", (name) =>
+    return if ! name?
+    node.dataset.name = name
+    node.querySelector('.name').textContent = name
+    return
   return
 
 onEditAddressClick = ->
   return if serversTreeView.selectedNodes.length != 1
 
   node = serversTreeView.selectedNodes[0]
-  serverAddress = prompt "New address", node.dataset.address; return if ! serverAddress?
-  node.dataset.address = serverAddress
-  node.querySelector('.address').textContent = serverAddress
+  SupClient.dialogs.prompt "Enter the new address of the server", null, node.dataset.address, "OK", (address) =>
+    return if ! address?
+    node.dataset.address = address
+    node.querySelector('.address').textContent = address
+    return
   return
 
 onServerActivate = ->

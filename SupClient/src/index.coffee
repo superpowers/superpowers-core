@@ -2,6 +2,7 @@ io = require 'socket.io-client'
 
 exports.ProjectClient = require './ProjectClient'
 exports.component = require './component'
+exports.dialogs = require './dialogs'
 
 pluginsXHR = new XMLHttpRequest
 pluginsXHR.open 'GET', '/plugins.json', false # Synchronous

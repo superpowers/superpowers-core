@@ -324,52 +324,69 @@ onEntryActivate = ->
   return
 
 onNewAssetClick = ->
-  name = prompt "Asset name", "Asset"
-  return if ! name?
-
-  type = prompt "Asset type", "sprite"
-  return if ! type?
-
-  socket.emit 'add:entries', name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
+  SupClient.dialogs.prompt "Enter the name of the asset", "Enter a name", null, "OK", (name) =>
+    return if ! name?
+    
+    SupClient.dialogs.select "Select the type of the asset", Object.keys(SupClient.pluginPaths.byAssetType), "OK", (type) =>
+      return if ! type?
+      
+      socket.emit 'add:entries', name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
+    return
   return
 
 onNewFolderClick = ->
-  name = prompt "Folder name", "Folder"
-  return if ! name?
+  SupClient.dialogs.prompt "Enter the name of the folder", "Enter a name", null, "OK", (name) =>
+    return if ! name?
 
-  socket.emit 'add:entries', name, null, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
+    socket.emit 'add:entries', name, null, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
+    return
   return
 
 onTrashEntryClick = ->
   return if ui.entriesTreeView.selectedNodes.length == 0
-
+  
+  selectedEntries = []
+  
+  checkNextEntry = =>
+    selectedEntries.splice(0, 1)
+    if selectedEntries.length == 0
+      SupClient.dialogs.confirm "Are you sure you want to trash the selected entries?", "Yes", (confirm) =>
+        return if ! confirm
+      
+        trashEntry = (entry) =>
+          if ! entry.type?
+            trashEntry entryChild for entryChild in entry.children
+    
+          socket.emit 'trash:entries', entry.id, (err) ->
+            alert err if err?
+            return
+    
+        for selectedNode in ui.entriesTreeView.selectedNodes
+          entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
+          trashEntry entry
+    
+        ui.entriesTreeView.clearSelection()
+        return
+      
+    else
+      warnBrokenDependence selectedEntries[0]
+    return
+  
   warnBrokenDependence = (entry) =>
     if ! entry.type?
-      warnBrokenDependence entryChild for entryChild in entry.children
+      selectedEntries.push entryChild for entryChild in entry.children
 
     if entry.dependentAssetIds?.length > 0
       dependentAssetNames = ( data.entries.byId[usingId].name for usingId in entry.dependentAssetIds )
-      alert "#{entry.name} is used in #{dependentAssetNames.join(', ')}."
-
+      SupClient.dialogs.info "#{entry.name} is used in #{dependentAssetNames.join(', ')}.", "OK", =>
+        checkNextEntry()
+        return
+    else
+      checkNextEntry()
+        
   for selectedNode in ui.entriesTreeView.selectedNodes
-    entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
-    warnBrokenDependence entry
-
-  return if ! confirm "Are you sure you want to trash the selected entries?"
-
-  trashEntry = (entry) =>
-    if ! entry.type?
-      trashEntry entryChild for entryChild in entry.children
-
-    socket.emit 'trash:entries', entry.id, (err) ->
-      alert err if err?
-      return
-
-  for selectedNode in ui.entriesTreeView.selectedNodes
-    entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
-    trashEntry entry
-
-  ui.entriesTreeView.clearSelection()
+    selectedEntries.push data.entries.byId[parseInt(selectedNode.dataset.id)] 
+  warnBrokenDependence selectedEntries[0]
   return
 
 onOpenEntryClick = ->
@@ -387,11 +404,12 @@ onRenameEntryClick = ->
   selectedNode = ui.entriesTreeView.selectedNodes[0]
   entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
 
-  newName = prompt "New name", entry.name
-  return if ! newName?
+  SupClient.dialogs.prompt "Enter the new name of the asset", null, entry.name, "OK", (newName) =>
+    return if ! newName? or newName == entry.name
 
-  socket.emit 'setProperty:entries', entry.id, 'name', newName, (err) ->
-    alert err if err?
+    socket.emit 'setProperty:entries', entry.id, 'name', newName, (err) ->
+      alert err if err?
+      return
     return
   return
 
@@ -402,10 +420,11 @@ onDuplicateEntryClick = ->
   entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
   return if ! entry.type?
 
-  newName = prompt "Asset name", entry.name
-  return if ! newName?
+  SupClient.dialogs.prompt "Enter the name of the new asset", null, entry.name, "OK", (newName) =>
+    return if ! newName?
 
-  socket.emit 'duplicate:entries', newName, entry.id, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
+    socket.emit 'duplicate:entries', newName, entry.id, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
+    return
   return
 
 createAssetTabElement = (entry) =>

@@ -92,18 +92,20 @@ onProjectActivate = ->
   return
 
 onNewProjectClick = ->
-  name = prompt "Project name", "Project"
-  return if ! name?
+  SupClient.dialogs.prompt "Enter the name of theproject", "Enter a name", null, "OK", (name) =>
+    return if ! name?
+    
+    SupClient.dialogs.prompt "Enter the description of the project", "Enter the description", null, "OK", (description) =>
+      description ?= ""
+      socket.emit 'add:projects', name, description, (err, id) ->
+        alert err if err?
 
-  description = prompt "Project description", ""
-  return if ! description?
-
-  socket.emit 'add:projects', name, description, (err, id) ->
-    alert err if err?
-
-    ui.projectsTreeView.clearSelection()
-    ui.projectsTreeView.addToSelection ui.projectsTreeView.treeRoot.querySelector("li[data-id='#{id}']")
+        ui.projectsTreeView.clearSelection()
+        ui.projectsTreeView.addToSelection ui.projectsTreeView.treeRoot.querySelector("li[data-id='#{id}']")
+        return
+      return
     return
+  return
 
 onRenameProjectClick = ->
   return if ui.projectsTreeView.selectedNodes.length != 1
@@ -111,13 +113,14 @@ onRenameProjectClick = ->
   selectedNode = ui.projectsTreeView.selectedNodes[0]
   project = data.projects.byId[selectedNode.dataset.id]
 
-  newName = prompt "New name", project.name
-  return if ! newName?
+  SupClient.dialogs.prompt "Enter the new name of the project", null, project.name, "OK", (newName) =>
+    return if ! newName? or newName == project.name
 
-  socket.emit 'setProperty:projects', project.id, 'name', newName, (err) ->
-    alert err if err?
-
+    socket.emit 'setProperty:projects', project.id, 'name', newName, (err) ->
+      alert err if err?
+      return
     return
+  return
 
 onEditDescriptionClick = ->
   return if ui.projectsTreeView.selectedNodes.length != 1
@@ -125,10 +128,12 @@ onEditDescriptionClick = ->
   selectedNode = ui.projectsTreeView.selectedNodes[0]
   project = data.projects.byId[selectedNode.dataset.id]
 
-  newDescription = prompt "New description", project.description
-  return if ! newDescription?
+  SupClient.dialogs.prompt "Enter the new description of the project", null, project.description, "OK", (newDescription) =>
+    return if ! newDescription? or newDescription == project.description
 
-  socket.emit 'setProperty:projects', project.id, 'description', newDescription, (err) ->
-    alert err if err?
+    socket.emit 'setProperty:projects', project.id, 'description', newDescription, (err) ->
+      alert err if err?
+      return
 
     return
+  return
