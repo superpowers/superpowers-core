@@ -46,7 +46,7 @@ module.exports = dialogs =
     buttonsElt.appendChild validateButtonElt
 
     document.body.appendChild dialogElt
-    inputElt.focus()
+    inputElt.select()
     return
 
   confirm: (label, validationLabel, callback) ->
