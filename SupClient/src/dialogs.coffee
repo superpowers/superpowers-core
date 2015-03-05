@@ -80,11 +80,25 @@ module.exports = dialogs =
     buttonsElt.className = "buttons"
     messageElt.appendChild buttonsElt
 
+    onKeyUp = (event) =>
+      if event.keyCode == 13
+        document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
+        callback?(true)
+      else if event.keyCode == 27
+        document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
+        callback?(false)
+      return
+
+    document.addEventListener "keyup", onKeyUp
+
     cancelButtonElt = document.createElement "button"
     cancelButtonElt.innerHTML = "Cancel"
     cancelButtonElt.className = "cancel-button"
     cancelButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
+      document.removeEventListener "keyup", onKeyUp
       callback?(false)
       return
 
@@ -93,6 +107,7 @@ module.exports = dialogs =
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
+      document.removeEventListener "keyup", onKeyUp
       callback?(true)
       return
 
@@ -154,12 +169,19 @@ module.exports = dialogs =
       optionElt.innerHTML = option
       selectElt.appendChild optionElt
 
-    messageElt.addEventListener "keypress", (event) =>
-      if event.charCode == 13
+    onKeyUp = (event) =>
+      if event.keyCode == 13
         document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
         value = if selectElt.value != "" then selectElt.value else null
         callback?(value)
+      else if event.keyCode == 27
+        document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
+        callback?(null)
       return
+
+    document.addEventListener "keyup", onKeyUp
     messageElt.appendChild selectElt
 
     buttonsElt = document.createElement "div"
@@ -171,6 +193,7 @@ module.exports = dialogs =
     cancelButtonElt.className = "cancel-button"
     cancelButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
+      document.removeEventListener "keyup", onKeyUp
       callback?(null)
       return
 
@@ -179,6 +202,7 @@ module.exports = dialogs =
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
+      document.removeEventListener "keyup", onKeyUp
       value = if selectElt.value != "" then selectElt.value else null
       callback?(value)
       return
