@@ -42,7 +42,6 @@ module.exports = dialogs =
       document.removeEventListener "keyup", onKeyUp
       callback?(null)
       return
-    buttonsElt.appendChild cancelButtonElt
 
     validateButtonElt = document.createElement "button"
     validateButtonElt.innerHTML = validationLabel
@@ -53,7 +52,13 @@ module.exports = dialogs =
       value = if inputElt.value != "" then inputElt.value else null
       callback?(value)
       return
-    buttonsElt.appendChild validateButtonElt
+
+    if navigator.platform == "Win32"
+      buttonsElt.appendChild validateButtonElt
+      buttonsElt.appendChild cancelButtonElt
+    else
+      buttonsElt.appendChild cancelButtonElt
+      buttonsElt.appendChild validateButtonElt
 
     document.body.appendChild dialogElt
     inputElt.select()
@@ -82,7 +87,6 @@ module.exports = dialogs =
       document.body.removeChild dialogElt
       callback?(false)
       return
-    buttonsElt.appendChild cancelButtonElt
 
     validateButtonElt = document.createElement "button"
     validateButtonElt.innerHTML = validationLabel
@@ -91,7 +95,13 @@ module.exports = dialogs =
       document.body.removeChild dialogElt
       callback?(true)
       return
-    buttonsElt.appendChild validateButtonElt
+
+    if navigator.platform == "Win32"
+      buttonsElt.appendChild validateButtonElt
+      buttonsElt.appendChild cancelButtonElt
+    else
+      buttonsElt.appendChild cancelButtonElt
+      buttonsElt.appendChild validateButtonElt
 
     document.body.appendChild dialogElt
     validateButtonElt.focus()
@@ -163,7 +173,6 @@ module.exports = dialogs =
       document.body.removeChild dialogElt
       callback?(null)
       return
-    buttonsElt.appendChild cancelButtonElt
 
     validateButtonElt = document.createElement "button"
     validateButtonElt.innerHTML = validationLabel
@@ -173,7 +182,13 @@ module.exports = dialogs =
       value = if selectElt.value != "" then selectElt.value else null
       callback?(value)
       return
-    buttonsElt.appendChild validateButtonElt
+
+    if navigator.platform == "Win32"
+      buttonsElt.appendChild validateButtonElt
+      buttonsElt.appendChild cancelButtonElt
+    else
+      buttonsElt.appendChild cancelButtonElt
+      buttonsElt.appendChild validateButtonElt
 
     document.body.appendChild dialogElt
     selectElt.focus()
