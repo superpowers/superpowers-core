@@ -14,4 +14,5 @@ cd ../sound && gulp
 cd ../sprite && gulp
 cd ../tileMap && gulp
 cd ../tweenjs && npm install && gulp
+cd ../collision2D && gulp
 popd

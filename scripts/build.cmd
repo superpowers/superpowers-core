@@ -48,4 +48,7 @@ cd ../tweenjs
 call npm install
 call gulp
 
+cd ../collision2D
+call gulp
+
 popd
