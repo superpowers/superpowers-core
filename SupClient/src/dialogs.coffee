@@ -14,12 +14,20 @@ module.exports = dialogs =
     inputElt = document.createElement "input"
     inputElt.placeholder = placeholder ? ""
     inputElt.value = initialValue ? ""
-    messageElt.addEventListener "keypress", (event) =>
-      if event.charCode == 13
+
+    onKeyUp = (event) =>
+      if event.keyCode == 13
         document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
         value = if inputElt.value != "" then inputElt.value else null
         callback?(value)
+      else if event.keyCode == 27
+        document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
+        callback?(null)
       return
+
+    document.addEventListener "keyup", onKeyUp
     messageElt.appendChild inputElt
 
     buttonsElt = document.createElement "div"
@@ -31,6 +39,7 @@ module.exports = dialogs =
     cancelButtonElt.className = "cancel-button"
     cancelButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
+      document.removeEventListener "keyup", onKeyUp
       callback?(null)
       return
     buttonsElt.appendChild cancelButtonElt
@@ -40,6 +49,7 @@ module.exports = dialogs =
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
+      document.removeEventListener "keyup", onKeyUp
       value = if inputElt.value != "" then inputElt.value else null
       callback?(value)
       return
