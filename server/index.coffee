@@ -24,6 +24,7 @@ httpServer.on 'error', (err) =>
 
 # Load plugins
 pluginsFullNames = { all: [], byAssetType: {} }
+requiredPluginFiles = [ 'data', 'components', 'componentEditors', 'api', 'runtime' ]
 pluginsList = []
 shouldIgnorePlugin = (pluginName) -> pluginName.indexOf('.') != -1 or pluginName == 'node_modules'
 
@@ -35,6 +36,10 @@ for pluginAuthor in fs.readdirSync pluginsPath
     continue if shouldIgnorePlugin pluginName
     pluginPath = "#{pluginAuthorPath}/#{pluginName}"
     pluginsList.push { name: pluginName, path: pluginPath, author: pluginAuthor }
+
+    for requiredFile in requiredPluginFiles
+      requiredFilePath = "#{pluginPath}/public/#{requiredFile}.js"
+      if ! fs.existsSync requiredFilePath then fs.closeSync fs.openSync(requiredFilePath, 'w')
 
     pluginsFullNames.all.push "#{pluginAuthor}/#{pluginName}"
     if fs.existsSync "#{pluginPath}/editors"
