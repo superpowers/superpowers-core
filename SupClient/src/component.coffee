@@ -28,8 +28,17 @@ module.exports = component =
     parentElt.appendChild inputElt
 
     inputElt.value = value
-    inputElt.min = min
-    inputElt.max = max
+    inputElt.min = min if min?
+    inputElt.max = max if max?
+
+    inputElt
+
+  createCheckBox: (parentElt, value) ->
+    inputElt = document.createElement('input')
+    inputElt.type = 'checkbox'
+    parentElt.appendChild inputElt
+
+    inputElt.checked = value
 
     inputElt
 
