@@ -13,6 +13,23 @@ module.exports = (projectId) ->
   clone = document.importNode template.content, true
   document.body.appendChild clone
 
+  # Hot-keys
+  document.addEventListener 'keydown', (event) =>
+    if event.keyCode == 79 and event.ctrlKey then event.preventDefault()
+    return
+  document.addEventListener 'keyup', (event) =>
+    if event.keyCode == 79 and event.ctrlKey and ! document.querySelector(".dialog")?
+      entries = []
+      data.entries.walk (node) =>
+        entries.push data.entries.getPathFromId node.id
+        return
+
+      SupClient.dialogs.filter entries, "Asset Name", (entryPath) =>
+        return if ! entryPath?
+        openEntry SupClient.findEntryByPath(data.entries.pub, entryPath).id
+        return
+    return
+
   # Project info
   document.querySelector('.project .project-name').textContent = projectId
 
@@ -294,7 +311,10 @@ updateSelectedEntry = ->
 
 onEntryActivate = ->
   activatedEntry = ui.entriesTreeView.selectedNodes[0]
-  id = activatedEntry.dataset.id
+  openEntry activatedEntry.dataset.id
+  return
+
+openEntry = (id) ->
   entry = data.entries.byId[id]
 
   if ! entry.type?

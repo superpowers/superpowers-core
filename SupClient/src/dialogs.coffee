@@ -217,3 +217,41 @@ module.exports = dialogs =
     document.body.appendChild dialogElt
     selectElt.focus()
     return
+
+  filter: (list, placeholder, callback) ->
+    dialogElt = document.createElement "div"
+    dialogElt.className = "dialog"
+
+    messageElt = document.createElement "div"
+    messageElt.className = "message"
+    dialogElt.appendChild messageElt
+
+    inputElt = document.createElement "input"
+    inputElt.placeholder = placeholder ? ""
+    messageElt.appendChild inputElt
+
+    labelElt = document.createElement "label"
+    messageElt.appendChild labelElt
+
+    onKeyUp = (event) =>
+      if event.keyCode == 13
+        document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
+        value = if labelElt.innerHTML != "" then labelElt.innerHTML else null
+        callback?(value)
+      else if event.keyCode == 27
+        document.body.removeChild dialogElt
+        document.removeEventListener "keyup", onKeyUp
+        callback?(null)
+      else if inputElt.value != ""
+        for item in list
+          if item.indexOf(inputElt.value) != -1
+            labelElt.innerHTML = item
+            return
+        labelElt.innerHTML = ""
+      return
+    document.addEventListener "keyup", onKeyUp
+
+    document.body.appendChild dialogElt
+    inputElt.focus()
+    return
