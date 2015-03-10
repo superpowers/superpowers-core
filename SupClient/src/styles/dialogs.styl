@@ -12,7 +12,6 @@
     background-color white
     margin auto
     padding 10px
-    padding-bottom 0
     width 300px
     height 120px
     display flex
@@ -28,8 +27,20 @@
   .buttons
     flex 2
     display flex
-    
+
     button
       margin 0 5px 0 5px
       flex 1
-      align-self center
+      align-self flex-end
+
+  .filter-parent
+    margin-top 5px
+    height 80%
+    overflow-y auto
+
+    > div
+      display block
+      height 20px
+
+    .selected
+      background-color gainsboro

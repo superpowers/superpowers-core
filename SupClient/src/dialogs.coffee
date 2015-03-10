@@ -232,29 +232,82 @@ module.exports =
     inputElt.placeholder = placeholder ? ""
     messageElt.appendChild inputElt
 
-    labels = []
-    for i in [0...4]
-      labelElt = document.createElement "label"
-      labels.push labelElt
-      messageElt.appendChild labelElt
+    labelParentElt = document.createElement "div"
+    labelParentElt.className = "filter-parent"
+    messageElt.appendChild labelParentElt
+
+    labelElts = []
+    selectedIndex = null
+
+    selectResult = (index) =>
+      selectedIndex = index
+      labelElts[index].className = "selected"
+      labelParentElt.scrollTop = (index - 3) * 20
+      return
+
+    onKeyDown = (event) =>
+      if event.keyCode == 38
+        event.preventDefault()
+        if selectedIndex? and selectedIndex > 0
+          labelElts[selectedIndex].className = ""
+          selectResult selectedIndex - 1
+
+      else if event.keyCode == 40
+        event.preventDefault()
+        if selectedIndex? and selectedIndex < labelElts.length - 1
+          labelElts[selectedIndex].className = ""
+          selectResult selectedIndex + 1
+      return
 
     onKeyUp = (event) =>
       if event.keyCode == 13
         document.body.removeChild dialogElt
         document.removeEventListener "keyup", onKeyUp
-        value = if labels[0].innerHTML != "" then labels[0].innerHTML else null
+        document.removeEventListener "keydown", onKeyDown
+        value = if selectedIndex? then labelElts[selectedIndex].innerHTML else null
         callback?(value)
+
       else if event.keyCode == 27
         document.body.removeChild dialogElt
         document.removeEventListener "keyup", onKeyUp
+        document.removeEventListener "keydown", onKeyDown
         callback?(null)
+
       else if inputElt.value != ""
+        previousSelectedResult = if selectedIndex? then labelElts[selectedIndex].innerHTML else null
+
         results = fuzzy.filter inputElt.value, list
-        for label, index in labels
-          label.innerHTML = results[index]?.original ? ""
+        for result, index in results
+          if ! labelElts[index]?
+            labelElt = document.createElement "div"
+            labelElt.innerHTML = results[index].original
+            labelParentElt.appendChild labelElt
+            labelElts.push labelElt
+          else
+            labelElts[index].className = ""
+            labelElts[index].innerHTML = results[index].original
+
+          if results[index].original == previousSelectedResult
+            newSelectedIndex = index
+
+        while labelElts.length > results.length
+          labelParentElt.removeChild labelElts[labelElts.length - 1]
+          labelElts.pop()
+
+        if newSelectedIndex?
+          selectResult newSelectedIndex
+        else if labelElts[0]?
+          selectResult 0
+        else
+          selectedIndex = null
+
       else
-        label.innerHTML = "" for label in labels
+        labelParentElt.removeChild labelElt for labelElt in labelElts
+        labelElts.length = 0
+        selectedIndex = null
       return
+
+    document.addEventListener "keydown", onKeyDown, true
     document.addEventListener "keyup", onKeyUp
 
     document.body.appendChild dialogElt
