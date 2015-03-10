@@ -1,0 +1,13 @@
+{
+  "name": "superpowers-launcher",
+  "main": "index.html",
+  "window": {
+    "width": 800,
+    "height": 480,
+    "min_width": 800,
+    "min_height": 480,
+    "toolbar": false,
+    "frame": true,
+    "resizable": false
+  }
+}
