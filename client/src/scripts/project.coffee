@@ -19,15 +19,7 @@ module.exports = (projectId) ->
     return
   document.addEventListener 'keyup', (event) =>
     if event.keyCode == 79 and event.ctrlKey and ! document.querySelector(".dialog")?
-      entries = []
-      data.entries.walk (node) =>
-        entries.push data.entries.getPathFromId node.id if node.type?
-        return
-
-      SupClient.dialogs.filter entries, "Asset Name", (entryPath) =>
-        return if ! entryPath?
-        openEntry SupClient.findEntryByPath(data.entries.pub, entryPath).id
-        return
+      openSearchEntryDialog()
     return
 
   # Project info
@@ -42,6 +34,7 @@ module.exports = (projectId) ->
 
   document.querySelector('.entries-buttons .new-asset').addEventListener 'click', onNewAssetClick
   document.querySelector('.entries-buttons .new-folder').addEventListener 'click', onNewFolderClick
+  document.querySelector('.entries-buttons .search').addEventListener 'click', onSearchClick
   document.querySelector('.entries-buttons .open-entry').addEventListener 'click', onOpenEntryClick
   document.querySelector('.entries-buttons .rename-entry').addEventListener 'click', onRenameEntryClick
   document.querySelector('.entries-buttons .duplicate-entry').addEventListener 'click', onDuplicateEntryClick
@@ -111,6 +104,7 @@ onDisconnected = ->
   document.querySelector('.project-buttons .run').disabled = true
   document.querySelector('.entries-buttons .new-asset').disabled = true
   document.querySelector('.entries-buttons .new-folder').disabled = true
+  document.querySelector('.entries-buttons .search').disabled = true
   document.querySelector('.connecting').style.display = ''
   return
 
@@ -130,6 +124,7 @@ onEntriesReceived = (err, entries) ->
   document.querySelector('.project-buttons .run').disabled = false
   document.querySelector('.entries-buttons .new-asset').disabled = false
   document.querySelector('.entries-buttons .new-folder').disabled = false
+  document.querySelector('.entries-buttons .search').disabled = false
 
   walk = (entry, parentEntry, parentElt) ->
     liElt = createEntryElement entry
@@ -314,6 +309,17 @@ onEntryActivate = ->
   openEntry activatedEntry.dataset.id
   return
 
+openSearchEntryDialog = ->
+  entries = []
+  data.entries.walk (node) =>
+    entries.push data.entries.getPathFromId node.id if node.type?
+    return
+
+  SupClient.dialogs.filter entries, "Asset Name", (entryPath) =>
+    return if ! entryPath?
+    openEntry SupClient.findEntryByPath(data.entries.pub, entryPath).id
+    return
+
 openEntry = (id) ->
   entry = data.entries.byId[id]
 
@@ -360,6 +366,10 @@ onNewFolderClick = ->
 
     socket.emit 'add:entries', name, null, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
     return
+  return
+
+onSearchClick = ->
+  openSearchEntryDialog()
   return
 
 onTrashEntryClick = ->
