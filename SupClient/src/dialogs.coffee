@@ -1,4 +1,6 @@
-module.exports = dialogs =
+fuzzy = require "fuzzy"
+
+module.exports =
   prompt: (label, placeholder, initialValue, validationLabel, callback) ->
     dialogElt = document.createElement "div"
     dialogElt.className = "dialog"
@@ -230,25 +232,28 @@ module.exports = dialogs =
     inputElt.placeholder = placeholder ? ""
     messageElt.appendChild inputElt
 
-    labelElt = document.createElement "label"
-    messageElt.appendChild labelElt
+    labels = []
+    for i in [0...4]
+      labelElt = document.createElement "label"
+      labels.push labelElt
+      messageElt.appendChild labelElt
 
     onKeyUp = (event) =>
       if event.keyCode == 13
         document.body.removeChild dialogElt
         document.removeEventListener "keyup", onKeyUp
-        value = if labelElt.innerHTML != "" then labelElt.innerHTML else null
+        value = if labels[0].innerHTML != "" then labels[0].innerHTML else null
         callback?(value)
       else if event.keyCode == 27
         document.body.removeChild dialogElt
         document.removeEventListener "keyup", onKeyUp
         callback?(null)
       else if inputElt.value != ""
-        for item in list
-          if item.indexOf(inputElt.value) != -1
-            labelElt.innerHTML = item
-            return
-        labelElt.innerHTML = ""
+        results = fuzzy.filter inputElt.value, list
+        for label, index in labels
+          label.innerHTML = results[index]?.original ? ""
+      else
+        label.innerHTML = "" for label in labels
       return
     document.addEventListener "keyup", onKeyUp
 

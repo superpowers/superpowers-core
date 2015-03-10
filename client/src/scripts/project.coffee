@@ -21,7 +21,7 @@ module.exports = (projectId) ->
     if event.keyCode == 79 and event.ctrlKey and ! document.querySelector(".dialog")?
       entries = []
       data.entries.walk (node) =>
-        entries.push data.entries.getPathFromId node.id
+        entries.push data.entries.getPathFromId node.id if node.type?
         return
 
       SupClient.dialogs.filter entries, "Asset Name", (entryPath) =>
