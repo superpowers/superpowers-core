@@ -6,8 +6,23 @@ global.SupCore = require '../SupCore'
 # global.SupSystem = require '../SupSystem'
 
 # Projects
+path = require 'path'
 fs = require 'fs'
-projectsPath = "#{__dirname}/../projects"
+
+superpowersDataPath = "#{__dirname}/.."
+
+switch process.platform
+  when "win32"
+    if process.env.APPDATA? then superpowersDataPath = path.join(process.env.APPDATA, 'Superpowers')
+  when "darwin"
+    if process.env.HOME? then superpowersDataPath = path.join(process.env.HOME, 'Library', 'Superpowers')
+  else
+    if process.env.XDG_DATA_HOME? then superpowersDataPath = path.join(process.env.XDG_DATA_HOME, 'Superpowers')
+    else if process.env.HOME? then superpowersDataPath = path.join(process.env.HOME, '.local/share', 'Superpowers')
+
+projectsPath = path.join(superpowersDataPath, "projects")
+
+try fs.mkdirSync superpowersDataPath
 try fs.mkdirSync projectsPath
 
 # Server
