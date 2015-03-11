@@ -54,12 +54,16 @@ module.exports = (projectId) ->
 
   # Home tab
   tab = document.createElement('li')
+  tab.dataset.pane = 'home'
+
+  iconElt = document.createElement('img')
+  iconElt.classList.add 'icon'
+  iconElt.src = "/plugins/sparklinlabs/home/editors/main/icon.svg"
+  tab.appendChild iconElt
 
   tabLabel = document.createElement('span')
   tabLabel.classList.add 'label'
   tabLabel.textContent = "Home"
-
-  tab.dataset.pane = 'home'
   tab.appendChild tabLabel
 
   tab.classList.add 'active'
@@ -67,7 +71,8 @@ module.exports = (projectId) ->
 
   iframe = document.createElement('iframe')
   iframe.dataset.name = 'home'
-  iframe.src = "/plugins/home/?project=#{info.projectId}"
+  # FIXME: Don't hardcode path?
+  iframe.src = "/plugins/sparklinlabs/home/editors/main/?project=#{info.projectId}"
   iframe.classList.add 'active'
   ui.panesElt.appendChild iframe
 
