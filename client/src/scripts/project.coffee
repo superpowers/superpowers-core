@@ -26,7 +26,10 @@ module.exports = (projectId) ->
   document.querySelector('.project .project-name').textContent = projectId
 
   document.querySelector('.project-buttons .run').addEventListener 'click', onRunProjectClick
-  document.querySelector('.project-buttons .debug').addEventListener 'click', onDebugProjectClick
+  if window.nwDispatcher?
+    document.querySelector('.project-buttons .debug').addEventListener 'click', onDebugProjectClick
+  else
+    document.querySelector('.project-buttons .debug').style.display = 'none'
 
   # Entries tree view
   ui.entriesTreeView = new TreeView document.querySelector('.entries-tree-view'), onEntryDrop
