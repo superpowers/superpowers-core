@@ -9,5 +9,6 @@
     "toolbar": false,
     "frame": true,
     "resizable": false
-  }
+  },
+  "node-remote": "*"
 }

@@ -62,6 +62,7 @@ onEditAddressClick = ->
 
 onServerActivate = ->
   window.open "http://" + serversTreeView.selectedNodes[0].dataset.address
+  return
 
 serversTreeView = new TreeView document.querySelector('.servers-tree-view')
 serversTreeView.on 'activate', onServerActivate

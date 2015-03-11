@@ -26,6 +26,7 @@ module.exports = (projectId) ->
   document.querySelector('.project .project-name').textContent = projectId
 
   document.querySelector('.project-buttons .run').addEventListener 'click', onRunProjectClick
+  document.querySelector('.project-buttons .debug').addEventListener 'click', onDebugProjectClick
 
   # Entries tree view
   ui.entriesTreeView = new TreeView document.querySelector('.entries-tree-view'), onEntryDrop
@@ -102,6 +103,7 @@ onDisconnected = ->
   updateSelectedEntry()
 
   document.querySelector('.project-buttons .run').disabled = true
+  document.querySelector('.project-buttons .debug').disabled = true
   document.querySelector('.entries-buttons .new-asset').disabled = true
   document.querySelector('.entries-buttons .new-folder').disabled = true
   document.querySelector('.entries-buttons .search').disabled = true
@@ -122,6 +124,7 @@ onEntriesReceived = (err, entries) ->
 
   document.querySelector('.connecting').style.display = 'none'
   document.querySelector('.project-buttons .run').disabled = false
+  document.querySelector('.project-buttons .debug').disabled = false
   document.querySelector('.entries-buttons .new-asset').disabled = false
   document.querySelector('.entries-buttons .new-folder').disabled = false
   document.querySelector('.entries-buttons .search').disabled = false
@@ -247,6 +250,16 @@ onRunProjectClick = ->
     if err? then alert err; return
 
     window.open "/player?project=#{info.projectId}&build=#{buildId}", 'player'
+    return
+  return
+
+onDebugProjectClick = ->
+  window.open 'data:text/html;charset=utf-8,Building...', 'player'
+
+  socket.emit 'build:project', (err, buildId) ->
+    if err? then alert err; return
+
+    window.open "/player?project=#{info.projectId}&build=#{buildId}&debug", 'player'
     return
   return
 
