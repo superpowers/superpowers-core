@@ -15,4 +15,6 @@ cd ../sprite && gulp
 cd ../tileMap && gulp
 cd ../tweenjs && npm install && gulp
 cd ../arcadePhysics2D && gulp
+cd ../model && gulp
+cd ../cannonjs && npm install && gulp
 popd

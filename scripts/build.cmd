@@ -51,4 +51,11 @@ call gulp
 cd ../arcadePhysics2D
 call gulp
 
+cd ../model
+call gulp
+
+cd ../cannonjs
+call npm install
+call gulp
+
 popd
