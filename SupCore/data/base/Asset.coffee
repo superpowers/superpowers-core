@@ -29,7 +29,7 @@ module.exports = class Asset extends Hash
       @emit 'load'
       return
     return
-    
+
   save: (assetPath, callback) ->
     json = JSON.stringify @pub, null, 2
     fs.writeFile path.join(assetPath, "asset.json"), json, { encoding: 'utf8' }, callback
@@ -38,6 +38,6 @@ module.exports = class Asset extends Hash
   server_setProperty: (client, path, value, callback) ->
     @setProperty path, value, (err, actualValue) =>
       if err? then callback? err; return
-      
+
       callback null, path, actualValue
       return
