@@ -339,10 +339,8 @@ openSearchEntryDialog = ->
 openEntry = (id) ->
   entry = data.entries.byId[id]
 
-  if ! entry.type?
-    # Just toggle the folder
-    activatedEntry.classList.toggle 'collapsed'
-    return
+  # Just toggle folders
+  if ! entry.type? then ui.entriesTreeView.selectedNodes[0].classList.toggle 'collapsed'; return
 
   ui.tabStrip.tabsRoot.querySelector('.active').classList.remove 'active'
   ui.panesElt.querySelector('iframe.active').classList.remove 'active'
