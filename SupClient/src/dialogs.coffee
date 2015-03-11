@@ -171,19 +171,20 @@ module.exports =
       optionElt.innerHTML = option
       selectElt.appendChild optionElt
 
-    onKeyUp = (event) =>
+    onKeyDown = (event) =>
       if event.keyCode == 13
+        event.preventDefault()
         document.body.removeChild dialogElt
-        document.removeEventListener "keyup", onKeyUp
+        document.removeEventListener "keydown", onKeyDown
         value = if selectElt.value != "" then selectElt.value else null
         callback?(value)
       else if event.keyCode == 27
         document.body.removeChild dialogElt
-        document.removeEventListener "keyup", onKeyUp
+        document.removeEventListener "keydown", onKeyDown
         callback?(null)
       return
 
-    document.addEventListener "keyup", onKeyUp
+    document.addEventListener "keydown", onKeyDown
     messageElt.appendChild selectElt
 
     buttonsElt = document.createElement "div"
