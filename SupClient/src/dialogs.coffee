@@ -1,7 +1,13 @@
 fuzzy = require "fuzzy"
 
 module.exports =
-  prompt: (label, placeholder, initialValue, validationLabel, callback) ->
+  prompt: (label, placeholder, initialValue, validationLabel, options, callback) ->
+    if ! callback? and typeof options == 'function'
+      callback = options
+      options = null
+
+    options ?= {}
+
     dialogElt = document.createElement "div"
     dialogElt.className = "dialog"
 
@@ -14,6 +20,9 @@ module.exports =
     messageElt.appendChild labelElt
 
     inputElt = document.createElement "input"
+    if options.type? then inputElt.type = options.type
+    # TODO: Wrap in a form element so the validation actually happens
+    if options.pattern? then inputElt.pattern = options.pattern
     inputElt.placeholder = placeholder ? ""
     inputElt.value = initialValue ? ""
 
