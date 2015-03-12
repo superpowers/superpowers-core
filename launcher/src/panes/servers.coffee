@@ -1,5 +1,5 @@
 TreeView = require 'dnd-tree-view'
-
+dialogs = require '../../../SupClient/src/dialogs'
 config = require '../config'
 
 start = ->
@@ -25,10 +25,10 @@ createServerElement = (entry) ->
   liElt
 
 onAddServerClick = ->
-  SupClient.dialogs.prompt "Enter a name for the server.", "Enter a name", null, "Add server", (name) =>
+  dialogs.prompt "Enter a name for the server.", "Enter a name", null, "Add server", (name) =>
     return if ! name?
 
-    SupClient.dialogs.prompt "Enter the server address.", null, "127.0.0.1", "Add server", (address) =>
+    dialogs.prompt "Enter the server address.", null, "127.0.0.1", "Add server", (address) =>
       return if ! address?
 
       liElt = createServerElement { name, address }
@@ -42,7 +42,7 @@ onRenameServerClick = ->
 
   node = serversTreeView.selectedNodes[0]
 
-  SupClient.dialogs.prompt "Enter a new name for the server.", null, node.dataset.name, "Rename", (name) =>
+  dialogs.prompt "Enter a new name for the server.", null, node.dataset.name, "Rename", (name) =>
     return if ! name?
     node.dataset.name = name
     node.querySelector('.name').textContent = name
@@ -53,7 +53,7 @@ onEditAddressClick = ->
   return if serversTreeView.selectedNodes.length != 1
 
   node = serversTreeView.selectedNodes[0]
-  SupClient.dialogs.prompt "Enter the new server address.", null, node.dataset.address, "Update", (address) =>
+  dialogs.prompt "Enter the new server address.", null, node.dataset.address, "Update", (address) =>
     return if ! address?
     node.dataset.address = address
     node.querySelector('.address').textContent = address
