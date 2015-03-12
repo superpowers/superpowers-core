@@ -1,5 +1,6 @@
 require './servers'
 require './settings'
+require './community'
 
 # Panes
 paneButtonsContainer = document.querySelector('.pane-buttons')

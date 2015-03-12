@@ -66,7 +66,6 @@ hub = new ProjectHub io, paths.projects, (err) ->
 
   SupCore.log "Loaded #{Object.keys(hub.serversById).length} projects."
 
-  console.log config.password.length
   hostname = if config.password.length == 0 then 'localhost' else ''
 
   httpServer.listen config.port, hostname,  ->
