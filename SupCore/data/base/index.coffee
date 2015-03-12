@@ -27,19 +27,19 @@ exports.getRuleViolation = (value, rule, create=false) ->
       if rule.max? and value > rule.max then return { message: "Value (#{value}) is greater than maximum value (#{rule.max})" }
 
     when 'string'
-      if typeof(value) != 'string' then return { message: "Expected string" } 
+      if typeof(value) != 'string' then return { message: "Expected string" }
 
-      if rule.length? and value.length != rule.length then return { message: "String should have length of #{rule.length}, got #{value.length}" } 
-      if rule.minLength? and value.length < rule.minLength then return { message: "String length (#{value.length}) is less than minimum length (#{rule.minLength})" } 
-      if rule.maxLength? and value.length > rule.maxLength then return { message: "String length (#{value.length}) is greater than maximum length (#{rule.maxLength})" } 
+      if rule.length? and value.length != rule.length then return { message: "String should have length of #{rule.length}, got #{value.length}" }
+      if rule.minLength? and value.length < rule.minLength then return { message: "String length (#{value.length}) is less than minimum length (#{rule.minLength})" }
+      if rule.maxLength? and value.length > rule.maxLength then return { message: "String length (#{value.length}) is greater than maximum length (#{rule.maxLength})" }
 
     when 'enum'
       if typeof(value) != 'string' then return { message: "Expected string for enum" }
-      
+
       if rule.items.indexOf(value) == -1 then return { message: "Invalid enum value: #{value}" }
 
     when 'hash'
-      if typeof(value) != 'object' then return { message: "Expected hash" } 
+      if typeof(value) != 'object' then return { message: "Expected hash" }
 
       ruleProperties = rule.properties ? {}
 
@@ -50,9 +50,9 @@ exports.getRuleViolation = (value, rule, create=false) ->
           return { message: "Unexpected hash key: #{key}", path: key } if ! rule.values?
 
           if rule.keys?
-            if rule.keys.length? and key.length != rule.keys.length then return { message: "Key should have length of #{rule.keys.length}, got #{key.length}", path: key } 
-            if rule.keys.minLength? and key.length < rule.keys.minLength then return { message: "Key length (#{key.length}) is less than minimum length (#{rule.keys.minLength})", path: key } 
-            if rule.keys.maxLength? and key.length > rule.keys.maxLength then return { message: "Key length (#{key.length}) is greater than maximum length (#{rule.keys.maxLength})", path: key } 
+            if rule.keys.length? and key.length != rule.keys.length then return { message: "Key should have length of #{rule.keys.length}, got #{key.length}", path: key }
+            if rule.keys.minLength? and key.length < rule.keys.minLength then return { message: "Key length (#{key.length}) is less than minimum length (#{rule.keys.minLength})", path: key }
+            if rule.keys.maxLength? and key.length > rule.keys.maxLength then return { message: "Key length (#{key.length}) is greater than maximum length (#{rule.keys.maxLength})", path: key }
 
           violation = exports.getRuleViolation propertyValue, rule.values, true
           if violation?
@@ -68,19 +68,20 @@ exports.getRuleViolation = (value, rule, create=false) ->
           missingKeys.splice missingKeys.indexOf(key), 1
 
       # Ignore optional keys
+      actualMissingKeys = []
       for missingKey in missingKeys
         missingKeyRuleType = ruleProperties[missingKey].type
-        if missingKeyRuleType[missingKeyRuleType.length - 1] == '?'
-          missingKeys.splice missingKeys.indexOf(missingKey), 1
+        if missingKeyRuleType[missingKeyRuleType.length - 1] != '?'
+          actualMissingKeys.push missingKey
 
-      if missingKeys.length > 0 then return { message: "Missing hash keys: #{missingKeys.join(', ')}" }
+      if actualMissingKeys.length > 0 then return { message: "Missing hash keys: #{actualMissingKeys.join(', ')}" }
 
     when 'array'
       if ! Array.isArray(value) then return { message: "Expected array" }
 
-      if rule.length? and value.length != rule.length then return { message: "Array should have length of #{rule.length}, got #{value.length}" } 
-      if rule.minLength? and value.length < rule.minLength then return { message: "Array length (#{value.length}) is less than minimum length (#{rule.minLength})" } 
-      if rule.maxLength? and value.length > rule.maxLength then return { message: "Array length (#{value.length}) is greater than maximum length (#{rule.maxLength})" } 
+      if rule.length? and value.length != rule.length then return { message: "Array should have length of #{rule.length}, got #{value.length}" }
+      if rule.minLength? and value.length < rule.minLength then return { message: "Array length (#{value.length}) is less than minimum length (#{rule.minLength})" }
+      if rule.maxLength? and value.length > rule.maxLength then return { message: "Array length (#{value.length}) is greater than maximum length (#{rule.maxLength})" }
 
       for item, index in value
         violation = exports.getRuleViolation item, rule.items, true
