@@ -10,7 +10,7 @@ module.exports =
     dialogElt.appendChild messageElt
 
     labelElt = document.createElement "label"
-    labelElt.innerHTML = label
+    labelElt.textContent = label
     messageElt.appendChild labelElt
 
     inputElt = document.createElement "input"
@@ -37,7 +37,7 @@ module.exports =
     messageElt.appendChild buttonsElt
 
     cancelButtonElt = document.createElement "button"
-    cancelButtonElt.innerHTML = "Cancel"
+    cancelButtonElt.textContent = "Cancel"
     cancelButtonElt.className = "cancel-button"
     cancelButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
@@ -46,7 +46,7 @@ module.exports =
       return
 
     validateButtonElt = document.createElement "button"
-    validateButtonElt.innerHTML = validationLabel
+    validateButtonElt.textContent = validationLabel
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
@@ -75,7 +75,7 @@ module.exports =
     dialogElt.appendChild messageElt
 
     labelElt = document.createElement "label"
-    labelElt.innerHTML = label
+    labelElt.textContent = label
     messageElt.appendChild labelElt
 
     buttonsElt = document.createElement "div"
@@ -96,7 +96,7 @@ module.exports =
     document.addEventListener "keyup", onKeyUp
 
     cancelButtonElt = document.createElement "button"
-    cancelButtonElt.innerHTML = "Cancel"
+    cancelButtonElt.textContent = "Cancel"
     cancelButtonElt.className = "cancel-button"
     cancelButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
@@ -105,7 +105,7 @@ module.exports =
       return
 
     validateButtonElt = document.createElement "button"
-    validateButtonElt.innerHTML = validationLabel
+    validateButtonElt.textContent = validationLabel
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
@@ -133,7 +133,7 @@ module.exports =
     dialogElt.appendChild messageElt
 
     labelElt = document.createElement "label"
-    labelElt.innerHTML = label
+    labelElt.textContent = label
     messageElt.appendChild labelElt
 
     buttonsElt = document.createElement "div"
@@ -141,7 +141,7 @@ module.exports =
     messageElt.appendChild buttonsElt
 
     validateButtonElt = document.createElement "button"
-    validateButtonElt.innerHTML = validationLabel
+    validateButtonElt.textContent = validationLabel
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
@@ -162,13 +162,13 @@ module.exports =
     dialogElt.appendChild messageElt
 
     labelElt = document.createElement "label"
-    labelElt.innerHTML = label
+    labelElt.textContent = label
     messageElt.appendChild labelElt
 
     selectElt = document.createElement "select"
     for option in list
       optionElt = document.createElement "option"
-      optionElt.innerHTML = option
+      optionElt.textContent = option
       selectElt.appendChild optionElt
 
     onKeyDown = (event) =>
@@ -192,7 +192,7 @@ module.exports =
     messageElt.appendChild buttonsElt
 
     cancelButtonElt = document.createElement "button"
-    cancelButtonElt.innerHTML = "Cancel"
+    cancelButtonElt.textContent = "Cancel"
     cancelButtonElt.className = "cancel-button"
     cancelButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
@@ -201,7 +201,7 @@ module.exports =
       return
 
     validateButtonElt = document.createElement "button"
-    validateButtonElt.innerHTML = validationLabel
+    validateButtonElt.textContent = validationLabel
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
@@ -265,7 +265,7 @@ module.exports =
         document.body.removeChild dialogElt
         document.removeEventListener "keyup", onKeyUp
         document.removeEventListener "keydown", onKeyDown
-        value = if selectedIndex? then labelElts[selectedIndex].innerHTML else null
+        value = if selectedIndex? then labelElts[selectedIndex].textContent else null
         callback?(value)
 
       else if event.keyCode == 27
@@ -275,18 +275,18 @@ module.exports =
         callback?(null)
 
       else if inputElt.value != ""
-        previousSelectedResult = if selectedIndex? then labelElts[selectedIndex].innerHTML else null
+        previousSelectedResult = if selectedIndex? then labelElts[selectedIndex].textContent else null
 
         results = fuzzy.filter inputElt.value, list
         for result, index in results
           if ! labelElts[index]?
             labelElt = document.createElement "div"
-            labelElt.innerHTML = results[index].original
+            labelElt.textContent = results[index].original
             labelParentElt.appendChild labelElt
             labelElts.push labelElt
           else
             labelElts[index].className = ""
-            labelElts[index].innerHTML = results[index].original
+            labelElts[index].textContent = results[index].original
 
           if results[index].original == previousSelectedResult
             newSelectedIndex = index
