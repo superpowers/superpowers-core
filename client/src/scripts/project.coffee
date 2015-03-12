@@ -77,7 +77,7 @@ module.exports = (projectId) ->
   ui.panesElt.appendChild iframe
 
   # Network
-  socket = SupClient.connect projectId, { reconnection: true }
+  socket = SupClient.connect projectId, { promptCredentials: true, reconnection: true }
 
   socket.on 'connect', onConnected
   socket.on 'disconnect', onDisconnected

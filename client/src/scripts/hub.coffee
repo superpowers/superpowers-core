@@ -16,7 +16,7 @@ module.exports = ->
   document.querySelector('.projects-buttons .rename-project').addEventListener 'click', onRenameProjectClick
   document.querySelector('.projects-buttons .edit-description').addEventListener 'click', onEditDescriptionClick
 
-  socket = SupClient.connect()
+  socket = SupClient.connect(null, { promptCredentials: true, reconnection: false })
 
   socket.on 'connect', onConnected
   socket.on 'disconnect', onDisconnected

@@ -2,12 +2,13 @@ fs = require 'fs'
 path = require 'path'
 async = require 'async'
 
+authMiddleware = require './authenticate'
 RemoteProjectClient = require './RemoteProjectClient'
 schemas = require './schemas'
 
 module.exports = class ProjectServer
 
-  constructor: (io, @projectPath, manifestData, callback) ->
+  constructor: (globalIO, @projectPath, manifestData, callback) ->
 
     @data = assets: new SupCore.data.Assets @
     @scheduledSaveCallbacks = {}
@@ -80,7 +81,8 @@ module.exports = class ProjectServer
 
     serve = (callback) =>
       # Setup the project's namespace
-      @io = io.of "/project:#{@data.manifest.pub.id}"
+      @io = globalIO.of "/project:#{@data.manifest.pub.id}"
+      @io.use authMiddleware
       @io.on 'connection', @_addSocket
       callback(); return
 

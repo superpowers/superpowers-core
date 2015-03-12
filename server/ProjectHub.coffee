@@ -1,6 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 async = require 'async'
+authMiddleware = require './authenticate'
 
 ProjectServer = require './ProjectServer'
 RemoteHubClient = require './RemoteHubClient'
@@ -25,6 +26,8 @@ module.exports = class ProjectHub
 
     serve = (callback) =>
       @io = @globalIO.of('/hub')
+      @io.use authMiddleware
+
       @io.on 'connection', @_addSocket
       callback(); return
 

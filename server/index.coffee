@@ -1,4 +1,3 @@
-
 paths = require './paths'
 config = require './config'
 

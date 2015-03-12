@@ -1,4 +1,5 @@
 io = require 'socket.io-client'
+Cookies = require 'cookies-js'
 
 exports.ProjectClient = require './ProjectClient'
 exports.component = require './component'
@@ -13,7 +14,37 @@ if pluginsXHR.status == 200
 
 exports.connect = (projectId, options={ reconnection: false }) ->
   namespace = if projectId? then "project:#{projectId}" else "hub"
-  io.connect "#{window.location.protocol}//#{window.location.host}/#{namespace}", transports: [ 'websocket' ], reconnection: options.reconnection
+  socket = io.connect "#{window.location.protocol}//#{window.location.host}/#{namespace}", transports: [ 'websocket' ], reconnection: options.reconnection
+
+  if options.promptCredentials then socket.on 'error', onSocketError
+  socket
+
+onSocketError = (error) ->
+  document.body.innerHTML = ''
+  if error == 'invalidCredentials'
+    promptServerPassword (serverPassword) ->
+      promptUsername (username) ->
+        setupAuth serverPassword, username
+        return
+      return
+  else if error = 'invalidUsername'
+    promptUsername (username) ->
+      setupAuth '', username
+      return
+  return
+
+promptServerPassword = (callback) ->
+  SupClient.dialogs.prompt "Please enter the server password.", '', '', "Connect", { type: 'password' }, callback
+  return
+
+promptUsername = (callback) ->
+  SupClient.dialogs.prompt "Please choose a username.", '', '', "Connect", { pattern: '[A-Za-z0-9_]{3,20}' }, callback
+  return
+
+setupAuth = (serverPassword, username) ->
+  Cookies.set 'supServerAuth', JSON.stringify({ serverPassword, username }), { expires: Infinity }
+  window.location.reload()
+  return
 
 exports.onAssetTrashed = ->
   document.body.innerHTML = ''
