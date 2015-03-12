@@ -58,4 +58,7 @@ cd ../cannonjs
 call npm install
 call gulp
 
+cd ../home
+call gulp
+
 popd

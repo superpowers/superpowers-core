@@ -1,29 +1,22 @@
-exports.config = require './config'
-
 # Globals
 global.SupAPI = require '../SupAPI'
 global.SupCore = require '../SupCore'
 # global.SupSystem = require '../SupSystem'
 
-# Projects
+# Data
 path = require 'path'
 fs = require 'fs'
+paths = require './paths'
 
-superpowersDataPath = "#{__dirname}/.."
+projectsPath = path.join(__dirname, "../projects")
 
-switch process.platform
-  when "win32"
-    if process.env.APPDATA? then superpowersDataPath = path.join(process.env.APPDATA, 'Superpowers')
-  when "darwin"
-    if process.env.HOME? then superpowersDataPath = path.join(process.env.HOME, 'Library', 'Superpowers')
-  else
-    if process.env.XDG_DATA_HOME? then superpowersDataPath = path.join(process.env.XDG_DATA_HOME, 'Superpowers')
-    else if process.env.HOME? then superpowersDataPath = path.join(process.env.HOME, '.local/share', 'Superpowers')
+if ! fs.existsSync projectsPath
+  projectsPath = path.join(paths.userData, "projects")
+  try fs.mkdirSync paths.userData
+  try fs.mkdirSync projectsPath
 
-projectsPath = path.join(superpowersDataPath, "projects")
-
-try fs.mkdirSync superpowersDataPath
-try fs.mkdirSync projectsPath
+# Config
+exports.config = require './config'
 
 # Server
 express = require 'express'
