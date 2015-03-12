@@ -205,7 +205,7 @@ module.exports =
     cancelButtonElt.className = "cancel-button"
     cancelButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
-      document.removeEventListener "keyup", onKeyUp
+      document.removeEventListener "keydown", onKeyDown
       callback?(null)
       return
 
@@ -214,7 +214,7 @@ module.exports =
     validateButtonElt.className = "validate-button"
     validateButtonElt.addEventListener "click", =>
       document.body.removeChild dialogElt
-      document.removeEventListener "keyup", onKeyUp
+      document.removeEventListener "keydown", onKeyDown
       value = if selectElt.value != "" then selectElt.value else null
       callback?(value)
       return
