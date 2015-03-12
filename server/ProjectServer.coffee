@@ -10,12 +10,22 @@ module.exports = class ProjectServer
 
   constructor: (globalIO, @projectPath, manifestData, callback) ->
 
-    @data = assets: new SupCore.data.Assets @
+    @data =
+      assets: new SupCore.data.Assets @
+      rooms: new SupCore.data.Rooms @
+
     @scheduledSaveCallbacks = {}
     @nextClientId = 0
     @clientsBySocketId = {}
 
     @data.assets.on 'itemLoad', @_onAssetLoaded
+    @data.rooms.on 'itemLoad', @_onRoomLoaded
+
+    migrate = (callback) =>
+      # Old projects didn't have a rooms folder
+      fs.mkdir path.join(@projectPath, 'rooms'), (err) =>
+        callback(); return
+      return
 
     loadManifest = (callback) =>
       if manifestData?
@@ -101,7 +111,7 @@ module.exports = class ProjectServer
       , callback
       return
 
-    async.waterfall [ loadManifest, loadMembers,
+    async.waterfall [ migrate, loadManifest, loadMembers,
       loadInternals, loadEntries, serve, prepareAssets ], callback
 
   log: (message) ->
@@ -135,6 +145,12 @@ module.exports = class ProjectServer
 
     item.on 'addDependencies', (dependencyEntryIds) => @_addDependencies assetId, dependencyEntryIds; return
     item.on 'removeDependencies', (dependencyEntryIds) => @_removeDependencies assetId, dependencyEntryIds; return
+    return
+
+  _onRoomLoaded: (roomId, item) =>
+    roomPath = path.join(@projectPath, "rooms/#{roomId}")
+    saveCallback = item.save.bind(item, roomPath)
+    item.on 'change', => @_scheduleSave 60, "rooms:#{roomId}", saveCallback; return
     return
 
   _addSocket: (socket) =>

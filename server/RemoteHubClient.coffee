@@ -34,6 +34,7 @@ module.exports = class RemoteHubClient extends BaseRemoteClient
 
     projectPath = path.join(@server.projectsPath, projectFolder)
     fs.mkdirSync path.join(projectPath, 'assets')
+    fs.mkdirSync path.join(projectPath, 'rooms')
 
     @server.data.projects.add manifest, null, (err, actualIndex) =>
       if err? then callback? err; return

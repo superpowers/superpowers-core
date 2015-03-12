@@ -24,6 +24,8 @@ module.exports = class Asset extends Hash
 
   load: (assetPath) ->
     fs.readFile path.join(assetPath, "asset.json"), { encoding: 'utf8' }, (err, json) =>
+      if err? then throw err
+
       @pub = JSON.parse(json)
       @setup()
       @emit 'load'

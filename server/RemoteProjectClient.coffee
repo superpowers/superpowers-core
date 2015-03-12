@@ -28,6 +28,9 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     # Assets
     @socket.on 'edit:assets', @_onEditAsset
 
+    # Rooms
+    @socket.on 'edit:rooms', @_onEditRoom
+
     # Project
     @socket.on 'build:project', @_onBuildProject
 
@@ -194,11 +197,37 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     # if ! callback? then @server.log "Ignoring edit:assets command, missing a callback"; return
 
     @server.data.assets.acquire id, (err, asset) =>
+      if err? then callback? err; return
+
       commandMethod.call asset, @, cmdArgs..., (err, callbackArgs...) =>
         @server.data.assets.release id
         if err? then callback? err; return
 
         @server.io.in("sub:assets:#{id}").emit 'edit:assets', id, cmd, callbackArgs...
+        callback? null, callbackArgs[0]?.id
+      return
+    return
+
+  # Rooms
+  _onEditRoom: (id, args..., callback) =>
+    return if ! @errorIfCant 'editRooms', callback
+
+    if args.length == 0 then callback? "Invalid command"; return
+
+    cmd = args[0]
+    cmdArgs = args.slice(1)
+    commandMethod = SupCore.data.Room.prototype["server_#{cmd}"]
+    if ! commandMethod? then callback? "Invalid command"; return
+    # if ! callback? then @server.log "Ignoring edit:rooms command, missing a callback"; return
+
+    @server.data.rooms.acquire id, (err, room) =>
+      if err? then callback? err; return
+
+      commandMethod.call room, @, cmdArgs..., (err, callbackArgs...) =>
+        @server.data.rooms.release id
+        if err? then callback? err; return
+
+        @server.io.in("sub:rooms:#{id}").emit 'edit:rooms', id, cmd, callbackArgs...
         callback? null, callbackArgs[0]?.id
       return
     return

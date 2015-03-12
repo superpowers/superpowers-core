@@ -10,6 +10,9 @@ exports.Entries = require './Entries'
 
 exports.Assets = require './Assets'
 
+exports.Rooms = require './Rooms'
+exports.Room = require './Room'
+
 exports.hasDuplicateName = (id, name, siblings) ->
   for sibling in siblings
     if sibling.id != id and sibling.name == name
