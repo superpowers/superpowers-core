@@ -2,6 +2,8 @@
   "name": "superpowers-launcher",
   "main": "index.html",
   "window": {
+    "title": "Superpowers",
+    "icon": "icon.png",
     "width": 800,
     "height": 480,
     "min_width": 800,
