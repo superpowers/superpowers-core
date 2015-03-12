@@ -4,6 +4,8 @@ schemas = {}
 schemas.config =
   type: 'object'
   properties:
+    port: { type: 'number' }
+    password: { type: 'string' }
     maxRecentBuilds: { type: 'number', min: 1 }
 
 # Project manifest

@@ -6,29 +6,23 @@ html
 
   body
     .pane-buttons
-      button.home Home
       button.servers Servers
+      // button.community Community
       button.settings Settings
 
     .panes
-      .home
-        include panes/home
       .servers
         include panes/servers
+      // .community
+        include panes/community
       .settings
         include panes/settings
 
-    .my-server
-      header
-        | My Server 
-        .buttons
-          button.start-stop-server Start
-        .auto-start-server
-          input#auto-start-server(type="checkbox")
-          label(for="auto-start-server") Auto-start server on startup
-      textarea(readonly)
+    .splash
+      include splash/index
 
     script.
-      window.child_process = require('child_process');
+      window.nodeProcess = process;
+      window.nodeRequire = require;
 
     script(src="index.js")

@@ -1,4 +1,6 @@
-config = require './config'
+config = require '../config'
+
+child_process = nodeRequire('child_process');
 
 myServerElt = document.querySelector('.my-server')
 
@@ -31,12 +33,13 @@ startServer = ->
     serverProcess = null
     startStopServerButton.disabled = false
     startStopServerButton.textContent = 'Start'
+    myServerTextarea.value += "\n"
 
     if config.hasRequestedClose then nwWindow.close(true)
     return
 
   serverProcess.on 'message', (msg) ->
-    myServerTextarea.value += "#{msg}\n";
+    myServerTextarea.value += "#{msg}\n"
     setTimeout ( -> myServerTextarea.scrollTop = myServerTextarea.scrollHeight ), 0
     return
 

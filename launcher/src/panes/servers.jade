@@ -3,3 +3,13 @@
   button.rename-server Rename
   button.edit-address Edit address
 .servers-tree-view
+
+.my-server
+  header
+    | My Server 
+    .buttons
+      button.start-stop-server Start
+    .auto-start-server
+      input#auto-start-server(type="checkbox")
+      label(for="auto-start-server") Auto-start server on startup
+  textarea(readonly)

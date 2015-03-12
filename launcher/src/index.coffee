@@ -1,5 +1,5 @@
 require('./panes')
-require('./myServer')
+require('./splash')
 config = require('./config')
 
 gui = global.window.nwDispatcher.requireNwGui()

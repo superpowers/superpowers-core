@@ -1,5 +1,5 @@
-require('./home')
-require('./servers')
+require './servers'
+require './settings'
 
 # Panes
 paneButtonsContainer = document.querySelector('.pane-buttons')

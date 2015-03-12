@@ -1,22 +1,12 @@
+
+paths = require './paths'
+config = require './config'
+
 # Globals
 global.SupAPI = require '../SupAPI'
 global.SupCore = require '../SupCore'
-# global.SupSystem = require '../SupSystem'
 
-# Data
-path = require 'path'
-fs = require 'fs'
-paths = require './paths'
-
-projectsPath = path.join(__dirname, "../projects")
-
-if ! fs.existsSync projectsPath
-  projectsPath = path.join(paths.userData, "projects")
-  try fs.mkdirSync paths.userData
-  try fs.mkdirSync projectsPath
-
-# Config
-exports.config = require './config'
+SupCore.log "Server starting..."
 
 # Server
 express = require 'express'
@@ -27,10 +17,14 @@ httpServer = require('http').createServer app
 io = require('socket.io') httpServer, { transports: ['websocket'] }
 
 httpServer.on 'error', (err) =>
-  if err.code == 'EADDRINUSE' then SupCore.log "Could not start the server: another application is already listening on port #{exports.config.port}."
+  if err.code == 'EADDRINUSE'
+    SupCore.log "Could not start the server: another application is already listening on port #{config.port}."
+    process.exit()
   else throw err
 
 # Load plugins
+fs = require 'fs'
+
 pluginsFullNames = { all: [], byAssetType: {} }
 requiredPluginFiles = [ 'data', 'components', 'componentEditors', 'api', 'runtime' ]
 pluginsList = []
@@ -68,12 +62,17 @@ fs.writeFileSync "#{__dirname}/../public/plugins.json", JSON.stringify(pluginsFu
 
 # Project hub
 ProjectHub = require './ProjectHub'
-hub = new ProjectHub io, projectsPath, (err) ->
+hub = new ProjectHub io, paths.projects, (err) ->
   if err? then SupCore.log "Failed to start server:\n#{err.stack}"; return
 
   SupCore.log "Loaded #{Object.keys(hub.serversById).length} projects."
 
-  httpServer.listen exports.config.port, -> SupCore.log "Server started."
+  console.log config.password.length
+  hostname = if config.password.length == 0 then 'localhost' else ''
+
+  httpServer.listen config.port, hostname,  ->
+    SupCore.log "Server started on port #{config.port}."
+    if hostname == 'localhost' then SupCore.log "NOTE: Setup a password to allow other people to connect to your server."
 
 # Save on exit and handle crashes
 isQuitting = false
