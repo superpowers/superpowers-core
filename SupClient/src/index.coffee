@@ -1,5 +1,4 @@
 io = require 'socket.io-client'
-Cookies = require 'cookies-js'
 
 exports.ProjectClient = require './ProjectClient'
 exports.component = require './component'
@@ -15,7 +14,7 @@ if pluginsXHR.status == 200
 exports.connect = (projectId, options={ reconnection: false }) ->
   namespace = if projectId? then "project:#{projectId}" else "hub"
 
-  supServerAuth = Cookies.get 'supServerAuth'
+  supServerAuth = localStorage.getItem 'supServerAuth'
   socket = io.connect "#{window.location.protocol}//#{window.location.host}/#{namespace}", transports: [ 'websocket' ], reconnection: options.reconnection, query: { supServerAuth }
 
   if options.promptCredentials then socket.on 'error', onSocketError
@@ -44,7 +43,7 @@ promptUsername = (callback) ->
   return
 
 setupAuth = (serverPassword, username) ->
-  Cookies.set 'supServerAuth', JSON.stringify({ serverPassword, username }), { expires: 60 * 60 * 24 * 365 }
+  localStorage.setItem 'supServerAuth', JSON.stringify({ serverPassword, username })
   window.location.reload()
   return
 
