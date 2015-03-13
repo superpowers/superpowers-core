@@ -1,11 +1,10 @@
-cookie = require 'cookie'
 config = require './config'
 
 usernameRegex = /^[A-Za-z0-9_]{3,20}$/
 
 module.exports = (socket, next) ->
-  if socket.request.headers.cookie?
-    authJSON = cookie.parse(socket.request.headers.cookie).supServerAuth
+  if socket.handshake.query?
+    authJSON = socket.handshake.query.supServerAuth
     try auth = JSON.parse(authJSON)
 
   if auth? and auth.serverPassword == config.password and typeof auth.username == 'string' and usernameRegex.test(auth.username)

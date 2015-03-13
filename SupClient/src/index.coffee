@@ -14,7 +14,9 @@ if pluginsXHR.status == 200
 
 exports.connect = (projectId, options={ reconnection: false }) ->
   namespace = if projectId? then "project:#{projectId}" else "hub"
-  socket = io.connect "#{window.location.protocol}//#{window.location.host}/#{namespace}", transports: [ 'websocket' ], reconnection: options.reconnection
+
+  supServerAuth = Cookies.get 'supServerAuth'
+  socket = io.connect "#{window.location.protocol}//#{window.location.host}/#{namespace}", transports: [ 'websocket' ], reconnection: options.reconnection, query: { supServerAuth }
 
   if options.promptCredentials then socket.on 'error', onSocketError
   socket
@@ -42,7 +44,7 @@ promptUsername = (callback) ->
   return
 
 setupAuth = (serverPassword, username) ->
-  Cookies.set 'supServerAuth', JSON.stringify({ serverPassword, username }), { expires: Infinity }
+  Cookies.set 'supServerAuth', JSON.stringify({ serverPassword, username }), { expires: 60 * 60 * 24 * 365 }
   window.location.reload()
   return
 
