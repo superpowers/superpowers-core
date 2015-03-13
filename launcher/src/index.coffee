@@ -1,6 +1,7 @@
-require('./panes')
-require('./splash')
-config = require('./config')
+require './panes'
+require './splash'
+myServer = require './myServer'
+config = require './config'
 
 gui = global.window.nwDispatcher.requireNwGui()
 nwWindow = gui.Window.get()
@@ -12,6 +13,6 @@ nwWindow.on 'close', (event) ->
   config.hasRequestedClose = true
   config.save()
 
-  if serverProcess? then serverProcess.send('stop')
+  if myServer.serverProcess? then myServer.serverProcess.send('stop')
   else nwWindow.close(true)
   return

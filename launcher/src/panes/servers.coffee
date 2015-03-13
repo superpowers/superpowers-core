@@ -1,5 +1,3 @@
-require './myServer'
-
 TreeView = require 'dnd-tree-view'
 dialogs = require '../../../SupClient/src/dialogs'
 config = require '../config'
