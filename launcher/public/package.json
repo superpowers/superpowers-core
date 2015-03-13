@@ -8,7 +8,7 @@
     "height": 480,
     "min_width": 800,
     "min_height": 480,
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "resizable": false
   },

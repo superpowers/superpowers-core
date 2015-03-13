@@ -1,6 +1,7 @@
 config = require '../config'
 
-child_process = nodeRequire('child_process');
+path = nodeRequire 'path'
+child_process = nodeRequire 'child_process'
 
 myServerElt = document.querySelector('.my-server')
 
@@ -28,7 +29,8 @@ startStopServerButton.addEventListener 'click', ->
 startServer = ->
   startStopServerButton.textContent = 'Stop'
 
-  serverProcess = child_process.fork '../../server/start.js', silent: true
+  serverPath = path.join path.resolve(path.dirname(nodeProcess.mainModule.filename)), '../../server/start.js'
+  serverProcess = child_process.fork serverPath, silent: true
   serverProcess.on 'exit', (chunk) ->
     serverProcess = null
     startStopServerButton.disabled = false

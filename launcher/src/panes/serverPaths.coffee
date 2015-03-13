@@ -1,7 +1,7 @@
 path = nodeRequire 'path'
 fs = nodeRequire 'fs'
 
-rootPath = path.resolve(path.dirname(nodeProcess.execPath))
+rootPath = path.resolve(path.dirname(nodeProcess.mainModule.filename))
 
 # User data folder
 exports.userData = path.join(rootPath, '../..')
