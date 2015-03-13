@@ -44,7 +44,8 @@ for pluginAuthor in fs.readdirSync pluginsPath
 
     pluginsFullNames.all.push "#{pluginAuthor}/#{pluginName}"
     if fs.existsSync "#{pluginPath}/editors"
-      pluginsFullNames.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}" for assetType in fs.readdirSync "#{pluginPath}/editors"
+      for assetType in fs.readdirSync "#{pluginPath}/editors"
+        if assetType != 'main' then pluginsFullNames.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}"
 
 # First, load all scripting API modules
 for plugin in pluginsList
