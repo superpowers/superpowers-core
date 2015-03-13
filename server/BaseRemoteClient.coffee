@@ -25,7 +25,7 @@ module.exports = class BaseRemoteClient
       [ sub, endpoint, id ] = subscription.split ':'
       continue if ! id?
 
-      @server.data[endpoint].release id
+      @server.data[endpoint].release id, @
 
     @server.removeRemoteClient @socket.id
     return
@@ -39,23 +39,20 @@ module.exports = class BaseRemoteClient
       if id? then "sub:#{endpoint}:#{id}"
       else "sub:#{endpoint}"
 
-    @socket.join roomName
-    @subscriptions.push roomName
-
     if ! id?
+      @socket.join roomName
+      @subscriptions.push roomName
       callback null, data.pub
       return
 
-    data.acquire id, (err, item) =>
-      if err?
-        roomNameIndex = @subscriptions.indexOf(roomName)
-        if roomNameIndex != -1
-          @socket.leave roomName
-          @subscriptions.splice roomNameIndex, 1
+    data.acquire id, @, (err, item) =>
+      if err? then callback err; return
 
-        callback err; return
+      @socket.join roomName
+      @subscriptions.push roomName
 
-      callback null, item.pub; return
+      callback null, item.pub
+      return
 
     return
 
@@ -68,7 +65,7 @@ module.exports = class BaseRemoteClient
 
     if id?
       roomName = "sub:#{endpoint}:#{id}"
-      data.release id
+      data.release id, @
     else
       roomName = "sub:#{endpoint}"
 

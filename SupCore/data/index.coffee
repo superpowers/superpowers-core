@@ -12,6 +12,7 @@ exports.Assets = require './Assets'
 
 exports.Rooms = require './Rooms'
 exports.Room = require './Room'
+exports.RoomUsers = require './RoomUsers'
 
 exports.hasDuplicateName = (id, name, siblings) ->
   for sibling in siblings

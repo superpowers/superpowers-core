@@ -64,7 +64,7 @@ module.exports = class ListById extends EventEmitter
     callback null, index
     @emit 'change'
     return
-    
+
   client_move: (id, newIndex) ->
     item = @byId[id]
 
@@ -75,15 +75,15 @@ module.exports = class ListById extends EventEmitter
   remove: (id, callback) ->
     item = @byId[id]
     if ! item? then callback "Invalid item id: #{id}"; return
-    
+
     index = @pub.indexOf(item)
     @pub.splice index, 1
     delete @byId[id]
-    
+
     callback null, index
     @emit 'change'
     return
-    
+
   client_remove: (id) ->
     item = @byId[id]
     @pub.splice @pub.indexOf(item), 1
@@ -103,7 +103,7 @@ module.exports = class ListById extends EventEmitter
     if violation? then callback "Invalid value: #{base.formatRuleViolation(violation)}"; return
 
     item[key] = value
-    
+
     callback null, value
     @emit 'change'
     return

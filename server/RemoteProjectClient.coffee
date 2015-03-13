@@ -111,7 +111,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
 
       newAssetPath = path.join(@server.projectPath, "assets/#{entry.id}")
 
-      @server.data.assets.acquire id, (err, referenceAsset) =>
+      @server.data.assets.acquire id, null, (err, referenceAsset) =>
         fs.mkdirSync newAssetPath
         referenceAsset.save newAssetPath, (err) =>
           @server.data.assets.release id
@@ -196,7 +196,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     if ! commandMethod? then callback? "Invalid command"; return
     # if ! callback? then @server.log "Ignoring edit:assets command, missing a callback"; return
 
-    @server.data.assets.acquire id, (err, asset) =>
+    @server.data.assets.acquire id, null, (err, asset) =>
       if err? then callback? err; return
 
       commandMethod.call asset, @, cmdArgs..., (err, callbackArgs...) =>
@@ -220,7 +220,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     if ! commandMethod? then callback? "Invalid command"; return
     # if ! callback? then @server.log "Ignoring edit:rooms command, missing a callback"; return
 
-    @server.data.rooms.acquire id, (err, room) =>
+    @server.data.rooms.acquire id, null, (err, room) =>
       if err? then callback? err; return
 
       commandMethod.call room, @, cmdArgs..., (err, callbackArgs...) =>
@@ -257,7 +257,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     async.each assetIdsToExport, (assetId, cb) =>
       folderPath = path.join(buildPath, 'assets', assetId.toString())
       fs.mkdir folderPath, (err) =>
-        @server.data.assets.acquire assetId, (err, asset) =>
+        @server.data.assets.acquire assetId, null, (err, asset) =>
           asset.save folderPath, (err) =>
             @server.data.assets.release assetId
             cb(); return

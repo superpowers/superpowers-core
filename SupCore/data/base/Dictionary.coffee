@@ -7,7 +7,7 @@ module.exports = class Dictionary extends EventEmitter
     @refCountById = {}
     @unloadTimeoutsById = {}
 
-  acquire: (id, callback) ->
+  acquire: (id, owner, callback) ->
     @refCountById[id] ?= 0
     @refCountById[id]++
     #console.log "Acquiring #{id}: #{@refCountById[id]} refs"
@@ -34,7 +34,7 @@ module.exports = class Dictionary extends EventEmitter
 
     return
 
-  release: (id, options) ->
+  release: (id, owner, options) ->
     if ! @refCountById[id]? then throw new Error "Can't release #{id}, ref count is null"
 
     @refCountById[id]--

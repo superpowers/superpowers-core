@@ -103,9 +103,9 @@ module.exports = class ProjectServer
         # Ignore folders
         if ! @data.entries.byId[assetId].type? then cb(); return
 
-        @data.assets.acquire assetId, (err, asset) =>
+        @data.assets.acquire assetId, null, (err, asset) =>
           asset.restore()
-          @data.assets.release assetId, skipUnloadDelay: true
+          @data.assets.release assetId, null, skipUnloadDelay: true
           cb(); return
         return
       , callback

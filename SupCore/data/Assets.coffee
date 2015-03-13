@@ -6,10 +6,10 @@ module.exports = class Assets extends SupData.base.Dictionary
   constructor: (@server) ->
     super()
 
-  acquire: (id, callback) ->
+  acquire: (id, owner, callback) ->
     if ! @server.data.entries.byId[id]?.type? then callback "Invalid asset id: #{id}"; return
 
-    super id, callback
+    super id, owner, callback
 
   _load: (id) ->
     entry = @server.data.entries.byId[id]
