@@ -46,7 +46,13 @@ module.exports = class Room extends SupData.base.Hash
     return
 
   join: (client, callback) ->
-    item = { id: client.socket.username }
+    item = @users.byId[client.socket.username]
+    if item?
+      item.connectionCount++
+      callback null, item
+      return
+
+    item = { id: client.socket.username, connectionCount: 1 }
 
     @users.add item, null, (err, actualIndex) =>
       if err? then throw new Error(err)
@@ -55,6 +61,12 @@ module.exports = class Room extends SupData.base.Hash
     return
 
   leave: (client, callback) ->
+    item = @users.byId[client.socket.username]
+    if item.connectionCount > 1
+      item.connectionCount--
+      callback null, client.socket.username
+      return
+
     @users.remove client.socket.username, (err) =>
       if err? then throw new Error(err)
       callback null, client.socket.username
@@ -62,10 +74,16 @@ module.exports = class Room extends SupData.base.Hash
     return
 
   client_join: (item, index) ->
-    @users.client_add item, index
+    if index? then @users.client_add item, index
+    else @users.byId[item.id].connectionCount++
     return
 
   client_leave: (id) ->
+    item = @users.byId[id]
+    if item.connectionCount > 1
+      item.connectionCount--
+      return
+
     @users.client_remove id
     return
 

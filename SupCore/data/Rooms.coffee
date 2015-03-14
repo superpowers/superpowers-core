@@ -15,8 +15,8 @@ module.exports = class Rooms extends SupData.base.Dictionary
       if err? then callback err; return
       if ! owner? then callback null, item; return
 
-      item.join owner, (err, roomUser) =>
-        @server.io.in("sub:rooms:#{id}").emit 'edit:rooms', id, 'join', roomUser
+      item.join owner, (err, roomUser, index) =>
+        @server.io.in("sub:rooms:#{id}").emit 'edit:rooms', id, 'join', roomUser, index
 
         callback null, item
         return
