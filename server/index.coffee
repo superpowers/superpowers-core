@@ -24,9 +24,8 @@ httpServer.on 'error', (err) =>
 # Load plugins
 fs = require 'fs'
 
-pluginsFullNames = { all: [], byAssetType: {} }
+pluginsInfo = { all: [], editorsByAssetType: {}, tools: [] }
 requiredPluginFiles = [ 'data', 'components', 'componentEditors', 'api', 'runtime' ]
-pluginsList = []
 shouldIgnorePlugin = (pluginName) -> pluginName.indexOf('.') != -1 or pluginName == 'node_modules'
 
 pluginsPath = "#{__dirname}/../plugins"
@@ -36,29 +35,33 @@ for pluginAuthor in fs.readdirSync pluginsPath
   for pluginName in fs.readdirSync pluginAuthorPath
     continue if shouldIgnorePlugin pluginName
     pluginPath = "#{pluginAuthorPath}/#{pluginName}"
-    pluginsList.push { name: pluginName, path: pluginPath, author: pluginAuthor }
 
+    # Load scripting API module
+    apiModulePath = "#{pluginPath}/api"
+    require apiModulePath if fs.existsSync apiModulePath
+
+    # Load data module
+    dataModulePath = "#{pluginPath}/data"
+    require dataModulePath if fs.existsSync dataModulePath
+
+    # Expose public stuff
+    app.use "/plugins/#{pluginAuthor}/#{pluginName}", express.static "#{pluginPath}/public"
+
+    # Ensure all required files exist
     for requiredFile in requiredPluginFiles
       requiredFilePath = "#{pluginPath}/public/#{requiredFile}.js"
       if ! fs.existsSync requiredFilePath then fs.closeSync fs.openSync(requiredFilePath, 'w')
 
-    pluginsFullNames.all.push "#{pluginAuthor}/#{pluginName}"
+    # Collect plugin info
+    pluginsInfo.all.push "#{pluginAuthor}/#{pluginName}"
     if fs.existsSync "#{pluginPath}/editors"
-      for assetType in fs.readdirSync "#{pluginPath}/editors"
-        if assetType != 'main' then pluginsFullNames.byAssetType[assetType] = "#{pluginAuthor}/#{pluginName}"
+      for editorName in fs.readdirSync "#{pluginPath}/editors"
+        if SupCore.data.assetPlugins[editorName]?
+          pluginsInfo.editorsByAssetType[editorName] = "#{pluginAuthor}/#{pluginName}"
+        else
+          pluginsInfo.tools.push { pluginPath: "#{pluginAuthor}/#{pluginName}", name: editorName }
 
-# First, load all scripting API modules
-for plugin in pluginsList
-  apiModulePath = "#{plugin.path}/api"
-  require apiModulePath if fs.existsSync apiModulePath
-
-# Then, load data modules and expose public stuff
-for plugin in pluginsList
-  dataModulePath = "#{plugin.path}/data"
-  require dataModulePath if fs.existsSync dataModulePath
-  app.use "/plugins/#{plugin.author}/#{plugin.name}", express.static "#{plugin.path}/public"
-
-fs.writeFileSync "#{__dirname}/../public/plugins.json", JSON.stringify(pluginsFullNames)
+fs.writeFileSync "#{__dirname}/../public/plugins.json", JSON.stringify(pluginsInfo)
 
 # Project hub
 ProjectHub = require './ProjectHub'
