@@ -15,6 +15,8 @@ module.exports = class Assets extends SupData.base.Dictionary
     entry = @server.data.entries.byId[id]
 
     assetClass = SupData.assetPlugins[entry.type]
+    if ! assetClass? then throw new Error "No data plugin for asset type \"#{entry.type}\""
+
     asset = new assetClass null, @server.data
     asset.load path.join(@server.projectPath, "assets/#{id}")
 

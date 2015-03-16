@@ -277,7 +277,7 @@ createEntryElement = (entry) ->
 
   if entry.type?
     iconElt = document.createElement('img')
-    iconElt.src = "/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type]}/editors/#{entry.type}/icon.svg"
+    iconElt.src = "/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/icon.svg"
     liElt.appendChild iconElt
 
   nameSpan = document.createElement('span')
@@ -358,7 +358,7 @@ openEntry = (id) ->
     ui.tabStrip.tabsRoot.appendChild tab
 
     iframe = document.createElement('iframe')
-    iframe.src = "/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type]}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{id}"
+    iframe.src = "/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{id}"
     iframe.dataset.assetId = id
     ui.panesElt.appendChild iframe
     iframe.contentWindow.focus()
@@ -372,7 +372,8 @@ onNewAssetClick = ->
   SupClient.dialogs.prompt "Enter a name for the new asset.", "Asset name", null, "Create", (name) =>
     return if ! name?
 
-    SupClient.dialogs.select "Choose a type for the new asset.", Object.keys(SupClient.pluginPaths.editorsByAssetType), "Create", (type) =>
+    editorNames = ( editor.title.en for assetType, editor of SupClient.pluginPaths.editorsByAssetType )
+    SupClient.dialogs.select "Choose a type for the new asset.", editorNames, "Create", (type) =>
       return if ! type?
 
       socket.emit 'add:entries', name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck
@@ -444,7 +445,7 @@ onOpenEntryClick = ->
   selectedNode = ui.entriesTreeView.selectedNodes[0]
   entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
 
-  window.open "#{window.location.origin}/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type]}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{entry.id}"
+  window.open "#{window.location.origin}/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{entry.id}"
   return
 
 onRenameEntryClick = ->
@@ -482,7 +483,7 @@ createAssetTabElement = (entry) =>
   if entry.type?
     iconElt = document.createElement('img')
     iconElt.classList.add 'icon'
-    iconElt.src = "/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type]}/editors/#{entry.type}/icon.svg"
+    iconElt.src = "/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/icon.svg"
     tabElt.appendChild iconElt
 
   tabLabel = document.createElement('span')

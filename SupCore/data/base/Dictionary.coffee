@@ -22,7 +22,8 @@ module.exports = class Dictionary extends EventEmitter
     item = @byId[id]
 
     if ! item?
-      item = @_load id
+      try item = @_load id
+      catch e then callback e; return
       @byId[id] = item
 
     if item.pub? then callback null, item

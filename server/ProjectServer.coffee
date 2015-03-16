@@ -104,6 +104,8 @@ module.exports = class ProjectServer
         if ! @data.entries.byId[assetId].type? then cb(); return
 
         @data.assets.acquire assetId, null, (err, asset) =>
+          if err? then cb err; return
+
           asset.restore()
           @data.assets.release assetId, null, skipUnloadDelay: true
           cb(); return

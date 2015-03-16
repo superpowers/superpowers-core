@@ -15,8 +15,7 @@ module.exports = class ProjectHub
     serveProjects = (callback) =>
       async.each fs.readdirSync(@projectsPath), (projectFolder, cb) =>
         if projectFolder.indexOf('.') != -1 then cb(); return
-        @loadProject projectFolder, null, cb
-        return
+        @loadProject projectFolder, null, cb; return
       , callback
       return
 

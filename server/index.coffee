@@ -24,7 +24,7 @@ httpServer.on 'error', (err) =>
 # Load plugins
 fs = require 'fs'
 
-pluginsInfo = { all: [], editorsByAssetType: {}, tools: [] }
+pluginsInfo = { all: [], editorsByAssetType: {}, toolsByName: {} }
 requiredPluginFiles = [ 'data', 'components', 'componentEditors', 'api', 'runtime' ]
 shouldIgnorePlugin = (pluginName) -> pluginName.indexOf('.') != -1 or pluginName == 'node_modules'
 
@@ -56,10 +56,16 @@ for pluginAuthor in fs.readdirSync pluginsPath
     pluginsInfo.all.push "#{pluginAuthor}/#{pluginName}"
     if fs.existsSync "#{pluginPath}/editors"
       for editorName in fs.readdirSync "#{pluginPath}/editors"
+        title = editorName
+        try title = JSON.parse(fs.readFileSync("#{pluginPath}/public/editors/#{editorName}/locales/en/main.json", encoding: 'utf8')).title
+
         if SupCore.data.assetPlugins[editorName]?
-          pluginsInfo.editorsByAssetType[editorName] = "#{pluginAuthor}/#{pluginName}"
+          pluginsInfo.editorsByAssetType[editorName] = {
+            title: { en: title }
+            pluginPath: "#{pluginAuthor}/#{pluginName}"
+          }
         else
-          pluginsInfo.tools.push { pluginPath: "#{pluginAuthor}/#{pluginName}", name: editorName }
+          pluginsInfo.toolsByName[editorName] = { pluginPath: "#{pluginAuthor}/#{pluginName}", title: { en: title } }
 
 fs.writeFileSync "#{__dirname}/../public/plugins.json", JSON.stringify(pluginsInfo)
 
