@@ -111,7 +111,7 @@ module.exports = class ProjectServer
       , callback
       return
 
-    async.waterfall [ migrate, loadManifest, loadMembers,
+    async.series [ migrate, loadManifest, loadMembers,
       loadInternals, loadEntries, serve, prepareAssets ], callback
 
   log: (message) ->

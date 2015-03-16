@@ -62,7 +62,7 @@ module.exports = class RemoteHubClient extends BaseRemoteClient
 
       loadProject = (callback) => @server.loadProject projectFolder, manifest, callback; return
 
-      async.waterfall [ writeManifest, writeInternals, writeMembers, writeEntries, loadProject ], (err) =>
+      async.series [ writeManifest, writeInternals, writeMembers, writeEntries, loadProject ], (err) =>
         if err? then SupCore.log "Error while creating project:\n#{err}"; return
 
         @server.io.in('sub:projects').emit 'add:projects', manifest, actualIndex
