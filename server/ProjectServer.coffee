@@ -164,7 +164,7 @@ module.exports = class ProjectServer
     return if scheduledCallback?.timeoutId?
 
     errorCallback = (err) =>
-      @log "Save done! #{callbackName}"
+      #@log "Save done! #{callbackName}"
       @log "Error in #{callbackName}:\n#{err}" if err?
       return
 

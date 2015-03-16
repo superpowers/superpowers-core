@@ -234,7 +234,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
 
   # Project
   _onBuildProject: (callback) =>
-    @server.log "Building project..."
+    #@server.log "Building project..."
 
     buildId = @server.data.internals.pub.nextBuildId
     @server.data.internals.setProperty 'nextBuildId', @server.data.internals.pub.nextBuildId + 1
@@ -271,7 +271,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
       fs.writeFile path.join(buildPath, 'game.json'), json, { encoding: 'utf8' }, (err) =>
         if err? then callback "Could not save game.json"; return
 
-        @server.log "Done generating build #{buildId}..."
+        #@server.log "Done generating build #{buildId}..."
 
         callback null, buildId
 
