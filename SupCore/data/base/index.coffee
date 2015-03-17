@@ -89,6 +89,9 @@ exports.getRuleViolation = (value, rule, create=false) ->
           violationPath = if violation.path? then "[#{index}].#{violation.path}" else "[#{index}]"
           return { message: violation.message, path: violationPath }
 
+    when 'any'
+      # No validation at all
+
     else
       console.warn "getRuleViolation - Unhandled rule type:"
       console.warn ruleType
