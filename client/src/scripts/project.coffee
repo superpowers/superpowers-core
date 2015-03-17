@@ -36,6 +36,10 @@ module.exports = (projectId) ->
   ui.entriesTreeView.on 'selectionChange', updateSelectedEntry
   ui.entriesTreeView.on 'activate', onEntryActivate
 
+  ui.assetsTypeByName = {}
+  for assetType, editor of SupClient.pluginPaths.editorsByAssetType
+    ui.assetsTypeByName[editor.title.en] = assetType
+
   document.querySelector('.entries-buttons .new-asset').addEventListener 'click', onNewAssetClick
   document.querySelector('.entries-buttons .new-folder').addEventListener 'click', onNewFolderClick
   document.querySelector('.entries-buttons .search').addEventListener 'click', onSearchClick
@@ -372,8 +376,7 @@ onNewAssetClick = ->
   SupClient.dialogs.prompt "Enter a name for the new asset.", "Asset name", null, "Create", (name) =>
     return if ! name?
 
-    editorNames = ( editor.title.en for assetType, editor of SupClient.pluginPaths.editorsByAssetType )
-    SupClient.dialogs.select "Choose a type for the new asset.", editorNames, "Create", (type) =>
+    SupClient.dialogs.select "Choose a type for the new asset.", ui.assetsTypeByName, "Create", (type) =>
       return if ! type?
 
       socket.emit 'add:entries', name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck

@@ -162,7 +162,7 @@ module.exports =
     validateButtonElt.focus()
     return
 
-  select: (label, list, validationLabel, callback) ->
+  select: (label, options, validationLabel, callback) ->
     dialogElt = document.createElement "div"
     dialogElt.className = "dialog"
 
@@ -175,9 +175,10 @@ module.exports =
     messageElt.appendChild labelElt
 
     selectElt = document.createElement "select"
-    for option in list
+    for optionName, optionValue of options
       optionElt = document.createElement "option"
-      optionElt.textContent = option
+      optionElt.textContent = optionName
+      optionElt.value = optionValue
       selectElt.appendChild optionElt
 
     onKeyDown = (event) =>
