@@ -65,11 +65,6 @@ module.exports = (projectId) ->
   iconElt.src = "/plugins/sparklinlabs/home/editors/main/icon.svg"
   tab.appendChild iconElt
 
-  tabLabel = document.createElement('span')
-  tabLabel.classList.add 'label'
-  tabLabel.textContent = "Home"
-  tab.appendChild tabLabel
-
   tab.classList.add 'active'
   ui.tabStrip.tabsRoot.appendChild tab
 
