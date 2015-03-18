@@ -51,8 +51,20 @@ exports.onAssetTrashed = ->
   document.body.innerHTML = ''
 
   h1 = document.createElement('h1')
-  h1.textContent = 'This asset has been trashed'
-  document.body.appendChild h1
+  h1.textContent = 'This asset has been trashed.'
+
+  ###
+  # TODO: window.parent.postMessage(...) or window.close()
+  button = document.createElement('button')
+  button.textContent = 'Close'
+  button.addEventListener 'click', => ...
+  ###
+
+  div = document.createElement('div')
+  div.className = 'superpowers-error'
+  div.appendChild h1
+  # div.appendChild button
+  document.body.appendChild div
   return
 
 exports.onDisconnected = ->
@@ -66,6 +78,7 @@ exports.onDisconnected = ->
   button.addEventListener 'click', => location.reload()
 
   div = document.createElement('div')
+  div.className = 'superpowers-error'
   div.appendChild h1
   div.appendChild button
   document.body.appendChild div
