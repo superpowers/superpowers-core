@@ -61,7 +61,16 @@ onEditAddressClick = ->
   return
 
 onServerActivate = ->
-  window.open "http://" + serversTreeView.selectedNodes[0].dataset.address
+  gui = global.window.nwDispatcher.requireNwGui()
+  gui.Window.open "http://" + serversTreeView.selectedNodes[0].dataset.address,
+    "title": "Superpowers",
+    "icon": "icon.png",
+    "width": 1000,
+    "height": 600,
+    "min_width": 800,
+    "min_height": 480,
+    "toolbar": false,
+    "frame": true
   return
 
 serversTreeView = new TreeView document.querySelector('.servers-tree-view')
