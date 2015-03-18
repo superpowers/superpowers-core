@@ -75,6 +75,22 @@ module.exports = (projectId) ->
   iframe.classList.add 'active'
   ui.panesElt.appendChild iframe
 
+  # Tools and settings
+  toolsList = document.querySelector('.sidebar .tools ul')
+
+  for toolName, tool of SupClient.pluginPaths.toolsByName
+    if toolName == 'main' and tool.pluginPath == 'sparklinlabs/home' then continue
+
+    toolElt = document.createElement('li')
+
+    anchorElt = document.createElement('a')
+    anchorElt.target = "_blank"
+    anchorElt.href = "/plugins/#{tool.pluginPath}/editors/#{toolName}/?project=#{info.projectId}"
+    anchorElt.textContent = tool.title.en
+    toolElt.appendChild anchorElt
+
+    toolsList.appendChild toolElt
+
   # Network
   socket = SupClient.connect projectId, { promptCredentials: true, reconnection: true }
 
