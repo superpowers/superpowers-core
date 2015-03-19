@@ -19,6 +19,7 @@ shouldDistribute = (file) ->
   return false if file.indexOf('.hg') != -1
   return false if file.indexOf('.sublime-') != -1
   return false if _.endsWith(file, 'gulpfile.coffee')
+  return false if _.endsWith(file, 'launcher.cmd')
   return false if _.endsWith(file, '.orig')
   return false if _.endsWith(file, '.jade')
   return false if _.endsWith(file, '.styl')
@@ -31,6 +32,7 @@ shouldDistribute = (file) ->
   return false if _.startsWith(file, 'node_modules/gulp')
   return false if _.startsWith(file, 'node_modules/.bin')
   return false if _.startsWith(file, 'launcher/src')
+  return false if _.startsWith(file, 'bin')
   return false if _.startsWith(file, 'public/builds') or _.startsWith(file, 'projects')
   return false if file == 'config.json'
   true
@@ -42,7 +44,13 @@ readdirRecursive sourceRootPath, (err, files) ->
 
   for file in files
     relativeFile = file.substring sourceRootPath.length + 1
-    targetPath = "#{targetRootPath}/#{relativeFile}"
+    targetPath = "#{targetRootPath}/app/#{relativeFile}"
     mkdirp.sync path.dirname(targetPath)
     fs.writeFileSync targetPath, fs.readFileSync file
+
+  fs.renameSync "#{targetRootPath}/app/launcher/public/package.json", "#{targetRootPath}/package.json"
+  package = fs.readFileSync "#{targetRootPath}/package.json", { encoding: 'utf8' }
+  package = package.replace "index.html", "app/launcher/public/index.html"
+  package = package.replace "icon.png", "app/launcher/public/icon.png"
+  fs.writeFileSync "#{targetRootPath}/package.json", package, { encoding: 'utf8' }
   return
