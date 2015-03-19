@@ -53,20 +53,32 @@ module.exports = (projectId) ->
   ui.tabStrip.on 'activateTab', onTabActivate
   ui.tabStrip.on 'closeTab', onTabClose
 
+  # Global controls
+  toggleNotificationsButton = document.querySelector('.top .controls button.toggle-notifications')
+  toggleNotificationsButton.addEventListener 'click', onClickToggleNotifications
+
+  if localStorage.getItem('disableNotifications')?
+    toggleNotificationsButton.textContent = '-o-'
+    toggleNotificationsButton.title = "Click to enable notifications"
+  else
+    toggleNotificationsButton.textContent = '(o)'
+    toggleNotificationsButton.title = 'Click to enable notifications'
+
+
   # Panes
   ui.panesElt = document.querySelector('.project .main .panes')
 
   # Home tab
-  homeTab = document.createElement('li')
-  homeTab.dataset.pane = 'home'
+  ui.homeTab = document.createElement('li')
+  ui.homeTab.dataset.pane = 'home'
 
   iconElt = document.createElement('img')
   iconElt.classList.add 'icon'
   iconElt.src = "/plugins/sparklinlabs/home/editors/main/icon.svg"
-  homeTab.appendChild iconElt
+  ui.homeTab.appendChild iconElt
 
-  homeTab.classList.add 'active'
-  ui.tabStrip.tabsRoot.appendChild homeTab
+  ui.homeTab.classList.add 'active'
+  ui.tabStrip.tabsRoot.appendChild ui.homeTab
 
   iframe = document.createElement('iframe')
   iframe.dataset.name = 'home'
@@ -75,31 +87,7 @@ module.exports = (projectId) ->
   iframe.classList.add 'active'
   ui.panesElt.appendChild iframe
 
-  window.addEventListener "message", (event) =>
-    return if event.data.type != "chat"
-    return if homeTab.classList.contains 'active'
-
-    homeTab.classList.add 'blink'
-    doNotification = =>
-      notification = new Notification "New chat message in \"#{data.manifest.pub.name}\" project",
-        icon: "/images/icon.png"
-        body: event.data.content
-
-      setTimeout =>
-        notification.close()
-        return
-      , 5000
-      return
-
-    if Notification.permission == 'granted'
-      doNotification()
-    else if Notification.permission != 'denied'
-      Notification.requestPermission (status) =>
-        Notification.permission = status
-        if Notification.permission == 'granted'
-          doNotification()
-        return
-    return
+  window.addEventListener "message", onMessage
 
   # Tools and settings
   toolsList = document.querySelector('.sidebar .tools ul')
@@ -369,6 +357,55 @@ updateSelectedEntry = ->
 onEntryActivate = ->
   activatedEntry = ui.entriesTreeView.selectedNodes[0]
   openEntry activatedEntry.dataset.id
+  return
+
+onMessage = (event) ->
+  return if event.data.type != "chat"
+
+  isHomeTabVisible = ui.homeTab.classList.contains('active')
+  return if isHomeTabVisible and ! document.hidden
+
+  if ! isHomeTabVisible? then ui.homeTab.classList.add 'blink'
+
+  return if localStorage.getItem('disableNotifications')?
+
+  doNotification = =>
+    notification = new Notification "New chat message in \"#{data.manifest.pub.name}\" project",
+      icon: "/favicon.ico", body: event.data.content
+
+    closeTimeoutId = setTimeout ( => notification.close(); return ), 5000
+
+    notification.addEventListener 'click', =>
+      window.focus()
+      onTabActivate ui.homeTab
+      clearTimeout closeTimeoutId
+      notification.close()
+      return
+    return
+
+  if Notification.permission == 'granted'
+    doNotification()
+  else if Notification.permission != 'denied'
+    Notification.requestPermission (status) =>
+      Notification.permission = status
+      if Notification.permission == 'granted'
+        doNotification()
+      return
+  return
+
+
+onClickToggleNotifications = (event) ->
+  disableNotifications = localStorage.getItem('disableNotifications') ? false
+  disableNotifications = ! disableNotifications
+
+  if ! disableNotifications
+    localStorage.removeItem('disableNotifications')
+    event.target.textContent = '(o)'
+    event.target.title = 'Click to disable notifications'
+  else
+    localStorage.setItem('disableNotifications', 'true')
+    event.target.textContent = '-o-'
+    event.target.title = 'Click to enable notifications'
   return
 
 openSearchEntryDialog = ->
