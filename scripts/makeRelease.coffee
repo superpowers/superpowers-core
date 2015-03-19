@@ -7,9 +7,9 @@ _ = require 'lodash'
 sourceRootPath = path.resolve("#{__dirname}/..")
 
 packageInfo = require("#{sourceRootPath}/package.json")
-targetRootPath = "#{__dirname}/../../releases/#{packageInfo.version}"
+targetRootPath = "#{__dirname}/../../releases/#{packageInfo.version}/content"
 try
-  fs.mkdirSync targetRootPath
+  mkdirp targetRootPath
 catch e
   console.log "Could not create superpowers-#{packageInfo.version} folder"
   return
@@ -49,8 +49,8 @@ readdirRecursive sourceRootPath, (err, files) ->
     fs.writeFileSync targetPath, fs.readFileSync file
 
   fs.renameSync "#{targetRootPath}/app/launcher/public/package.json", "#{targetRootPath}/package.json"
-  package = fs.readFileSync "#{targetRootPath}/package.json", { encoding: 'utf8' }
-  package = package.replace "index.html", "app/launcher/public/index.html"
-  package = package.replace "icon.png", "app/launcher/public/icon.png"
-  fs.writeFileSync "#{targetRootPath}/package.json", package, { encoding: 'utf8' }
+  launcherPackage = fs.readFileSync "#{targetRootPath}/package.json", { encoding: 'utf8' }
+  launcherPackage = launcherPackage.replace "index.html", "app/launcher/public/index.html"
+  launcherPackage = launcherPackage.replace "icon.png", "app/launcher/public/icon.png"
+  fs.writeFileSync "#{targetRootPath}/package.json", launcherPackage, { encoding: 'utf8' }
   return
