@@ -62,7 +62,7 @@ module.exports = (projectId) ->
     toggleNotificationsButton.title = "Click to enable notifications"
   else
     toggleNotificationsButton.textContent = '(o)'
-    toggleNotificationsButton.title = 'Click to enable notifications'
+    toggleNotificationsButton.title = 'Click to disable notifications'
 
 
   # Panes
