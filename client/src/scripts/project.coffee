@@ -57,16 +57,16 @@ module.exports = (projectId) ->
   ui.panesElt = document.querySelector('.project .main .panes')
 
   # Home tab
-  tab = document.createElement('li')
-  tab.dataset.pane = 'home'
+  homeTab = document.createElement('li')
+  homeTab.dataset.pane = 'home'
 
   iconElt = document.createElement('img')
   iconElt.classList.add 'icon'
   iconElt.src = "/plugins/sparklinlabs/home/editors/main/icon.svg"
-  tab.appendChild iconElt
+  homeTab.appendChild iconElt
 
-  tab.classList.add 'active'
-  ui.tabStrip.tabsRoot.appendChild tab
+  homeTab.classList.add 'active'
+  ui.tabStrip.tabsRoot.appendChild homeTab
 
   iframe = document.createElement('iframe')
   iframe.dataset.name = 'home'
@@ -74,6 +74,32 @@ module.exports = (projectId) ->
   iframe.src = "/plugins/sparklinlabs/home/editors/main/?project=#{info.projectId}"
   iframe.classList.add 'active'
   ui.panesElt.appendChild iframe
+
+  window.addEventListener "message", (event) =>
+    return if event.data.type != "chat"
+    return if homeTab.classList.contains 'active'
+
+    homeTab.classList.add 'blink'
+    doNotification = =>
+      notification = new Notification "New chat message in \"#{data.manifest.pub.name}\" project",
+        icon: "/images/icon.png"
+        body: event.data.content
+
+      setTimeout =>
+        notification.close()
+        return
+      , 5000
+      return
+
+    if Notification.permission == 'granted'
+      doNotification()
+    else if Notification.permission != 'denied'
+      Notification.requestPermission (status) =>
+        Notification.permission = status
+        if Notification.permission == 'granted'
+          doNotification()
+        return
+    return
 
   # Tools and settings
   toolsList = document.querySelector('.sidebar .tools ul')
@@ -527,6 +553,7 @@ onTabActivate = (tabElement) =>
   ui.panesElt.querySelector('iframe.active').classList.remove 'active'
 
   tabElement.classList.add 'active'
+  tabElement.classList.remove 'blink'
   assetId = tabElement.dataset.assetId
 
   if assetId?
