@@ -4,7 +4,8 @@ ol.tab-strip
   margin 0
   padding 0
 
-  user-select none
+  *
+    user-select none
 
   > li
     display flex
@@ -43,9 +44,7 @@ ol.tab-strip
 
   > li[data-pane="home"]
     width 40px
-
-    > img
-      flex 1
+    padding-left 4px
 
 @keyframes blink
   0%
