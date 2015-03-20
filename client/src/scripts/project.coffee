@@ -15,16 +15,21 @@ module.exports = (projectId) ->
 
   # Hot-keys
   document.addEventListener 'keydown', (event) =>
-    if event.keyCode == 79 and event.ctrlKey or   # CTRL-O
-    event.keyCode == 116 or event.keyCode == 117  # F5 or F6
+    if event.keyCode == 79 and event.ctrlKey # CTRL-O
       event.preventDefault()
-    return
-  document.addEventListener 'keyup', (event) =>
-    if event.keyCode == 79 and event.ctrlKey and ! document.querySelector(".dialog")?
       openSearchEntryDialog()
 
-    if event.keyCode == 116 then onRunProjectClick()
-    if event.keyCode == 117 then onDebugProjectClick()
+    if event.keyCode == 87 and event.ctrlKey # CTRL-W
+      event.preventDefault()
+      onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
+
+    if event.keyCode == 116 # F5
+      event.preventDefault()
+      onRunProjectClick()
+
+    if event.keyCode == 117  # F6
+      event.preventDefault()
+      onDebugProjectClick()
     return
 
   # Project info
@@ -365,8 +370,11 @@ onEntryActivate = ->
   return
 
 onMessage = (event) ->
-  return if event.data.type != "chat"
+  if event.data.type == "chat" then onMessageChat event.data.content
+  if event.data.type == "hotkey" then onMessageHotKey event.data.content
+  return
 
+onMessageChat = (message) ->
   isHomeTabVisible = ui.homeTab.classList.contains('active')
   return if isHomeTabVisible and ! document.hidden
 
@@ -376,7 +384,7 @@ onMessage = (event) ->
 
   doNotification = =>
     notification = new Notification "New chat message in \"#{data.manifest.pub.name}\" project",
-      icon: "/images/icon.png", body: event.data.content
+      icon: "/images/icon.png", body: message
 
     closeTimeoutId = setTimeout ( => notification.close(); return ), 5000
 
@@ -398,6 +406,13 @@ onMessage = (event) ->
       return
   return
 
+onMessageHotKey = (action) =>
+  switch action
+    when 'searchEntry' then openSearchEntryDialog()
+    when 'closeTab' then onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
+    when 'run' then onRunProjectClick()
+    when 'debug' then onDebugProjectClick()
+  return
 
 onClickToggleNotifications = (event) ->
   disableNotifications = localStorage.getItem('disableNotifications') ? false

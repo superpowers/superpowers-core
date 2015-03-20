@@ -84,6 +84,24 @@ exports.onDisconnected = ->
   document.body.appendChild div
   return
 
+exports.setupHotkeys = ->
+  document.addEventListener 'keydown', (event) =>
+    if event.keyCode == 79 and event.ctrlKey and ! document.querySelector(".dialog")?
+      event.preventDefault()
+      window.parent?.postMessage { type: "hotkey", content: "searchEntry" }, window.location.origin
+
+    if event.keyCode == 87 and event.ctrlKey
+      event.preventDefault()
+      window.parent?.postMessage { type: "hotkey", content: "closeTab" }, window.location.origin
+
+    if event.keyCode == 116
+      event.preventDefault()
+      window.parent?.postMessage { type: "hotkey", content: "run" }, window.location.origin
+    if event.keyCode == 117
+      event.preventDefault()
+      window.parent?.postMessage { type: "hotkey", content: "debug" }, window.location.origin
+    return
+
 exports.getTreeViewInsertionPoint = (treeView) ->
   selectedElt = treeView.selectedNodes[0]
   if selectedElt?
