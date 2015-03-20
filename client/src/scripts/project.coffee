@@ -15,11 +15,16 @@ module.exports = (projectId) ->
 
   # Hot-keys
   document.addEventListener 'keydown', (event) =>
-    if event.keyCode == 79 and event.ctrlKey then event.preventDefault()
+    if event.keyCode == 79 and event.ctrlKey or   # CTRL-O
+    event.keyCode == 116 or event.keyCode == 117  # F5 or F6
+      event.preventDefault()
     return
   document.addEventListener 'keyup', (event) =>
     if event.keyCode == 79 and event.ctrlKey and ! document.querySelector(".dialog")?
       openSearchEntryDialog()
+
+    if event.keyCode == 116 then onRunProjectClick()
+    if event.keyCode == 117 then onDebugProjectClick()
     return
 
   # Project info
