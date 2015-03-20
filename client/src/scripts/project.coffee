@@ -365,13 +365,13 @@ onMessage = (event) ->
   isHomeTabVisible = ui.homeTab.classList.contains('active')
   return if isHomeTabVisible and ! document.hidden
 
-  if ! isHomeTabVisible? then ui.homeTab.classList.add 'blink'
+  if ! isHomeTabVisible then ui.homeTab.classList.add 'blink'
 
   return if localStorage.getItem('disableNotifications')?
 
   doNotification = =>
     notification = new Notification "New chat message in \"#{data.manifest.pub.name}\" project",
-      icon: "/favicon.ico", body: event.data.content
+      icon: "/images/icon.png", body: event.data.content
 
     closeTimeoutId = setTimeout ( => notification.close(); return ), 5000
 
