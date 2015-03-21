@@ -74,7 +74,7 @@ ProjectHub = require './ProjectHub'
 hub = new ProjectHub io, paths.projects, (err) ->
   if err? then SupCore.log "Failed to start server:\n#{err.stack}"; return
 
-  SupCore.log "Loaded #{Object.keys(hub.serversById).length} projects."
+  SupCore.log "Loaded #{Object.keys(hub.serversById).length} projects from #{paths.projects}."
 
   hostname = if config.password.length == 0 then 'localhost' else ''
 
