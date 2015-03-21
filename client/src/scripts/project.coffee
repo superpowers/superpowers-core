@@ -23,6 +23,13 @@ module.exports = (projectId) ->
       event.preventDefault()
       onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
 
+    if event.keyCode == 9 and event.ctrlKey # CTRL-TAB
+      event.preventDefault()
+      if event.shiftKey
+        onActivatePreviousTab()
+      else
+        onActivateNextTab()
+
     if event.keyCode == 116 # F5
       event.preventDefault()
       onRunProjectClick()
@@ -409,9 +416,11 @@ onMessageChat = (message) ->
 onMessageHotKey = (action) =>
   switch action
     when 'searchEntry' then openSearchEntryDialog()
-    when 'closeTab' then onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
-    when 'run' then onRunProjectClick()
-    when 'debug' then onDebugProjectClick()
+    when 'closeTab'    then onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
+    when 'previousTab' then onActivatePreviousTab()
+    when 'nextTab'     then onActivateNextTab()
+    when 'run'         then onRunProjectClick()
+    when 'debug'       then onDebugProjectClick()
   return
 
 onClickToggleNotifications = (event) ->
@@ -632,4 +641,22 @@ onTabClose = (tabElement) =>
   frameElt = ui.panesElt.querySelector("iframe[data-asset-id='#{assetId}']")
   frameElt.parentElement.removeChild frameElt
 
+  return
+
+onActivatePreviousTab = ->
+  activeTabElt = ui.tabStrip.tabsRoot.querySelector('.active')
+  for tabElt, tabIndex in ui.tabStrip.tabsRoot.children
+    if tabElt == activeTabElt
+      newTabIndex = if tabIndex == 0 then ui.tabStrip.tabsRoot.children.length - 1 else tabIndex - 1
+      onTabActivate ui.tabStrip.tabsRoot.children[newTabIndex]
+      return
+  return
+
+onActivateNextTab = ->
+  activeTabElt = ui.tabStrip.tabsRoot.querySelector('.active')
+  for tabElt, tabIndex in ui.tabStrip.tabsRoot.children
+    if tabElt == activeTabElt
+      newTabIndex = if tabIndex == ui.tabStrip.tabsRoot.children.length - 1 then 0 else tabIndex + 1
+      onTabActivate ui.tabStrip.tabsRoot.children[newTabIndex]
+      return
   return
