@@ -3,14 +3,14 @@
     .project-management
       h1.project-name
       .project-buttons
-        button(disabled).run Run
-        button(disabled).debug Debug
+        button(title="(F5)",disabled).run Run
+        button(title="(F6)",disabled).debug Debug
 
     .entries-buttons
       div.create
         button(disabled).new-asset New Asset
         button(disabled).new-folder New Folder
-        button(disabled).search Search
+        button(title="(Ctrl+O)",disabled).search Search
       div.edit
         button(disabled).open-entry.single.asset-only Open
         button(disabled).rename-entry.single Rename
