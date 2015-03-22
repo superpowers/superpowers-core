@@ -9,6 +9,10 @@ module.exports = ->
   clone = document.importNode template.content, true
   document.body.appendChild clone
 
+  port = window.location.port
+  if port.length == 0 then port = "80"
+  document.querySelector('.server-name').textContent = "#{window.location.hostname} on port #{port}"
+
   ui.projectsTreeView = new TreeView document.querySelector('.projects-tree-view'), onProjectsTreeViewDrop
   ui.projectsTreeView.on 'activate', onProjectActivate
 

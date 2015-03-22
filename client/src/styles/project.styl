@@ -1,85 +1,153 @@
 &
   display flex
 
-h1
-  font-size 1.5em
-
 .sidebar
-  width 300px
+  width 280px
   display flex
   flex-flow column
-  background #eee
-  border-right 1px solid #aaa
+  background #f0f0f0
+  border-right 1px solid rgba(0,0,0,0.3)
+  color #444
 
-  .project-management
-    display flex
-    align-items center
-    padding 0.5em
+  button
+    opacity 0.5
+    cursor pointer
 
-    .project-name
-      flex 1
-      margin 0
-      text-overflow ellipsis
-      white-space nowrap
-      overflow-x hidden
+    &:hover
+      opacity 1
 
-  .entries-buttons
+    &:disabled
+      opacity 0.2
+      cursor default
+
+.project-management
+  display flex
+  align-items center
+  background rgba(0,0,0,0.65)
+  color #eee
+  line-height 1
+
+.project-name
+  font-weight bold
+  padding 1em
+  padding-right 0
+  -webkit-app-region drag
+  flex 1
+  text-overflow ellipsis
+  white-space nowrap
+  overflow-x hidden
+
+.project-buttons
+  margin 0 0.5em
+
+  button
+    border none
+    background-color transparent
+    background-position center center
+    background-repeat no-repeat
+    width 30px
+    height 30px
+
+  .debug
+    background-image url(images/project/debug.svg)
+  .run
+    background-image url(images/project/run.svg)
+
+.entries-buttons
+  display flex
+  background rgba(0,0,0,0.05)
+  border-bottom 1px solid #acacac
+
+  button
+    flex 1
+    height 35px
+    border none
+    background-color transparent
+    background-position center center
+    background-repeat no-repeat
+
+    &:hover
+      background-color rgba(0,0,0,0.1)
+
+    &:active
+      background-color #fff
+
+  .new-asset
+    background-image url(images/entries/new-asset.svg)
+  .new-folder
+    background-image url(images/entries/new-folder.svg)
+  .rename-entry
+    background-image url(images/entries/rename-entry.svg)
+  .duplicate-entry
+    background-image url(images/entries/duplicate-entry.svg)
+  .trash-entry
+    background-image url(images/entries/trash-entry.svg)
+  .search
+    background-image url(images/entries/search.svg)
+
+.entries-tree-view
+  flex 1
+  position relative
+  overflow-y auto
+
+  .connecting
+    position absolute
+    top 0
+    bottom 0
+    left 0
+    right 0
+    z-index 1
     display flex
     flex-flow column
+    align-items center
+    justify-content center
+    text-align center
+    text-transform uppercase
+    opacity 0.5
 
-    > div
-      display flex
-
-    button
-      flex 1
-      font-size smaller
-      white-space nowrap
-
-  .entries-tree-view
-    border-top 1px solid #aaa
-    flex 5
-    position relative
-    background #fff
-    overflow-y auto
-
-    .connecting
-      position absolute
-      top 0
-      bottom 0
-      left 0
-      right 0
-      z-index 1
-      display flex
-      flex-flow column
-      align-items center
-      justify-content center
-      text-align center
-      text-transform uppercase
-      opacity 0.5
-
-    .tree
-      position absolute
-
-    .name
-      white-space pre
-      flex 1
-
-    .diagnostics span
-      background rgba(0,0,0,0.2)
-      color rgba(0,0,0,0.8)
-      font-size 80%
-
-  .tools
-    border-top 1px solid #aaa
-    flex 1
-    overflow-y auto
-    ul
-      list-style none
-      margin 0
-      padding-left 0.5em
+  .tree
+    padding 0 0 2em 0
+    position absolute
 
     li
-      margin 0.5em 0
+      color #444
+
+      &.group
+        color #666
+
+      &:not(.selected):hover
+        background #e0e0e0
+
+      &.group > .toggle
+        opacity 0.5
+        background url(/images/treeView/group-open-dark.svg) center no-repeat
+      &.group.collapsed > .toggle
+        background-image url(/images/treeView/group-closed-dark.svg)
+
+  .name
+    white-space pre
+    flex 1
+
+  .diagnostics span
+    background rgba(0,0,0,0.2)
+    color rgba(0,0,0,0.8)
+    font-size 80%
+
+.tools
+  background rgba(0,0,0,0.1)
+  overflow-y auto
+  border-top 1px solid #acacac
+
+  ul
+    margin 0
+    padding 0
+    list-style none
+
+  li
+    padding 1em
+
+  a
+    color #00f
 
 .main
   flex 1
@@ -88,11 +156,8 @@ h1
 
   .top
     display flex
-
-    .controls
-      display flex
-      background #eee
-      border-bottom: 1px solid #aaa;
+    background #eee
+    border-bottom 1px solid #aaa
 
   .tabs-bar
     flex 1

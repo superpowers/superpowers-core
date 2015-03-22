@@ -60,7 +60,7 @@ module.exports = (projectId) ->
   document.querySelector('.entries-buttons .new-asset').addEventListener 'click', onNewAssetClick
   document.querySelector('.entries-buttons .new-folder').addEventListener 'click', onNewFolderClick
   document.querySelector('.entries-buttons .search').addEventListener 'click', onSearchClick
-  document.querySelector('.entries-buttons .open-entry').addEventListener 'click', onOpenEntryClick
+  # document.querySelector('.entries-buttons .open-entry').addEventListener 'click', onOpenEntryClick
   document.querySelector('.entries-buttons .rename-entry').addEventListener 'click', onRenameEntryClick
   document.querySelector('.entries-buttons .duplicate-entry').addEventListener 'click', onDuplicateEntryClick
   document.querySelector('.entries-buttons .trash-entry').addEventListener 'click', onTrashEntryClick
@@ -75,10 +75,10 @@ module.exports = (projectId) ->
   toggleNotificationsButton.addEventListener 'click', onClickToggleNotifications
 
   if localStorage.getItem('disableNotifications')?
-    toggleNotificationsButton.textContent = '-o-'
+    toggleNotificationsButton.classList.add 'disabled'
     toggleNotificationsButton.title = "Click to enable notifications"
   else
-    toggleNotificationsButton.textContent = '(o)'
+    toggleNotificationsButton.classList.remove 'disabled'
     toggleNotificationsButton.title = 'Click to disable notifications'
 
 
@@ -362,7 +362,7 @@ onEntryDrop = (dropInfo, orderedNodes) ->
   false
 
 updateSelectedEntry = ->
-  for button in document.querySelectorAll('.entries-buttons .edit button')
+  for button in document.querySelectorAll('.entries-buttons button.edit')
     disabled = ui.entriesTreeView.selectedNodes.length == 0 or
       (button.classList.contains('single') and ui.entriesTreeView.selectedNodes.length != 1) or
       (button.classList.contains('asset-only') and ui.entriesTreeView.selectedNodes[0].classList.contains('group'))
@@ -429,11 +429,11 @@ onClickToggleNotifications = (event) ->
 
   if ! disableNotifications
     localStorage.removeItem('disableNotifications')
-    event.target.textContent = '(o)'
+    event.target.classList.remove 'disabled'
     event.target.title = 'Click to disable notifications'
   else
     localStorage.setItem('disableNotifications', 'true')
-    event.target.textContent = '-o-'
+    event.target.classList.add 'disabled'
     event.target.title = 'Click to enable notifications'
   return
 

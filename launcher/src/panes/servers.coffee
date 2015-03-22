@@ -70,7 +70,7 @@ onServerActivate = ->
     "min_width": 800,
     "min_height": 480,
     "toolbar": false,
-    "frame": true
+    "frame": false
   return
 
 serversTreeView = new TreeView document.querySelector('.servers-tree-view')

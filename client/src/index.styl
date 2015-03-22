@@ -3,6 +3,10 @@
 
 body
   display flex
+  font-family 'Roboto'
+
+  &:not(.maximized)
+    border 1px solid #666
 
   > div
     flex 1
@@ -12,3 +16,13 @@ body
 
   > .project
     @import 'styles/project'
+
+  .controls
+    @import 'styles/controls'
+
+body.browser
+  border none
+
+  .controls
+    .minimize, .maximize, .close
+      display none

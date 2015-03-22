@@ -1,21 +1,19 @@
 .project
   .sidebar
     .project-management
-      h1.project-name
+      .project-name
       .project-buttons
-        button(title="(F5)",disabled).run Run
-        button(title="(F6)",disabled).debug Debug
+        button(title="Debug (F6)",disabled).debug
+        button(title="Run (F5)",disabled).run
 
     .entries-buttons
-      div.create
-        button(disabled).new-asset New Asset
-        button(disabled).new-folder New Folder
-        button(title="(Ctrl+O)",disabled).search Search
-      div.edit
-        button(disabled).open-entry.single.asset-only Open
-        button(disabled).rename-entry.single Rename
-        button(disabled).duplicate-entry.single.asset-only Duplicate
-        button(disabled).trash-entry Trash
+      button(title="New asset",disabled).new-asset
+      button(title="New folder",disabled).new-folder
+      // button(disabled).open-entry.single.asset-only Open
+      button(title="Rename",disabled).rename-entry.single.edit
+      button(title="Duplicate",disabled).duplicate-entry.single.asset-only.edit
+      button(title="Trash",disabled).trash-entry.edit
+      button(title="Search (Ctrl+O)",disabled).search
     .entries-tree-view
       .connecting
         div Connecting...
@@ -25,9 +23,8 @@
     .top
       .tabs-bar
       .controls
-        button.toggle-notifications ?o?
-        //
-          button _
-          button o
-          button X
+        button.toggle-notifications
+        button.minimize
+        button.maximize
+        button.close
     .panes
