@@ -454,9 +454,6 @@ openEntry = (id) ->
   # Just toggle folders
   if ! entry.type? then ui.entriesTreeView.selectedNodes[0].classList.toggle 'collapsed'; return
 
-  ui.tabStrip.tabsRoot.querySelector('.active').classList.remove 'active'
-  ui.panesElt.querySelector('iframe.active').classList.remove 'active'
-
   tab = ui.tabStrip.tabsRoot.querySelector("li[data-asset-id='#{id}']")
   iframe = ui.panesElt.querySelector("iframe[data-asset-id='#{id}']")
 
@@ -468,11 +465,8 @@ openEntry = (id) ->
     iframe.src = "/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{id}"
     iframe.dataset.assetId = id
     ui.panesElt.appendChild iframe
-    iframe.contentWindow.focus()
 
-  tab.classList.add 'active'
-  iframe.classList.add 'active'
-
+  onTabActivate tab
   return
 
 onNewAssetClick = ->
@@ -623,9 +617,13 @@ onTabActivate = (tabElement) =>
   assetId = tabElement.dataset.assetId
 
   if assetId?
-    ui.panesElt.querySelector("iframe[data-asset-id='#{assetId}']").classList.add 'active'
+    tabIframe = ui.panesElt.querySelector("iframe[data-asset-id='#{assetId}']")
   else
-    ui.panesElt.querySelector("iframe[data-name='#{tabElement.dataset.pane}']").classList.add 'active'
+    tabIframe = ui.panesElt.querySelector("iframe[data-name='#{tabElement.dataset.pane}']")
+
+  tabIframe.classList.add 'active'
+  tabIframe.contentWindow.focus()
+  tabIframe.contentWindow.postMessage { type: "activate" }, window.location.origin
   return
 
 onTabClose = (tabElement) =>
