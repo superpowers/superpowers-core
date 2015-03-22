@@ -86,11 +86,11 @@ exports.onDisconnected = ->
 
 exports.setupHotkeys = ->
   document.addEventListener 'keydown', (event) =>
-    if event.keyCode == 79 and event.ctrlKey and ! document.querySelector(".dialog")? # CTRL-O
+    if event.keyCode == 79 and (event.ctrlKey or event.metaKey) and ! document.querySelector(".dialog")? # CTRL-O
       event.preventDefault()
       window.parent?.postMessage { type: "hotkey", content: "searchEntry" }, window.location.origin
 
-    if event.keyCode == 87 and event.ctrlKey # CTRL-W
+    if event.keyCode == 87 and (event.ctrlKey or event.metaKey) # CTRL-W
       event.preventDefault()
       window.parent?.postMessage { type: "hotkey", content: "closeTab" }, window.location.origin
 
@@ -101,10 +101,10 @@ exports.setupHotkeys = ->
       else
         window.parent?.postMessage { type: "hotkey", content: "nextTab" }, window.location.origin
 
-    if event.keyCode == 116 # F5
+    if event.keyCode == 116 or (event.keyCode == 80 and event.metaKey) # F5 or Cmd-P
       event.preventDefault()
       window.parent?.postMessage { type: "hotkey", content: "run" }, window.location.origin
-    if event.keyCode == 117 # F6
+    if event.keyCode == 117 or (event.keyCode == 80 and event.metaKey and event.shiftKey) # F6 or Cmd-Shift-P
       event.preventDefault()
       window.parent?.postMessage { type: "hotkey", content: "debug" }, window.location.origin
     return

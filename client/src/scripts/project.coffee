@@ -15,11 +15,11 @@ module.exports = (projectId) ->
 
   # Hot-keys
   document.addEventListener 'keydown', (event) =>
-    if event.keyCode == 79 and event.ctrlKey # CTRL-O
+    if event.keyCode == 79 and (event.ctrlKey or event.metaKey) # CTRL-O
       event.preventDefault()
       openSearchEntryDialog()
 
-    if event.keyCode == 87 and event.ctrlKey # CTRL-W
+    if event.keyCode == 87 and (event.ctrlKey or event.metaKey) # CTRL-W
       event.preventDefault()
       onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
 
@@ -30,11 +30,11 @@ module.exports = (projectId) ->
       else
         onActivateNextTab()
 
-    if event.keyCode == 116 # F5
+    if event.keyCode == 116 or (event.keyCode == 80 and event.metaKey) # F5 or Cmd-P
       event.preventDefault()
       onRunProjectClick()
 
-    if event.keyCode == 117  # F6
+    if event.keyCode == 117 or (event.keyCode == 80 and event.metaKey and event.shiftKey) # F6 or Cmd-Shift-P
       event.preventDefault()
       onDebugProjectClick()
     return
