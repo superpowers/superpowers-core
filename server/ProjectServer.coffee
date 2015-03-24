@@ -48,23 +48,49 @@ module.exports = class ProjectServer
         callback(); return
 
     loadInternals = (callback) =>
-      fs.readFile path.join(@projectPath, 'internals.json'), { encoding: 'utf8' }, (err, internalsJSON) =>
-        if err? then callback err; return
+      internalsData = null
 
-        try internalsData = JSON.parse internalsJSON
-        catch err then callback err; return
+      async.series [
 
-        @data.internals = new SupCore.data.Internals internalsData
-        @data.internals.on 'change', @_onInternalsChanged
+        (cb) =>
+          fs.readFile path.join(@projectPath, 'internals.json'), { encoding: 'utf8' }, (err, internalsJSON) =>
+            if err?
+              if err.code != 'ENOENT' then cb err; return
+              internalsData = nextBuildId: 0, nextEntryId: null
+            else
+              try internalsData = JSON.parse internalsJSON
+              catch err then cb err; return
 
-        callback(); return
+            cb(); return
+
+        (cb) =>
+          fs.readdir path.join(@projectPath, 'builds'), (err, entries) ->
+            if err? and err.code != 'ENOENT' then cb err; return
+
+            if entries?
+              for entry in entries
+                entryBuildId = parseInt(entry)
+                continue if Number.isNaN(entryBuildId)
+                internalsData.nextBuildId = Math.max entryBuildId + 1, internalsData.nextBuildId
+
+            cb(); return
+
+        ], (err) =>
+          if err? then callback err; return
+
+          @data.internals = new SupCore.data.Internals internalsData
+          @data.internals.on 'change', @_onInternalsChanged
+
+          callback(); return
 
     loadMembers = (callback) =>
       fs.readFile path.join(@projectPath, 'members.json'), { encoding: 'utf8' }, (err, membersJSON) =>
-        if err? then callback err; return
-
-        try membersData = JSON.parse membersJSON
-        catch err then callback err; return
+        if err?
+          if err.code != 'ENOENT' then callback err; return
+          membersData = []
+        else
+          try membersData = JSON.parse membersJSON
+          catch err then callback err; return
 
         try schemas.validate membersData, 'projectMembers'
         catch err then callback err; return
@@ -86,6 +112,10 @@ module.exports = class ProjectServer
 
         @data.entries = new SupCore.data.Entries entriesData, @data.internals.pub.nextEntryId
         @data.entries.on 'change', @_onEntriesChanged
+
+        # nextEntryId might be null if internals.json could be found
+        if ! @data.internals.pub.nextEntryId?
+          @data.internals.pub.nextEntryId = @data.entries.nextId
 
         callback(); return
 

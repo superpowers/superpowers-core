@@ -12,6 +12,16 @@ express = require 'express'
 app = express()
 app.use '/', express.static "#{__dirname}/../public"
 
+path = require 'path'
+app.get '/builds/:projectId/:buildId/*', (req, res) ->
+  projectServer = hub.serversById[req.params.projectId]
+  if ! projectServer? then res.status(404).end("No such project"); return
+  res.sendFile path.join(projectServer.projectPath, "builds", req.params.buildId, req.params[0]); return
+
+app.use (err, req, res, next) ->
+  if err.status == 404 then res.status(404).end("File not found"); return
+  next(); return
+
 httpServer = require('http').createServer app
 io = require('socket.io') httpServer, { transports: ['websocket'] }
 

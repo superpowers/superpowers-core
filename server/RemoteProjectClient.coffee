@@ -237,15 +237,14 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     #@server.log "Building project..."
 
     buildId = @server.data.internals.pub.nextBuildId
-    @server.data.internals.setProperty 'nextBuildId', @server.data.internals.pub.nextBuildId + 1
+    @server.data.internals.setProperty 'nextBuildId', buildId + 1
 
-    projectBuildsPath = "#{__dirname}/../public/builds/#{@server.data.manifest.pub.id}/"
+    projectBuildsPath = "#{@server.projectPath}/builds/"
     buildPath = projectBuildsPath + buildId
 
     game = name: @server.data.manifest.pub.name, assets: @server.data.entries.getForStorage()
 
-    try fs.mkdirSync "#{__dirname}/../public/builds"
-    try fs.mkdirSync "#{__dirname}/../public/builds/#{@server.data.manifest.pub.id}"
+    try fs.mkdirSync projectBuildsPath
     try fs.mkdirSync buildPath
     catch err then callback "Could not create folder for build #{buildId}"; return
 
