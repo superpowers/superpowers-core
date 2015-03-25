@@ -69,7 +69,7 @@ for pluginAuthor in fs.readdirSync pluginsPath
         title = editorName
         try title = JSON.parse(fs.readFileSync("#{pluginPath}/public/editors/#{editorName}/locales/en/main.json", encoding: 'utf8')).title
 
-        if SupCore.data.assetPlugins[editorName]?
+        if SupCore.data.assetClasses[editorName]?
           pluginsInfo.editorsByAssetType[editorName] = {
             title: { en: title }
             pluginPath: "#{pluginAuthor}/#{pluginName}"

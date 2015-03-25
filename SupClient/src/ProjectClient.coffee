@@ -76,7 +76,7 @@ module.exports = class ProjectClient
     subscribers = @subscribersByAssetId[assetId]
     return if ! subscribers?
 
-    asset = @assetsById[assetId] = new SupCore.data.assetPlugins[assetType] assetData
+    asset = @assetsById[assetId] = new SupCore.data.assetClasses[assetType] assetData
 
     for subscriber in subscribers
       subscriber.onAssetReceived assetId, asset

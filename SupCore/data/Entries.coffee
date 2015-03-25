@@ -23,7 +23,7 @@ module.exports = class Entries extends SupData.base.TreeById
       return
 
   add: (node, parentId, index, callback) ->
-    if node.type? and ! SupData.assetPlugins[node.type]?
+    if node.type? and ! SupData.assetClasses[node.type]?
       callback "Invalid asset type"; return
 
     super node, parentId, index, (err, actualIndex) =>

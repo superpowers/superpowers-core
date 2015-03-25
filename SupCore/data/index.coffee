@@ -31,21 +31,21 @@ exports.ensureUniqueName = (id, name, siblings) ->
 
   candidateName
 
-exports.assetPlugins = {}
-exports.componentConfigPlugins = {}
+exports.assetClasses = {}
+exports.componentConfigClasses = {}
 
-exports.addAssetPlugin = (name, plugin) ->
-  if exports.assetPlugins[name]?
-    console.log "SupCore.data.addAssetPlugin: Tried to load two or more plugins named \"#{name}\""
+exports.registerAssetClass = (name, assetClass) ->
+  if exports.assetClasses[name]?
+    console.log "SupCore.data.registerAssetClass: Tried to register two or more asset classes named \"#{name}\""
     return
 
-  exports.assetPlugins[name] = plugin
+  exports.assetClasses[name] = assetClass
   return
 
-exports.addComponentConfigPlugin = (name, plugin) ->
-  if exports.componentConfigPlugins[name]?
-    console.log "SupCore.data.addComponentConfigPlugin: Tried to load two or more plugins named \"#{name}\""
+exports.registerComponentConfigClass = (name, configClass) ->
+  if exports.componentConfigClasses[name]?
+    console.log "SupCore.data.registerComponentConfigClass: Tried to load two or more component configuration classes named \"#{name}\""
     return
 
-  exports.componentConfigPlugins[name] = plugin
+  exports.componentConfigClasses[name] = configClass
   return

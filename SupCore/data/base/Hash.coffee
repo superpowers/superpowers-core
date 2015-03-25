@@ -26,7 +26,7 @@ module.exports = class Hash extends EventEmitter
 
   client_setProperty: (path, value) ->
     parts = path.split '.'
-    
+
     obj = @pub
     obj = obj[part] for part in parts.slice(0, parts.length - 1)
     obj[parts[parts.length - 1]] = value

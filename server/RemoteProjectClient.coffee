@@ -78,7 +78,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
         callback? null, entry.id
 
       if entry.type?
-        assetClass = SupCore.data.assetPlugins[entry.type]
+        assetClass = SupCore.data.assetClasses[entry.type]
         asset = new assetClass
         asset.init()
         # FIXME: Use a nicer path than the asset id?
@@ -217,7 +217,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
 
     cmd = args[0]
     cmdArgs = args.slice(1)
-    commandMethod = SupCore.data.assetPlugins[entry.type].prototype["server_#{cmd}"]
+    commandMethod = SupCore.data.assetClasses[entry.type].prototype["server_#{cmd}"]
     if ! commandMethod? then callback? "Invalid command"; return
     # if ! callback? then @server.log "Ignoring edit:assets command, missing a callback"; return
 
