@@ -20,8 +20,6 @@ module.exports = class Room extends SupData.base.Hash
 
     if @pub? then @users = new SupData.RoomUsers @pub.users
 
-  destroy: -> @removeAllListeners(); return
-
   load: (roomPath) ->
     fs.readFile path.join("#{roomPath}.json"), { encoding: 'utf8' }, (err, json) =>
       if err? and err.code != 'ENOENT' then throw err
@@ -35,6 +33,8 @@ module.exports = class Room extends SupData.base.Hash
       @emit 'load'
       return
     return
+
+  unload: -> @removeAllListeners(); return
 
   save: (roomPath, callback) ->
     users = @pub.users
