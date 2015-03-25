@@ -336,6 +336,6 @@ module.exports = class ProjectServer
       @io.in('sub:entries').emit 'remove:dependencies', assetId, removedDependencyEntryIds
 
     if assetDependencies.length == 0
-      delete data.entries.dependenciesByAssetId[assetId]
+      delete @data.entries.dependenciesByAssetId[assetId]
 
     return
