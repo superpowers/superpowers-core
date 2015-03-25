@@ -13,6 +13,7 @@ module.exports = class ProjectServer
     @data =
       assets: new SupCore.data.Assets @
       rooms: new SupCore.data.Rooms @
+      resources: new SupCore.data.Resources @
 
     @scheduledSaveCallbacks = {}
     @nextClientId = 0
@@ -20,11 +21,14 @@ module.exports = class ProjectServer
 
     @data.assets.on 'itemLoad', @_onAssetLoaded
     @data.rooms.on 'itemLoad', @_onRoomLoaded
+    @data.resources.on 'itemLoad', @_onResourceLoaded
 
     migrate = (callback) =>
-      # Old projects didn't have a rooms folder
-      fs.mkdir path.join(@projectPath, 'rooms'), (err) =>
-        callback(); return
+      # Old projects didn't have a rooms or resources folder
+      async.series [
+        (cb) => fs.mkdir path.join(@projectPath, 'rooms'), (err) => cb(); return
+        (cb) => fs.mkdir path.join(@projectPath, 'resources'), (err) => cb(); return
+      ], callback
       return
 
     loadManifest = (callback) =>
@@ -185,6 +189,13 @@ module.exports = class ProjectServer
     item.on 'change', => @_scheduleSave 60, "rooms:#{roomId}", saveCallback; return
     return
 
+  _onResourceLoaded: (resourceId, item) =>
+    console.log "#{resourceId} has been loaded"
+    resourcePath = path.join(@projectPath, "resources/#{resourceId}")
+    saveCallback = item.save.bind(item, resourcePath)
+    item.on 'change', => @_scheduleSave 60, "resources:#{resourceId}", saveCallback; return
+    return
+
   _addSocket: (socket) =>
     client = new RemoteProjectClient @, @nextClientId++, socket
     @clientsBySocketId[socket.id] = client
@@ -242,7 +253,7 @@ module.exports = class ProjectServer
 
   _saveEntries: (callback) =>
     entriesJSON = JSON.stringify @data.entries.getForStorage(), null, 2
-    fs.writeFile path.join(@projectPath, 'entries.json'), entriesJSON, callback 
+    fs.writeFile path.join(@projectPath, 'entries.json'), entriesJSON, callback
     return
 
   _setDiagnostic: (assetId, diagnosticId, type, data) =>

@@ -79,12 +79,11 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
 
       if entry.type?
         assetClass = SupCore.data.assetClasses[entry.type]
-        asset = new assetClass
-        asset.init()
-        # FIXME: Use a nicer path than the asset id?
-        assetPath = path.join(@server.projectPath, "assets/#{entry.id}")
-        fs.mkdirSync assetPath
-        asset.save assetPath, onEntryCreated
+        asset = new assetClass null, @server.data, entry.type.split('.')[0]
+        asset.init =>
+          assetPath = path.join(@server.projectPath, "assets/#{entry.id}")
+          fs.mkdirSync assetPath
+          asset.save assetPath, onEntryCreated
       else
         onEntryCreated()
 

@@ -3,26 +3,26 @@ Hash = require './Hash'
 path = require 'path'
 fs = require 'fs'
 
-module.exports = class Asset extends Hash
+module.exports = class Resource extends Hash
 
   constructor: (pub, schema, @serverData) ->
     super pub, schema
     @setup() if pub?
 
-  # OVERRIDE: Make sure to call super(callback). Called when creating a new asset
+  # OVERRIDE: Make sure to call super(callback). Called when creating a new resource
   init: (callback) -> @setup(); callback(); return
 
-  # OVERRIDE: Called when creating/loading an asset
+  # OVERRIDE: Called when creating/loading a resource
   setup: ->
 
-  # OVERRIDE: Called when loading a project
-  # Check for any error/warning/info and @emit 'setDiagnostic' as required
-  # Also if the asset depends on others, @emit 'addDependencies' with a list of entry IDs
-  restore: ->
-
   load: (assetPath) ->
-    fs.readFile path.join(assetPath, "asset.json"), { encoding: 'utf8' }, (err, json) =>
-      if err? then throw err
+    fs.readFile path.join(assetPath, "resource.json"), { encoding: 'utf8' }, (err, json) =>
+      if err?
+        if err.code == 'ENOENT'
+          @init => @emit 'load'
+          return
+
+        throw err
 
       @pub = JSON.parse(json)
       @setup()
@@ -34,7 +34,10 @@ module.exports = class Asset extends Hash
 
   save: (assetPath, callback) ->
     json = JSON.stringify @pub, null, 2
-    fs.writeFile path.join(assetPath, "asset.json"), json, { encoding: 'utf8' }, callback
+
+    fs.mkdir path.join(assetPath), (err) ->
+      if err? and err.code != 'EEXIST' then callback err; return
+      fs.writeFile path.join(assetPath, "resource.json"), json, { encoding: 'utf8' }, callback
     return
 
   server_setProperty: (client, path, value, callback) ->

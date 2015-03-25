@@ -9,6 +9,7 @@ exports.Diagnostics = require './Diagnostics'
 exports.Entries = require './Entries'
 
 exports.Assets = require './Assets'
+exports.Resources = require './Resources'
 
 exports.Rooms = require './Rooms'
 exports.Room = require './Room'
@@ -33,6 +34,7 @@ exports.ensureUniqueName = (id, name, siblings) ->
 
 exports.assetClasses = {}
 exports.componentConfigClasses = {}
+exports.resourceClasses = {}
 
 exports.registerAssetClass = (name, assetClass) ->
   if exports.assetClasses[name]?
@@ -44,8 +46,17 @@ exports.registerAssetClass = (name, assetClass) ->
 
 exports.registerComponentConfigClass = (name, configClass) ->
   if exports.componentConfigClasses[name]?
-    console.log "SupCore.data.registerComponentConfigClass: Tried to load two or more component configuration classes named \"#{name}\""
+    console.log "SupCore.data.registerComponentConfigClass: Tried to register two or more component configuration classes named \"#{name}\""
     return
 
   exports.componentConfigClasses[name] = configClass
+  return
+
+# This registers a plugin *resource* (see SupCore.data.Resources), not just a resource class, hence the name
+exports.registerResource = (name, resourceClass) ->
+  if exports.resourceClasses[name]?
+    console.log "SupCore.data.registerResource: Tried to register two or more plugin resources named \"#{name}\""
+    return
+
+  exports.resourceClasses[name] = resourceClass
   return

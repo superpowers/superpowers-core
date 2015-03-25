@@ -3,6 +3,7 @@ exports.ListById = require './ListById'
 exports.TreeById = require './TreeById'
 exports.Dictionary = require './Dictionary'
 exports.Asset = require './Asset'
+exports.Resource = require './Resource'
 exports.ComponentConfig = require './ComponentConfig'
 
 exports.getRuleViolation = (value, rule, create=false) ->
