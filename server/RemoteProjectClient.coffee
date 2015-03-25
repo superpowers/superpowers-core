@@ -141,8 +141,30 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
   _onTrashEntry: (id, callback) =>
     return if ! @errorIfCant 'editAssets', callback
 
-    dependentAssetIds = @server.data.entries.byId[id]?.dependentAssetIds
+    entry = @server.data.entries.byId[id]
+    dependentAssetIds = entry?.dependentAssetIds
 
+    # Clear all dependencies for this entry
+    dependencies = @server.data.entries.dependenciesByAssetId[id]
+    if dependencies?
+      removedDependencyEntryIds = []
+      for depId in dependencies
+        depId = parseInt(depId) if typeof depId == 'string'
+        depEntry = @server.data.entries.byId[depId]
+        if ! depEntry? then continue
+
+        dependentAssetIds = depEntry.dependentAssetIds
+        index = dependentAssetIds.indexOf(id)
+        if index != -1
+          dependentAssetIds.splice(index, 1)
+          removedDependencyEntryIds.push depId
+
+      if removedDependencyEntryIds.length > 0
+        @server.io.in('sub:entries').emit 'remove:dependencies', id, dependencies
+
+      delete @server.data.entries.dependenciesByAssetId[id]
+
+    # Delete the entry
     @server.data.entries.remove id, (err) =>
       if err? then callback? err; return
 
@@ -153,11 +175,14 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
       @server.io.in(roomName).emit 'trash:assets', id
 
       for socketId of @server.io.adapter.rooms[roomName]
+        console.log "#{socketId} is in #{roomName} which was just trashed"
         remoteClient = @server.clientsBySocketId[socketId]
         remoteClient.socket.leave roomName
+        console.log "subscriptions: #{remoteClient.subscriptions}"
+        console.log "index: #{remoteClient.subscriptions.indexOf(roomName)}"
         remoteClient.subscriptions.splice remoteClient.subscriptions.indexOf(roomName), 1
 
-      # Generate diagnostics for any assets using this entry
+      # Generate diagnostics for any assets depending on this entry
       if dependentAssetIds?
         for dependentAssetId in dependentAssetIds
           missingAssetIds = [ id ]

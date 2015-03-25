@@ -12,6 +12,7 @@ module.exports = class Entries extends SupData.base.TreeById
     super pub, @constructor.schema, nextId
 
     @diagnosticsByEntryId = {}
+    @dependenciesByAssetId = {}
 
     @walk (node, parentNode) =>
       return if ! node.type?

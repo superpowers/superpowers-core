@@ -277,7 +277,11 @@ module.exports = class ProjectServer
     addedDependencyEntryIds = []
     missingAssetIds = []
 
+    assetDependencies = @data.entries.dependenciesByAssetId[assetId] ?= []
+
     for depId in dependencyEntryIds
+      assetDependencies.push depId
+
       depId = parseInt(depId) if typeof depId == 'string'
       depEntry = @data.entries.byId[depId]
       if ! depEntry? then missingAssetIds.push depId; continue
@@ -302,7 +306,11 @@ module.exports = class ProjectServer
     removedDependencyEntryIds = []
     missingAssetIds = []
 
+    assetDependencies = @data.entries.dependenciesByAssetId[assetId] ?= []
+
     for depId in dependencyEntryIds
+      assetDependencies.splice assetDependencies.indexOf(depId), 1
+
       depId = parseInt(depId) if typeof depId == 'string'
       depEntry = @data.entries.byId[depId]
       if ! depEntry? then missingAssetIds.push depId; continue
@@ -326,5 +334,8 @@ module.exports = class ProjectServer
 
     if removedDependencyEntryIds.length > 0
       @io.in('sub:entries').emit 'remove:dependencies', assetId, removedDependencyEntryIds
+
+    if assetDependencies.length == 0
+      delete data.entries.dependenciesByAssetId[assetId]
 
     return
