@@ -17,5 +17,6 @@ cd ../tweenjs && npm install && gulp
 cd ../arcadePhysics2D && gulp
 cd ../model && gulp
 cd ../cannonjs && npm install && gulp
+cd ../p2js && npm install && gulp
 cd ../home && gulp
 popd

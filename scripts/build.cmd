@@ -58,6 +58,10 @@ cd ../cannonjs
 call npm install
 call gulp
 
+cd ../p2js
+call npm install
+call gulp
+
 cd ../home
 call gulp
 
