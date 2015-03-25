@@ -9,8 +9,6 @@ module.exports = class Asset extends Hash
     super pub, schema
     @setup() if pub?
 
-  destroy: -> @removeAllListeners(); return
-
   # OVERRIDE: Make sure to call super(). Called when creating a new asset
   init: -> @setup(); return
 
@@ -31,6 +29,8 @@ module.exports = class Asset extends Hash
       @emit 'load'
       return
     return
+
+  unload: -> @removeAllListeners(); return
 
   save: (assetPath, callback) ->
     json = JSON.stringify @pub, null, 2

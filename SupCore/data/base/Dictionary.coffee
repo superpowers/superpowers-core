@@ -52,7 +52,7 @@ module.exports = class Dictionary extends EventEmitter
 
   _unload: (id) ->
     #console.log "Unloading #{id}"
-    @byId[id].destroy()
+    @byId[id].unload()
     delete @byId[id]; delete @unloadTimeoutsById[id]; return
 
   releaseAll: (id) ->
