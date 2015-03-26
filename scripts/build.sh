@@ -18,5 +18,6 @@ cd ../arcadePhysics2D && gulp
 cd ../model && gulp
 cd ../cannonjs && npm install && gulp
 cd ../p2js && npm install && gulp
+cd ../rngjs && gulp
 cd ../home && gulp
 popd

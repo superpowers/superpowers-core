@@ -62,6 +62,9 @@ cd ../p2js
 call npm install
 call gulp
 
+cd ../rngjs
+call gulp
+
 cd ../home
 call gulp
 
