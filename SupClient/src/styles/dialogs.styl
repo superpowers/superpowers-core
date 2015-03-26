@@ -13,7 +13,6 @@
     margin auto
     padding 10px
     width 300px
-    height 120px
     display flex
     flex-flow column
     box-shadow 0 0 20px rgba(0,0,0,0.2)
@@ -31,17 +30,20 @@
 
     button
       margin 0 5px 0 5px
-      flex 1
       align-self flex-end
 
   .filter-parent
+    flex 1
     margin-top 5px
-    height 80%
+    height 80px
     overflow-y auto
 
     > div
       display block
       height 20px
+      overflow-x hidden
+      text-overflow ellipsis
+      white-space nowrap
 
     .selected
       background-color gainsboro
