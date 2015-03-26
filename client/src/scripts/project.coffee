@@ -60,10 +60,15 @@ module.exports = (projectId) ->
   document.querySelector('.entries-buttons .new-asset').addEventListener 'click', onNewAssetClick
   document.querySelector('.entries-buttons .new-folder').addEventListener 'click', onNewFolderClick
   document.querySelector('.entries-buttons .search').addEventListener 'click', onSearchClick
-  # document.querySelector('.entries-buttons .open-entry').addEventListener 'click', onOpenEntryClick
   document.querySelector('.entries-buttons .rename-entry').addEventListener 'click', onRenameEntryClick
   document.querySelector('.entries-buttons .duplicate-entry').addEventListener 'click', onDuplicateEntryClick
   document.querySelector('.entries-buttons .trash-entry').addEventListener 'click', onTrashEntryClick
+
+  ui.openInNewWindowButton = document.createElement('button')
+  ui.openInNewWindowButton.classList.add 'openInNewWindow'
+  ui.openInNewWindowButton.textContent = "[>]"
+  ui.openInNewWindowButton.title = "Open in new window"
+  ui.openInNewWindowButton.addEventListener 'click', onOpenInNewWindowClick
 
   # Tab strip
   ui.tabStrip = new TabStrip document.querySelector('.tabs-bar')
@@ -332,6 +337,9 @@ createEntryElement = (entry) ->
   liElt.appendChild nameSpan
 
   if entry.type?
+    liElt.addEventListener 'mouseenter', (event) -> liElt.appendChild ui.openInNewWindowButton; return
+    liElt.addEventListener 'mouseleave', (event) -> liElt.removeChild ui.openInNewWindowButton; return
+
     diagnosticsSpan = document.createElement('span')
     diagnosticsSpan.className = 'diagnostics'
 
@@ -539,12 +547,9 @@ onTrashEntryClick = ->
   warnBrokenDependence selectedEntries[0]
   return
 
-onOpenEntryClick = ->
-  return if ui.entriesTreeView.selectedNodes.length != 1
-
-  selectedNode = ui.entriesTreeView.selectedNodes[0]
-  entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
-
+onOpenInNewWindowClick = (event) ->
+  id = event.target.parentElement.dataset.id
+  entry = data.entries.byId[parseInt(id)]
   window.open "#{window.location.origin}/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{entry.id}"
   return
 
