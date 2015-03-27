@@ -9,4 +9,4 @@ syntax: regexp
 ^projects/
 ^public/
 ^launcher/public/
-^config.cson
+^config.json
