@@ -15,8 +15,8 @@ module.exports = class Resource extends Hash
   # OVERRIDE: Called when creating/loading a resource
   setup: ->
 
-  load: (assetPath) ->
-    fs.readFile path.join(assetPath, "resource.json"), { encoding: 'utf8' }, (err, json) =>
+  load: (resourcePath) ->
+    fs.readFile path.join(resourcePath, "resource.json"), { encoding: 'utf8' }, (err, json) =>
       if err?
         if err.code == 'ENOENT'
           @init => @emit 'load'
@@ -32,12 +32,12 @@ module.exports = class Resource extends Hash
 
   unload: -> @removeAllListeners(); return
 
-  save: (assetPath, callback) ->
+  save: (resourcePath, callback) ->
     json = JSON.stringify @pub, null, 2
 
-    fs.mkdir path.join(assetPath), (err) ->
+    fs.mkdir path.join(resourcePath), (err) ->
       if err? and err.code != 'EEXIST' then callback err; return
-      fs.writeFile path.join(assetPath, "resource.json"), json, { encoding: 'utf8' }, callback
+      fs.writeFile path.join(resourcePath, "resource.json"), json, { encoding: 'utf8' }, callback
     return
 
   server_setProperty: (client, path, value, callback) ->
