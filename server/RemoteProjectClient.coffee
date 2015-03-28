@@ -174,11 +174,8 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
       @server.io.in(roomName).emit 'trash:assets', id
 
       for socketId of @server.io.adapter.rooms[roomName]
-        console.log "#{socketId} is in #{roomName} which was just trashed"
         remoteClient = @server.clientsBySocketId[socketId]
         remoteClient.socket.leave roomName
-        console.log "subscriptions: #{remoteClient.subscriptions}"
-        console.log "index: #{remoteClient.subscriptions.indexOf(roomName)}"
         remoteClient.subscriptions.splice remoteClient.subscriptions.indexOf(roomName), 1
 
       # Generate diagnostics for any assets depending on this entry
