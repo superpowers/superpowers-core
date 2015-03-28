@@ -10,7 +10,7 @@ module.exports = class Asset extends Hash
     @setup() if pub?
 
   # OVERRIDE: Make sure to call super(callback). Called when creating a new asset
-  init: (callback) -> @setup(); callback(); return
+  init: (options, callback) -> @setup(); callback(); return
 
   # OVERRIDE: Called when creating/loading an asset
   setup: ->
