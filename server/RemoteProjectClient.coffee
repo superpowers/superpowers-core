@@ -140,61 +140,72 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
   _onTrashEntry: (id, callback) =>
     return if ! @errorIfCant 'editAssets', callback
 
-    @server.data.assets.acquire id, null, (err, asset) =>
-      if err? then callback? err; return
+    entry = @server.data.entries.byId[id]
+    asset = null
 
-      asset.destroy =>
-        @server.data.assets.releaseAll id
+    doTrashEntry = =>
+      # Clear all dependencies for this entry
+      dependentAssetIds = entry?.dependentAssetIds
 
-        # Clear all dependencies for this entry
-        entry = @server.data.entries.byId[id]
-        dependentAssetIds = entry?.dependentAssetIds
+      dependencies = @server.data.entries.dependenciesByAssetId[id]
+      if dependencies?
+        removedDependencyEntryIds = []
+        for depId in dependencies
+          depId = parseInt(depId) if typeof depId == 'string'
+          depEntry = @server.data.entries.byId[depId]
+          if ! depEntry? then continue
 
-        dependencies = @server.data.entries.dependenciesByAssetId[id]
-        if dependencies?
-          removedDependencyEntryIds = []
-          for depId in dependencies
-            depId = parseInt(depId) if typeof depId == 'string'
-            depEntry = @server.data.entries.byId[depId]
-            if ! depEntry? then continue
+          dependentAssetIds = depEntry.dependentAssetIds
+          index = dependentAssetIds.indexOf(id)
+          if index != -1
+            dependentAssetIds.splice(index, 1)
+            removedDependencyEntryIds.push depId
 
-            dependentAssetIds = depEntry.dependentAssetIds
-            index = dependentAssetIds.indexOf(id)
-            if index != -1
-              dependentAssetIds.splice(index, 1)
-              removedDependencyEntryIds.push depId
+        if removedDependencyEntryIds.length > 0
+          @server.io.in('sub:entries').emit 'remove:dependencies', id, dependencies
 
-          if removedDependencyEntryIds.length > 0
-            @server.io.in('sub:entries').emit 'remove:dependencies', id, dependencies
+        delete @server.data.entries.dependenciesByAssetId[id]
 
-          delete @server.data.entries.dependenciesByAssetId[id]
+      # Delete the entry
+      @server.data.entries.remove id, (err) =>
+        if err? then callback? err; return
 
-        # Delete the entry
-        @server.data.entries.remove id, (err) =>
-          if err? then callback? err; return
+        @server.io.in('sub:entries').emit 'trash:entries', id
 
-          @server.io.in('sub:entries').emit 'trash:entries', id
+        # Notify and clear all asset subscribers
+        roomName = "sub:assets:#{id}"
+        @server.io.in(roomName).emit 'trash:assets', id
 
-          # Notify and clear all asset subscribers
-          roomName = "sub:assets:#{id}"
-          @server.io.in(roomName).emit 'trash:assets', id
+        for socketId of @server.io.adapter.rooms[roomName]
+          remoteClient = @server.clientsBySocketId[socketId]
+          remoteClient.socket.leave roomName
+          remoteClient.subscriptions.splice remoteClient.subscriptions.indexOf(roomName), 1
 
-          for socketId of @server.io.adapter.rooms[roomName]
-            remoteClient = @server.clientsBySocketId[socketId]
-            remoteClient.socket.leave roomName
-            remoteClient.subscriptions.splice remoteClient.subscriptions.indexOf(roomName), 1
+        # Generate diagnostics for any assets depending on this entry
+        if dependentAssetIds?
+          for dependentAssetId in dependentAssetIds
+            missingAssetIds = [ id ]
+            existingDiag = @server.data.entries.diagnosticsByEntryId[dependentAssetId].byId["missingDependencies"]
+            if existingDiag? then missingAssetIds = missingAssetIds.concat existingDiag.data.missingAssetIds
+            @server._setDiagnostic dependentAssetId, "missingDependencies", "error", { missingAssetIds }
 
-          # Generate diagnostics for any assets depending on this entry
-          if dependentAssetIds?
-            for dependentAssetId in dependentAssetIds
-              missingAssetIds = [ id ]
-              existingDiag = @server.data.entries.diagnosticsByEntryId[dependentAssetId].byId["missingDependencies"]
-              if existingDiag? then missingAssetIds = missingAssetIds.concat existingDiag.data.missingAssetIds
-              @server._setDiagnostic dependentAssetId, "missingDependencies", "error", { missingAssetIds }
+        # Skip asset destruction & release if trashing a folder
+        if ! asset? then callback?(); return
 
+        # NOTE: It is important that we destroy the asset after having removed its entry
+        # from the tree so that nobody can subscribe to it after it's been destroyed
+        asset.destroy =>
+          @server.data.assets.releaseAll id
           callback?(); return
         return
       return
+
+    # Skip asset acquisition if trashing a folder
+    if ! entry.type? then doTrashEntry(); return
+
+    @server.data.assets.acquire id, null, (err, asset) =>
+      if err? then callback? err; return
+      doTrashEntry(); return
     return
 
   _onSetEntryProperty: (id, key, value, callback) =>
