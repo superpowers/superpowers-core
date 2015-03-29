@@ -190,10 +190,10 @@ module.exports = class ProjectServer
     return
 
   _onResourceLoaded: (resourceId, item) =>
-    console.log "#{resourceId} has been loaded"
     resourcePath = path.join(@projectPath, "resources/#{resourceId}")
     saveCallback = item.save.bind(item, resourcePath)
     item.on 'change', => @_scheduleSave 60, "resources:#{resourceId}", saveCallback; return
+    item.on 'command', (cmd, callbackArgs...) => @io.in("sub:resources:#{resourceId}").emit('edit:resources', resourceId, cmd, callbackArgs...); return
     return
 
   _addSocket: (socket) =>
