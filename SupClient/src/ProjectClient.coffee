@@ -3,19 +3,22 @@ module.exports = class ProjectClient
   constructor: (@socket, options) ->
     @socket.on 'edit:assets', @_onAssetEdited
     @socket.on 'trash:assets', @_onAssetTrashed
+    @socket.on 'edit:resources', @_onResourceEdited
 
     @entries = null
+    @entriesSubscribers = []
+
     @assetsById = {}
     @subscribersByAssetId = {}
 
-    @entriesSubscribers = []
+    @resourcesById = {}
+    @subscribersByResourceId = {}
 
     # Allow keeping an entries subscription alive at all times
     # Used in the scene editor to avoid constantly unsub'ing & resub'ing
     @_keepEntriesSubscription = options?.subEntries
     if @_keepEntriesSubscription
       @socket.emit 'sub', 'entries', null, @_onEntriesReceived
-
 
   subEntries: (subscriber) ->
     @entriesSubscribers.push subscriber
@@ -41,6 +44,14 @@ module.exports = class ProjectClient
     return
 
   sub: (assetId, assetType, subscriber) ->
+    console.warn "ProjectClient.sub is deprecated, use ProjectClient.subAsset"
+    @subAsset assetId, assetType, subscriber; return
+
+  unsub: (assetId, assetType, subscriber) ->
+    console.warn "ProjectClient.unsub is deprecated, use ProjectClient.unsubAsset"
+    @unsubAsset assetId, assetType, subscriber; return
+
+  subAsset: (assetId, assetType, subscriber) ->
     subscribers = @subscribersByAssetId[assetId]
     if ! subscribers?
       subscribers = @subscribersByAssetId[assetId] = []
@@ -52,7 +63,7 @@ module.exports = class ProjectClient
     subscribers.push subscriber
     return
 
-  unsub: (assetId, subscriber) ->
+  unsubAsset: (assetId, subscriber) ->
     subscribers = @subscribersByAssetId[assetId]
     return if ! subscribers?
 
@@ -67,16 +78,45 @@ module.exports = class ProjectClient
 
     return
 
+
+  subResource: (resourceId, subscriber) ->
+    subscribers = @subscribersByResourceId[resourceId]
+    if ! subscribers?
+      subscribers = @subscribersByResourceId[resourceId] = []
+      @socket.emit 'sub', 'resources', resourceId, @_onResourceReceived.bind @, resourceId
+    else
+      resource = @resourcesById[resourceId]
+      if resource? then subscriber.onResourceReceived resourceId, resource
+
+    subscribers.push subscriber
+    return
+
+  unsubResource: (resourceId, subscriber) ->
+    subscribers = @subscribersByResourceId[resourceId]
+    return if ! subscribers?
+
+    index = subscribers.indexOf(subscriber)
+    return if index == -1
+
+    subscribers.splice index, 1
+    if subscribers.length == 0
+      delete @subscribersByResourceId[resourceId]
+      delete @resourcesById[resourceId]
+      @socket.emit 'unsub', 'resources', resourceId
+
+    return
+
+
   _onAssetReceived: (assetId, assetType, err, assetData) ->
     # FIXME: The asset was probably trashed in the meantime, handle that
     if err?
-      console.warn "Got an error in AssetSubscriptionManager._onAssetReceived: #{err}"
+      console.warn "Got an error in ProjectClient._onAssetReceived: #{err}"
       return
 
     subscribers = @subscribersByAssetId[assetId]
     return if ! subscribers?
 
-    asset = @assetsById[assetId] = new SupCore.data.assetClasses[assetType] assetData
+    asset = @assetsById[assetId] = new SupCore.data.assetClasses[assetType] assetId, assetData
 
     for subscriber in subscribers
       subscriber.onAssetReceived assetId, asset
@@ -104,6 +144,34 @@ module.exports = class ProjectClient
 
     delete @assetsById[assetId]
     delete @subscribersByAssetId[assetId]
+
+    return
+
+
+  _onResourceReceived: (resourceId, err, resourceData) ->
+    if err?
+      console.warn "Got an error in ProjectClient._onResourceReceived: #{err}"
+      return
+
+    subscribers = @subscribersByResourceId[resourceId]
+    return if ! subscribers?
+
+    resource = @resourcesById[resourceId] = new SupCore.data.resourceClasses[resourceId] resourceData
+
+    for subscriber in subscribers
+      subscriber.onResourceReceived resourceId, resource
+
+    return
+
+  _onResourceEdited: (resourceId, command, args...) =>
+    subscribers = @subscribersByResourceId[resourceId]
+    return if ! subscribers?
+
+    resource = @resourcesById[resourceId]
+    resource.__proto__["client_#{command}"].apply resource, args
+
+    for subscriber in subscribers
+      subscriber.onResourceEdited resourceId, command, args...
 
     return
 
