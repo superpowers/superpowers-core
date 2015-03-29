@@ -44,11 +44,11 @@ module.exports = class ProjectClient
     return
 
   sub: (assetId, assetType, subscriber) ->
-    console.warn "ProjectClient.sub is deprecated, use ProjectClient.subAsset"
+    console.warn "ProjectClient.sub has been deprecated and will be removed soon. Please use ProjectClient.subAsset instead."
     @subAsset assetId, assetType, subscriber; return
 
   unsub: (assetId, assetType, subscriber) ->
-    console.warn "ProjectClient.unsub is deprecated, use ProjectClient.unsubAsset"
+    console.warn "ProjectClient.unsub has been deprecated and will be removed soon. Please use ProjectClient.unsubAsset instead."
     @unsubAsset assetId, assetType, subscriber; return
 
   subAsset: (assetId, assetType, subscriber) ->

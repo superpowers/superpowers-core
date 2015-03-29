@@ -60,3 +60,16 @@ exports.registerResource = (name, resourceClass) ->
 
   exports.resourceClasses[name] = resourceClass
   return
+
+
+# Deprecated
+exports.assetPlugins = exports.assetClasses
+exports.componentConfigPlugins = exports.componentConfigClasses
+
+exports.addAssetPlugin = (name, assetClass) ->
+  console.warn "SupCore.data.addAssetPlugin and SupCore.data.assetPlugins are deprecated and will be removed soon. Please use SupCore.data.registerAssetClass and SupCore.data.assetClasses instead."
+  exports.registerAssetClass name, assetClass; return
+
+exports.addComponentConfigPlugin = (name, configClass) ->
+  console.warn "SupCore.data.addComponentConfigPlugin and SupCore.data.componentConfigPlugins are deprecated and will be removed soon. Please use SupCore.data.registerComponentConfigClass and SupCore.data.componentConfigClasses instead."
+  exports.registerComponentConfigClass name, configClass; return
