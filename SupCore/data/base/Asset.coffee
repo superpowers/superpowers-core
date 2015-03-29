@@ -5,7 +5,7 @@ fs = require 'fs'
 
 module.exports = class Asset extends Hash
 
-  constructor: (pub, schema, @serverData) ->
+  constructor: (@id, pub, schema, @serverData) ->
     super pub, schema
     @setup() if pub?
 
@@ -19,6 +19,11 @@ module.exports = class Asset extends Hash
   # Check for any error/warning/info and @emit 'setDiagnostic' as required
   # Also if the asset depends on others, @emit 'addDependencies' with a list of entry IDs
   restore: ->
+
+  # OVERRIDE: Called when destroying an asset
+  # Most assets won't need to do anything here but some might want to do some
+  # clean up work like making changes to associated resources
+  destroy: (callback) -> callback(); return
 
   load: (assetPath) ->
     fs.readFile path.join(assetPath, "asset.json"), { encoding: 'utf8' }, (err, json) =>

@@ -79,7 +79,7 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
 
       if entry.type?
         assetClass = SupCore.data.assetClasses[entry.type]
-        asset = new assetClass null, @server.data, entry.type.split('.')[0]
+        asset = new assetClass entry.id, null, @server.data, entry.type.split('.')[0]
         asset.init { name: entry.name }, =>
           assetPath = path.join(@server.projectPath, "assets/#{entry.id}")
           fs.mkdirSync assetPath
@@ -140,58 +140,61 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
   _onTrashEntry: (id, callback) =>
     return if ! @errorIfCant 'editAssets', callback
 
-    entry = @server.data.entries.byId[id]
-    dependentAssetIds = entry?.dependentAssetIds
-
-    # Clear all dependencies for this entry
-    dependencies = @server.data.entries.dependenciesByAssetId[id]
-    if dependencies?
-      removedDependencyEntryIds = []
-      for depId in dependencies
-        depId = parseInt(depId) if typeof depId == 'string'
-        depEntry = @server.data.entries.byId[depId]
-        if ! depEntry? then continue
-
-        dependentAssetIds = depEntry.dependentAssetIds
-        index = dependentAssetIds.indexOf(id)
-        if index != -1
-          dependentAssetIds.splice(index, 1)
-          removedDependencyEntryIds.push depId
-
-      if removedDependencyEntryIds.length > 0
-        @server.io.in('sub:entries').emit 'remove:dependencies', id, dependencies
-
-      delete @server.data.entries.dependenciesByAssetId[id]
-
-    # Delete the entry
-    @server.data.entries.remove id, (err) =>
+    @server.data.assets.acquire id, null, (err, asset) =>
       if err? then callback? err; return
 
-      @server.io.in('sub:entries').emit 'trash:entries', id
+      asset.destroy =>
+        @server.data.assets.releaseAll id
 
-      # Notify and clear all asset subscribers
-      roomName = "sub:assets:#{id}"
-      @server.io.in(roomName).emit 'trash:assets', id
+        # Clear all dependencies for this entry
+        entry = @server.data.entries.byId[id]
+        dependentAssetIds = entry?.dependentAssetIds
 
-      for socketId of @server.io.adapter.rooms[roomName]
-        remoteClient = @server.clientsBySocketId[socketId]
-        remoteClient.socket.leave roomName
-        remoteClient.subscriptions.splice remoteClient.subscriptions.indexOf(roomName), 1
+        dependencies = @server.data.entries.dependenciesByAssetId[id]
+        if dependencies?
+          removedDependencyEntryIds = []
+          for depId in dependencies
+            depId = parseInt(depId) if typeof depId == 'string'
+            depEntry = @server.data.entries.byId[depId]
+            if ! depEntry? then continue
 
-      # Generate diagnostics for any assets depending on this entry
-      if dependentAssetIds?
-        for dependentAssetId in dependentAssetIds
-          missingAssetIds = [ id ]
-          existingDiag = @server.data.entries.diagnosticsByEntryId[dependentAssetId].byId["missingDependencies"]
-          if existingDiag? then missingAssetIds = missingAssetIds.concat existingDiag.data.missingAssetIds
-          @server._setDiagnostic dependentAssetId, "missingDependencies", "error", { missingAssetIds }
+            dependentAssetIds = depEntry.dependentAssetIds
+            index = dependentAssetIds.indexOf(id)
+            if index != -1
+              dependentAssetIds.splice(index, 1)
+              removedDependencyEntryIds.push depId
 
-      # Unload the asset
-      @server.data.assets.releaseAll id
+          if removedDependencyEntryIds.length > 0
+            @server.io.in('sub:entries').emit 'remove:dependencies', id, dependencies
 
-      callback?()
+          delete @server.data.entries.dependenciesByAssetId[id]
+
+        # Delete the entry
+        @server.data.entries.remove id, (err) =>
+          if err? then callback? err; return
+
+          @server.io.in('sub:entries').emit 'trash:entries', id
+
+          # Notify and clear all asset subscribers
+          roomName = "sub:assets:#{id}"
+          @server.io.in(roomName).emit 'trash:assets', id
+
+          for socketId of @server.io.adapter.rooms[roomName]
+            remoteClient = @server.clientsBySocketId[socketId]
+            remoteClient.socket.leave roomName
+            remoteClient.subscriptions.splice remoteClient.subscriptions.indexOf(roomName), 1
+
+          # Generate diagnostics for any assets depending on this entry
+          if dependentAssetIds?
+            for dependentAssetId in dependentAssetIds
+              missingAssetIds = [ id ]
+              existingDiag = @server.data.entries.diagnosticsByEntryId[dependentAssetId].byId["missingDependencies"]
+              if existingDiag? then missingAssetIds = missingAssetIds.concat existingDiag.data.missingAssetIds
+              @server._setDiagnostic dependentAssetId, "missingDependencies", "error", { missingAssetIds }
+
+          callback?(); return
+        return
       return
-
     return
 
   _onSetEntryProperty: (id, key, value, callback) =>
