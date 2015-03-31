@@ -173,6 +173,7 @@ onManifestReceived = (err, manifest) ->
   data.manifest = new SupCore.data.Manifest manifest
 
   document.querySelector('.project .project-name').textContent = manifest.name
+  document.title = "#{manifest.name} — Superpowers"
   return
 
 onEntriesReceived = (err, entries) ->
