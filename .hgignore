@@ -5,6 +5,8 @@ plugins/sparklinlabs/*/public/**.css
 plugins/sparklinlabs/*/public/**.html
 *.sublime-*
 bin/
+SupCore/**.js
+SupCore/typings/*
 syntax: regexp
 ^projects/
 ^public/
