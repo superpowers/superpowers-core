@@ -18,3 +18,10 @@ module.exports = class ComponentConfig extends Hash
   # You can check for asset dependency changes by overriding this method
   # and calling @emit 'addDependencies' / 'removeDependencies' as needed
   # setProperty: (path, value, callback) ->
+
+  server_setProperty: (client, path, value, callback) ->
+    @setProperty path, value, (err, actualValue) =>
+      if err? then callback? err; return
+
+      callback? null, path, actualValue
+      return
