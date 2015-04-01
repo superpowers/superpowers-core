@@ -51,7 +51,7 @@ class TreeById extends events.EventEmitter {
 
     return name;
   }
-  
+
   add(node: any, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     if (node.id != null && this.schema.id == null) { callback("Found unexpected id key"); return }
 
@@ -65,7 +65,7 @@ class TreeById extends events.EventEmitter {
       if (rule == null) { callback(`Invalid key: ${key}`); return; }
       var violation = base.getRuleViolation(value, rule, true);
       if (violation != null) { callback(`Invalid value: ${base.formatRuleViolation(violation)}`); return; }
-    
+
       missingKeys.splice(missingKeys.indexOf(key), 1);
     }
 
@@ -82,7 +82,7 @@ class TreeById extends events.EventEmitter {
     callback(null, index);
     this.emit('change');
   }
-  
+
   client_add(node, parentId: string, index: number) {
     var siblings = (parentId != null) ? this.byId[parentId].children : this.pub;
     siblings.splice(index, 0, node);

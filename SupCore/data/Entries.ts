@@ -10,7 +10,7 @@ class Entries extends SupData.base.TreeById {
 
   diagnosticsByEntryId: { [key: number]: any };
   dependenciesByAssetId: any;
-  
+
   constructor(pub, nextId: number) {
     super(pub, Entries.schema, nextId);
 
@@ -25,7 +25,7 @@ class Entries extends SupData.base.TreeById {
       if (node.dependentAssetIds == null) node.dependentAssetIds = [];
     });
   }
-   
+
   add(node, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     if (node.type != null && SupData.assetClasses[node.type] == null) { callback("Invalid asset type"); return; }
 
@@ -45,7 +45,7 @@ class Entries extends SupData.base.TreeById {
       callback(null, actualIndex);
     });
   }
-  
+
   client_add(node, parentId: string, index: number) {
     super.client_add(node, parentId, index);
     this.diagnosticsByEntryId[node.id] = new SupData.Diagnostics(node.diagnostics);

@@ -62,14 +62,14 @@ class Dictionary extends events.EventEmitter {
   _load(id: string) {
     throw new Error("This is an abstract method");
   }
-  
+
   _unload(id: string) {
     //console.log(`Unloading ${id}`);
     this.byId[id].unload();
     delete this.byId[id];
     delete this.unloadTimeoutsById[id];
   }
-  
+
   releaseAll(id: string) {
     // Cancel pending unload timeout if any
     var timeout = this.unloadTimeoutsById[id];
