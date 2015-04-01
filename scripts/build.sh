@@ -1,6 +1,6 @@
 pushd $(dirname $0)
 cd .. && npm install
-cd SupCore && gulp
+cd SupCore && tsd reinstall && tsd rebundle && gulp
 cd ../SupClient && gulp
 cd ../SupAPI && gulp
 cd ../system/SupEngine && npm install && gulp

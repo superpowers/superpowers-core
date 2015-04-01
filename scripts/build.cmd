@@ -4,6 +4,8 @@ cd ..
 call npm install
 
 cd SupCore
+call tsd reinstall
+call tsd rebundle
 call gulp
 
 cd ../SupClient
