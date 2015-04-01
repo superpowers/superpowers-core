@@ -297,22 +297,37 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     , (err) =>
       if err? then callback "Could not export all assets"; return
 
-      json = JSON.stringify(game, null, 2)
-      fs.writeFile path.join(buildPath, 'game.json'), json, { encoding: 'utf8' }, (err) =>
-        if err? then callback "Could not save game.json"; return
+      fs.mkdirSync path.join buildPath, 'resources'
 
-        #@server.log "Done generating build #{buildId}..."
+      async.each Object.keys(SupCore.data.resourceClasses), (resourceName, cb) =>
+        folderPath = path.join(buildPath, 'resources', resourceName.toString())
+        fs.mkdir folderPath, (err) =>
+          @server.data.resources.acquire resourceName, null, (err, resource) =>
+            resource.save folderPath, (err) =>
+              @server.data.resources.release resourceName
+              cb(); return
+            return
+          return
+        return
+      , (err) =>
+        if err? then callback "Could not export all resources"; return
 
-        callback null, buildId
+        json = JSON.stringify(game, null, 2)
+        fs.writeFile path.join(buildPath, 'game.json'), json, { encoding: 'utf8' }, (err) =>
+          if err? then callback "Could not save game.json"; return
 
-        # Remove an old build to avoid using too much disk space
-        buildToDeleteId = buildId - config.maxRecentBuilds
-        buildToDeletePath = projectBuildsPath + buildToDeleteId
-        rimraf buildToDeletePath, (err) =>
-          if err?
-            @server.log "Failed to remove build #{buildToDeleteId}:"
-            @server.log err
+          #@server.log "Done generating build #{buildId}..."
 
-      return
+          callback null, buildId
+
+          # Remove an old build to avoid using too much disk space
+          buildToDeleteId = buildId - config.maxRecentBuilds
+          buildToDeletePath = projectBuildsPath + buildToDeleteId
+          rimraf buildToDeletePath, (err) =>
+            if err?
+              @server.log "Failed to remove build #{buildToDeleteId}:"
+              @server.log err
+
+        return
 
     return
