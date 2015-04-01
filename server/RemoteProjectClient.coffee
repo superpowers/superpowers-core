@@ -218,51 +218,47 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     return
 
   # Assets
-  _onEditAsset: (id, args..., callback) =>
+  _onEditAsset: (id, command, args..., callback) =>
     return if ! @errorIfCant 'editAssets', callback
 
     entry = @server.data.entries.byId[id]
     if ! entry?.type? then callback? "No such asset"; return
-    if args.length == 0 then callback? "Invalid command"; return
+    if ! command? then callback? "Invalid command"; return
 
-    cmd = args[0]
-    cmdArgs = args.slice(1)
-    commandMethod = SupCore.data.assetClasses[entry.type].prototype["server_#{cmd}"]
+    commandMethod = SupCore.data.assetClasses[entry.type].prototype["server_#{command}"]
     if ! commandMethod? then callback? "Invalid command"; return
     # if ! callback? then @server.log "Ignoring edit:assets command, missing a callback"; return
 
     @server.data.assets.acquire id, null, (err, asset) =>
       if err? then callback? err; return
 
-      commandMethod.call asset, @, cmdArgs..., (err, callbackArgs...) =>
+      commandMethod.call asset, @, args..., (err, callbackArgs...) =>
         @server.data.assets.release id
         if err? then callback? err; return
 
-        @server.io.in("sub:assets:#{id}").emit 'edit:assets', id, cmd, callbackArgs...
+        @server.io.in("sub:assets:#{id}").emit 'edit:assets', id, command, callbackArgs...
         callback? null, callbackArgs[0]?.id
       return
     return
 
   # Rooms
-  _onEditRoom: (id, args..., callback) =>
+  _onEditRoom: (id, command, args..., callback) =>
     return if ! @errorIfCant 'editRooms', callback
 
-    if args.length == 0 then callback? "Invalid command"; return
+    if ! command? then callback? "Invalid command"; return
 
-    cmd = args[0]
-    cmdArgs = args.slice(1)
-    commandMethod = SupCore.data.Room.prototype["server_#{cmd}"]
+    commandMethod = SupCore.data.Room.prototype["server_#{command}"]
     if ! commandMethod? then callback? "Invalid command"; return
     # if ! callback? then @server.log "Ignoring edit:rooms command, missing a callback"; return
 
     @server.data.rooms.acquire id, null, (err, room) =>
       if err? then callback? err; return
 
-      commandMethod.call room, @, cmdArgs..., (err, callbackArgs...) =>
+      commandMethod.call room, @, args..., (err, callbackArgs...) =>
         @server.data.rooms.release id
         if err? then callback? err; return
 
-        @server.io.in("sub:rooms:#{id}").emit 'edit:rooms', id, cmd, callbackArgs...
+        @server.io.in("sub:rooms:#{id}").emit 'edit:rooms', id, command, callbackArgs...
         callback? null, callbackArgs[0]?.id
       return
     return
