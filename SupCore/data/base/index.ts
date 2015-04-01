@@ -22,7 +22,8 @@ export function getRuleViolation(value, rule, create = false): { message: string
       break;
     }
 
-    case "number", "integer": {
+    case "number":
+    case "integer": {
       if (typeof (value) != "number") return { message: "Expected number" };
       if (ruleType == "integer" && (value % 1) != 0) return { message: "Expected an integer" };
 
