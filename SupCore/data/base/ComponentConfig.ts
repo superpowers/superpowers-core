@@ -18,6 +18,14 @@ class ComponentConfig extends Hash {
   // You can check for asset dependency changes by overriding this method
   // and calling @emit 'addDependencies' / 'removeDependencies' as needed
   // setProperty(path, value, callback) {}
+
+  server_setProperty(client, path, value, callback) {
+    this.setProperty(path, value, (err, actualValue) => {
+      if (err != null) { callback(err); return; }
+
+      callback(null, path, actualValue);
+    });
+  }
 }
 
 export = ComponentConfig;
