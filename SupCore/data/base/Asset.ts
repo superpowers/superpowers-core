@@ -14,20 +14,12 @@ class Asset extends Hash {
     if (this.pub != null) this.setup();
   }
 
-  // OVERRIDE: Make sure to call super(callback). Called when creating a new asset
   init(options, callback: Function) { this.setup(); callback(); }
 
-  // OVERRIDE: Called when creating/loading an asset
   setup() {}
 
-  // OVERRIDE: Called when loading a project
-  // Check for any error/warning/info and this.emit 'setDiagnostic' as required
-  // Also if the asset depends on others, this.emit 'addDependencies' with a list of entry IDs
   restore() {}
 
-  // OVERRIDE: Called when destroying an asset
-  // Most assets won't need to do anything here but some might want to do some
-  // clean up work like making changes to associated resources
   destroy(callback: Function) { callback(); }
 
   load(assetPath: string) {
@@ -57,4 +49,3 @@ class Asset extends Hash {
 }
 
 export = Asset;
-

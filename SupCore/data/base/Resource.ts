@@ -12,10 +12,8 @@ class Resource extends Hash {
     if (pub!= null) this.setup();
   }
 
-  // OVERRIDE: Make sure to call super(callback). Called when creating a new resource
   init(callback: Function) { this.setup(); callback(); }
 
-  // OVERRIDE: Called when creating/loading a resource
   setup() {}
 
   load(resourcePath: string) {
