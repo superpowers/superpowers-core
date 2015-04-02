@@ -14,7 +14,7 @@ class Projects extends ListById {
   }
 
   generateProjectId(): string {
-    var id: string = null
+    var id: string = null;
 
     while (true) {
       id = _.sample(characters, 4).join('');

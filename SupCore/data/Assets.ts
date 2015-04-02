@@ -10,7 +10,7 @@ class Assets extends SupData.base.Dictionary {
   }
 
   acquire(id: string, owner, callback: (err: Error) => any) {
-    if (this.server.data.entries.byId[id] == null || this.server.data.entries.byId[id].type == null) { callback(new Error(`Invalid asset id: ${id}`)); return }
+    if (this.server.data.entries.byId[id] == null || this.server.data.entries.byId[id].type == null) { callback(new Error(`Invalid asset id: ${id}`)); return; }
 
     super.acquire(id, owner, callback);
   }

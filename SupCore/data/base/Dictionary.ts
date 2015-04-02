@@ -13,7 +13,7 @@ class Dictionary extends events.EventEmitter {
     this.unloadDelaySeconds = unloadDelaySeconds;
   }
 
-  acquire(id: string, owner, callback: (err: Error, item?: any) => any) {
+  acquire(id: string, owner: any, callback: (err: Error, item?: any) => any) {
     if (this.refCountById[id] == null) this.refCountById[id] = 0;
     this.refCountById[id]++;
     //console.log(`Acquiring ${id}: ${this.refCountById[id]} refs`);
@@ -31,7 +31,7 @@ class Dictionary extends events.EventEmitter {
     if (item == null) {
       try { item = this._load(id); }
       catch (e) { callback(e); return; }
-      this.byId[id] = item
+      this.byId[id] = item;
     }
 
     if (item.pub != null) callback(null, item);
@@ -44,7 +44,7 @@ class Dictionary extends events.EventEmitter {
     });
   }
 
-  release(id: string, owner, options?) {
+  release(id: string, owner: any, options?) {
     if (this.refCountById[id] == null) throw new Error(`Can't release ${id}, ref count is null`);
 
     this.refCountById[id]--;
@@ -55,13 +55,11 @@ class Dictionary extends events.EventEmitter {
 
       // Schedule unloading the asset after a while
       if (options != null && options.skipUnloadDelay) this._unload(id);
-      else this.unloadTimeoutsById[id] = setTimeout(( () => { this._unload(id); } ), this.unloadDelaySeconds * 1000);
+      else this.unloadTimeoutsById[id] = setTimeout(() => { this._unload(id); }, this.unloadDelaySeconds * 1000);
     }
   }
 
-  _load(id: string) {
-    throw new Error("This is an abstract method");
-  }
+  _load(id: string) { throw new Error("This method must be overridden by derived classes"); }
 
   _unload(id: string) {
     //console.log(`Unloading ${id}`);

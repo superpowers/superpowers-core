@@ -29,10 +29,11 @@ class Entries extends SupData.base.TreeById {
   add(node, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     if (node.type != null && SupData.assetClasses[node.type] == null) { callback("Invalid asset type"); return; }
 
-    super.add(node, parentId, index,(err, actualIndex) => {
+    super.add(node, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
 
-      var siblings = (parentId != null) ? this.byId[parentId].children : this.pub;
+      var siblings = this.pub;
+      if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
       node.name = SupData.ensureUniqueName(node.id, node.name, siblings);
 
       if (node.type != null) {
@@ -56,7 +57,8 @@ class Entries extends SupData.base.TreeById {
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
     // Check that the requested parent is indeed a folder
-    var siblings = (parentId != null) ? this.byId[parentId].children : this.pub;
+    var siblings = this.pub;
+    if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     if (siblings == null) { callback(`Invalid parent node id: ${parentId}`); return; }
 
     if (SupData.hasDuplicateName(node.id, node.name, siblings)) { callback("There's already an entry with this name in this folder"); return; }
@@ -90,7 +92,7 @@ class Entries extends SupData.base.TreeById {
     var entriesById = {};
 
     this.walk((entry, parentEntry) => {
-      var savedEntry = { id: entry.id, name: entry.name, type: entry.type, children: [] }
+      var savedEntry = { id: entry.id, name: entry.name, type: entry.type, children: [] };
       if (entry.children == null) delete savedEntry.children;
       entriesById[savedEntry.id] = savedEntry;
 

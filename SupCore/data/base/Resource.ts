@@ -9,7 +9,7 @@ class Resource extends Hash {
   constructor(pub, schema, serverData) {
     super(pub, schema);
     this.serverData = serverData;
-    if (pub!= null) this.setup();
+    if (pub != null) this.setup();
   }
 
   init(callback: Function) { this.setup(); callback(); }
@@ -19,7 +19,7 @@ class Resource extends Hash {
   load(resourcePath: string) {
     fs.readFile(path.join(resourcePath, "resource.json"), { encoding: 'utf8' }, (err, json) => {
       if (err != null) {
-        if (err.code == 'ENOENT') {
+        if (err.code === 'ENOENT') {
           this.init( () => { this.emit('load') } );
           return;
         }
@@ -39,7 +39,7 @@ class Resource extends Hash {
     var json = JSON.stringify(this.pub, null, 2);
 
     fs.mkdir(path.join(resourcePath), (err) => {
-      if (err != null && err.code != "EEXIST") { callback(err); return; }
+      if (err != null && err.code !== "EEXIST") { callback(err); return; }
       fs.writeFile(path.join(resourcePath, "resource.json"), json, { encoding: 'utf8' }, callback);
     });
   }

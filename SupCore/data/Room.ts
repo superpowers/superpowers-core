@@ -28,7 +28,7 @@ class Room extends SupData.base.Hash {
 
   load(roomPath: string) {
     fs.readFile(path.join(`${roomPath}.json`), { encoding: "utf8" }, (err, json) => {
-      if (err != null && err.code != "ENOENT") throw err;
+      if (err != null && err.code !== "ENOENT") throw err;
 
       if (json == null) this.pub = { history: [] };
       else this.pub = JSON.parse(json);
@@ -69,8 +69,8 @@ class Room extends SupData.base.Hash {
   client_join(item: any, index: number) {
     if (index != null) this.users.client_add(item, index);
     else this.users.byId[item.id].connectionCount++;
-
   }
+
   leave(client: any, callback: (err: string, username?: any) => any) {
     var item = this.users.byId[client.socket.username];
     if (item.connectionCount > 1) {
@@ -94,7 +94,7 @@ class Room extends SupData.base.Hash {
   server_appendMessage(client: any, text: string, callback: (err: string, entry?: any) => any) {
     if (typeof(text) != "string" || text.length > 300) { callback("Your message was too long"); return; }
 
-    var entry = { timestamp: Date.now(), author: client.socket.username, text: text }
+    var entry = { timestamp: Date.now(), author: client.socket.username, text: text };
     this.pub.history.push(entry);
     if (this.pub.history.length > 100) this.pub.history.splice(0, 1);
 

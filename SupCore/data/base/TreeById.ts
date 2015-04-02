@@ -53,9 +53,10 @@ class TreeById extends events.EventEmitter {
   }
 
   add(node: any, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    if (node.id != null && this.schema.id == null) { callback("Found unexpected id key"); return }
+    if (node.id != null && this.schema.id == null) { callback("Found unexpected id key"); return; }
 
-    var siblings = (parentId != null && this.byId[parentId] != null) ? this.byId[parentId].children : this.pub;
+    var siblings = this.pub;
+    if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     if (siblings == null) { callback(`Invalid parent id: ${parentId}`); return; }
 
     var missingKeys = Object.keys(this.schema);
@@ -76,7 +77,7 @@ class TreeById extends events.EventEmitter {
     this.parentNodesById[node.id] = this.byId[parentId];
 
     // Fix index if it's out of bounds
-    if (index == null || index < 0 || index >= siblings.length) index = siblings.length;
+    if (index == null || index < 0 || index > siblings.length) index = siblings.length;
     siblings.splice(index, 0, node);
 
     callback(null, index);
@@ -84,7 +85,8 @@ class TreeById extends events.EventEmitter {
   }
 
   client_add(node, parentId: string, index: number) {
-    var siblings = (parentId != null) ? this.byId[parentId].children : this.pub;
+    var siblings = this.pub;
+    if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     siblings.splice(index, 0, node);
 
     this.byId[node.id] = node;
@@ -98,12 +100,12 @@ class TreeById extends events.EventEmitter {
 
     if (parentId != null) {
       var parentNode = this.byId[parentId];
-      if (parentNode == null) { callback(`Invalid parent node id: ${parentId}`); return; }
+      if (parentNode == null || parentNode.children == null) { callback(`Invalid parent node id: ${parentId}`); return; }
     }
 
     // Adjust insertion index if needed
     var siblings = (parentNode != null) ? parentNode.children : this.pub;
-    if (index == null || index < 0 || index >= siblings.length) index = siblings.length;
+    if (index == null || index < 0 || index > siblings.length) index = siblings.length;
 
     var oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     var oldIndex = oldSiblings.indexOf(node);
@@ -122,8 +124,8 @@ class TreeById extends events.EventEmitter {
   client_move(id: string, parentId: string, index: number) {
     var node = this.byId[id];
 
-    var parentNode = (this.byId[parentId] != null) ? this.byId[parentId] : null;
-    var siblings = (parentId != null) ? this.byId[parentId].children : this.pub;
+    var parentNode = (parentId != null) ? this.byId[parentId] : null;
+    var siblings = (parentNode != null) ? this.byId[parentId].children : this.pub;
 
     var oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     var oldIndex = oldSiblings.indexOf(node);

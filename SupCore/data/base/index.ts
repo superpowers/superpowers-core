@@ -9,7 +9,7 @@ export import ComponentConfig = require("./ComponentConfig");
 export function getRuleViolation(value, rule, create = false): { message: string; path?: string } {
   if (!create && ! rule.mutable) return { message: "Immutable" };
 
-  var optional = rule.type[rule.type.length - 1] == "?"
+  var optional = rule.type[rule.type.length - 1] == "?";
   if (optional && value == null) return null;
 
   var ruleType: string;
@@ -18,14 +18,14 @@ export function getRuleViolation(value, rule, create = false): { message: string
 
   switch (ruleType) {
     case "boolean": {
-      if (typeof (value) != "boolean") return { message: "Expected boolean" };
+      if (typeof value !== "boolean") return { message: "Expected boolean" };
       break;
     }
 
     case "number":
     case "integer": {
-      if (typeof (value) != "number") return { message: "Expected number" };
-      if (ruleType == "integer" && (value % 1) != 0) return { message: "Expected an integer" };
+      if (typeof value !== "number") return { message: "Expected number" };
+      if (ruleType === "integer" && (value % 1) !== 0) return { message: "Expected an integer" };
 
       if (rule.min != null && value < rule.min) return { message: `Value (${value}) is less than minimum value (${rule.min})` };
       if (rule.max != null && value > rule.max) return { message: `Value (${value}) is greater than maximum value (${rule.max})` };
@@ -33,23 +33,23 @@ export function getRuleViolation(value, rule, create = false): { message: string
     }
 
     case "string": {
-      if (typeof (value) != "string") return { message: "Expected string" };
+      if (typeof value !== "string") return { message: "Expected string" };
 
-      if (rule.length != null && value.length != rule.length) return { message: `String should have length of ${rule.length}, got ${value.length}` };
+      if (rule.length != null && value.length !== rule.length) return { message: `String should have length of ${rule.length}, got ${value.length}` };
       if (rule.minLength != null && value.length < rule.minLength) return { message: `String length (${value.length}) is less than minimum length (${rule.minLength})` };
       if (rule.maxLength != null && value.length > rule.maxLength) return { message: `String length (${value.length}) is greater than maximum length (${rule.maxLength})` };
       break;
     }
 
     case "enum": {
-      if (typeof (value) != "string") return { message: "Expected string for enum" };
+      if (typeof value !== "string") return { message: "Expected string for enum" };
 
       if (rule.items.indexOf(value) == -1) return { message: `Invalid enum value: ${value}` };
       break;
     }
 
     case "hash": {
-      if (typeof (value) != "object") return { message: "Expected hash" };
+      if (typeof value !== "object") return { message: "Expected hash" };
 
       var ruleProperties = (rule.properties != null) ? rule.properties : {};
       var missingKeys = Object.keys(ruleProperties);
@@ -59,7 +59,6 @@ export function getRuleViolation(value, rule, create = false): { message: string
         var propertyRule = ruleProperties[key];
 
         if (propertyRule == null) {
-
           if (rule.values == null) return { message: `Unexpected hash key: ${key}`, path: key };
 
           if (rule.keys != null) {
@@ -86,7 +85,7 @@ export function getRuleViolation(value, rule, create = false): { message: string
       }
 
       // Ignore optional keys
-      var actualMissingKeys = []
+      var actualMissingKeys = [];
       missingKeys.forEach((missingKey) => {
         var missingKeyRuleType = ruleProperties[missingKey].type;
         if (missingKeyRuleType[missingKeyRuleType.length - 1] != "?") actualMissingKeys.push(missingKey);
@@ -98,7 +97,7 @@ export function getRuleViolation(value, rule, create = false): { message: string
     case "array": {
       if (! Array.isArray(value)) return { message: "Expected array" };
 
-      if (rule.length != null && value.length != rule.length) return { message: `Array should have length of ${rule.length}, got ${value.length}` };
+      if (rule.length != null && value.length !== rule.length) return { message: `Array should have length of ${rule.length}, got ${value.length}` };
       if (rule.minLength != null && value.length < rule.minLength) return { message: `Array length (${value.length}) is less than minimum length (${rule.minLength})` };
       if (rule.maxLength != null && value.length > rule.maxLength) return { message: `Array length (${value.length}) is greater than maximum length (${rule.maxLength})` };
 
@@ -118,8 +117,7 @@ export function getRuleViolation(value, rule, create = false): { message: string
     }
 
     default: {
-      console.warn("getRuleViolation - Unhandled rule type:");
-      console.warn(ruleType);
+      console.warn(`getRuleViolation - Unhandled rule type: ${ruleType}`);
     }
   }
   return null;
@@ -128,7 +126,7 @@ export function getRuleViolation(value, rule, create = false): { message: string
 export function formatRuleViolation(violation): string {
   if (violation == null) return "No error";
 
-  var text = violation.message
+  var text = violation.message;
   if (violation.path != null) text += ` at ${violation.path}`;
-  return text
+  return text;
 }
