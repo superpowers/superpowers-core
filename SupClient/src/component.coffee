@@ -33,7 +33,7 @@ module.exports = component =
 
     inputElt
 
-  createCheckBox: (parentElt, value) ->
+  createBooleanField: (parentElt, value) ->
     inputElt = document.createElement('input')
     inputElt.type = 'checkbox'
     parentElt.appendChild inputElt
