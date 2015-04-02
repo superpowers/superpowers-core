@@ -268,7 +268,10 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     #@server.log "Building project..."
 
     buildId = @server.data.internals.pub.nextBuildId
-    @server.data.internals.setProperty 'nextBuildId', buildId + 1
+    # setProperty is synchronous
+    @server.data.internals.setProperty 'nextBuildId', buildId + 1, (err) =>
+      if err? then callback err
+      return
 
     projectBuildsPath = "#{@server.projectPath}/builds/"
     buildPath = projectBuildsPath + buildId
