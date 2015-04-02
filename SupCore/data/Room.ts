@@ -86,7 +86,7 @@ class Room extends SupData.base.Hash {
 
   client_leave(id: string) {
     var item = this.users.byId[id];
-    if (item.connectionCount > 1) item.connectionCount--;
+    if (item.connectionCount > 1) { item.connectionCount--; return; }
 
     this.users.client_remove(id);
   }
