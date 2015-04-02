@@ -76,8 +76,9 @@ class Dictionary extends events.EventEmitter {
     if (timeout != null) {
       clearTimeout(timeout);
       delete this.unloadTimeoutsById[id];
-      delete this.refCountById[id];
     }
+
+    delete this.refCountById[id];
     delete this.byId[id];
   }
 }
