@@ -106,7 +106,7 @@ declare module SupCore {
         schema: any;
 
         constructor(pub, schema);
-        setProperty(path: string, value, callback: (err: string, index?: number) => any);
+        setProperty(path: string, value, callback: (err: string, value?: any) => any);
         client_setProperty(path: string, value);
       }
 

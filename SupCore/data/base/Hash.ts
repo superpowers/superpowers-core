@@ -12,7 +12,7 @@ class Hash extends events.EventEmitter {
     this.schema = schema;
   }
 
-  setProperty(path: string, value, callback: (err: string, index?: number) => any) {
+  setProperty(path: string, value, callback: (err: string, value?: any) => any) {
     var parts = path.split('.');
 
     var rule = this.schema[parts[0]];
