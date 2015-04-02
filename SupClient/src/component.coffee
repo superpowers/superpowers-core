@@ -1,17 +1,32 @@
 module.exports = component =
 
-  createSetting: (parentElt, name) ->
+  createSetting: (parentElt, name, options) ->
     rowElt = document.createElement('tr')
     parentElt.appendChild rowElt
 
     keyElt = document.createElement('th')
-    keyElt.textContent = name
     rowElt.appendChild keyElt
+
+    if options?.checkbox
+      containerElt = document.createElement('div')
+      containerElt.className = ''
+      keyElt.appendChild containerElt
+
+      nameElt = document.createElement('div')
+      nameElt.textContent = name
+      nameElt.title = options.title
+      containerElt.appendChild nameElt
+
+      checkboxElt = document.createElement('input')
+      checkboxElt.type = 'checkbox'
+      containerElt.appendChild checkboxElt
+    else
+      keyElt.textContent = name
 
     valueElt = document.createElement('td')
     rowElt.appendChild valueElt
 
-    { rowElt, keyElt, valueElt }
+    { rowElt, keyElt, valueElt, checkboxElt }
 
   createTextField: (parentElt, value) ->
     inputElt = document.createElement('input')
