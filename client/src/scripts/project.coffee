@@ -32,19 +32,19 @@ module.exports = (projectId) ->
 
     if event.keyCode == 116 or (event.keyCode == 80 and event.metaKey) # F5 or Cmd-P
       event.preventDefault()
-      onRunProjectClick()
+      runProject()
 
     if event.keyCode == 117 or (event.keyCode == 80 and event.metaKey and event.shiftKey) # F6 or Cmd-Shift-P
       event.preventDefault()
-      onDebugProjectClick()
+      runProject { debug: true }
     return
 
   # Project info
   document.querySelector('.project .project-name').textContent = projectId
 
-  document.querySelector('.project-buttons .run').addEventListener 'click', onRunProjectClick
+  document.querySelector('.project-buttons .run').addEventListener 'click', => runProject()
   if window.nwDispatcher?
-    document.querySelector('.project-buttons .debug').addEventListener 'click', onDebugProjectClick
+    document.querySelector('.project-buttons .debug').addEventListener 'click', => runProject { debug: true }
   else
     document.querySelector('.project-buttons .debug').style.display = 'none'
 
@@ -303,25 +303,38 @@ onDependenciesRemoved = (id, depIds) ->
   return
 
 # User interface
-onRunProjectClick = ->
-  window.open 'data:text/html;charset=utf-8,Building...', 'player'
+
+# Make sure windows have a frame in NW.js
+gui = window.nwDispatcher?.requireNwGui()
+if gui?
+  nwWindow = gui.Window.get()
+  nwWindow.on 'new-win-policy', (frame, url, policy) ->
+    options =
+      min_width: 800, min_height: 480
+      width: 1000, height: 600
+      toolbar: false, frame: true
+
+    if url.substring(0, 'data:'.length) == 'data:'
+      options.width = 800
+      options.height = 480
+
+    policy.setNewWindowManifest options
+    return
+
+buildingHTML = 'data:text/html;charset=utf-8,<body><div>Building...</div><style>body { display: flex; align-items: center; justify-content: center; font-family: Arial; }</style></body>'
+
+runProject = (options={}) ->
+  window.open buildingHTML, 'player'
 
   socket.emit 'build:project', (err, buildId) ->
     if err? then alert err; return
+    url = "/player?project=#{info.projectId}&build=#{buildId}"
+    if options.debug then url += "&debug"
 
-    window.open "/player?project=#{info.projectId}&build=#{buildId}", 'player'
+    window.open url, 'player'
     return
   return
 
-onDebugProjectClick = ->
-  window.open 'data:text/html;charset=utf-8,Building...', 'player'
-
-  socket.emit 'build:project', (err, buildId) ->
-    if err? then alert err; return
-
-    window.open "/player?project=#{info.projectId}&build=#{buildId}&debug", 'player'
-    return
-  return
 
 createEntryElement = (entry) ->
   liElt = document.createElement('li')
@@ -428,8 +441,8 @@ onMessageHotKey = (action) =>
     when 'closeTab'    then onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
     when 'previousTab' then onActivatePreviousTab()
     when 'nextTab'     then onActivateNextTab()
-    when 'run'         then onRunProjectClick()
-    when 'debug'       then onDebugProjectClick()
+    when 'run'         then runProject()
+    when 'debug'       then runProject { debug: true }
   return
 
 onClickToggleNotifications = (event) ->
