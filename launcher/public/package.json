@@ -6,10 +6,8 @@
     "icon": "icon.png",
     "width": 800,
     "height": 480,
-    "min_width": 800,
-    "min_height": 480,
     "toolbar": false,
-    "frame": true,
+    "frame": false,
     "resizable": false
   },
   "node-remote": "*"

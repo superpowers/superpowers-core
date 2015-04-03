@@ -7,14 +7,20 @@ body
   background #eee
   display flex
   flex-flow column
+  border 1px solid #666
 
 .pane-buttons
-  background #ccc
+  background #fff
+  border-bottom 1px solid rgba(0,0,0,0.2)
+  -webkit-app-region drag
 
   > button
-    background #aaa
+    outline none
+    -webkit-app-region no-drag
+    background #f5f5f5
     padding 0.75em 1em
     border none
+    border-right 1px solid rgba(0,0,0,0.2)
     text-transform uppercase
 
     &.active
@@ -23,8 +29,7 @@ body
       font-weight bold
 
     &:not(.active):hover
-      background #888
-      color #fff
+      background #ccc
 
 .panes
   flex 1
@@ -51,3 +56,30 @@ body
 a:hover
   text-decoration none
   color #66f
+
+.controls
+  position absolute
+  top 1px
+  right 1px
+  font-size 0
+
+  button
+    width 30px
+    height 25px
+    border none
+    outline none
+    -webkit-app-region no-drag
+
+  .minimize
+    background url(images/controls/minimize-window.svg)
+    &:hover
+      background url(images/controls/minimize-window-hover.svg)
+    &:active
+      background url(images/controls/minimize-window-active.svg)
+
+  .close
+    background url(images/controls/close-window.svg)
+    &:hover
+      background url(images/controls/close-window-hover.svg)
+    &:active
+      background url(images/controls/close-window-active.svg)

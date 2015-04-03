@@ -2,8 +2,8 @@ doctype html
 html
   head
     title Superpowers
+    meta(charset="utf8")
     link(rel="stylesheet",href="index.css")
-
   body
     .pane-buttons
       button.servers Servers
@@ -20,6 +20,10 @@ html
 
     .splash
       include splash/index
+
+    .controls
+      button.minimize
+      button.close
 
     script.
       window.nodeProcess = process;
