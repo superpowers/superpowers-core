@@ -109,7 +109,9 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     @server.data.entries.add entry, options?.parentId, options?.index, (err, actualIndex) =>
       if err? then callback? err; return
 
-      @server.data.internals.setProperty 'nextEntryId', @server.data.internals.pub.nextEntryId + 1
+      @server.data.internals.setProperty 'nextEntryId', @server.data.internals.pub.nextEntryId + 1, (err) =>
+        if err? then callback err
+        return
 
       newAssetPath = path.join(@server.projectPath, "assets/#{entry.id}")
 
