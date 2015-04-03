@@ -18,7 +18,7 @@ class Projects extends ListById {
 
     while (true) {
       id = _.sample(characters, 4).join('');
-      if (this.byId[id] != null) break;
+      if (this.byId[id] == null) break;
     }
 
     return id;
