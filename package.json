@@ -18,7 +18,7 @@
     "gulp-typescript": "^2.5.0",
     "gulp-util": "^3.0.3",
     "nib": "^1.1.0",
-    "typescript": "^1.4.1",
+    "typescript": "1.4.1",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^2.3.0"
   },
