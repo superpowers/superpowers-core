@@ -56,6 +56,7 @@ class Room extends SupData.base.Hash {
     if (item != null) {
       item.connectionCount++;
       callback(null, item);
+      return;
     }
 
     item = { id: client.socket.username, connectionCount: 1 };
@@ -76,6 +77,7 @@ class Room extends SupData.base.Hash {
     if (item.connectionCount > 1) {
       item.connectionCount--;
       callback(null, client.socket.username);
+      return;
     }
 
     this.users.remove(client.socket.username, (err) => {
