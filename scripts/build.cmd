@@ -16,6 +16,8 @@ call gulp
 
 cd ../system/SupEngine
 call npm install
+call tsd reinstall
+call tsd rebundle
 call gulp
 
 cd ../SupRuntime

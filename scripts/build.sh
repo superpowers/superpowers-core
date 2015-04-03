@@ -3,7 +3,7 @@ cd .. && npm install
 cd SupCore && tsd reinstall && tsd rebundle && gulp
 cd ../SupClient && gulp
 cd ../SupAPI && gulp
-cd ../system/SupEngine && npm install && gulp
+cd ../system/SupEngine && npm install && tsd reinstall && tsd rebundle && gulp
 cd ../SupRuntime && gulp
 cd ../player && gulp
 cd ../../client && gulp
