@@ -71,7 +71,10 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     @server.data.entries.add entry, options?.parentId, options?.index, (err, actualIndex) =>
       if err? then callback? err; return
 
-      @server.data.internals.setProperty 'nextEntryId', @server.data.internals.pub.nextEntryId + 1
+      # setProperty is synchronous
+      @server.data.internals.setProperty 'nextEntryId', @server.data.internals.pub.nextEntryId + 1, (err) =>
+        if err? then callback err
+        return
 
       onEntryCreated = =>
         @server.io.in('sub:entries').emit 'add:entries', entry, options?.parentId, actualIndex
