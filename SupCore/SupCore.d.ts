@@ -45,7 +45,7 @@ declare module SupCore {
       diagnosticsByEntryId: { [key: number]: any };
       dependenciesByAssetId: any;
 
-      constructor(pub, nextId: number);
+      constructor(pub, nextId?: number);
       add(node, parentId: string, index: number, callback: (err: string, index?: number) => any);
       client_add(node, parentId: string, index: number);
       move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any);
@@ -137,7 +137,7 @@ declare module SupCore {
         byId: { [key: string]: any };
         parentNodesById: { [key: string]: any };
 
-        constructor(pub, schema, nextId: number);
+        constructor(pub, schema, nextId?: number);
         walk(callback: (node: any, parentNode?: any) => any);
         getPathFromId(id: string): string;
         add(node: any, parentId: string, index: number, callback: (err: string, index?: number) => any);

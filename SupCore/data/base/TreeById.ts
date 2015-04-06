@@ -9,7 +9,7 @@ class TreeById extends events.EventEmitter {
   byId: { [key: string]: any };
   parentNodesById: { [key: string]: any };
 
-  constructor(pub, schema, nextId: number) {
+  constructor(pub, schema, nextId?: number) {
     super();
     this.pub = pub;
     this.schema = schema;

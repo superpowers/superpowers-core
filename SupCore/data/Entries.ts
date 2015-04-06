@@ -11,7 +11,7 @@ class Entries extends SupData.base.TreeById {
   diagnosticsByEntryId: { [key: number]: any };
   dependenciesByAssetId: any;
 
-  constructor(pub, nextId: number) {
+  constructor(pub, nextId?: number) {
     super(pub, Entries.schema, nextId);
 
     this.diagnosticsByEntryId = {}
