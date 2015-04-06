@@ -17,7 +17,8 @@ class Projects extends ListById {
     var id: string = null;
 
     while (true) {
-      id = _.sample(characters, 4).join('');
+      id = "";
+      for (var i = 0; i < 4; i++) id += _.sample(characters);
       if (this.byId[id] == null) break;
     }
 
