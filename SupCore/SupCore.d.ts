@@ -1,4 +1,4 @@
-///<reference path="typings/node/node.d.ts"/>
+///<reference path="../typings/tsd.d.ts"/>
 
 declare module SupCore {
   function log(message: string);

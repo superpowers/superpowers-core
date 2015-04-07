@@ -1,3 +1,5 @@
+/// <reference path="./typings/socket.io-client/socket.io-client.d.ts" />
+
 declare module SupClient {
   var pluginPaths: string;
 
