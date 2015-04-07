@@ -7,14 +7,14 @@ class Asset extends Hash {
   id: string;
   serverData: any;
 
-  constructor(id, pub, schema, serverData) {
+  constructor(id: string, pub: any, schema: any, serverData: any) {
     super(pub, schema);
     this.id = id;
     this.serverData = serverData;
     if (this.pub != null) this.setup();
   }
 
-  init(options, callback: Function) { this.setup(); callback(); }
+  init(options: any, callback: Function) { this.setup(); callback(); }
 
   setup() {}
 
@@ -39,7 +39,7 @@ class Asset extends Hash {
     fs.writeFile(path.join(assetPath, "asset.json"), json, { encoding: 'utf8' }, callback);
   }
 
-  server_setProperty(client, path, value, callback: (err: string, path?: string, value?: any) => any) {
+  server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any) {
     this.setProperty(path, value, (err, actualValue) => {
       if (err != null) { callback(err); return; }
 

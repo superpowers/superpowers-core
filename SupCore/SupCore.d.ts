@@ -168,9 +168,9 @@ declare module SupCore {
         id: string;
         serverData: any;
 
-        constructor(id, pub, schema, serverData);
+        constructor(id: string, pub: any, schema: any, serverData: any);
         // OVERRIDE: Make sure to call super(callback). Called when creating a new asset
-        init(options, callback: Function);
+        init(options: any, callback: Function);
 
         // OVERRIDE: Called when creating/loading an asset
         setup();
@@ -188,7 +188,7 @@ declare module SupCore {
         load(assetPath: string);
         unload();
         save(assetPath: string, callback: (err: Error) => any);
-        server_setProperty(client, path, value, callback: (err: string, path?: string, value?: any) => any);
+        server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any);
       }
 
       class Resource extends Hash {
