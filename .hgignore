@@ -7,6 +7,8 @@ plugins/sparklinlabs/*/public/**.html
 bin/
 SupCore/**.js
 SupCore/typings/*
+SupClient/**.js
+SupClient/typings/*
 SupAPI/**.js
 syntax: regexp
 ^projects/
