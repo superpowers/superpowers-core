@@ -2,7 +2,7 @@ import io = require("socket.io-client");
 
 export import ProjectClient = require("./ProjectClient");
 export import component = require("./component");
-export import dialogs = require("./dialogs");
+export import dialogs = require("./dialogs/index");
 
 var pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous
