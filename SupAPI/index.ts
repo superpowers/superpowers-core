@@ -1,6 +1,8 @@
 export var contexts = {};
 
-export function registerPlugin(contextName: string, pluginName: string, plugin: any) {
+export function registerPlugin(contextName: string, pluginName: string,
+  plugin: {code: string, defs: string, exposeActorComponent?: {propertyName: string; className: string}}) {
+
   if (contexts[contextName] == null) contexts[contextName] = { plugins: {} };
 
   if (contexts[contextName].plugins[pluginName] != null) {
