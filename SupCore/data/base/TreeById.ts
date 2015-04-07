@@ -181,7 +181,7 @@ class TreeById extends events.EventEmitter {
     this.emit('change');
   }
 
-  client_setProperty(id: number, key: string, value: any) {
+  client_setProperty(id: string, key: string, value: any) {
     this.byId[id][key] = value;
   }
 }

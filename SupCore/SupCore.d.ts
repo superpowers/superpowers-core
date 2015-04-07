@@ -147,7 +147,7 @@ declare module SupCore {
         remove(id: string, callback: (err: string) => any);
         client_remove(id: string);
         setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any);
-        client_setProperty(id: number, key: string, value: any);
+        client_setProperty(id: string, key: string, value: any);
       }
 
       class Dictionary extends EventEmitter {
