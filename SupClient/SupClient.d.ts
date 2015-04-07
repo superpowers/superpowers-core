@@ -1,7 +1,7 @@
 declare module SupClient {
   var pluginPaths: string;
 
-  function connect(projectId: string, options: {reconnection: boolean; promptCredentials: boolean;});
+  function connect(projectId: string, options?: {reconnection: boolean; promptCredentials: boolean;}): SocketIOClient.Socket;
   function onAssetTrashed();
   function onDisconnected();
   function setupHotkeys();
@@ -24,6 +24,7 @@ declare module SupClient {
   module dialogs {
     function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
       options: {type?: string; pattern?: string;}|((value: string) => any), callback: (value: string) => any);
+    function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string, callback: (value: string) => any);
     function confirm(label: string, validationLabel: string, callback: (value: boolean) => any);
     function info(label: string, validationLabel: string, callback: () => any);
     function select(label: string, options: {[value: string]: string}, validationLabel: string, callback: (value: string) => any);
