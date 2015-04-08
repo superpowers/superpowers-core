@@ -1,4 +1,4 @@
-export function createSetting(parentElt: HTMLDivElement, name: string, options: {checkbox?: boolean; title?: string;}):
+export function createSetting(parentElt: HTMLDivElement, name: string, options?: {checkbox?: boolean; title?: string;}):
 {rowElt: HTMLTableRowElement; keyElt: HTMLTableHeaderCellElement; valueElt: HTMLTableDataCellElement; checkboxElt: HTMLInputElement;} {
   var rowElt = document.createElement('tr');
   parentElt.appendChild(rowElt);
@@ -60,7 +60,7 @@ export function createBooleanField(parentElt: HTMLTableDataCellElement, value: b
   return inputElt;
 }
 
-export function createSelectBox(parentElt: HTMLTableDataCellElement, options: {[value: string]: string;}, initialValue: string): HTMLSelectElement {
+export function createSelectBox(parentElt: HTMLTableDataCellElement, options: {[value: string]: string;}, initialValue = ""): HTMLSelectElement {
   var selectElt = document.createElement('select');
   parentElt.appendChild(selectElt);
 

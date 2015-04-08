@@ -14,12 +14,12 @@ declare module SupClient {
   function findEntryByPath(entries: any, path: string|string[]): any;
 
   module component {
-    function createSetting(parentElt: HTMLDivElement, name: string, options: {checkbox?: boolean; title?: string;}):
+    function createSetting(parentElt: HTMLDivElement, name: string, options?: {checkbox?: boolean; title?: string;}):
       {rowElt: HTMLTableRowElement; keyElt: HTMLTableHeaderCellElement; valueElt: HTMLTableDataCellElement; checkboxElt: HTMLInputElement;};
     function createTextField(parentElt: HTMLTableDataCellElement, value: string): HTMLInputElement;
     function createNumberField(parentElt: HTMLTableDataCellElement, value: any, min?: any, max?: any): HTMLInputElement;
     function createBooleanField(parentElt: HTMLTableDataCellElement, value: boolean): HTMLInputElement;
-    function createSelectBox(parentElt: HTMLTableDataCellElement, options: {[value: string]: string;}, initialValue: string): HTMLSelectElement;
+    function createSelectBox(parentElt: HTMLTableDataCellElement, options: {[value: string]: string;}, initialValue?: string): HTMLSelectElement;
     function createSelectOption(parentElt: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
   }
 
