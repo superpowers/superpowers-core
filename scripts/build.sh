@@ -1,10 +1,10 @@
 pushd $(dirname $0)
-cd .. && npm install
+cd .. && npm install && tsd reinstall && tsd rebundle
 cd SupCore && tsd reinstall && tsd rebundle && gulp
-cd ../SupClient && gulp
+cd ../SupClient && tsd reinstall && tsd rebundle && gulp
 cd ../SupAPI && gulp
 cd ../system/SupEngine && npm install && tsd reinstall && tsd rebundle && gulp
-cd ../SupRuntime && gulp
+cd ../SupRuntime && tsd reinstall && tsd rebundle && gulp
 cd ../player && gulp
 cd ../../client && gulp
 cd ../launcher && gulp

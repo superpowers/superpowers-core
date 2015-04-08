@@ -2,6 +2,8 @@ pushd %~dp0
 
 cd ..
 call npm install
+call tsd reinstall
+call tsd rebundle
 
 cd SupCore
 call tsd reinstall
@@ -9,6 +11,8 @@ call tsd rebundle
 call gulp
 
 cd ../SupClient
+call tsd reinstall
+call tsd rebundle
 call gulp
 
 cd ../SupAPI
@@ -21,6 +25,8 @@ call tsd rebundle
 call gulp
 
 cd ../SupRuntime
+call tsd reinstall
+call tsd rebundle
 call gulp
 
 cd ../player
