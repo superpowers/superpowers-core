@@ -18,7 +18,7 @@ function select(label: string, options: {[value: string]: string}, validationLab
     selectElt.appendChild(optionElt);
   }
 
-  var onKeyDown = (event) => {
+  var onKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
       event.preventDefault();
       document.body.removeChild(dialogElt);

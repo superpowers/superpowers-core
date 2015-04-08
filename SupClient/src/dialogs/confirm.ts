@@ -14,7 +14,7 @@ function confirm(label: string, validationLabel: string, callback: (value: boole
   buttonsElt.className = "buttons";
   messageElt.appendChild(buttonsElt);
 
-  var onKeyUp = (event) => {
+  var onKeyUp = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
       document.body.removeChild(dialogElt);
       document.removeEventListener("keyup", onKeyUp);

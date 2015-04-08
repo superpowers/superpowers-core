@@ -4,9 +4,9 @@ declare module SupClient {
   var pluginPaths: string;
 
   function connect(projectId: string, options?: {reconnection: boolean; promptCredentials: boolean;}): SocketIOClient.Socket;
-  function onAssetTrashed();
-  function onDisconnected();
-  function setupHotkeys();
+  function onAssetTrashed(): void;
+  function onDisconnected(): void;
+  function setupHotkeys(): void;
   function getTreeViewInsertionPoint(treeView: any): { parentId: number; index: number };
 
   function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById): { parentId: number; index: number };
@@ -25,12 +25,13 @@ declare module SupClient {
 
   module dialogs {
     function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
-      options: {type?: string; pattern?: string;}|((value: string) => any), callback: (value: string) => any);
-    function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string, callback: (value: string) => any);
-    function confirm(label: string, validationLabel: string, callback: (value: boolean) => any);
-    function info(label: string, validationLabel: string, callback: () => any);
-    function select(label: string, options: {[value: string]: string}, validationLabel: string, callback: (value: string) => any);
-    function filter(list: string[], placeholder: string, callback: (value: string) => any);
+      options: {type?: string; pattern?: string;}|((value: string) => any), callback: (value: string) => any): void;
+    function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
+      callback: (value: string) => any): void;
+    function confirm(label: string, validationLabel: string, callback: (value: boolean) => any): void;
+    function info(label: string, validationLabel: string, callback: () => any): void;
+    function select(label: string, options: {[value: string]: string}, validationLabel: string, callback: (value: string) => any): void;
+    function filter(list: string[], placeholder: string, callback: (value: string) => any): void;
   }
 
   class ProjectClient {
@@ -47,27 +48,27 @@ declare module SupClient {
 
     constructor(socket: SocketIOClient.Socket, options: {subEntries: boolean});
 
-    subEntries(subscriber: EntriesSubscriber);
-    unsubEntries(subscriber: EntriesSubscriber);
+    subEntries(subscriber: EntriesSubscriber): void;
+    unsubEntries(subscriber: EntriesSubscriber): void;
 
-    subAsset(assetId: string, assetType: string, subscriber: AssetSubscriber);
-    unsubAsset(assetId: string, subscriber: AssetSubscriber);
-    subResource(resourceId: string, subscriber: ResourceSubscriber);
-    unsubResource(resourceId: string, subscriber: ResourceSubscriber);
+    subAsset(assetId: string, assetType: string, subscriber: AssetSubscriber): void;
+    unsubAsset(assetId: string, subscriber: AssetSubscriber): void;
+    subResource(resourceId: string, subscriber: ResourceSubscriber): void;
+    unsubResource(resourceId: string, subscriber: ResourceSubscriber): void;
   }
 }
 
 interface EntriesSubscriber {
   onEntriesReceived(entries: SupCore.data.Entries): void;
   onEntryAdded(entry: any, parentId: string, index: number): void;
-  onEntryMoved(id: string, parentId: string, index): void;
+  onEntryMoved(id: string, parentId: string, index: number): void;
   onSetEntryProperty(id: string, key: string, value: any): void;
   onEntryTrashed(id: string): void;
 }
 
 interface AssetSubscriber {
   onAssetReceived(assetId: string, asset: any): void;
-  onAssetEdited(assetId: string, command: string, ...args): void;
+  onAssetEdited(assetId: string, command: string, ...args: any[]): void;
   onAssetTrashed(assetId: string): void;
 }
 

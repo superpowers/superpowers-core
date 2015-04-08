@@ -17,16 +17,16 @@ function filter(list: string[], placeholder: string, callback: (value: string) =
   labelParentElt.className = "filter-parent";
   messageElt.appendChild(labelParentElt);
 
-  var labelElts = [];
+  var labelElts: HTMLDivElement[] = [];
   var selectedIndex: number;
 
-  var selectResult = (index) => {
+  var selectResult = (index: number) => {
     selectedIndex = index;
     labelElts[index].className = "selected";
     labelParentElt.scrollTop = (index - 3) * 20;
   }
 
-  var onKeyDown = (event) => {
+  var onKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 38) {
       event.preventDefault();
       if (selectedIndex != null && selectedIndex > 0) {
@@ -43,7 +43,7 @@ function filter(list: string[], placeholder: string, callback: (value: string) =
     }
   }
 
-  var onKeyUp = (event) => {
+  var onKeyUp = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
       document.body.removeChild(dialogElt);
       document.removeEventListener("keyup", onKeyUp);

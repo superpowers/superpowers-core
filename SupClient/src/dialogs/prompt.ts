@@ -27,7 +27,7 @@ function prompt(label: string, placeholder: string, initialValue: string, valida
   inputElt.placeholder = (placeholder) ? placeholder : "";
   inputElt.value = (initialValue) ? initialValue : "";
 
-  var onKeyUp = (event) => {
+  var onKeyUp = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
       document.body.removeChild(dialogElt);
       document.removeEventListener("keyup", onKeyUp);

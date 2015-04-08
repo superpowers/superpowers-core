@@ -8,7 +8,7 @@ var pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous
 pluginsXHR.send(null);
 
-var internalPluginPaths;
+var internalPluginPaths: string;
 if (pluginsXHR.status == 200) internalPluginPaths = JSON.parse(pluginsXHR.responseText);
 export var pluginPaths = internalPluginPaths;
 
@@ -40,11 +40,11 @@ function onSocketError(error: string) {
   }
 }
 
-function promptServerPassword(callback) {
+function promptServerPassword(callback: (password: string) => any) {
   dialogs.prompt("Please enter the server password.", '', '', "Connect", { type: 'password' }, callback);
 }
 
-function promptUsername(callback) {
+function promptUsername(callback: (username: string) => any) {
   dialogs.prompt("Please choose a username.", '', '', "Connect", { pattern: '[A-Za-z0-9_]{3,20}' }, callback);
 }
 
@@ -189,7 +189,7 @@ export function findEntryByPath(entries: any, path: string|string[]) {
   var parts = (typeof path === 'string') ? path.split('/') : path;
   var foundEntry: any;
 
-  entries.every((entry) => {
+  entries.every((entry: any) => {
     if (entry.name === parts[0]) {
       if (parts.length === 1) {
         foundEntry = entry;

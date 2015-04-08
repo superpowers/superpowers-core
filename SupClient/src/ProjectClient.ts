@@ -1,14 +1,14 @@
 interface EntriesSubscriber {
   onEntriesReceived(entries: SupCore.data.Entries): void;
   onEntryAdded(entry: any, parentId: string, index: number): void;
-  onEntryMoved(id: string, parentId: string, index): void;
+  onEntryMoved(id: string, parentId: string, index: number): void;
   onSetEntryProperty(id: string, key: string, value: any): void;
   onEntryTrashed(id: string): void;
 }
 
 interface AssetSubscriber {
   onAssetReceived(assetId: string, asset: any): void;
-  onAssetEdited(assetId: string, command: string, ...args): void;
+  onAssetEdited(assetId: string, command: string, ...args: any[]): void;
   onAssetTrashed(assetId: string): void;
 }
 
@@ -67,11 +67,11 @@ class ProjectClient {
     }
   }
 
-  sub(assetId, assetType, subscriber) {
+  sub(assetId: string, assetType: string, subscriber: AssetSubscriber) {
     console.warn("ProjectClient.sub has been deprecated and will be removed soon. Please use ProjectClient.subAsset instead.");
     this.subAsset(assetId, assetType, subscriber)
   }
-  unsub(assetId, subscriber) {
+  unsub(assetId: string, subscriber: AssetSubscriber) {
     console.warn("ProjectClient.unsub has been deprecated and will be removed soon. Please use ProjectClient.unsubAsset instead.");
     this.unsubAsset(assetId, subscriber);
   }
@@ -191,7 +191,7 @@ class ProjectClient {
     subscribers.forEach((subscriber) => { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); })
   }
 
-  _onEntriesReceived(err, entries: any) {
+  _onEntriesReceived(err: string, entries: any) {
     this.entries = new SupCore.data.Entries(entries);
 
     this.socket.on('add:entries', this._onEntryAdded);
