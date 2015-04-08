@@ -1,15 +1,22 @@
 import base = require("./index");
 import events = require("events");
 
+interface TreeNode {
+  id: string;
+  name: string;
+  children?: TreeNode[];
+  [name: string]: any;
+}
+
 class TreeById extends events.EventEmitter {
-  pub: any;
+  pub: TreeNode[];
   schema: any;
   nextId: number;
 
-  byId: { [key: string]: any };
-  parentNodesById: { [key: string]: any };
+  byId: { [key: string]: TreeNode };
+  parentNodesById: { [key: string]: TreeNode };
 
-  constructor(pub, schema, nextId?: number) {
+  constructor(pub: any, schema: any, nextId?: number) {
     super();
     this.pub = pub;
     this.schema = schema;
@@ -20,7 +27,7 @@ class TreeById extends events.EventEmitter {
 
     var maxNodeId = -1;
     this.walk( (node, parentNode) => {
-      maxNodeId = Math.max(maxNodeId, node.id);
+      maxNodeId = Math.max(maxNodeId, parseInt(node.id));
       this.byId[node.id] = node;
       this.parentNodesById[node.id] = parentNode;
     });
@@ -28,8 +35,8 @@ class TreeById extends events.EventEmitter {
     if (this.nextId == null) this.nextId = maxNodeId + 1;
   }
 
-  walk(callback: (node: any, parentNode?: any) => any) {
-    var walkRecurse = (node: any, parentNode?: any) => {
+  walk(callback: (node: TreeNode, parentNode?: TreeNode) => any) {
+    var walkRecurse = (node: TreeNode, parentNode?: TreeNode) => {
       callback(node, parentNode);
 
       if (node.children != null) {
@@ -52,7 +59,7 @@ class TreeById extends events.EventEmitter {
     return name;
   }
 
-  add(node: any, parentId: string, index: number, callback: (err: string, index?: number) => any) {
+  add(node: TreeNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     if (node.id != null && this.schema.id == null) { callback("Found unexpected id key"); return; }
 
     var siblings = this.pub;
@@ -72,7 +79,10 @@ class TreeById extends events.EventEmitter {
 
     if (missingKeys.length > 0) { callback(`Missing key: ${missingKeys[0]}`); return; }
 
-    if (node.id == null) node.id = this.nextId++;
+    if (node.id == null) {
+      node.id = this.nextId.toString();
+      this.nextId++;
+    }
     this.byId[node.id] = node;
     this.parentNodesById[node.id] = this.byId[parentId];
 
@@ -84,7 +94,7 @@ class TreeById extends events.EventEmitter {
     this.emit('change');
   }
 
-  client_add(node, parentId: string, index: number) {
+  client_add(node: TreeNode, parentId: string, index: number) {
     var siblings = this.pub;
     if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     siblings.splice(index, 0, node);

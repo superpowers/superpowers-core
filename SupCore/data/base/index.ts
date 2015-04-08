@@ -6,7 +6,31 @@ export import Asset = require("./Asset");
 export import Resource = require("./Resource");
 export import ComponentConfig = require("./ComponentConfig");
 
-export function getRuleViolation(value, rule, create = false): { message: string; path?: string } {
+interface Rule {
+  mutable: boolean;
+  type: string;
+
+  // Number
+  min?: number;
+  max?: number;
+
+  // String
+  length?: string;
+  minLength?: string;
+  maxLength?: string;
+
+  // Enum or Array
+  items?: Rule|string[];
+
+  // Hash
+  keys?: {length?: string; minLength?: string; maxLength?: string;}
+  values?: Rule;
+  properties?: {[key: string]: Rule};
+}
+interface Violation {
+  message: string; path?: string;
+}
+export function getRuleViolation(value: any, rule: Rule, create = false): Violation {
   if (!create && ! rule.mutable) return { message: "Immutable" };
 
   var optional = rule.type[rule.type.length - 1] == "?";
@@ -44,14 +68,15 @@ export function getRuleViolation(value, rule, create = false): { message: string
     case "enum": {
       if (typeof value !== "string") return { message: "Expected string for enum" };
 
-      if (rule.items.indexOf(value) == -1) return { message: `Invalid enum value: ${value}` };
+      var items = <string[]>rule.items;
+      if (items.indexOf(value) == -1) return { message: `Invalid enum value: ${value}` };
       break;
     }
 
     case "hash": {
       if (typeof value !== "object") return { message: "Expected hash" };
 
-      var ruleProperties = (rule.properties != null) ? rule.properties : {};
+      var ruleProperties: {[key: string]: Rule} = (rule.properties != null) ? rule.properties : {};
       var missingKeys = Object.keys(ruleProperties);
 
       for (var key in value) {
@@ -85,7 +110,7 @@ export function getRuleViolation(value, rule, create = false): { message: string
       }
 
       // Ignore optional keys
-      var actualMissingKeys = [];
+      var actualMissingKeys: string[] = [];
       missingKeys.forEach((missingKey) => {
         var missingKeyRuleType = ruleProperties[missingKey].type;
         if (missingKeyRuleType[missingKeyRuleType.length - 1] != "?") actualMissingKeys.push(missingKey);
@@ -101,8 +126,8 @@ export function getRuleViolation(value, rule, create = false): { message: string
       if (rule.minLength != null && value.length < rule.minLength) return { message: `Array length (${value.length}) is less than minimum length (${rule.minLength})` };
       if (rule.maxLength != null && value.length > rule.maxLength) return { message: `Array length (${value.length}) is greater than maximum length (${rule.maxLength})` };
 
-      value.forEach((item,index) => {
-        var violation = getRuleViolation(item, rule.items, true);
+      value.forEach((item: any,index: number) => {
+        var violation = getRuleViolation(item, <Rule>rule.items, true);
         if (violation != null) {
           var violationPath = (violation.path != null) ? `[${index}].${violation.path}` : `[${index}]`;
           return { message: violation.message, path: violationPath };
@@ -123,7 +148,7 @@ export function getRuleViolation(value, rule, create = false): { message: string
   return null;
 }
 
-export function formatRuleViolation(violation): string {
+export function formatRuleViolation(violation: Violation): string {
   if (violation == null) return "No error";
 
   var text = violation.message;

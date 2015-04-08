@@ -8,7 +8,7 @@ class RoomUsers extends ListById {
     // username: { type: 'string', minLength: 3, maxLength: 20 }
   }
 
-  constructor(pub) {
+  constructor(pub: any) {
     super(pub, RoomUsers.schema);
   }
 }

@@ -1,7 +1,7 @@
 import Hash = require("./Hash");
 
 class ComponentConfig extends Hash {
-  constructor(pub, schema) {
+  constructor(pub: any, schema: any) {
     super(pub, schema);
   }
 
@@ -9,7 +9,7 @@ class ComponentConfig extends Hash {
 
   destroy() {}
 
-  server_setProperty(client, path, value, callback) {
+  server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any) {
     this.setProperty(path, value, (err, actualValue) => {
       if (err != null) { callback(err); return; }
 

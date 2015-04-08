@@ -5,7 +5,7 @@ class Members extends ListById {
     cachedUsername: { type: 'string' }
   }
 
-  constructor(pub) {
+  constructor(pub: any[]) {
     super(pub, Members.schema);
   }
 }

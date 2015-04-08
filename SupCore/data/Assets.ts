@@ -4,12 +4,12 @@ import path = require("path");
 class Assets extends SupData.base.Dictionary {
   server: any;
 
-  constructor(server) {
+  constructor(server: any) {
     super();
     this.server = server;
   }
 
-  acquire(id: string, owner, callback: (err: Error) => any) {
+  acquire(id: string, owner: any, callback: (err: Error) => any) {
     if (this.server.data.entries.byId[id] == null || this.server.data.entries.byId[id].type == null) { callback(new Error(`Invalid asset id: ${id}`)); return; }
 
     super.acquire(id, owner, callback);

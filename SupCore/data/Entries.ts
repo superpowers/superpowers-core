@@ -1,5 +1,16 @@
 import SupData = require("./index");
 
+interface EntryNode {
+  id: string;
+  name: string;
+  children?: EntryNode[];
+  [name: string]: any;
+
+  type?: string;
+  diagnostics?: string[];
+  dependentAssetIds?: any[];
+}
+
 class Entries extends SupData.base.TreeById {
   static schema = {
     name: { type: 'string', minLength: 1, maxLength: 80, mutable: true },
@@ -8,16 +19,13 @@ class Entries extends SupData.base.TreeById {
     dependentAssetIds: { type: 'array', items: { type: 'integer' } }
   }
 
-  diagnosticsByEntryId: { [key: number]: any };
-  dependenciesByAssetId: any;
+  diagnosticsByEntryId: { [key: string]: SupData.Diagnostics } = {};
+  dependenciesByAssetId: any = {};
 
-  constructor(pub, nextId?: number) {
+  constructor(pub: any, nextId?: number) {
     super(pub, Entries.schema, nextId);
 
-    this.diagnosticsByEntryId = {}
-    this.dependenciesByAssetId = {}
-
-    this.walk((node, parentNode) => {
+    this.walk((node: EntryNode, parentNode: EntryNode) => {
       if (node.type == null) return;
 
       if (node.diagnostics == null) node.diagnostics = [];
@@ -26,7 +34,7 @@ class Entries extends SupData.base.TreeById {
     });
   }
 
-  add(node, parentId: string, index: number, callback: (err: string, index?: number) => any) {
+  add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     if (node.type != null && SupData.assetClasses[node.type] == null) { callback("Invalid asset type"); return; }
 
     super.add(node, parentId, index, (err, actualIndex) => {
@@ -47,7 +55,7 @@ class Entries extends SupData.base.TreeById {
     });
   }
 
-  client_add(node, parentId: string, index: number) {
+  client_add(node: EntryNode, parentId: string, index: number) {
     super.client_add(node, parentId, index);
     this.diagnosticsByEntryId[node.id] = new SupData.Diagnostics(node.diagnostics);
   }
@@ -67,7 +75,7 @@ class Entries extends SupData.base.TreeById {
   }
 
   remove(id: string, callback: (err: string) => any) {
-    var node = this.byId[id];
+    var node = <EntryNode>this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
     if (node.type == null && node.children.length != 0) { callback("The folder must be empty"); return; }
 
@@ -88,12 +96,12 @@ class Entries extends SupData.base.TreeById {
   }
 
   getForStorage() {
-    var entries = [];
-    var entriesById = {};
+    var entries: EntryNode[] = [];
+    var entriesById: {[id: string]: EntryNode} = {};
 
-    this.walk((entry, parentEntry) => {
-      var savedEntry = { id: entry.id, name: entry.name, type: entry.type, children: [] };
-      if (entry.children == null) delete savedEntry.children;
+    this.walk((entry: EntryNode, parentEntry: EntryNode) => {
+      var savedEntry: EntryNode = { id: entry.id, name: entry.name, type: entry.type };
+      if (entry.children != null) savedEntry.children = [];
       entriesById[savedEntry.id] = savedEntry;
 
       if (parentEntry == null) entries.push(savedEntry);

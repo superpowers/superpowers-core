@@ -6,7 +6,7 @@ class Internals extends Hash {
     nextEntryId: { type: 'integer', min: 0, mutable: true }
   }
 
-  constructor(pub) {
+  constructor(pub: any) {
     super(pub, Internals.schema);
   }
 }

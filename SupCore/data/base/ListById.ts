@@ -2,14 +2,14 @@ import base = require("./index");
 import events = require("events");
 
 class ListById extends events.EventEmitter {
-  pub: Array<any>;
+  pub: any[];
   schema: any;
   generateNextId: Function;
   nextId = 0;
 
-  byId = {};
+  byId: {[id: string]: any} = {};
 
-  constructor(pub, schema, generateNextId?: Function) {
+  constructor(pub: any[], schema: any, generateNextId?: Function) {
     super();
     this.pub = pub;
     this.schema = schema;
@@ -28,7 +28,7 @@ class ListById extends events.EventEmitter {
     }
   }
 
-  add(item, index: number, callback: (err: string, index?: number) => any) {
+  add(item: any, index: number, callback: (err: string, index?: number) => any) {
     if (item.id != null && this.schema.id == null) { callback("Found unexpected id key"); return; }
 
     var missingKeys = Object.keys(this.schema);
@@ -55,12 +55,12 @@ class ListById extends events.EventEmitter {
     this.emit("change");
   }
 
-  client_add(item, index: number) {
+  client_add(item: any, index: number) {
     this.byId[item.id] = item;
     this.pub.splice(index, 0, item);
   }
 
-  move(id, index, callback: (err: string, index?: number) => any) {
+  move(id: string, index: number, callback: (err: string, index?: number) => any) {
     var item = this.byId[id];
     if (item == null) { callback(`Invalid item id: ${id}`); return; }
 
@@ -77,14 +77,14 @@ class ListById extends events.EventEmitter {
     this.emit('change');
   }
 
-  client_move(id, newIndex: number) {
+  client_move(id: string, newIndex: number) {
     var item = this.byId[id];
 
     this.pub.splice(this.pub.indexOf(item), 1);
     this.pub.splice(newIndex, 0, item);
   }
 
-  remove(id, callback: (err: string, index?: number) => any) {
+  remove(id: string, callback: (err: string, index?: number) => any) {
     var item = this.byId[id];
     if (item == null) { callback(`Invalid item id: ${id}`); return; }
 
@@ -96,7 +96,7 @@ class ListById extends events.EventEmitter {
     this.emit('change');
   }
 
-  client_remove(id) {
+  client_remove(id: string) {
     var item = this.byId[id];
     this.pub.splice(this.pub.indexOf(item), 1);
     delete this.byId[id];
@@ -105,7 +105,7 @@ class ListById extends events.EventEmitter {
   // clear: ->
 
   // FIXME: Replace key with path and support nested properties
-  setProperty(id, key: string, value, callback: (err: string, value?: any) => any) {
+  setProperty(id: string, key: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {
     var item = this.byId[id];
     if (item == null) { callback(`Invalid item id: ${id}`); return; }
 
@@ -120,7 +120,7 @@ class ListById extends events.EventEmitter {
     this.emit('change');
   }
 
-  client_setProperty(id, key: string, value) {
+  client_setProperty(id: string, key: string, value: number|string|boolean) {
     this.byId[id][key] = value;
   }
 }

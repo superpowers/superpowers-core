@@ -5,21 +5,19 @@ import path = require("path");
 // They might be used for project-wide plugin-specific settings for instance
 class Resources extends SupData.base.Dictionary {
   server: any;
-  resourceClassesById: any;
 
-  constructor(server, resourceClassesById) {
+  constructor(server: any) {
     super()
     this.server = server;
-    this.resourceClassesById = resourceClassesById;
   }
 
-  acquire(id: string, owner, callback: (err: Error, item?: any) => any) {
+  acquire(id: string, owner: any, callback: (err: Error, item?: any) => any) {
     if (SupData.resourceClasses[id] == null) { callback(new Error(`Invalid resource id: ${id}`)); return; }
 
     super.acquire(id, owner, callback);
   }
 
-  _load(id) {
+  _load(id: string) {
     var resourceClass = SupData.resourceClasses[id];
 
     var resource = new resourceClass(null, this.server.data);

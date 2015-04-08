@@ -20,7 +20,7 @@ class Room extends SupData.base.Hash {
 
   users: SupData.RoomUsers;
 
-  constructor(pub) {
+  constructor(pub: any) {
     super(pub, Room.schema);
 
     if (this.pub != null) this.users = new SupData.RoomUsers(this.pub.users);

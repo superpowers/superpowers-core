@@ -4,7 +4,7 @@ class Dictionary extends events.EventEmitter {
   byId: { [key: string]: any; };
   refCountById: { [key: string]: number; };
   unloadDelaySeconds: number;
-  unloadTimeoutsById = {};
+  unloadTimeoutsById: {[id: string]: NodeJS.Timer} = {};
 
   constructor(unloadDelaySeconds = 60) {
     super();
@@ -44,7 +44,7 @@ class Dictionary extends events.EventEmitter {
     });
   }
 
-  release(id: string, owner: any, options?) {
+  release(id: string, owner: any, options?: {skipUnloadDelay: boolean}) {
     if (this.refCountById[id] == null) throw new Error(`Can't release ${id}, ref count is null`);
 
     this.refCountById[id]--;

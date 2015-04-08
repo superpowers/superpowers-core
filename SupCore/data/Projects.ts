@@ -9,7 +9,7 @@ class Projects extends ListById {
     description: { type: "string", maxLength: 300 }
   }
 
-  constructor(pub) {
+  constructor(pub: any[]) {
     super(pub, Projects.schema, this.generateProjectId);
   }
 

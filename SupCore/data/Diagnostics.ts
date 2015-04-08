@@ -7,7 +7,7 @@ class Diagnostics extends ListById {
     data: { type: "any" }
   }
 
-  constructor(pub) {
+  constructor(pub: any[]) {
     super(pub, Diagnostics.schema);
   }
 }

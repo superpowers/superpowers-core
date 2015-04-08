@@ -5,14 +5,14 @@ class Hash extends events.EventEmitter {
   pub: any;
   schema: any;
 
-  constructor(pub, schema) {
+  constructor(pub: any, schema: any) {
     super()
 
     this.pub = pub;
     this.schema = schema;
   }
 
-  setProperty(path: string, value, callback: (err: string, value?: any) => any) {
+  setProperty(path: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {
     var parts = path.split('.');
 
     var rule = this.schema[parts[0]];
@@ -30,7 +30,7 @@ class Hash extends events.EventEmitter {
     this.emit('change');
   }
 
-  client_setProperty(path: string, value) {
+  client_setProperty(path: string, value: number|string|boolean) {
     var parts = path.split('.');
 
     var obj = this.pub;

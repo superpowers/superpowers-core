@@ -7,7 +7,7 @@ class Manifest extends Hash {
     description: { type: 'string', maxLength: 300, mutable: true }
   }
 
-  constructor(pub) {
+  constructor(pub: any) {
     super(pub, Manifest.schema);
   }
 }

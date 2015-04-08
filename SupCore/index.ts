@@ -3,7 +3,7 @@
 
 export import data = require("./data/index");
 
-export function log(message: string) {
+export function log(message: string): void {
   var text = `${new Date().toISOString() } - ${message}`;
   console.log(text);
 
