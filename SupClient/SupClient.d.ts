@@ -46,7 +46,7 @@ declare module SupClient {
     resourcesById: {[resourceId: string]: any};
     subscribersByResourceId: {[assetId: string]: ResourceSubscriber[]};
 
-    constructor(socket: SocketIOClient.Socket, options: {subEntries: boolean});
+    constructor(socket: SocketIOClient.Socket, options?: {subEntries: boolean});
 
     subEntries(subscriber: EntriesSubscriber): void;
     unsubEntries(subscriber: EntriesSubscriber): void;

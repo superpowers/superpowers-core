@@ -31,7 +31,7 @@ class ProjectClient {
 
   _keepEntriesSubscription: boolean;
 
-  constructor(socket: SocketIOClient.Socket, options: {subEntries: boolean}) {
+  constructor(socket: SocketIOClient.Socket, options?: {subEntries: boolean}) {
     this.socket = socket;
     this.socket.on('edit:assets', this._onAssetEdited.bind(this));
     this.socket.on('trash:assets', this._onAssetTrashed.bind(this));
