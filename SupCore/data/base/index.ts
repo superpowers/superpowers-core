@@ -48,8 +48,8 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
 
     case "number":
     case "integer": {
-      if (typeof value !== "number") return { message: "Expected number" };
-      if (ruleType === "integer" && (value % 1) !== 0) return { message: "Expected an integer" };
+      if (typeof value !== "number") return { message: `Expected ${ruleType}` };
+      if (ruleType === "integer" && (value % 1) !== 0) return { message: "Expected integer" };
 
       if (rule.min != null && value < rule.min) return { message: `Value (${value}) is less than minimum value (${rule.min})` };
       if (rule.max != null && value > rule.max) return { message: `Value (${value}) is greater than maximum value (${rule.max})` };
