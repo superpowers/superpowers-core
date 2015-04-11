@@ -23,14 +23,15 @@ schemas.projectMembers =
   items:
     type: 'object'
     properties:
-      id: { type: 'integer' }
+      id: { type: 'string' }
       cachedUsername: { type: 'string' }
 
 # Project entries
 projectEntry =
   type: 'object'
   properties:
-    id: { type: 'integer' }
+    # IDs used to be integers but are now serialized as strings
+    id: { type: [ 'integer', 'string' ] }
     name: { type: 'string', minLength: 1, maxLength: 80 }
     type: { type: [ 'string', 'null' ] }
     children:
