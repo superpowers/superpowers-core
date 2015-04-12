@@ -13,6 +13,10 @@ module.exports = (projectId) ->
   clone = document.importNode template.content, true
   document.body.appendChild clone
 
+  # Workaround for NW.js bug: https://github.com/nwjs/nw.js/issues/3360
+  if navigator.platform == 'MacIntel'
+    document.querySelector('.tabs-bar').style.webkitAppRegion = 'no-drag'
+
   # Hot-keys
   document.addEventListener 'keydown', (event) =>
     if event.keyCode == 79 and (event.ctrlKey or event.metaKey) # CTRL-O
