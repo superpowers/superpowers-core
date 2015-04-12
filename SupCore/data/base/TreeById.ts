@@ -27,6 +27,9 @@ class TreeById extends events.EventEmitter {
 
     var maxNodeId = -1;
     this.walk( (node, parentNode) => {
+      // TODO: Remove this cast at some point, legacy stuff from Superpowers 0.4
+      if(typeof node.id == 'number') node.id = node.id.toString();
+
       maxNodeId = Math.max(maxNodeId, parseInt(node.id));
       this.byId[node.id] = node;
       this.parentNodesById[node.id] = parentNode;

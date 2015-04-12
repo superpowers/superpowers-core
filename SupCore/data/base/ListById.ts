@@ -18,6 +18,9 @@ class ListById extends events.EventEmitter {
     var maxItemId = -1;
 
     this.pub.forEach((item) => {
+      // TODO: Remove this cast at some point, legacy stuff from Superpowers 0.4
+      if(typeof item.id == 'number') item.id = item.id.toString();
+
       this.byId[item.id] = item;
       maxItemId = Math.max(maxItemId, item.id);
     });
