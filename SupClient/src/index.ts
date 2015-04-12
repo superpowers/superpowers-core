@@ -159,6 +159,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
     case 'inside': {
       parentNode = treeById.byId[targetEntryId];
       index = parentNode.children.length;
+      break;
     }
     case 'above':
     case 'below': {
@@ -168,6 +169,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
       index = (parentNode != null) ? parentNode.children.indexOf(targetNode) : treeById.pub.indexOf(targetNode);
 
       if (dropInfo.where === 'below') index++;
+      break;
     }
   }
 
