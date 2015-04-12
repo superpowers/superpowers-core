@@ -5,7 +5,7 @@ exports.hasRequestedClose = false
 
 exports.serverEntries =
   if serversJSON? then JSON.parse serversJSON
-  else [ { name: "My Server", address: "127.0.0.1:80" } ]
+  else [ { name: "My Server", address: "127.0.0.1:4237" } ]
 
 autoStartServer = localStorage.getItem 'superpowers.autoStartServer'
 exports.autoStartServer = if autoStartServer? then JSON.parse autoStartServer else true

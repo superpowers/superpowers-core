@@ -1,4 +1,4 @@
 module.exports =
-  port: 80
+  port: 4237
   password: ''
   maxRecentBuilds: 50
