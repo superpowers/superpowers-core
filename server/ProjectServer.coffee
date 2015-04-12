@@ -68,12 +68,12 @@ module.exports = class ProjectServer
             cb(); return
 
         (cb) =>
-          fs.readdir path.join(@projectPath, 'builds'), (err, entries) ->
+          fs.readdir path.join(@projectPath, 'builds'), (err, entryIds) ->
             if err? and err.code != 'ENOENT' then cb err; return
 
-            if entries?
-              for entry in entries
-                entryBuildId = parseInt(entry)
+            if entryIds?
+              for entryId in entryIds
+                entryBuildId = parseInt(entryId)
                 continue if Number.isNaN(entryBuildId)
                 internalsData.nextBuildId = Math.max entryBuildId + 1, internalsData.nextBuildId
 
