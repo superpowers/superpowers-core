@@ -16,7 +16,7 @@ class Entries extends SupData.base.TreeById {
     name: { type: 'string', minLength: 1, maxLength: 80, mutable: true },
     type: { type: 'string?' },
     diagnostics: { type: 'listById?' },
-    dependentAssetIds: { type: 'array', items: { type: 'integer' } }
+    dependentAssetIds: { type: 'array', items: { type: 'string' } }
   }
 
   diagnosticsByEntryId: { [key: string]: SupData.Diagnostics } = {};

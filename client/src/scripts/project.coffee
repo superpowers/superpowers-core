@@ -370,7 +370,7 @@ createEntryElement = (entry) ->
 onEntryDrop = (dropInfo, orderedNodes) ->
   { parentId, index } = SupClient.getTreeViewDropPoint dropInfo, data.entries
 
-  entryIds = ( parseInt(entry.dataset.id) for entry in orderedNodes )
+  entryIds = ( entry.dataset.id for entry in orderedNodes )
 
   sourceParentNode = data.entries.parentNodesById[entryIds[0]]
   sourceChildren = sourceParentNode?.children ? data.entries.pub
@@ -534,7 +534,7 @@ onTrashEntryClick = ->
             return
 
         for selectedNode in ui.entriesTreeView.selectedNodes
-          entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
+          entry = data.entries.byId[selectedNode.dataset.id]
           trashEntry entry
 
         ui.entriesTreeView.clearSelection()
@@ -557,13 +557,13 @@ onTrashEntryClick = ->
       checkNextEntry()
 
   for selectedNode in ui.entriesTreeView.selectedNodes
-    selectedEntries.push data.entries.byId[parseInt(selectedNode.dataset.id)]
+    selectedEntries.push data.entries.byId[selectedNode.dataset.id]
   warnBrokenDependence selectedEntries[0]
   return
 
 onOpenInNewWindowClick = (event) ->
   id = event.target.parentElement.dataset.id
-  entry = data.entries.byId[parseInt(id)]
+  entry = data.entries.byId[id]
   window.open "#{window.location.origin}/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{entry.id}"
   return
 
@@ -571,7 +571,7 @@ onRenameEntryClick = ->
   return if ui.entriesTreeView.selectedNodes.length != 1
 
   selectedNode = ui.entriesTreeView.selectedNodes[0]
-  entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
+  entry = data.entries.byId[selectedNode.dataset.id]
 
   SupClient.dialogs.prompt "Enter a new name for the asset.", null, entry.name, "Rename", (newName) =>
     return if ! newName? or newName == entry.name
@@ -586,7 +586,7 @@ onDuplicateEntryClick = ->
   return if ui.entriesTreeView.selectedNodes.length != 1
 
   selectedNode = ui.entriesTreeView.selectedNodes[0]
-  entry = data.entries.byId[parseInt(selectedNode.dataset.id)]
+  entry = data.entries.byId[selectedNode.dataset.id]
   return if ! entry.type?
 
   SupClient.dialogs.prompt "Enter a name for the new asset.", null, entry.name, "Duplicate", (newName) =>

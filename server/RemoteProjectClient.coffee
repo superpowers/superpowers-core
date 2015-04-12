@@ -156,7 +156,6 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
       if dependencies?
         removedDependencyEntryIds = []
         for depId in dependencies
-          depId = parseInt(depId) if typeof depId == 'string'
           depEntry = @server.data.entries.byId[depId]
           if ! depEntry? then continue
 

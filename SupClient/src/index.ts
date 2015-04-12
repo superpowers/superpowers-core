@@ -132,11 +132,11 @@ export function getTreeViewInsertionPoint(treeView: any) {
 
   if (selectedElt != null) {
     if (selectedElt.classList.contains('group')) {
-      parentId = parseInt(selectedElt.dataset.id);
+      parentId = selectedElt.dataset.id;
     }
     else {
       if (selectedElt.parentElement.classList.contains('children')) {
-        parentId = parseInt(selectedElt.parentElement.previousSibling.dataset.id);
+        parentId = selectedElt.parentElement.previousSibling.dataset.id;
       }
 
       index = 1
@@ -154,7 +154,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
   var index: number;
 
   var parentNode: any;
-  var targetEntryId = parseInt(dropInfo.target.dataset.id);
+  var targetEntryId = dropInfo.target.dataset.id;
 
   switch (dropInfo.where) {
     case 'inside': {
@@ -177,7 +177,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
 }
 
 export function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById) {
-  var targetEntryId = parseInt(dropInfo.target.dataset.id);
+  var targetEntryId = dropInfo.target.dataset.id;
   var targetNode = listById.byId[targetEntryId];
 
   var index = listById.pub.indexOf(targetNode)

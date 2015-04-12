@@ -284,7 +284,6 @@ module.exports = class ProjectServer
     return
 
   _addDependencies: (assetId, dependencyEntryIds) =>
-    assetId = parseInt(assetId) if typeof assetId == 'string'
     addedDependencyEntryIds = []
     missingAssetIds = []
 
@@ -293,7 +292,6 @@ module.exports = class ProjectServer
     for depId in dependencyEntryIds
       assetDependencies.push depId
 
-      depId = parseInt(depId) if typeof depId == 'string'
       depEntry = @data.entries.byId[depId]
       if ! depEntry? then missingAssetIds.push depId; continue
 
@@ -313,7 +311,6 @@ module.exports = class ProjectServer
     return
 
   _removeDependencies: (assetId, dependencyEntryIds) =>
-    assetId = parseInt(assetId) if typeof assetId == 'string'
     removedDependencyEntryIds = []
     missingAssetIds = []
 
@@ -322,7 +319,6 @@ module.exports = class ProjectServer
     for depId in dependencyEntryIds
       assetDependencies.splice assetDependencies.indexOf(depId), 1
 
-      depId = parseInt(depId) if typeof depId == 'string'
       depEntry = @data.entries.byId[depId]
       if ! depEntry? then missingAssetIds.push depId; continue
 
