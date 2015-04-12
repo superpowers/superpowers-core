@@ -34,17 +34,21 @@ httpServer.on 'error', (err) =>
 # Load plugins
 fs = require 'fs'
 
-pluginsPath = "#{__dirname}/../plugins"
 shouldIgnorePlugin = (pluginName) -> pluginName.indexOf('.') != -1 or pluginName == 'node_modules'
+
+pluginsPath = "#{__dirname}/../plugins"
+pluginNamesByAuthor = {}
+for pluginAuthor in fs.readdirSync pluginsPath
+  pluginAuthorPath = "#{pluginsPath}/#{pluginAuthor}"
+  pluginNamesByAuthor[pluginAuthor] = ( pluginName for pluginName in fs.readdirSync(pluginAuthorPath) when ! shouldIgnorePlugin pluginName )
 
 # First pass
 requiredPluginFiles = [ 'data', 'components', 'componentEditors', 'api', 'runtime' ]
 
-for pluginAuthor in fs.readdirSync pluginsPath
+for pluginAuthor, pluginNames of pluginNamesByAuthor
   pluginAuthorPath = "#{pluginsPath}/#{pluginAuthor}"
 
-  for pluginName in fs.readdirSync pluginAuthorPath
-    continue if shouldIgnorePlugin pluginName
+  for pluginName in pluginNames
     pluginPath = "#{pluginAuthorPath}/#{pluginName}"
 
     # Load scripting API module
@@ -62,11 +66,10 @@ for pluginAuthor in fs.readdirSync pluginsPath
 # Second pass, because data modules might depend on API modules
 pluginsInfo = { all: [], editorsByAssetType: {}, toolsByName: {} }
 
-for pluginAuthor in fs.readdirSync pluginsPath
+for pluginAuthor, pluginNames of pluginNamesByAuthor
   pluginAuthorPath = "#{pluginsPath}/#{pluginAuthor}"
 
-  for pluginName in fs.readdirSync pluginAuthorPath
-    continue if shouldIgnorePlugin pluginName
+  for pluginName in pluginNames
     pluginPath = "#{pluginAuthorPath}/#{pluginName}"
 
     # Load data module
