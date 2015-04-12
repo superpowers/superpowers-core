@@ -33,9 +33,9 @@ class ProjectClient {
 
   constructor(socket: SocketIOClient.Socket, options?: {subEntries: boolean}) {
     this.socket = socket;
-    this.socket.on('edit:assets', this._onAssetEdited.bind(this));
-    this.socket.on('trash:assets', this._onAssetTrashed.bind(this));
-    this.socket.on('edit:resources', this._onResourceEdited.bind(this));
+    this.socket.on('edit:assets', this._onAssetEdited);
+    this.socket.on('trash:assets', this._onAssetTrashed);
+    this.socket.on('edit:resources', this._onResourceEdited);
 
     // Allow keeping an entries subscription alive at all times
     // Used in the scene editor to avoid constantly unsub'ing & resub'ing
@@ -134,7 +134,7 @@ class ProjectClient {
     }
   }
 
-  _onAssetReceived(assetId: string, assetType: string, err: string, assetData: any) {
+  _onAssetReceived = (assetId: string, assetType: string, err: string, assetData: any) => {
     // FIXME: The asset was probably trashed in the meantime, handle that
     if (err != null) {
       console.warn(`Got an error in ProjectClient._onAssetReceived: ${err}`);
@@ -148,7 +148,7 @@ class ProjectClient {
     subscribers.forEach((subscriber) => { subscriber.onAssetReceived(assetId, asset); })
   }
 
-  _onAssetEdited(assetId: string, command: string, ...args: any[]) {
+  _onAssetEdited = (assetId: string, command: string, ...args: any[]) => {
     var subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
@@ -158,7 +158,7 @@ class ProjectClient {
     subscribers.forEach((subscriber) => { subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args)); })
   }
 
-  _onAssetTrashed(assetId: string) {
+  _onAssetTrashed = (assetId: string) => {
     var subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
@@ -168,7 +168,7 @@ class ProjectClient {
     delete this.subscribersByAssetId[assetId];
   }
 
-  _onResourceReceived(resourceId: string, err: string, resourceData: any) {
+  _onResourceReceived = (resourceId: string, err: string, resourceData: any) => {
     if (err != null) {
       console.warn(`Got an error in ProjectClient._onResourceReceived: ${err}`);
       return;
@@ -181,7 +181,7 @@ class ProjectClient {
     subscribers.forEach((subscriber) => { subscriber.onResourceReceived(resourceId, resource); })
   }
 
-  _onResourceEdited(resourceId: string, command: string, ...args: any[]) {
+  _onResourceEdited = (resourceId: string, command: string, ...args: any[]) => {
     var subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
@@ -191,7 +191,7 @@ class ProjectClient {
     subscribers.forEach((subscriber) => { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); })
   }
 
-  _onEntriesReceived(err: string, entries: any) {
+  _onEntriesReceived = (err: string, entries: any) => {
     this.entries = new SupCore.data.Entries(entries);
 
     this.socket.on('add:entries', this._onEntryAdded);
@@ -202,28 +202,28 @@ class ProjectClient {
     this.entriesSubscribers.forEach((subscriber) => { subscriber.onEntriesReceived(this.entries); })
   }
 
-  _onEntryAdded(entry: any, parentId: string, index: number) {
+  _onEntryAdded = (entry: any, parentId: string, index: number) => {
     this.entries.client_add(entry, parentId, index);
     this.entriesSubscribers.forEach((subscriber) => {
       subscriber.onEntryAdded(entry, parentId, index);
     });
   }
 
-  _onEntryMoved(id: string, parentId: string, index: number) {
+  _onEntryMoved = (id: string, parentId: string, index: number) => {
     this.entries.client_move(id, parentId, index);
     this.entriesSubscribers.forEach((subscriber) => {
       subscriber.onEntryMoved(id, parentId, index);
     });
   }
 
-  _onSetEntryProperty(id: string, key: string, value: any) {
+  _onSetEntryProperty = (id: string, key: string, value: any) => {
     this.entries.client_setProperty(id, key, value);
     this.entriesSubscribers.forEach((subscriber) => {
       subscriber.onSetEntryProperty(id, key, value);
     })
   }
 
-  _onEntryTrashed(id: string) {
+  _onEntryTrashed = (id: string) => {
     this.entries.client_remove(id);
     this.entriesSubscribers.forEach((subscriber) => {
       subscriber.onEntryTrashed(id);
