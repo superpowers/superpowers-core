@@ -34,11 +34,12 @@ httpServer.on 'error', (err) =>
 # Load plugins
 fs = require 'fs'
 
-pluginsInfo = { all: [], editorsByAssetType: {}, toolsByName: {} }
-requiredPluginFiles = [ 'data', 'components', 'componentEditors', 'api', 'runtime' ]
+pluginsPath = "#{__dirname}/../plugins"
 shouldIgnorePlugin = (pluginName) -> pluginName.indexOf('.') != -1 or pluginName == 'node_modules'
 
-pluginsPath = "#{__dirname}/../plugins"
+# First pass
+requiredPluginFiles = [ 'data', 'components', 'componentEditors', 'api', 'runtime' ]
+
 for pluginAuthor in fs.readdirSync pluginsPath
   pluginAuthorPath = "#{pluginsPath}/#{pluginAuthor}"
 
@@ -50,10 +51,6 @@ for pluginAuthor in fs.readdirSync pluginsPath
     apiModulePath = "#{pluginPath}/api"
     require apiModulePath if fs.existsSync apiModulePath
 
-    # Load data module
-    dataModulePath = "#{pluginPath}/data"
-    require dataModulePath if fs.existsSync dataModulePath
-
     # Expose public stuff
     app.use "/plugins/#{pluginAuthor}/#{pluginName}", express.static "#{pluginPath}/public"
 
@@ -61,6 +58,20 @@ for pluginAuthor in fs.readdirSync pluginsPath
     for requiredFile in requiredPluginFiles
       requiredFilePath = "#{pluginPath}/public/#{requiredFile}.js"
       if ! fs.existsSync requiredFilePath then fs.closeSync fs.openSync(requiredFilePath, 'w')
+
+# Second pass, because data modules might depend on API modules
+pluginsInfo = { all: [], editorsByAssetType: {}, toolsByName: {} }
+
+for pluginAuthor in fs.readdirSync pluginsPath
+  pluginAuthorPath = "#{pluginsPath}/#{pluginAuthor}"
+
+  for pluginName in fs.readdirSync pluginAuthorPath
+    continue if shouldIgnorePlugin pluginName
+    pluginPath = "#{pluginAuthorPath}/#{pluginName}"
+
+    # Load data module
+    dataModulePath = "#{pluginPath}/data"
+    require dataModulePath if fs.existsSync dataModulePath
 
     # Collect plugin info
     pluginsInfo.all.push "#{pluginAuthor}/#{pluginName}"
