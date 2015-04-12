@@ -26,7 +26,11 @@ class ListById extends events.EventEmitter {
     });
 
     if (this.generateNextId == null) {
-      this.generateNextId = () => { return this.nextId++; };
+      this.generateNextId = () => {
+        var id = this.nextId.toString();
+        this.nextId++;
+        return id;
+      };
       this.nextId = maxItemId + 1;
     }
   }
