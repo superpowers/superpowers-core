@@ -75,9 +75,21 @@ module.exports = (projectId) ->
   ui.openInNewWindowButton.addEventListener 'click', onOpenInNewWindowClick
 
   # Tab strip
-  ui.tabStrip = new TabStrip document.querySelector('.tabs-bar')
+  tabsBarElt = document.querySelector('.tabs-bar')
+  ui.tabStrip = new TabStrip tabsBarElt
   ui.tabStrip.on 'activateTab', onTabActivate
   ui.tabStrip.on 'closeTab', onTabClose
+
+  # Prevent <iframe> panes from getting mouse event while dragging tabs
+  restorePanesMouseEvent = (event) ->
+    ui.panesElt.style.pointerEvents = ''
+    document.removeEventListener 'mouseup', restorePanesMouseEvent
+    return
+
+  tabsBarElt.addEventListener 'mousedown', (event) ->
+    ui.panesElt.style.pointerEvents = 'none'
+    document.addEventListener 'mouseup', restorePanesMouseEvent
+    return
 
   # Global controls
   toggleNotificationsButton = document.querySelector('.top .controls button.toggle-notifications')
