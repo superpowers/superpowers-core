@@ -96,7 +96,6 @@ export function setupHotkeys() {
 
     // IE workaround for window.location.origin
     var origin = `${window.location.protocol}//${window.location.host}`
-    if (window.location.port !== "") origin += `:${window.location.port}`;
 
     if (event.keyCode === 79 && (event.ctrlKey || event.metaKey) && document.querySelector(".dialog") == null) { // CTRL-O
       event.preventDefault()
