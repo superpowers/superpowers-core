@@ -80,7 +80,7 @@ class ProjectClient {
     var subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) {
       subscribers = this.subscribersByAssetId[assetId] = [];
-      this.socket.emit('sub', 'assets', assetId, this._onAssetReceived.bind(this), assetId, assetType);
+      this.socket.emit('sub', 'assets', assetId, this._onAssetReceived.bind(this, assetId, assetType));
     }
     else {
       var asset = this.assetsById[assetId];
@@ -109,7 +109,7 @@ class ProjectClient {
     var subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) {
       subscribers = this.subscribersByResourceId[resourceId] = [];
-      this.socket.emit('sub', 'resources', resourceId, this._onResourceReceived.bind(this), resourceId);
+      this.socket.emit('sub', 'resources', resourceId, this._onResourceReceived.bind(this, resourceId));
     }
     else {
       var resource = this.resourcesById[resourceId];
