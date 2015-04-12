@@ -241,6 +241,10 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
         if err? then callback? err; return
 
         @server.io.in("sub:assets:#{id}").emit 'edit:assets', id, command, callbackArgs...
+
+        # If the first parameter has an id, send it back to the client
+        # Useful so that they can grab the thing they created
+        # (It's a bit of a hack, but has proven useful)
         callback? null, callbackArgs[0]?.id
       return
     return
