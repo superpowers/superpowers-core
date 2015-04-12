@@ -94,8 +94,8 @@ export function setupHotkeys() {
   document.addEventListener('keydown', (event) => {
     if (window.parent == null) return;
 
-    // IE workaround for window.location.origin
-    var origin = `${window.location.protocol}//${window.location.host}`
+    // window.location.origin isn't listed in lib.d.ts as of TypeScript 1.4
+    var origin: string = (<any>window.location).origin;
 
     if (event.keyCode === 79 && (event.ctrlKey || event.metaKey) && document.querySelector(".dialog") == null) { // CTRL-O
       event.preventDefault()
