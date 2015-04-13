@@ -39,15 +39,15 @@ class TreeById extends events.EventEmitter {
   }
 
   walk(callback: (node: TreeNode, parentNode?: TreeNode) => any) {
-    var walkRecurse = (node: TreeNode, parentNode?: TreeNode) => {
-      callback(node, parentNode);
+    this.pub.forEach((node) => { this.walkNode(node, null, callback); });
+  }
 
-      if (node.children != null) {
-        node.children.forEach((child) => { walkRecurse(child, node); });
-      }
-    };
+  walkNode(node: TreeNode, parentNode: TreeNode, callback: (node: TreeNode, parentNode?: TreeNode) => any) {
+    callback(node, parentNode);
 
-    this.pub.forEach((node) => { walkRecurse(node); });
+    if (node.children != null) {
+      node.children.forEach((child) => { this.walkNode(child, node, callback); });
+    }
   }
 
   getPathFromId(id: string): string {
@@ -159,8 +159,10 @@ class TreeById extends events.EventEmitter {
     var siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     siblings.splice(siblings.indexOf(node), 1);
 
-    delete this.parentNodesById[id];
-    delete this.byId[id];
+    this.walkNode(node, null, (node: TreeNode, parentNode?: TreeNode) => {
+      delete this.parentNodesById[node.id];
+      delete this.byId[node.id];
+    });
 
     callback(null);
     this.emit('change');
@@ -172,8 +174,10 @@ class TreeById extends events.EventEmitter {
     var siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     siblings.splice(siblings.indexOf(node), 1);
 
-    delete this.parentNodesById[id];
-    delete this.byId[id];
+    this.walkNode(node, null, (node: TreeNode, parentNode?: TreeNode) => {
+      delete this.parentNodesById[node.id];
+      delete this.byId[node.id];
+    });
   }
 
   // clear() {}
