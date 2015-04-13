@@ -13,10 +13,10 @@ interface EntryNode {
 
 class Entries extends SupData.base.TreeById {
   static schema = {
-    name: { type: 'string', minLength: 1, maxLength: 80, mutable: true },
-    type: { type: 'string?' },
-    diagnostics: { type: 'listById?' },
-    dependentAssetIds: { type: 'array', items: { type: 'string' } }
+    name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
+    type: { type: "string?" },
+    diagnostics: { type: "array?" },
+    dependentAssetIds: { type: "array", items: { type: "string" } }
   }
 
   diagnosticsByEntryId: { [key: string]: SupData.Diagnostics } = {};
@@ -84,8 +84,8 @@ class Entries extends SupData.base.TreeById {
 
 
   setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any) {
-    if (key == 'name') {
-      if (typeof (value) != 'string') { callback("Invalid value"); return; }
+    if (key == "name") {
+      if (typeof (value) != "string") { callback("Invalid value"); return; }
       value = value.trim();
 
       var siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
