@@ -16,9 +16,10 @@ export import Room = require("./Room");
 export import RoomUsers = require("./RoomUsers");
 
 export function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean {
-  siblings.forEach((sibling) => {
+  for(var i = 0; i < siblings.length; i++) {
+    var sibling = siblings[i];
     if (sibling.id != id && sibling.name === name) return true;
-  });
+  }
   return false;
 }
 
