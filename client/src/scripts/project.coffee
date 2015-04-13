@@ -368,7 +368,7 @@ createEntryElement = (entry) ->
 
   if entry.type?
     liElt.addEventListener 'mouseenter', (event) -> liElt.appendChild ui.openInNewWindowButton; return
-    liElt.addEventListener 'mouseleave', (event) -> liElt.removeChild ui.openInNewWindowButton; return
+    liElt.addEventListener 'mouseleave', (event) -> ui.openInNewWindowButton.parentElement?.removeChild ui.openInNewWindowButton; return
 
     diagnosticsSpan = document.createElement('span')
     diagnosticsSpan.className = 'diagnostics'
