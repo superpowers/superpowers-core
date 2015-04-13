@@ -126,13 +126,15 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       if (rule.minLength != null && value.length < rule.minLength) return { message: `Array length (${value.length}) is less than minimum length (${rule.minLength})` };
       if (rule.maxLength != null && value.length > rule.maxLength) return { message: `Array length (${value.length}) is greater than maximum length (${rule.maxLength})` };
 
-      value.forEach((item: any,index: number) => {
-        var violation = getRuleViolation(item, <Rule>rule.items, true);
-        if (violation != null) {
-          var violationPath = (violation.path != null) ? `[${index}].${violation.path}` : `[${index}]`;
-          return { message: violation.message, path: violationPath };
-        }
-      });
+      if(rule.items != null) {
+        value.forEach((item: any,index: number) => {
+          var violation = getRuleViolation(item, <Rule>rule.items, true);
+          if (violation != null) {
+            var violationPath = (violation.path != null) ? `[${index}].${violation.path}` : `[${index}]`;
+            return { message: violation.message, path: violationPath };
+          }
+        });
+      }
       break;
     }
 

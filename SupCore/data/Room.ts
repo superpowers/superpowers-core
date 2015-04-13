@@ -12,7 +12,7 @@ class Room extends SupData.base.Hash {
           timestamp: { type: "number" },
           author: { type: "string" },
           text: { type: "string" },
-          users: { type: "listById" }
+          users: { type: "array" }
         }
       }
     }
