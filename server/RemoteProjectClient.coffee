@@ -28,6 +28,9 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     # Assets
     @socket.on 'edit:assets', @_onEditAsset
 
+    # Resources
+    @socket.on 'edit:resources', @_onEditResource
+
     # Rooms
     @socket.on 'edit:rooms', @_onEditRoom
 
@@ -241,6 +244,32 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
         if err? then callback? err; return
 
         @server.io.in("sub:assets:#{id}").emit 'edit:assets', id, command, callbackArgs...
+
+        # If the first parameter has an id, send it back to the client
+        # Useful so that they can grab the thing they created
+        # (It's a bit of a hack, but has proven useful)
+        callback? null, callbackArgs[0]?.id
+      return
+    return
+
+  # Resources
+  _onEditResource: (id, command, args..., callback) =>
+    return if ! @errorIfCant 'editResources', callback
+
+    if ! command? then callback? "Invalid command"; return
+
+    commandMethod = SupCore.data.resourceClasses[id].prototype["server_#{command}"]
+    if ! commandMethod? then callback? "Invalid command"; return
+    # if ! callback? then @server.log "Ignoring edit:assets command, missing a callback"; return
+
+    @server.data.resources.acquire id, null, (err, resource) =>
+      if err? then callback? err; return
+
+      commandMethod.call resource, @, args..., (err, callbackArgs...) =>
+        @server.data.resources.release id
+        if err? then callback? err; return
+
+        @server.io.in("sub:resources:#{id}").emit 'edit:resources', id, command, callbackArgs...
 
         # If the first parameter has an id, send it back to the client
         # Useful so that they can grab the thing they created
