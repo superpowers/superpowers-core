@@ -93,18 +93,21 @@ for pluginAuthor, pluginNames of pluginNamesByAuthor
 
 fs.writeFileSync "#{__dirname}/../public/plugins.json", JSON.stringify(pluginsInfo)
 
-# Project hub
-ProjectHub = require './ProjectHub'
-hub = new ProjectHub io, paths.projects, (err) ->
-  if err? then SupCore.log "Failed to start server:\n#{err.stack}"; return
+hub = null
 
-  SupCore.log "Loaded #{Object.keys(hub.serversById).length} projects from #{paths.projects}."
+require('./buildFiles').init pluginNamesByAuthor, ->
+  # Project hub
+  ProjectHub = require './ProjectHub'
+  hub = new ProjectHub io, paths.projects, (err) ->
+    if err? then SupCore.log "Failed to start server:\n#{err.stack}"; return
 
-  hostname = if config.password.length == 0 then 'localhost' else ''
+    SupCore.log "Loaded #{Object.keys(hub.serversById).length} projects from #{paths.projects}."
 
-  httpServer.listen config.port, hostname,  ->
-    SupCore.log "Server started on port #{config.port}."
-    if hostname == 'localhost' then SupCore.log "NOTE: Setup a password to allow other people to connect to your server."
+    hostname = if config.password.length == 0 then 'localhost' else ''
+
+    httpServer.listen config.port, hostname,  ->
+      SupCore.log "Server started on port #{config.port}."
+      if hostname == 'localhost' then SupCore.log "NOTE: Setup a password to allow other people to connect to your server."
 
 # Save on exit and handle crashes
 isQuitting = false

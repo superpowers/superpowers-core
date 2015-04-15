@@ -10,7 +10,6 @@ exports.userData = path.join(__dirname, '..')
 
 if argv['data-path']?
   exports.userData = path.resolve argv['data-path']
-  console.log exports.userData
 else
   switch process.platform
     when "win32"

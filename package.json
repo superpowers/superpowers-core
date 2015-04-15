@@ -37,6 +37,7 @@
     "socket.io-client": "^1.3.5",
     "tab-strip": "^1.0.3",
     "tv4": "^1.1.9",
+    "typedarray-to-buffer": "^3.0.1",
     "yargs": "^3.6.0"
   }
 }

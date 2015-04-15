@@ -1,9 +1,11 @@
 BaseRemoteClient = require './BaseRemoteClient'
 config = require './config'
+buildFiles = require './buildFiles'
 path = require 'path'
 fs = require 'fs'
 rimraf = require 'rimraf'
 async = require 'async'
+readdirRecursive = require 'recursive-readdir'
 _ = require 'lodash'
 
 module.exports = class RemoteProjectClient extends BaseRemoteClient
@@ -358,15 +360,24 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
 
           #@server.log "Done generating build #{buildId}..."
 
-          callback null, buildId
+          # Collect paths to all build files
+          files = []
+          readdirRecursive buildPath, (err, entries) =>
+            for entry in entries
+              relativePath = path.relative(buildPath, entry)
+              if path.sep == '\\' then relativePath = relativePath.replace /\\/g, '/'
+              files.push "/builds/#{@server.data.manifest.pub.id}/#{buildId}/#{relativePath}"
 
-          # Remove an old build to avoid using too much disk space
-          buildToDeleteId = buildId - config.maxRecentBuilds
-          buildToDeletePath = projectBuildsPath + buildToDeleteId
-          rimraf buildToDeletePath, (err) =>
-            if err?
-              @server.log "Failed to remove build #{buildToDeleteId}:"
-              @server.log err
+            files = files.concat buildFiles.files
+            callback null, buildId, files
+
+            # Remove an old build to avoid using too much disk space
+            buildToDeleteId = buildId - config.maxRecentBuilds
+            buildToDeletePath = projectBuildsPath + buildToDeleteId
+            rimraf buildToDeletePath, (err) =>
+              if err?
+                @server.log "Failed to remove build #{buildToDeleteId}:"
+                @server.log err
 
         return
 

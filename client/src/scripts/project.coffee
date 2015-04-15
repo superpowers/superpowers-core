@@ -1,3 +1,4 @@
+nodeRequire = require
 TreeView = require 'dnd-tree-view'
 TabStrip = require 'tab-strip'
 
@@ -29,27 +30,24 @@ module.exports = (projectId) ->
 
     if event.keyCode == 9 and event.ctrlKey # CTRL-TAB
       event.preventDefault()
-      if event.shiftKey
-        onActivatePreviousTab()
-      else
-        onActivateNextTab()
+      if event.shiftKey then onActivatePreviousTab()
+      else onActivateNextTab()
 
     if event.keyCode == 116 or (event.keyCode == 80 and event.metaKey) # F5 or Cmd-P
       event.preventDefault()
-      runProject()
+      runGame()
 
     if event.keyCode == 117 or (event.keyCode == 80 and event.metaKey and event.shiftKey) # F6 or Cmd-Shift-P
       event.preventDefault()
-      runProject { debug: true }
+      runGame { debug: true }
     return
 
   # Project info
-  document.querySelector('.project .project-name').textContent = projectId
-
-  document.querySelector('.project-buttons .run').addEventListener 'click', => runProject()
-  if window.nwDispatcher?
-    document.querySelector('.project-buttons .debug').addEventListener 'click', => runProject { debug: true }
-  else
+  document.querySelector('.project-buttons .run').addEventListener 'click', => runGame()
+  document.querySelector('.project-buttons .export').addEventListener 'click', => exportGame()
+  document.querySelector('.project-buttons .debug').addEventListener 'click', => runGame { debug: true }
+  if ! window.nwDispatcher?
+    document.querySelector('.project-buttons .export').title = 'Export game (only works from the Superpowers app for technical reasons)'
     document.querySelector('.project-buttons .debug').style.display = 'none'
 
   # Entries tree view
@@ -199,6 +197,8 @@ onEntriesReceived = (err, entries) ->
   ui.entriesTreeView.treeRoot.innerHTML = ''
 
   document.querySelector('.connecting').style.display = 'none'
+
+  if window.nwDispatcher? then document.querySelector('.project-buttons .export').disabled = false
   document.querySelector('.project-buttons .run').disabled = false
   document.querySelector('.project-buttons .debug').disabled = false
   document.querySelector('.entries-buttons .new-asset').disabled = false
@@ -337,10 +337,8 @@ if gui?
     policy.setNewWindowManifest options
     return
 
-buildingHTML = 'data:text/html;charset=utf-8,<body><div>Building...</div><style>body { display: flex; align-items: center; justify-content: center; font-family: Arial; }</style></body>'
-
-runProject = (options={}) ->
-  window.open buildingHTML, 'player'
+runGame = (options={}) ->
+  window.open 'build.html', 'player'
 
   socket.emit 'build:project', (err, buildId) ->
     if err? then alert err; return
@@ -351,6 +349,29 @@ runProject = (options={}) ->
     return
   return
 
+exportGame = ->
+  fileInput = document.createElement('input')
+  fileInput.type = 'file'
+  fileInput.setAttribute 'nwdirectory', ''
+  fileInput.setAttribute 'nwsaveas', ''
+  fileInput.click()
+
+  fileInput.addEventListener 'change', (event) ->
+    outputFolder = this.value
+    isFolderEmpty = false
+
+    fs = nodeRequire 'fs'
+    try isFolderEmpty = fs.readdirSync(outputFolder).length == 0
+    catch e then alert "Error while checking if folder was empty: #{e.message}"; return
+    if ! isFolderEmpty then alert "Output folder must be empty."; return
+
+    playerWindow = window.open 'build.html', 'player'
+
+    socket.emit 'build:project', (err, buildId, files) ->
+      playerWindow.postMessage { type: 'save', projectId: info.projectId, buildId, outputFolder, files }, window.location.origin
+      return
+
+  return
 
 createEntryElement = (entry) ->
   liElt = document.createElement('li')
@@ -457,8 +478,8 @@ onMessageHotKey = (action) =>
     when 'closeTab'    then onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
     when 'previousTab' then onActivatePreviousTab()
     when 'nextTab'     then onActivateNextTab()
-    when 'run'         then runProject()
-    when 'debug'       then runProject { debug: true }
+    when 'run'         then runGame()
+    when 'debug'       then runGame { debug: true }
   return
 
 onClickToggleNotifications = (event) ->
