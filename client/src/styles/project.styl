@@ -163,18 +163,23 @@
     list-style none
 
   li
-    padding 0.5em
     display flex
+
+    &:hover
+      background rgba(0,0,0,0.1)
+      a { text-decoration: none; }
+
+    &:active
+      background #fff
 
     div
       flex 1
 
       a
-        color #00f
+        display block
+        padding 0.5em
         text-decoration underline
-
-        &:hover
-          cursor: pointer
+        cursor pointer
 
 .main
   flex 1
