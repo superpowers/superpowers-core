@@ -23,6 +23,7 @@ shouldDistribute = (file) ->
   return false if _.endsWith(file, '.orig')
   return false if _.endsWith(file, '.jade')
   return false if _.endsWith(file, '.styl')
+  return false if _.endsWith(file, '.ts')
   return false if _.startsWith(file, 'client')
   return false if _.startsWith(file, 'scripts')
   return false if _.startsWith(file, 'projects')
