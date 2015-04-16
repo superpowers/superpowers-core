@@ -104,41 +104,31 @@ module.exports = (projectId) ->
   # Panes
   ui.panesElt = document.querySelector('.project .main .panes')
 
-  # Home tab
-  ui.homeTab = document.createElement('li')
-  ui.homeTab.dataset.pane = 'home'
-
-  iconElt = document.createElement('img')
-  iconElt.classList.add 'icon'
-  iconElt.src = "/plugins/sparklinlabs/home/editors/main/icon.svg"
-  ui.homeTab.appendChild iconElt
-
-  ui.homeTab.classList.add 'active'
-  ui.tabStrip.tabsRoot.appendChild ui.homeTab
-
-  iframe = document.createElement('iframe')
-  iframe.dataset.name = 'home'
-  # FIXME: Don't hardcode path?
-  iframe.src = "/plugins/sparklinlabs/home/editors/main/?project=#{info.projectId}"
-  iframe.classList.add 'active'
-  ui.panesElt.appendChild iframe
-
   window.addEventListener "message", onMessage
 
   # Tools and settings
   toolsList = document.querySelector('.sidebar .tools ul')
 
   for toolName, tool of SupClient.pluginPaths.toolsByName
-    if toolName == 'main' and tool.pluginPath == 'sparklinlabs/home' then continue
+    if toolName == 'main' and tool.pluginPath == 'sparklinlabs/home'
+      openTool toolName
+      continue
 
     toolElt = document.createElement('li')
+    toolElt.dataset.name = toolName
+    containerElt = document.createElement('div')
+    toolElt.appendChild containerElt
 
     anchorElt = document.createElement('a')
     anchorElt.target = "_blank"
-    anchorElt.href = "/plugins/#{tool.pluginPath}/editors/#{toolName}/?project=#{info.projectId}"
     anchorElt.textContent = tool.title.en
-    toolElt.appendChild anchorElt
+    containerElt.appendChild anchorElt
 
+    toolElt.addEventListener 'mouseenter', (event) => event.target.appendChild ui.openInNewWindowButton; return
+    toolElt.addEventListener 'mouseleave', (event) => ui.openInNewWindowButton.parentElement?.removeChild ui.openInNewWindowButton; return
+    anchorElt.addEventListener "click", (event) =>
+      openTool event.target.parentElement.parentElement.dataset.name
+      return
     toolsList.appendChild toolElt
 
   # Network
@@ -528,6 +518,23 @@ openEntry = (id) ->
   onTabActivate tab
   return
 
+openTool = (name) ->
+  tab = ui.tabStrip.tabsRoot.querySelector("li[data-pane='#{name}']")
+  iframe = ui.panesElt.querySelector("iframe[data-name='#{name}']")
+
+  if ! tab?
+    tool = SupClient.pluginPaths.toolsByName[name]
+    tab = createToolTabElement name, tool
+    ui.tabStrip.tabsRoot.appendChild tab
+
+    iframe = document.createElement('iframe')
+    iframe.src = "/plugins/#{tool.pluginPath}/editors/#{name}/?project=#{info.projectId}"
+    iframe.dataset.name = name
+    ui.panesElt.appendChild iframe
+
+  onTabActivate tab
+  return
+
 onNewAssetClick = ->
   SupClient.dialogs.prompt "Enter a name for the new asset.", "Asset name", null, "Create", (name) =>
     return if ! name?
@@ -600,8 +607,13 @@ onTrashEntryClick = ->
 
 onOpenInNewWindowClick = (event) ->
   id = event.target.parentElement.dataset.id
-  entry = data.entries.byId[id]
-  window.open "#{window.location.origin}/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{entry.id}"
+  if id?
+    entry = data.entries.byId[id]
+    window.open "#{window.location.origin}/plugins/#{SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/#{entry.type}/?project=#{info.projectId}&asset=#{entry.id}"
+  else
+    name = event.target.parentElement.dataset.name
+    tool = SupClient.pluginPaths.toolsByName[name]
+    window.open "#{window.location.origin}/plugins/#{SupClient.pluginPaths.toolsByName[name].pluginPath}/editors/#{name}/?project=#{info.projectId}"
   return
 
 onRenameEntryClick = ->
@@ -633,6 +645,14 @@ onDuplicateEntryClick = ->
     return
   return
 
+refreshAssetTabElement = (entry) ->
+  tabElt = ui.tabStrip.tabsRoot.querySelector("[data-asset-id='#{entry.id}']")
+  return if ! tabElt?
+
+  tabElt.querySelector('.label').textContent = entry.name
+  tabElt.title = data.entries.getPathFromId entry.id
+  return
+
 createAssetTabElement = (entry) =>
   tabElt = document.createElement('li')
 
@@ -656,22 +676,39 @@ createAssetTabElement = (entry) =>
   tabElt.dataset.assetId = entry.id
   tabElt
 
-refreshAssetTabElement = (entry) ->
-  tabElt = ui.tabStrip.tabsRoot.querySelector("[data-asset-id='#{entry.id}']")
-  return if ! tabElt?
+createToolTabElement = (toolName, tool) =>
+  tabElt = document.createElement('li')
 
-  tabElt.querySelector('.label').textContent = entry.name
-  tabElt.title = data.entries.getPathFromId entry.id
-  return
+  iconElt = document.createElement('img')
+  iconElt.classList.add 'icon'
+  iconElt.src = "/plugins/#{tool.pluginPath}/editors/#{toolName}/icon.svg"
+  tabElt.appendChild iconElt
+
+  tabLabel = document.createElement('span')
+  tabLabel.classList.add 'label'
+  tabElt.appendChild tabLabel
+
+  if toolName != "main"
+    tabLabel.textContent = tool.title.en
+
+    closeButton = document.createElement('button')
+    closeButton.classList.add 'close'
+    closeButton.addEventListener 'click', => onTabClose tabElt; return
+    tabElt.appendChild closeButton
+
+  tabElt.dataset.pane = toolName
+  tabElt
 
 onTabActivate = (tabElement) =>
-  ui.tabStrip.tabsRoot.querySelector('.active').classList.remove 'active'
-  ui.panesElt.querySelector('iframe.active').classList.remove 'active'
+  activeTab = ui.tabStrip.tabsRoot.querySelector('.active')
+  if activeTab != null
+    activeTab.classList.remove 'active'
+    ui.panesElt.querySelector('iframe.active').classList.remove 'active'
 
   tabElement.classList.add 'active'
   tabElement.classList.remove 'blink'
-  assetId = tabElement.dataset.assetId
 
+  assetId = tabElement.dataset.assetId
   if assetId?
     tabIframe = ui.panesElt.querySelector("iframe[data-asset-id='#{assetId}']")
   else
@@ -683,18 +720,18 @@ onTabActivate = (tabElement) =>
   return
 
 onTabClose = (tabElement) =>
-  assetId = tabElement.dataset.assetId
-  return if ! assetId?
-
   if tabElement.classList.contains 'active'
     activeTabElement = tabElement.nextSibling ? tabElement.previousSibling
     onTabActivate activeTabElement
 
+  assetId = tabElement.dataset.assetId
+  if assetId?
+    frameElt = ui.panesElt.querySelector("iframe[data-asset-id='#{assetId}']")
+  else
+    frameElt = ui.panesElt.querySelector("iframe[data-name='#{tabElement.dataset.pane}']")
+
   tabElement.parentElement.removeChild tabElement
-
-  frameElt = ui.panesElt.querySelector("iframe[data-asset-id='#{assetId}']")
   frameElt.parentElement.removeChild frameElt
-
   return
 
 onActivatePreviousTab = ->

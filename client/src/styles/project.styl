@@ -139,18 +139,18 @@
     color rgba(0,0,0,0.8)
     font-size 80%
 
-  .openInNewWindow
-    background transparent
-    border none
-    opacity 0.5
-    cursor pointer
-    align-self stretch
+.openInNewWindow
+  background transparent
+  border none
+  opacity 0.5
+  cursor pointer
+  align-self stretch
 
-    &:hover
-      opacity 1
+  &:hover
+    opacity 1
 
-    &:active
-      background-color #fff
+  &:active
+    background-color #eee
 
 .tools
   background rgba(0,0,0,0.1)
@@ -163,10 +163,18 @@
     list-style none
 
   li
-    padding 1em
+    padding 0.5em
+    display flex
 
-  a
-    color #00f
+    div
+      flex 1
+
+      a
+        color #00f
+        text-decoration underline
+
+        &:hover
+          cursor: pointer
 
 .main
   flex 1
