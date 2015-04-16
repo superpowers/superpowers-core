@@ -1,3 +1,5 @@
+#!/bin/bash
+
 pushd $(dirname $0)
 cd ../plugins/sparklinlabs/scene && gulp
 cd ../typescript && npm install && gulp

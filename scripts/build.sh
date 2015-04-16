@@ -1,3 +1,5 @@
+#!/bin/bash
+
 pushd $(dirname $0)
 cd .. && npm install && tsd reinstall && tsd rebundle
 cd SupCore && tsd reinstall && tsd rebundle && gulp
@@ -8,5 +10,5 @@ cd ../SupRuntime && tsd reinstall && tsd rebundle && gulp
 cd ../player && gulp
 cd ../../client && gulp
 cd ../launcher && gulp
-cd ../plugins && ./buildPlugins.sh
+cd ../scripts && ./buildPlugins.sh
 popd
