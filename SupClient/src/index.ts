@@ -97,6 +97,12 @@ export function setupHotkeys() {
     // window.location.origin isn't listed in lib.d.ts as of TypeScript 1.4
     var origin: string = (<any>window.location).origin;
 
+    if (event.keyCode == 78 && (event.ctrlKey || event.metaKey)) {// CTRL-N
+      event.preventDefault();
+      if (event.shiftKey) window.parent.postMessage({ type: "hotkey", content: "newFolder" }, origin);
+      else window.parent.postMessage({ type: "hotkey", content: "newAsset" }, origin);
+    }
+
     if (event.keyCode === 79 && (event.ctrlKey || event.metaKey) && document.querySelector(".dialog") == null) { // CTRL-O
       event.preventDefault()
       window.parent.postMessage({ type: "hotkey", content: "searchEntry" }, origin);

@@ -20,6 +20,23 @@ module.exports = (projectId) ->
 
   # Hot-keys
   document.addEventListener 'keydown', (event) =>
+    if event.keyCode == 78 and (event.ctrlKey or event.metaKey) # CTRL-N
+      event.preventDefault()
+      if (event.shiftKey) then onNewFolderClick()
+      else onNewAssetClick()
+
+    if event.keyCode == 113 # F2
+      event.preventDefault()
+      onRenameEntryClick()
+
+    if event.keyCode == 68 and (event.ctrlKey or event.metaKey) # CTRL-D
+      event.preventDefault()
+      onDuplicateEntryClick()
+
+    if event.keyCode == 46 # SUPPR
+      event.preventDefault()
+      onTrashEntryClick()
+
     if event.keyCode == 79 and (event.ctrlKey or event.metaKey) # CTRL-O
       event.preventDefault()
       openSearchEntryDialog()
@@ -428,6 +445,7 @@ onEntryActivate = ->
 onMessage = (event) ->
   if event.data.type == "chat" then onMessageChat event.data.content
   if event.data.type == "hotkey" then onMessageHotKey event.data.content
+
   return
 
 onMessageChat = (message) ->
@@ -464,6 +482,8 @@ onMessageChat = (message) ->
 
 onMessageHotKey = (action) =>
   switch action
+    when 'newAsset'    then onNewAssetClick()
+    when 'newFolder'   then onNewFolderClick()
     when 'searchEntry' then openSearchEntryDialog()
     when 'closeTab'    then onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
     when 'previousTab' then onActivatePreviousTab()
