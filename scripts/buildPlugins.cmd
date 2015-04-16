@@ -46,4 +46,7 @@ call tsd reinstall
 call tsd rebundle
 call gulp
 
+cd ../gameSettings
+call gulp
+
 popd

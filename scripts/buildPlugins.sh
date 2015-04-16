@@ -12,4 +12,5 @@ cd ../p2js && npm install && gulp
 cd ../rngjs && gulp
 cd ../home && gulp
 cd ../socketio && npm install && tsd reinstall && tsd rebundle && gulp
+cd ../gameSettings && gulp
 popd
