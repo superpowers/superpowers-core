@@ -7,6 +7,11 @@ global.SupCore = require '../SupCore'
 
 SupCore.log "Server starting..."
 
+process.on 'uncaughtException', (err) ->
+  SupCore.log "The server crashed.\n#{err.stack}"
+  process.exit 1
+  return
+
 # Server
 express = require 'express'
 app = express()
@@ -128,8 +133,3 @@ onExit = ->
 
 process.on 'SIGINT', onExit
 process.on 'message', (msg) -> if msg == 'stop' then onExit(); return
-
-process.on 'uncaughtException', (err) ->
-  SupCore.log "The server crashed.\n#{err.stack}"
-  process.exit 1
-  return
