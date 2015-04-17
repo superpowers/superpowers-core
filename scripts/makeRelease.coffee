@@ -52,6 +52,7 @@ readdirRecursive sourceRootPath, (err, files) ->
   fs.renameSync "#{targetRootPath}/app/launcher/public/package.json", "#{targetRootPath}/package.json"
   launcherPackage = fs.readFileSync "#{targetRootPath}/package.json", { encoding: 'utf8' }
   launcherPackage = launcherPackage.replace "index.html", "app/launcher/public/index.html"
+  launcherPackage = launcherPackage.replace "node-main.js", "app/launcher/public/node-main.js"
   launcherPackage = launcherPackage.replace "icon.png", "app/launcher/public/icon.png"
   fs.writeFileSync "#{targetRootPath}/package.json", launcherPackage, { encoding: 'utf8' }
   return

@@ -1,6 +1,7 @@
 {
   "name": "superpowers-launcher",
   "main": "index.html",
+  "node-main": "node-main.js",
   "window": {
     "title": "Superpowers",
     "icon": "icon.png",
