@@ -49,4 +49,7 @@ call gulp
 cd ../gameSettings
 call gulp
 
+cd ../font
+call gulp
+
 popd

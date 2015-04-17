@@ -15,4 +15,5 @@ cd ../rngjs && gulp
 cd ../home && gulp
 cd ../socketio && npm install && tsd reinstall && tsd rebundle && gulp
 cd ../gameSettings && gulp
+cd ../font && gulp
 popd
