@@ -212,8 +212,9 @@ module.exports = class RemoteProjectClient extends BaseRemoteClient
     # Skip asset acquisition if trashing a folder
     if ! entry.type? then doTrashEntry(); return
 
-    @server.data.assets.acquire id, null, (err, asset) =>
+    @server.data.assets.acquire id, null, (err, acquiredAsset) =>
       if err? then callback? err; return
+      asset = acquiredAsset
       doTrashEntry(); return
     return
 
