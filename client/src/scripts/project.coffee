@@ -347,14 +347,14 @@ if gui?
 gameWindow = null
 runGame = (options={}) ->
   gameWindow.close() if window.nwDispatcher? and gameWindow?
-  gameWindow = window.open 'build.html', 'player'
+  gameWindow = window.open 'build.html', "player_#{info.projectId}"
 
   socket.emit 'build:project', (err, buildId) ->
     if err? then alert err; return
     url = "/player?project=#{info.projectId}&build=#{buildId}"
     if options.debug then url += "&debug"
 
-    window.open url, 'player'
+    window.open url, "player_#{info.projectId}"
     return
   return
 
