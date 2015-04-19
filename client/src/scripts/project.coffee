@@ -344,8 +344,10 @@ if gui?
     policy.setNewWindowManifest options
     return
 
+gameWindow = null
 runGame = (options={}) ->
-  window.open 'build.html', 'player'
+  gameWindow.close() if window.nwDispatcher? and gameWindow?
+  gameWindow = window.open 'build.html', 'player'
 
   socket.emit 'build:project', (err, buildId) ->
     if err? then alert err; return
