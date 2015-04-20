@@ -103,7 +103,7 @@ export function setupHotkeys() {
       else window.parent.postMessage({ type: "hotkey", content: "newAsset" }, origin);
     }
 
-    if (event.keyCode === 79 && (event.ctrlKey || event.metaKey) && document.querySelector(".dialog") == null) { // CTRL-O
+    if ((event.keyCode === 79 || event.keyCode === 80) && (event.ctrlKey || event.metaKey) && document.querySelector(".dialog") == null) { // CTRL-O or Ctrl-P
       event.preventDefault()
       window.parent.postMessage({ type: "hotkey", content: "searchEntry" }, origin);
     }

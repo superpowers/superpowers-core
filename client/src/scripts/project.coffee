@@ -20,7 +20,7 @@ module.exports = (projectId) ->
 
   # Hot-keys
   document.addEventListener 'keydown', (event) =>
-    if event.keyCode == 78 and (event.ctrlKey or event.metaKey) # CTRL-N
+    if event.keyCode == 78 and (event.ctrlKey or event.metaKey) # Ctrl+N
       event.preventDefault()
       if (event.shiftKey) then onNewFolderClick()
       else onNewAssetClick()
@@ -29,7 +29,7 @@ module.exports = (projectId) ->
       event.preventDefault()
       onRenameEntryClick()
 
-    if event.keyCode == 68 and (event.ctrlKey or event.metaKey) # CTRL-D
+    if event.keyCode == 68 and (event.ctrlKey or event.metaKey) # Ctrl+D
       event.preventDefault()
       onDuplicateEntryClick()
 
@@ -37,24 +37,24 @@ module.exports = (projectId) ->
       event.preventDefault()
       onTrashEntryClick()
 
-    if event.keyCode == 79 and (event.ctrlKey or event.metaKey) # CTRL-O
+    if (event.keyCode == 79 or event.keyCode == 80) and (event.ctrlKey or event.metaKey) # Ctrl+O
       event.preventDefault()
       openSearchEntryDialog()
 
-    if event.keyCode == 87 and (event.ctrlKey or event.metaKey) # CTRL-W
+    if event.keyCode == 87 and (event.ctrlKey or event.metaKey) # Ctrl+W
       event.preventDefault()
       onTabClose ui.tabStrip.tabsRoot.querySelector('.active')
 
-    if event.keyCode == 9 and event.ctrlKey # CTRL-TAB
+    if event.keyCode == 9 and event.ctrlKey # Ctrl+TAB
       event.preventDefault()
       if event.shiftKey then onActivatePreviousTab()
       else onActivateNextTab()
 
-    if event.keyCode == 116 or (event.keyCode == 80 and event.metaKey) # F5 or Cmd-P
+    if event.keyCode == 116 or (event.keyCode == 80 and event.metaKey) # F5 or Cmd+P
       event.preventDefault()
       runGame()
 
-    if event.keyCode == 117 or (event.keyCode == 80 and event.metaKey and event.shiftKey) # F6 or Cmd-Shift-P
+    if event.keyCode == 117 or (event.keyCode == 80 and event.metaKey and event.shiftKey) # F6 or Cmd+Shift+P
       event.preventDefault()
       runGame { debug: true }
     return
