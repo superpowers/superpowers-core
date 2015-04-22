@@ -1,9 +1,10 @@
 var gulp = require("gulp");
 
 // Typescript
-var ts = require('gulp-typescript');
+var ts = require("gulp-typescript");
 gulp.task("typescript", function() {
   var tsResult = gulp.src("**/*.ts").pipe(ts({
+    typescript: require("typescript"),
     declarationFiles: false,
     noImplicitAny: true,
     module: "commonjs",
