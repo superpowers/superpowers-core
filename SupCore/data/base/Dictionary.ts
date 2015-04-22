@@ -45,7 +45,12 @@ class Dictionary extends events.EventEmitter {
   }
 
   release(id: string, owner: any, options?: {skipUnloadDelay: boolean}) {
-    if (this.refCountById[id] == null) throw new Error(`Can't release ${id}, ref count is null`);
+    if (this.refCountById[id] == null) {
+      // This might happen if .releaseAll(id) was called elsewhere since we called acquire
+      // Just log and ignore
+      console.log(`Can't release ${id}, ref count is null`);
+      return;
+    }
 
     this.refCountById[id]--;
     //console.log(`Releasing ${id}: ${this.refCountById[id]} refs left`);
