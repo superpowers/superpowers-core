@@ -92,40 +92,41 @@ export function onDisconnected() {
 
 export function setupHotkeys() {
   document.addEventListener('keydown', (event) => {
-    if (window.parent == null) return;
+    if (document.querySelector(".dialog") != null) return;
 
     // window.location.origin isn't listed in lib.d.ts as of TypeScript 1.4
     var origin: string = (<any>window.location).origin;
 
-    if (event.keyCode == 78 && (event.ctrlKey || event.metaKey)) {// CTRL-N
-      event.preventDefault();
-      if (event.shiftKey) window.parent.postMessage({ type: "hotkey", content: "newFolder" }, origin);
-      else window.parent.postMessage({ type: "hotkey", content: "newAsset" }, origin);
+    function sendMessage(action: string) {
+      if (window.parent != null) window.parent.postMessage({ type: "hotkey", content: action }, origin);
+      else window.postMessage({ type: "hotkey", content: action}, origin);
     }
 
-    if ((event.keyCode === 79 || event.keyCode === 80) && (event.ctrlKey || event.metaKey) && document.querySelector(".dialog") == null) { // CTRL-O or Ctrl-P
-      event.preventDefault()
-      window.parent.postMessage({ type: "hotkey", content: "searchEntry" }, origin);
+    if (event.keyCode == 78 && (event.ctrlKey || event.metaKey)) {// CTRL-N
+      event.preventDefault();
+      if (event.shiftKey) sendMessage("newFolder");
+      else sendMessage("newAsset");
+    }
+
+    if ((event.keyCode === 79 || event.keyCode === 80) && (event.ctrlKey || event.metaKey)) { // CTRL-O or CTRL-P
+      event.preventDefault(); sendMessage("searchEntry");
     }
 
     if (event.keyCode === 87 && (event.ctrlKey || event.metaKey)) { // CTRL-W
-      event.preventDefault()
-      window.parent.postMessage({ type: "hotkey", content: "closeTab" }, origin);
+      event.preventDefault(); sendMessage("closeTab");
     }
 
     if (event.keyCode === 9 && event.ctrlKey) { // CTRL-TAB
       event.preventDefault()
-      if (event.shiftKey) window.parent.postMessage({ type: "hotkey", content: "previousTab" }, origin);
-      else window.parent.postMessage({ type: "hotkey", content: "nextTab" }, origin);
+      if (event.shiftKey) sendMessage("previousTab");
+      else sendMessage("nextTab");
     }
 
     if (event.keyCode === 116 || (event.keyCode === 80 && event.metaKey)) { // F5 || Cmd-P
-      event.preventDefault()
-      window.parent.postMessage({ type: "hotkey", content: "run" }, origin);
+      event.preventDefault(); sendMessage("run");
     }
     if (event.keyCode === 117 || (event.keyCode === 80 && event.metaKey && event.shiftKey)) { // F6 or Cmd-Shift-P
-      event.preventDefault()
-      window.parent.postMessage({ type: "hotkey", content: "debug" }, origin);
+      event.preventDefault(); sendMessage("debug");
     }
   });
 }
