@@ -1,7 +1,7 @@
 /// <reference path="./typings/socket.io-client/socket.io-client.d.ts" />
 
 declare module SupClient {
-  var pluginPaths: string;
+  var pluginPaths: {all: string[], editorsByAssetType: {[assetType: string]: any}, toolsByName: {[toolName: string]: any}};
 
   function connect(projectId: string, options?: {reconnection: boolean; promptCredentials: boolean;}): SocketIOClient.Socket;
   function onAssetTrashed(): void;

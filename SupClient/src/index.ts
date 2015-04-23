@@ -8,7 +8,7 @@ var pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous
 pluginsXHR.send(null);
 
-var internalPluginPaths: string;
+var internalPluginPaths: any;
 if (pluginsXHR.status == 200) internalPluginPaths = JSON.parse(pluginsXHR.responseText);
 export var pluginPaths = internalPluginPaths;
 
