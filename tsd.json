@@ -10,6 +10,9 @@
     },
     "async/async.d.ts": {
       "commit": "25da006de5de3d2e31252fdc988296c7c212f231"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "caee0398cbc82b1bd2cc00843d911a664d498c25"
     }
   }
 }
