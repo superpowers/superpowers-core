@@ -60,6 +60,17 @@ onEditAddressClick = ->
     return
   return
 
+onRemoveAddressClick = ->
+  return if serversTreeView.selectedNodes.length != 1
+
+  node = serversTreeView.selectedNodes[0]
+  dialogs.confirm "Do you want to delete the server #{node.dataset.name}?", "Delete", (confirm) =>
+    return if ! confirm
+
+    node.parentElement.removeChild node
+    return
+  return
+
 onServerActivate = ->
   gui = global.window.nwDispatcher.requireNwGui()
   gui.Window.open "http://" + serversTreeView.selectedNodes[0].dataset.address,
@@ -75,6 +86,7 @@ serversTreeView.on 'activate', onServerActivate
 document.querySelector('.servers .buttons .add-server').addEventListener 'click', onAddServerClick
 document.querySelector('.servers .buttons .rename-server').addEventListener 'click', onRenameServerClick
 document.querySelector('.servers .buttons .edit-address').addEventListener 'click', onEditAddressClick
+document.querySelector('.servers .buttons .remove-server').addEventListener 'click', onRemoveAddressClick
 
 start()
 
