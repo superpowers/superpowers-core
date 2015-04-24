@@ -1,5 +1,4 @@
 ///<reference path="../typings/tsd.d.ts"/>
-///<reference path = "typings/tsd.d.ts"/>
 
 export import data = require("./data/index");
 
