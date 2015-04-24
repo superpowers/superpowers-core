@@ -74,7 +74,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
     }
 
     case "hash": {
-      if (typeof value !== "object") return { message: "Expected hash" };
+      if (value == null || typeof value !== "object") return { message: "Expected hash" };
 
       var ruleProperties: {[key: string]: Rule} = (rule.properties != null) ? rule.properties : {};
       var missingKeys = Object.keys(ruleProperties);
