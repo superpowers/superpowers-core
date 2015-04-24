@@ -53,6 +53,8 @@ call gulp
 
 cd ../typescript
 call npm install
+call tsd reinstall
+call tsd rebundle
 call gulp
 
 popd

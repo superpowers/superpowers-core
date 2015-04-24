@@ -16,5 +16,5 @@ cd ../sound && gulp
 cd ../sprite && gulp
 cd ../tileMap && gulp
 cd ../tweenjs && npm install && gulp
-cd ../typescript && npm install && gulp
+cd ../typescript && npm install && tsd reinstall && tsd rebundle && gulp
 popd

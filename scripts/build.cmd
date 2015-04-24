@@ -6,8 +6,6 @@ call tsd reinstall
 call tsd rebundle
 
 cd SupCore
-call tsd reinstall
-call tsd rebundle
 call gulp
 
 cd ../SupClient
@@ -25,8 +23,6 @@ call tsd rebundle
 call gulp
 
 cd ../SupRuntime
-call tsd reinstall
-call tsd rebundle
 call gulp
 
 cd ../player
