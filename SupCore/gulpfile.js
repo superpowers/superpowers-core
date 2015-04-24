@@ -1,6 +1,6 @@
 var gulp = require("gulp");
 
-// Typescript
+// TypeScript
 var ts = require("gulp-typescript");
 gulp.task("typescript", function() {
   var tsResult = gulp.src("**/*.ts").pipe(ts({
