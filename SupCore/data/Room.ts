@@ -2,7 +2,7 @@ import SupData = require("./index");
 import path = require("path");
 import fs = require("fs");
 
-class Room extends SupData.base.Hash {
+export default class Room extends SupData.base.Hash {
   static schema = {
     history: {
       type: "array",
@@ -43,16 +43,16 @@ class Room extends SupData.base.Hash {
   unload() { this.removeAllListeners(); return; }
 
   save(roomPath: string, callback: (err: Error) => any) {
-    var users = this.pub.users;
+    let users = this.pub.users;
     delete this.pub.users;
-    var json = JSON.stringify(this.pub, null, 2);
+    let json = JSON.stringify(this.pub, null, 2);
     this.pub.users = users;
 
     fs.writeFile(path.join(`${roomPath}.json`), json, { encoding: "utf8" }, callback);
   }
 
   join(client: any, callback: (err: string, item?: any, index?: number) => any) {
-    var item = this.users.byId[client.socket.username];
+    let item = this.users.byId[client.socket.username];
     if (item != null) {
       item.connectionCount++;
       callback(null, item);
@@ -73,7 +73,7 @@ class Room extends SupData.base.Hash {
   }
 
   leave(client: any, callback: (err: string, username?: any) => any) {
-    var item = this.users.byId[client.socket.username];
+    let item = this.users.byId[client.socket.username];
     if (item.connectionCount > 1) {
       item.connectionCount--;
       callback(null, client.socket.username);
@@ -87,7 +87,7 @@ class Room extends SupData.base.Hash {
   }
 
   client_leave(id: string) {
-    var item = this.users.byId[id];
+    let item = this.users.byId[id];
     if (item.connectionCount > 1) { item.connectionCount--; return; }
 
     this.users.client_remove(id);
@@ -96,7 +96,7 @@ class Room extends SupData.base.Hash {
   server_appendMessage(client: any, text: string, callback: (err: string, entry?: any) => any) {
     if (typeof(text) != "string" || text.length > 300) { callback("Your message was too long"); return; }
 
-    var entry = { timestamp: Date.now(), author: client.socket.username, text: text };
+    let entry = { timestamp: Date.now(), author: client.socket.username, text: text };
     this.pub.history.push(entry);
     if (this.pub.history.length > 100) this.pub.history.splice(0, 1);
 
@@ -109,5 +109,3 @@ class Room extends SupData.base.Hash {
     if (this.pub.history.length > 100) this.pub.history.splice(0, 1);
   }
 }
-
-export = Room;

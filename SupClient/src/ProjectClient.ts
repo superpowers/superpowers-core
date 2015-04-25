@@ -17,7 +17,7 @@ interface ResourceSubscriber {
   onResourceEdited(resourceId: string, command: string, ...args: any[]): void;
 }
 
-class ProjectClient {
+export default class ProjectClient {
   socket: SocketIOClient.Socket;
 
   entries: SupCore.data.Entries;
@@ -77,13 +77,13 @@ class ProjectClient {
   }
 
   subAsset(assetId: string, assetType: string, subscriber: AssetSubscriber) {
-    var subscribers = this.subscribersByAssetId[assetId];
+    let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) {
       subscribers = this.subscribersByAssetId[assetId] = [];
       this.socket.emit('sub', 'assets', assetId, this._onAssetReceived.bind(this, assetId, assetType));
     }
     else {
-      var asset = this.assetsById[assetId];
+      let asset = this.assetsById[assetId];
       if (asset != null) subscriber.onAssetReceived(assetId, asset);
     }
 
@@ -91,10 +91,10 @@ class ProjectClient {
   }
 
   unsubAsset(assetId: string, subscriber: AssetSubscriber) {
-    var subscribers = this.subscribersByAssetId[assetId];
+    let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    var index = subscribers.indexOf(subscriber);
+    let index = subscribers.indexOf(subscriber);
     if (index === -1) return;
 
     subscribers.splice(index, 1);
@@ -106,13 +106,13 @@ class ProjectClient {
   }
 
   subResource(resourceId: string, subscriber: ResourceSubscriber) {
-    var subscribers = this.subscribersByResourceId[resourceId];
+    let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) {
       subscribers = this.subscribersByResourceId[resourceId] = [];
       this.socket.emit('sub', 'resources', resourceId, this._onResourceReceived.bind(this, resourceId));
     }
     else {
-      var resource = this.resourcesById[resourceId];
+      let resource = this.resourcesById[resourceId];
       if (resource != null) subscriber.onResourceReceived(resourceId, resource);
     }
 
@@ -120,10 +120,10 @@ class ProjectClient {
   }
 
   unsubResource(resourceId: string, subscriber: ResourceSubscriber) {
-    var subscribers = this.subscribersByResourceId[resourceId];
+    let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
-    var index = subscribers.indexOf(subscriber);
+    let index = subscribers.indexOf(subscriber);
     if (index === -1) return;
 
     subscribers.splice(index, 1);
@@ -141,28 +141,28 @@ class ProjectClient {
       return;
     }
 
-    var subscribers = this.subscribersByAssetId[assetId];
+    let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    var asset = this.assetsById[assetId] = new SupCore.data.assetClasses[assetType](assetId, assetData);
-    subscribers.forEach((subscriber) => { subscriber.onAssetReceived(assetId, asset); })
+    let asset = this.assetsById[assetId] = new SupCore.data.assetClasses[assetType](assetId, assetData);
+    for (let subscriber of subscribers) { subscriber.onAssetReceived(assetId, asset); }
   }
 
   _onAssetEdited = (assetId: string, command: string, ...args: any[]) => {
-    var subscribers = this.subscribersByAssetId[assetId];
+    let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    var asset = this.assetsById[assetId];
+    let asset = this.assetsById[assetId];
     asset.__proto__[`client_${command}`].apply(asset, args);
 
-    subscribers.forEach((subscriber) => { subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args)); })
+    for (let subscriber of subscribers) { subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args)); }
   }
 
   _onAssetTrashed = (assetId: string) => {
-    var subscribers = this.subscribersByAssetId[assetId];
+    let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    subscribers.forEach((subscriber) => { subscriber.onAssetTrashed(assetId); });
+    for (let subscriber of subscribers) { subscriber.onAssetTrashed(assetId); }
 
     delete this.assetsById[assetId];
     delete this.subscribersByAssetId[assetId];
@@ -174,21 +174,21 @@ class ProjectClient {
       return;
     }
 
-    var subscribers = this.subscribersByResourceId[resourceId];
+    let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
-    var resource = this.resourcesById[resourceId] = new SupCore.data.resourceClasses[resourceId](resourceData);
-    subscribers.forEach((subscriber) => { subscriber.onResourceReceived(resourceId, resource); })
+    let resource = this.resourcesById[resourceId] = new SupCore.data.resourceClasses[resourceId](resourceData);
+    for (let subscriber of subscribers) { subscriber.onResourceReceived(resourceId, resource); }
   }
 
   _onResourceEdited = (resourceId: string, command: string, ...args: any[]) => {
-    var subscribers = this.subscribersByResourceId[resourceId];
+    let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
-    var resource = this.resourcesById[resourceId];
+    let resource = this.resourcesById[resourceId];
     resource.__proto__[`client_${command}`].apply(resource, args);
 
-    subscribers.forEach((subscriber) => { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); })
+    for (let subscriber of subscribers) { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); }
   }
 
   _onEntriesReceived = (err: string, entries: any) => {
@@ -199,35 +199,34 @@ class ProjectClient {
     this.socket.on('setProperty:entries', this._onSetEntryProperty);
     this.socket.on('trash:entries', this._onEntryTrashed);
 
-    this.entriesSubscribers.forEach((subscriber) => { subscriber.onEntriesReceived(this.entries); })
+    for (let subscriber of this.entriesSubscribers) { subscriber.onEntriesReceived(this.entries); }
   }
 
   _onEntryAdded = (entry: any, parentId: string, index: number) => {
     this.entries.client_add(entry, parentId, index);
-    this.entriesSubscribers.forEach((subscriber) => {
+    for (let subscriber of this.entriesSubscribers) {
       subscriber.onEntryAdded(entry, parentId, index);
-    });
+    }
   }
 
   _onEntryMoved = (id: string, parentId: string, index: number) => {
     this.entries.client_move(id, parentId, index);
-    this.entriesSubscribers.forEach((subscriber) => {
+    for (let subscriber of this.entriesSubscribers) {
       subscriber.onEntryMoved(id, parentId, index);
-    });
+    }
   }
 
   _onSetEntryProperty = (id: string, key: string, value: any) => {
     this.entries.client_setProperty(id, key, value);
-    this.entriesSubscribers.forEach((subscriber) => {
+    for (let subscriber of this.entriesSubscribers) {
       subscriber.onSetEntryProperty(id, key, value);
-    })
+    }
   }
 
   _onEntryTrashed = (id: string) => {
     this.entries.client_remove(id);
-    this.entriesSubscribers.forEach((subscriber) => {
+    for (let subscriber of this.entriesSubscribers) {
       subscriber.onEntryTrashed(id);
-    });
+    }
   }
 }
-export = ProjectClient;

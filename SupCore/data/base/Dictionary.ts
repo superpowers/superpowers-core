@@ -1,6 +1,6 @@
-import events = require("events");
+import { EventEmitter } from "events";
 
-class Dictionary extends events.EventEmitter {
+export default class Dictionary extends EventEmitter {
   byId: { [key: string]: any; };
   refCountById: { [key: string]: number; };
   unloadDelaySeconds: number;
@@ -19,14 +19,14 @@ class Dictionary extends events.EventEmitter {
     //console.log(`Acquiring ${id}: ${this.refCountById[id]} refs`);
 
     // Cancel pending unload timeout if any
-    var timeout = this.unloadTimeoutsById[id];
+    let timeout = this.unloadTimeoutsById[id];
     if (timeout != null) {
       //console.log(`Cancelling unload timeout for ${id}`);
       clearTimeout(timeout);
       delete this.unloadTimeoutsById[id];
     }
 
-    var item = this.byId[id];
+    let item = this.byId[id];
 
     if (item == null) {
       try { item = this._load(id); }
@@ -75,7 +75,7 @@ class Dictionary extends events.EventEmitter {
 
   releaseAll(id: string) {
     // Cancel pending unload timeout if any
-    var timeout = this.unloadTimeoutsById[id];
+    let timeout = this.unloadTimeoutsById[id];
     if (timeout != null) {
       clearTimeout(timeout);
       delete this.unloadTimeoutsById[id];
@@ -85,5 +85,3 @@ class Dictionary extends events.EventEmitter {
     delete this.byId[id];
   }
 }
-
-export = Dictionary;

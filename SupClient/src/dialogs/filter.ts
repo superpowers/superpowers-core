@@ -1,32 +1,32 @@
 ///<reference path = "./fuzzy.d.ts"/>
 import fuzzy = require("fuzzy");
 
-function filter(list: string[], placeholder: string, callback: (value: string) => any) {
-  var dialogElt = document.createElement("div");
+export default function filter(list: string[], placeholder: string, callback: (value: string) => any) {
+  let dialogElt = document.createElement("div");
   dialogElt.className = "dialog";
 
-  var messageElt = document.createElement("div");
+  let messageElt = document.createElement("div");
   messageElt.className = "message";
   dialogElt.appendChild(messageElt);
 
-  var inputElt = document.createElement("input");
+  let inputElt = document.createElement("input");
   inputElt.placeholder = (placeholder != null) ? placeholder : "";
   messageElt.appendChild(inputElt);
 
-  var labelParentElt = document.createElement("div");
+  let labelParentElt = document.createElement("div");
   labelParentElt.className = "filter-parent";
   messageElt.appendChild(labelParentElt);
 
-  var labelElts: HTMLDivElement[] = [];
-  var selectedIndex: number;
+  let labelElts: HTMLDivElement[] = [];
+  let selectedIndex: number;
 
-  var selectResult = (index: number) => {
+  let selectResult = (index: number) => {
     selectedIndex = index;
     labelElts[index].className = "selected";
     labelParentElt.scrollTop = (index - 3) * 20;
   }
 
-  var onKeyDown = (event: KeyboardEvent) => {
+  let onKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 38) {
       event.preventDefault();
       if (selectedIndex != null && selectedIndex > 0) {
@@ -43,12 +43,12 @@ function filter(list: string[], placeholder: string, callback: (value: string) =
     }
   }
 
-  var onKeyUp = (event: KeyboardEvent) => {
+  let onKeyUp = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
       document.body.removeChild(dialogElt);
       document.removeEventListener("keyup", onKeyUp);
       document.removeEventListener("keydown", onKeyDown);
-      var value = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
+      let value = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
       if (callback != null) callback(value);
     }
 
@@ -60,13 +60,13 @@ function filter(list: string[], placeholder: string, callback: (value: string) =
     }
 
     else if (inputElt.value !== "") {
-      var previousSelectedResult = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
-      var newSelectedIndex: number;
+      let previousSelectedResult = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
+      let newSelectedIndex: number;
 
-      var results = fuzzy.filter(inputElt.value, list);
+      let results = fuzzy.filter(inputElt.value, list);
       results.forEach((result, index) => {
         if (labelElts[index] == null) {
-          var labelElt = document.createElement("div");
+          let labelElt = document.createElement("div");
           labelElt.textContent = result.original;
           labelParentElt.appendChild(labelElt);
           labelElts.push(labelElt);
@@ -89,7 +89,7 @@ function filter(list: string[], placeholder: string, callback: (value: string) =
       else selectedIndex = null;
     }
     else {
-      labelElts.forEach((labelElt) => { labelParentElt.removeChild(labelElt); });
+      for (let labelElt of labelElts) labelParentElt.removeChild(labelElt);
       labelElts.length = 0;
       selectedIndex = null;
     }
@@ -101,5 +101,3 @@ function filter(list: string[], placeholder: string, callback: (value: string) =
   document.body.appendChild(dialogElt);
   inputElt.focus();
 }
-
-export = filter;

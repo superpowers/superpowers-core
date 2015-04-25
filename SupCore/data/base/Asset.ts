@@ -1,9 +1,9 @@
-import Hash = require("./Hash");
+import Hash from "./Hash";
 
-import path = require("path");
-import fs = require("fs");
+import * as path from "path";
+import * as fs from "fs";
 
-class Asset extends Hash {
+export default class Asset extends Hash {
   id: string;
   serverData: any;
 
@@ -35,7 +35,7 @@ class Asset extends Hash {
   unload() { this.removeAllListeners(); }
 
   save(assetPath: string, callback: (err: Error) => any) {
-    var json = JSON.stringify(this.pub, null, 2);
+    let json = JSON.stringify(this.pub, null, 2);
     fs.writeFile(path.join(assetPath, "asset.json"), json, { encoding: 'utf8' }, callback);
   }
 
@@ -47,5 +47,3 @@ class Asset extends Hash {
     });
   }
 }
-
-export = Asset;

@@ -1,22 +1,23 @@
-import io = require("socket.io-client");
+import * as io from "socket.io-client";
 
-export import ProjectClient = require("./ProjectClient");
-export import component = require("./component");
-export import dialogs = require("./dialogs/index");
+import ProjectClient from "./ProjectClient"
+import * as component from "./component";
+import * as dialogs from "./dialogs/index";
+export { ProjectClient, component, dialogs };
 
-var pluginsXHR = new XMLHttpRequest();
+let pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous
 pluginsXHR.send(null);
 
-var internalPluginPaths: any;
+let internalPluginPaths: any;
 if (pluginsXHR.status == 200) internalPluginPaths = JSON.parse(pluginsXHR.responseText);
-export var pluginPaths = internalPluginPaths;
+export let pluginPaths = internalPluginPaths;
 
-export function connect(projectId: string, options: {reconnection: boolean; promptCredentials: boolean;} = { reconnection: false, promptCredentials: false }) {
-  var namespace = (projectId != null) ? `project:${projectId}` : "hub";
+export function connect(projectId: string, options: { reconnection: boolean; promptCredentials: boolean; } = { reconnection: false, promptCredentials: false }) {
+  let namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
-  var supServerAuth = localStorage.getItem('supServerAuth');
-  var socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
+  let supServerAuth = localStorage.getItem('supServerAuth');
+  let socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
     { transports: [ 'websocket' ], reconnection: options.reconnection, query: { supServerAuth } }
   );
 
@@ -56,7 +57,7 @@ function setupAuth(serverPassword: string, username: string) {
 export function onAssetTrashed() {
   document.body.innerHTML = '';
 
-  var h1 = document.createElement('h1');
+  let h1 = document.createElement('h1');
   h1.textContent = 'This asset has been trashed.';
 
   /*
@@ -66,7 +67,7 @@ export function onAssetTrashed() {
   button.addEventListener 'click', => ...
   */
 
-  var div = document.createElement('div');
+  let div = document.createElement('div');
   div.className = 'superpowers-error';
   div.appendChild(h1);
   // div.appendChild button
@@ -76,14 +77,14 @@ export function onAssetTrashed() {
 export function onDisconnected() {
   document.body.innerHTML = '';
 
-  var h1 = document.createElement('h1');
+  let h1 = document.createElement('h1');
   h1.textContent = 'You were disconnected.';
 
-  var button = document.createElement('button');
+  let button = document.createElement('button');
   button.textContent = 'Reconnect';
   button.addEventListener('click', () => { location.reload(); });
 
-  var div = document.createElement('div');
+  let div = document.createElement('div');
   div.className = 'superpowers-error';
   div.appendChild(h1);
   div.appendChild(button);
@@ -94,15 +95,15 @@ export function setupHotkeys() {
   document.addEventListener('keydown', (event) => {
     if (document.querySelector(".dialog") != null) return;
 
-    // window.location.origin isn't listed in lib.d.ts as of TypeScript 1.4
-    var origin: string = (<any>window.location).origin;
+    // window.location.origin isn't listed in lib.d.ts as of TypeScript 1.5
+    let origin: string = (<any>window.location).origin;
 
     function sendMessage(action: string) {
       if (window.parent != null) window.parent.postMessage({ type: "hotkey", content: action }, origin);
       else window.postMessage({ type: "hotkey", content: action}, origin);
     }
 
-    if (event.keyCode == 78 && (event.ctrlKey || event.metaKey)) {// CTRL-N
+    if (event.keyCode == 78 && (event.ctrlKey || event.metaKey)) { // CTRL-N
       event.preventDefault();
       if (event.shiftKey) sendMessage("newFolder");
       else sendMessage("newAsset");
@@ -132,9 +133,9 @@ export function setupHotkeys() {
 }
 
 export function getTreeViewInsertionPoint(treeView: any) {
-  var selectedElt = treeView.selectedNodes[0];
-  var parentId: number;
-  var index: number;
+  let selectedElt = treeView.selectedNodes[0];
+  let parentId: number;
+  let index: number;
 
   if (selectedElt != null) {
     if (selectedElt.classList.contains('group')) {
@@ -156,11 +157,11 @@ export function getTreeViewInsertionPoint(treeView: any) {
 }
 
 export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById) {
-  var parentId: number;
-  var index: number;
+  let parentId: number;
+  let index: number;
 
-  var parentNode: any;
-  var targetEntryId = dropInfo.target.dataset.id;
+  let parentNode: any;
+  let targetEntryId = dropInfo.target.dataset.id;
 
   switch (dropInfo.where) {
     case 'inside': {
@@ -170,7 +171,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
     }
     case 'above':
     case 'below': {
-      var targetNode = treeById.byId[targetEntryId];
+      let targetNode = treeById.byId[targetEntryId];
       parentNode = treeById.parentNodesById[targetNode.id];
 
       index = (parentNode != null) ? parentNode.children.indexOf(targetNode) : treeById.pub.indexOf(targetNode);
@@ -185,17 +186,17 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
 }
 
 export function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById) {
-  var targetEntryId = dropInfo.target.dataset.id;
-  var targetNode = listById.byId[targetEntryId];
+  let targetEntryId = dropInfo.target.dataset.id;
+  let targetNode = listById.byId[targetEntryId];
 
-  var index = listById.pub.indexOf(targetNode)
+  let index = listById.pub.indexOf(targetNode)
   if (dropInfo.where === 'below') index++;
   return index;
 }
 
 export function findEntryByPath(entries: any, path: string|string[]) {
-  var parts = (typeof path === 'string') ? path.split('/') : path;
-  var foundEntry: any;
+  let parts = (typeof path === 'string') ? path.split('/') : path;
+  let foundEntry: any;
 
   entries.every((entry: any) => {
     if (entry.name === parts[0]) {

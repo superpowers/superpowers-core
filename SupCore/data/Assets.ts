@@ -1,7 +1,7 @@
-import SupData = require("./index");
-import path = require("path");
+import * as SupData from "./index";
+import * as path from "path";
 
-class Assets extends SupData.base.Dictionary {
+export default class Assets extends SupData.base.Dictionary {
   server: any;
 
   constructor(server: any) {
@@ -16,16 +16,14 @@ class Assets extends SupData.base.Dictionary {
   }
 
   _load(id: string) {
-    var entry = this.server.data.entries.byId[id];
+    let entry = this.server.data.entries.byId[id];
 
-    var assetClass = SupData.assetClasses[entry.type];
+    let assetClass = SupData.assetClasses[entry.type];
     if (assetClass == null) throw new Error(`No data plugin for asset type "${entry.type}"`);
 
-    var asset = new assetClass(id, null, this.server.data);
+    let asset = new assetClass(id, null, this.server.data);
     asset.load(path.join(this.server.projectPath, `assets/${id}`));
 
     return asset;
   }
 }
-
-export = Assets;

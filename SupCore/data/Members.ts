@@ -1,6 +1,6 @@
-import ListById = require("./base/ListById");
+import ListById from "./base/ListById";
 
-class Members extends ListById {
+export default class Members extends ListById {
   static schema = {
     cachedUsername: { type: 'string' }
   }
@@ -9,5 +9,3 @@ class Members extends ListById {
     super(pub, Members.schema);
   }
 }
-
-export = Members;

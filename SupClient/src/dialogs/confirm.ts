@@ -1,20 +1,20 @@
-function confirm(label: string, validationLabel: string, callback: (value: boolean) => any) {
-  var dialogElt = document.createElement("div");
+export default function confirm(label: string, validationLabel: string, callback: (value: boolean) => any) {
+  let dialogElt = document.createElement("div");
   dialogElt.className = "dialog";
 
-  var messageElt = document.createElement("div");
+  let messageElt = document.createElement("div");
   messageElt.className = "message";
   dialogElt.appendChild(messageElt);
 
-  var labelElt = document.createElement("label");
+  let labelElt = document.createElement("label");
   labelElt.textContent = label;
   messageElt.appendChild(labelElt);
 
-  var buttonsElt = document.createElement("div");
+  let buttonsElt = document.createElement("div");
   buttonsElt.className = "buttons";
   messageElt.appendChild(buttonsElt);
 
-  var onKeyUp = (event: KeyboardEvent) => {
+  let onKeyUp = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
       document.body.removeChild(dialogElt);
       document.removeEventListener("keyup", onKeyUp);
@@ -29,7 +29,7 @@ function confirm(label: string, validationLabel: string, callback: (value: boole
 
   document.addEventListener("keyup", onKeyUp);
 
-  var cancelButtonElt = document.createElement("button");
+  let cancelButtonElt = document.createElement("button");
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
   cancelButtonElt.addEventListener("click", () => {
@@ -38,7 +38,7 @@ function confirm(label: string, validationLabel: string, callback: (value: boole
     if (callback != null) callback(false);
   });
 
-  var validateButtonElt = document.createElement("button");
+  let validateButtonElt = document.createElement("button");
   validateButtonElt.textContent = validationLabel;
   validateButtonElt.className = "validate-button";
   validateButtonElt.addEventListener("click", () => {
@@ -59,5 +59,3 @@ function confirm(label: string, validationLabel: string, callback: (value: boole
   document.body.appendChild(dialogElt);
   validateButtonElt.focus();
 }
-
-export = confirm;

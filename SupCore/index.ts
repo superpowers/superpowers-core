@@ -1,9 +1,10 @@
 ///<reference path="../typings/tsd.d.ts"/>
 
-export import data = require("./data/index");
+import * as data from "./data/index";
+export { data };
 
 export function log(message: string): void {
-  var text = `${new Date().toISOString() } - ${message}`;
+  var text = `${new Date().toISOString()} - ${message}`;
   console.log(text);
 
   if (process != null && process.send != null) process.send(text);

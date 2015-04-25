@@ -1,4 +1,4 @@
-import SupData = require("./index");
+import * as SupData from "./index";
 
 interface EntryNode {
   id: string;
@@ -11,7 +11,7 @@ interface EntryNode {
   dependentAssetIds?: any[];
 }
 
-class Entries extends SupData.base.TreeById {
+export default class Entries extends SupData.base.TreeById {
   static schema = {
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     type: { type: "string?" },
@@ -40,12 +40,12 @@ class Entries extends SupData.base.TreeById {
     super.add(node, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
 
-      var siblings = this.pub;
+      let siblings = this.pub;
       if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
       node.name = SupData.ensureUniqueName(node.id, node.name, siblings);
 
       if (node.type != null) {
-        var diagnostics = new SupData.Diagnostics(node.diagnostics)
+        let diagnostics = new SupData.Diagnostics(node.diagnostics)
         this.diagnosticsByEntryId[node.id] = diagnostics;
         node.diagnostics = diagnostics.pub;
       }
@@ -61,11 +61,11 @@ class Entries extends SupData.base.TreeById {
   }
 
   move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    var node = this.byId[id];
+    let node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
     // Check that the requested parent is indeed a folder
-    var siblings = this.pub;
+    let siblings = this.pub;
     if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     if (siblings == null) { callback(`Invalid parent node id: ${parentId}`); return; }
 
@@ -75,7 +75,7 @@ class Entries extends SupData.base.TreeById {
   }
 
   remove(id: string, callback: (err: string) => any) {
-    var node = <EntryNode>this.byId[id];
+    let node = <EntryNode>this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
     if (node.type == null && node.children.length != 0) { callback("The folder must be empty"); return; }
 
@@ -88,7 +88,7 @@ class Entries extends SupData.base.TreeById {
       if (typeof (value) != "string") { callback("Invalid value"); return; }
       value = value.trim();
 
-      var siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+      let siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
       if (SupData.hasDuplicateName(id, value, siblings)) { callback("There's already an entry with this name in this folder"); return; }
     }
 
@@ -96,11 +96,11 @@ class Entries extends SupData.base.TreeById {
   }
 
   getForStorage() {
-    var entries: EntryNode[] = [];
-    var entriesById: {[id: string]: EntryNode} = {};
+    let entries: EntryNode[] = [];
+    let entriesById: {[id: string]: EntryNode} = {};
 
     this.walk((entry: EntryNode, parentEntry: EntryNode) => {
-      var savedEntry: EntryNode = { id: entry.id, name: entry.name, type: entry.type };
+      let savedEntry: EntryNode = { id: entry.id, name: entry.name, type: entry.type };
       if (entry.children != null) savedEntry.children = [];
       entriesById[savedEntry.id] = savedEntry;
 
@@ -110,5 +110,3 @@ class Entries extends SupData.base.TreeById {
     return entries;
   }
 }
-
-export = Entries;

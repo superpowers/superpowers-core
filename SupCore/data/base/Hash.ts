@@ -1,29 +1,29 @@
-import base = require("./index");
-import events = require("events");
+import * as base from "./index";
+import { EventEmitter } from "events";
 
-class Hash extends events.EventEmitter {
+export default class Hash extends EventEmitter {
   pub: any;
   schema: any;
 
   constructor(pub: any, schema: any) {
-    super()
+    super();
 
     this.pub = pub;
     this.schema = schema;
   }
 
   setProperty(path: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {
-    var parts = path.split('.');
+    let parts = path.split('.');
 
-    var rule = this.schema[parts[0]];
-    parts.slice(1).forEach((part) => { rule = rule.properties[part]; });
+    let rule = this.schema[parts[0]];
+    for (let part of parts.slice(1)) rule = rule.properties[part];
 
     if (rule == null) { callback(`Invalid key: ${path}`); return; }
-    var violation = base.getRuleViolation(value, rule);
+    let violation = base.getRuleViolation(value, rule);
     if (violation != null) { callback(`Invalid value: ${base.formatRuleViolation(violation)}`); return; }
 
-    var obj = this.pub;
-    parts.slice(0, parts.length - 1).forEach((part) => { obj = obj[part]; });
+    let obj = this.pub;
+    for (let part of parts.slice(0, parts.length - 1)) obj = obj[part];
     obj[parts[parts.length - 1]] = value;
 
     callback(null, value);
@@ -31,12 +31,10 @@ class Hash extends events.EventEmitter {
   }
 
   client_setProperty(path: string, value: number|string|boolean) {
-    var parts = path.split('.');
+    let parts = path.split('.');
 
-    var obj = this.pub;
-    parts.slice(0, parts.length - 1).forEach((part) => { obj = obj[part]; });
+    let obj = this.pub;
+    for (let part of parts.slice(0, parts.length - 1)) obj = obj[part];
     obj[parts[parts.length - 1]] = value;
   }
 }
-
-export = Hash;

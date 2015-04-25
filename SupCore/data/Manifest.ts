@@ -1,6 +1,6 @@
-import Hash = require("./base/Hash");
+import Hash from "./base/Hash";
 
-class Manifest extends Hash {
+export default class Manifest extends Hash {
   static schema = {
     id: { type: 'string' },
     name: { type: 'string', minLength: 1, maxLength: 80, mutable: true },
@@ -11,5 +11,3 @@ class Manifest extends Hash {
     super(pub, Manifest.schema);
   }
 }
-
-export = Manifest;

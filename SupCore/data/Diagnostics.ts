@@ -1,6 +1,6 @@
-import ListById = require("./base/ListById");
+import ListById from "./base/ListById";
 
-class Diagnostics extends ListById {
+export default class Diagnostics extends ListById {
   static schema = {
     id: { type: "string" },
     type: { type: "string" },
@@ -11,4 +11,3 @@ class Diagnostics extends ListById {
     super(pub, Diagnostics.schema);
   }
 }
-export = Diagnostics

@@ -1,6 +1,6 @@
-import Hash = require("./base/Hash");
+import Hash from "./base/Hash";
 
-class Internals extends Hash {
+export default class Internals extends Hash {
   static schema = {
     nextBuildId: { type: 'integer', min: 0, mutable: true },
     nextEntryId: { type: 'integer', min: 0, mutable: true }
@@ -10,5 +10,3 @@ class Internals extends Hash {
     super(pub, Internals.schema);
   }
 }
-
-export = Internals;

@@ -1,5 +1,5 @@
-import base = require("./index");
-import events = require("events");
+import * as base from "./index";
+import { EventEmitter } from "events";
 
 interface TreeNode {
   id: string;
@@ -8,7 +8,7 @@ interface TreeNode {
   [name: string]: any;
 }
 
-class TreeById extends events.EventEmitter {
+export default class TreeById extends EventEmitter {
   pub: TreeNode[];
   schema: any;
   nextId: number;
@@ -25,8 +25,8 @@ class TreeById extends events.EventEmitter {
     this.byId = {};
     this.parentNodesById = {};
 
-    var maxNodeId = -1;
-    this.walk( (node, parentNode) => {
+    let maxNodeId = -1;
+    this.walk((node, parentNode) => {
       // TODO: Remove this cast at some point, legacy stuff from Superpowers 0.4
       if(typeof node.id == 'number') node.id = node.id.toString();
 
@@ -39,20 +39,20 @@ class TreeById extends events.EventEmitter {
   }
 
   walk(callback: (node: TreeNode, parentNode?: TreeNode) => any) {
-    this.pub.forEach((node) => { this.walkNode(node, null, callback); });
+    for (let node of this.pub) this.walkNode(node, null, callback);
   }
 
   walkNode(node: TreeNode, parentNode: TreeNode, callback: (node: TreeNode, parentNode?: TreeNode) => any) {
     callback(node, parentNode);
 
     if (node.children != null) {
-      node.children.forEach((child) => { this.walkNode(child, node, callback); });
+      for (let child of node.children) this.walkNode(child, node, callback);
     }
   }
 
   getPathFromId(id: string): string {
-    var name = this.byId[id].name;
-    var parent = this.parentNodesById[id];
+    let name = this.byId[id].name;
+    let parent = this.parentNodesById[id];
     while(true) {
       if (parent == null) break;
       name = `${parent.name}/${name}`;
@@ -65,16 +65,16 @@ class TreeById extends events.EventEmitter {
   add(node: TreeNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     if (node.id != null && this.schema.id == null) { callback("Found unexpected id key"); return; }
 
-    var siblings = this.pub;
+    let siblings = this.pub;
     if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     if (siblings == null) { callback(`Invalid parent id: ${parentId}`); return; }
 
-    var missingKeys = Object.keys(this.schema);
-    for (var key in node) {
-      var value = node[key];
-      var rule = this.schema[key];
+    let missingKeys = Object.keys(this.schema);
+    for (let key in node) {
+      let value = node[key];
+      let rule = this.schema[key];
       if (rule == null) { callback(`Invalid key: ${key}`); return; }
-      var violation = base.getRuleViolation(value, rule, true);
+      let violation = base.getRuleViolation(value, rule, true);
       if (violation != null) { callback(`Invalid value: ${base.formatRuleViolation(violation)}`); return; }
 
       missingKeys.splice(missingKeys.indexOf(key), 1);
@@ -98,7 +98,7 @@ class TreeById extends events.EventEmitter {
   }
 
   client_add(node: TreeNode, parentId: string, index: number) {
-    var siblings = this.pub;
+    let siblings = this.pub;
     if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     siblings.splice(index, 0, node);
 
@@ -108,23 +108,24 @@ class TreeById extends events.EventEmitter {
 
 
   move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    var node = this.byId[id]
+    let node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
+    let parentNode: TreeNode = null;
     if (parentId != null) {
-      var parentNode = this.byId[parentId];
+      parentNode = this.byId[parentId];
       if (parentNode == null || parentNode.children == null) { callback(`Invalid parent node id: ${parentId}`); return; }
     }
 
     // Adjust insertion index if needed
-    var siblings = (parentNode != null) ? parentNode.children : this.pub;
+    let siblings = (parentNode != null) ? parentNode.children : this.pub;
     if (index == null || index < 0 || index > siblings.length) index = siblings.length;
 
-    var oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
-    var oldIndex = oldSiblings.indexOf(node);
+    let oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    let oldIndex = oldSiblings.indexOf(node);
     oldSiblings.splice(oldIndex, 1);
 
-    var actualIndex = index;
+    let actualIndex = index;
     if (siblings == oldSiblings && oldIndex < actualIndex) actualIndex--;
     siblings.splice(actualIndex, 0, node);
 
@@ -135,16 +136,16 @@ class TreeById extends events.EventEmitter {
   }
 
   client_move(id: string, parentId: string, index: number) {
-    var node = this.byId[id];
+    let node = this.byId[id];
 
-    var parentNode = (parentId != null) ? this.byId[parentId] : null;
-    var siblings = (parentNode != null) ? this.byId[parentId].children : this.pub;
+    let parentNode = (parentId != null) ? this.byId[parentId] : null;
+    let siblings = (parentNode != null) ? this.byId[parentId].children : this.pub;
 
-    var oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
-    var oldIndex = oldSiblings.indexOf(node);
+    let oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    let oldIndex = oldSiblings.indexOf(node);
     oldSiblings.splice(oldIndex, 1);
 
-    var actualIndex = index;
+    let actualIndex = index;
     if (siblings == oldSiblings && oldIndex < actualIndex) actualIndex--;
     siblings.splice(actualIndex, 0, node);
 
@@ -153,10 +154,10 @@ class TreeById extends events.EventEmitter {
 
 
   remove(id: string, callback: (err: string) => any) {
-    var node = this.byId[id];
+    let node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
-    var siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    let siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     siblings.splice(siblings.indexOf(node), 1);
 
     this.walkNode(node, null, (node: TreeNode, parentNode?: TreeNode) => {
@@ -169,9 +170,9 @@ class TreeById extends events.EventEmitter {
   }
 
   client_remove(id: string) {
-    var node = this.byId[id];
+    let node = this.byId[id];
 
-    var siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    let siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     siblings.splice(siblings.indexOf(node), 1);
 
     this.walkNode(node, null, (node: TreeNode, parentNode?: TreeNode) => {
@@ -184,12 +185,12 @@ class TreeById extends events.EventEmitter {
 
   // FIXME: Replace key with path and support nested properties
   setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any) {
-    var node = this.byId[id];
+    let node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
-    var rule = this.schema[key];
+    let rule = this.schema[key];
     if (rule == null) { callback(`Invalid key: ${key}`); return; }
-    var violation = base.getRuleViolation(value, rule);
+    let violation = base.getRuleViolation(value, rule);
     if (violation != null) { callback(`Invalid value: ${base.formatRuleViolation(violation)}`); return; }
 
     node[key] = value;
@@ -202,5 +203,3 @@ class TreeById extends events.EventEmitter {
     this.byId[id][key] = value;
   }
 }
-
-export = TreeById;

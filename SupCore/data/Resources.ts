@@ -1,9 +1,9 @@
-import SupData = require("./index");
-import path = require("path");
+import * as SupData from "./index";
+import * as path from "path";
 
 // Plugin resources are assets managed by plugins outside the project's asset tree
 // They might be used for project-wide plugin-specific settings for instance
-class Resources extends SupData.base.Dictionary {
+export default class Resources extends SupData.base.Dictionary {
   server: any;
 
   constructor(server: any) {
@@ -18,13 +18,11 @@ class Resources extends SupData.base.Dictionary {
   }
 
   _load(id: string) {
-    var resourceClass = SupData.resourceClasses[id];
+    let resourceClass = SupData.resourceClasses[id];
 
-    var resource = new resourceClass(null, this.server.data);
+    let resource = new resourceClass(null, this.server.data);
     resource.load(path.join(this.server.projectPath, `resources/${id}`));
 
     return resource;
   }
 }
-
-export = Resources;

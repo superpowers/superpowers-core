@@ -1,6 +1,6 @@
-import ListById = require("./base/ListById");
+import ListById from "./base/ListById";
 
-class RoomUsers extends ListById {
+export default class RoomUsers extends ListById {
   static schema = {
     // TODO: use userId for id when we've got proper login
     id: { type: 'string', minLength: 3, maxLength: 20 },
@@ -12,5 +12,3 @@ class RoomUsers extends ListById {
     super(pub, RoomUsers.schema);
   }
 }
-
-export = RoomUsers;

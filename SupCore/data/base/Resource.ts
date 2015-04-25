@@ -1,9 +1,9 @@
-import Hash = require("./Hash");
+import Hash from "./Hash";
 
-import path = require("path");
-import fs = require("fs");
+import * as path from "path";
+import * as fs from "fs";
 
-class Resource extends Hash {
+export default class Resource extends Hash {
   serverData: any;
 
   constructor(pub: any, schema: any, serverData: any) {
@@ -36,7 +36,7 @@ class Resource extends Hash {
   unload() { this.removeAllListeners(); }
 
   save(resourcePath: string, callback: (err: Error) => any) {
-    var json = JSON.stringify(this.pub, null, 2);
+    let json = JSON.stringify(this.pub, null, 2);
 
     fs.mkdir(path.join(resourcePath), (err) => {
       if (err != null && err.code !== "EEXIST") { callback(err); return; }
@@ -52,5 +52,3 @@ class Resource extends Hash {
     });
   }
 }
-
-export = Resource;

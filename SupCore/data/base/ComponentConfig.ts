@@ -1,6 +1,6 @@
-import Hash = require("./Hash");
+import Hash from "./Hash";
 
-class ComponentConfig extends Hash {
+export default class ComponentConfig extends Hash {
   constructor(pub: any, schema: any) {
     super(pub, schema);
   }
@@ -17,5 +17,3 @@ class ComponentConfig extends Hash {
     });
   }
 }
-
-export = ComponentConfig;
