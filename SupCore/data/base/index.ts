@@ -16,17 +16,17 @@ interface Rule {
   max?: number;
 
   // String
-  length?: string;
-  minLength?: string;
-  maxLength?: string;
+  length?: number;
+  minLength?: number;
+  maxLength?: number;
 
   // Enum or Array
-  items?: Rule|string[];
+  items?: string[] | Rule;
 
   // Hash
-  keys?: {length?: string; minLength?: string; maxLength?: string;}
+  keys?: { length?: number; minLength?: number; maxLength?: number; };
   values?: Rule;
-  properties?: {[key: string]: Rule};
+  properties?: { [key: string]: Rule; };
 }
 interface Violation {
   message: string; path?: string;
@@ -127,7 +127,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       if (rule.minLength != null && value.length < rule.minLength) return { message: `Array length (${value.length}) is less than minimum length (${rule.minLength})` };
       if (rule.maxLength != null && value.length > rule.maxLength) return { message: `Array length (${value.length}) is greater than maximum length (${rule.maxLength})` };
 
-      if(rule.items != null) {
+      if (rule.items != null) {
         for (let index = 0; index < value.length; index++) {
           let item: any = value[index];
           let violation = getRuleViolation(item, <Rule>rule.items, true);

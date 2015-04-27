@@ -19,7 +19,7 @@ export default class ListById extends EventEmitter {
 
     for (let item of this.pub) {
       // TODO: Remove this cast at some point, legacy stuff from Superpowers 0.4
-      if(typeof item.id == 'number') item.id = item.id.toString();
+      if (typeof item.id == 'number') item.id = item.id.toString();
 
       this.byId[item.id] = item;
       maxItemId = Math.max(maxItemId, item.id);

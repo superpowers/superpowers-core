@@ -120,15 +120,15 @@ declare module SupCore {
         max?: number;
 
         // String
-        length?: string;
-        minLength?: string;
-        maxLength?: string;
+        length?: number;
+        minLength?: number;
+        maxLength?: number;
 
         // Enum or Array
-        items?: Rule|string[];
+        items?: string[] | Rule;
 
         // Hash
-        keys?: {length?: string; minLength?: string; maxLength?: string;}
+        keys?: { length?: number; minLength?: number; maxLength?: number; };
         values?: Rule;
         properties?: {[key: string]: Rule};
       }
