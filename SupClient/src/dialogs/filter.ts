@@ -26,40 +26,8 @@ export default function filter(list: string[], placeholder: string, callback: (v
     labelParentElt.scrollTop = (index - 3) * 20;
   }
 
-  let onKeyDown = (event: KeyboardEvent) => {
-    if (event.keyCode === 38) {
-      event.preventDefault();
-      if (selectedIndex != null && selectedIndex > 0) {
-        labelElts[selectedIndex].className = "";
-        selectResult(selectedIndex - 1);
-      }
-    }
-    else if (event.keyCode === 40) {
-      event.preventDefault();
-      if (selectedIndex != null && selectedIndex < labelElts.length - 1) {
-        labelElts[selectedIndex].className = "";
-        selectResult(selectedIndex + 1);
-      }
-    }
-  }
-
   let onKeyUp = (event: KeyboardEvent) => {
-    if (event.keyCode === 13) {
-      document.body.removeChild(dialogElt);
-      document.removeEventListener("keyup", onKeyUp);
-      document.removeEventListener("keydown", onKeyDown);
-      let value = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
-      if (callback != null) callback(value);
-    }
-
-    else if (event.keyCode === 27) {
-      document.body.removeChild(dialogElt);
-      document.removeEventListener("keyup", onKeyUp);
-      document.removeEventListener("keydown", onKeyDown);
-      if (callback != null) callback(null);
-    }
-
-    else if (inputElt.value !== "") {
+    if (inputElt.value !== "") {
       let previousSelectedResult = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
       let newSelectedIndex: number;
 
@@ -95,8 +63,39 @@ export default function filter(list: string[], placeholder: string, callback: (v
     }
   }
 
+  let onKeyDown = (event: KeyboardEvent) => {
+    if (event.keyCode === 38) {
+      event.preventDefault();
+      if (selectedIndex != null && selectedIndex > 0) {
+        labelElts[selectedIndex].className = "";
+        selectResult(selectedIndex - 1);
+      }
+    }
+    else if (event.keyCode === 40) {
+      event.preventDefault();
+      if (selectedIndex != null && selectedIndex < labelElts.length - 1) {
+        labelElts[selectedIndex].className = "";
+        selectResult(selectedIndex + 1);
+      }
+    }
+    else if (event.keyCode === 13) {
+      document.body.removeChild(dialogElt);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
+      let value = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
+      if (callback != null) callback(value);
+    }
+
+    else if (event.keyCode === 27) {
+      document.body.removeChild(dialogElt);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
+      if (callback != null) callback(null);
+    }
+  }
+
   document.addEventListener("keydown", onKeyDown, true);
-  document.addEventListener("keyup", onKeyUp);
+  document.addEventListener("keyup", onKeyUp, true);
 
   document.body.appendChild(dialogElt);
   inputElt.focus();

@@ -14,27 +14,27 @@ export default function confirm(label: string, validationLabel: string, callback
   buttonsElt.className = "buttons";
   messageElt.appendChild(buttonsElt);
 
-  let onKeyUp = (event: KeyboardEvent) => {
+  let onKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
       document.body.removeChild(dialogElt);
-      document.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("keydown", onKeyDown);
       if (callback != null) callback(true);
     }
     else if (event.keyCode === 27) {
       document.body.removeChild(dialogElt);
-      document.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("keydown", onKeyDown);
       if (callback != null) callback(false);
     }
   };
 
-  document.addEventListener("keyup", onKeyUp);
+  document.addEventListener("keydown", onKeyDown);
 
   let cancelButtonElt = document.createElement("button");
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
   cancelButtonElt.addEventListener("click", () => {
     document.body.removeChild(dialogElt);
-    document.removeEventListener("keyup", onKeyUp);
+    document.removeEventListener("keydown", onKeyDown);
     if (callback != null) callback(false);
   });
 
@@ -43,7 +43,7 @@ export default function confirm(label: string, validationLabel: string, callback
   validateButtonElt.className = "validate-button";
   validateButtonElt.addEventListener("click", () => {
     document.body.removeChild(dialogElt);
-    document.removeEventListener("keyup", onKeyUp);
+    document.removeEventListener("keydown", onKeyDown);
     if (callback != null) callback(true);
   });
 
