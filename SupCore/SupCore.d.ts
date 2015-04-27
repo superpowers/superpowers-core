@@ -112,7 +112,7 @@ declare module SupCore {
 
     module base {
       interface Rule {
-        mutable: boolean;
+        mutable?: boolean;
         type: string;
 
         // Number
