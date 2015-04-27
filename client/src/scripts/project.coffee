@@ -19,6 +19,7 @@ module.exports = (projectId) ->
     document.querySelector('.tabs-bar').style.webkitAppRegion = 'no-drag'
 
   # Hot-keys
+  SupClient.setupHotkeys();
   document.addEventListener 'keydown', (event) =>
     return if document.querySelector(".dialog")?
 
