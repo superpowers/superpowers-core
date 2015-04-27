@@ -8,7 +8,7 @@ import ComponentConfig from "./ComponentConfig";
 export { Hash, ListById, TreeById, Dictionary, Asset, Resource, ComponentConfig };
 
 interface Rule {
-  mutable: boolean;
+  mutable?: boolean;
   type: string;
 
   // Number
