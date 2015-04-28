@@ -183,6 +183,7 @@ declare module SupCore {
 
         constructor(pub: TreeNode[], schema: any, nextId?: number);
         walk(callback: (node: TreeNode, parentNode?: any) => any): void;
+        walkNode(node: TreeNode, parentNode: TreeNode, callback: (node: TreeNode, parentNode?: TreeNode) => any): void;
         getPathFromId(id: string): string;
         add(node: TreeNode, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
         client_add(node: TreeNode, parentId: string, index: number): void;
