@@ -34,8 +34,6 @@ call gulp
 
 cd ../socketio
 call npm install
-call tsd reinstall
-call tsd rebundle
 call gulp
 
 cd ../sound
@@ -53,8 +51,6 @@ call gulp
 
 cd ../typescript
 call npm install
-call tsd reinstall
-call tsd rebundle
 call gulp
 
 popd

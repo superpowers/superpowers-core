@@ -5,11 +5,8 @@ plugins/sparklinlabs/*/public/**.css
 plugins/sparklinlabs/*/public/**.html
 *.sublime-*
 bin/
-typings/*
 SupCore/**.js
-SupCore/typings/*
 SupClient/**.js
-SupClient/typings/*
 SupAPI/**.js
 syntax: regexp
 ^projects/

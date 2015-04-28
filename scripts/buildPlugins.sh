@@ -11,10 +11,10 @@ cd ../model && gulp
 cd ../p2js && npm install && gulp
 cd ../rngjs && gulp
 cd ../scene && gulp
-cd ../socketio && npm install && tsd reinstall && tsd rebundle && gulp
+cd ../socketio && npm install && gulp
 cd ../sound && gulp
 cd ../sprite && gulp
 cd ../tileMap && gulp
 cd ../tweenjs && npm install && gulp
-cd ../typescript && npm install && tsd reinstall && tsd rebundle && gulp
+cd ../typescript && npm install && gulp
 popd
