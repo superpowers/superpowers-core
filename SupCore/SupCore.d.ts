@@ -11,7 +11,7 @@ declare module SupCore {
     var assetClasses: {[assetName: string]: AssetClass};
     function registerAssetClass(name: string, assetClass: AssetClass): void;
 
-    interface ComponentConfigClass { new(pub: any): base.ComponentConfig; }
+    interface ComponentConfigClass { new(pub: any): base.ComponentConfig; create(): any; }
     var componentConfigClasses: {[componentConfigName: string]: ComponentConfigClass};
     function registerComponentConfigClass(name: string, configClass: ComponentConfigClass): void;
 
@@ -168,7 +168,7 @@ declare module SupCore {
       }
 
       interface TreeNode {
-        id: string;
+        id?: string;
         name: string;
         children?: TreeNode[];
         [name: string]: any;

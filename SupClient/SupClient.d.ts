@@ -7,9 +7,9 @@ declare module SupClient {
   function onAssetTrashed(): void;
   function onDisconnected(): void;
   function setupHotkeys(): void;
-  function getTreeViewInsertionPoint(treeView: any): { parentId: number; index: number };
+  function getTreeViewInsertionPoint(treeView: any): { parentId: string; index: number };
 
-  function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById): { parentId: number; index: number };
+  function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById): { parentId: string; index: number };
   function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById): number;
   function findEntryByPath(entries: any, path: string|string[]): any;
 

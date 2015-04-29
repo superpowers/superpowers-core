@@ -134,7 +134,7 @@ export function setupHotkeys() {
 
 export function getTreeViewInsertionPoint(treeView: any) {
   let selectedElt = treeView.selectedNodes[0];
-  let parentId: number;
+  let parentId: string;
   let index: number;
 
   if (selectedElt != null) {
@@ -157,7 +157,7 @@ export function getTreeViewInsertionPoint(treeView: any) {
 }
 
 export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById) {
-  let parentId: number;
+  let parentId: string;
   let index: number;
 
   let parentNode: any;

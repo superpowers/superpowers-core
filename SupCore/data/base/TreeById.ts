@@ -2,7 +2,7 @@ import * as base from "./index";
 import { EventEmitter } from "events";
 
 interface TreeNode {
-  id: string;
+  id?: string;
   name: string;
   children?: TreeNode[];
   [name: string]: any;

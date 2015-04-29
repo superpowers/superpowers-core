@@ -48,7 +48,7 @@ export function registerAssetClass(name: string, assetClass: AssetClass) {
   return
 }
 
-interface ComponentConfigClass { new(pub: any): base.ComponentConfig; }
+interface ComponentConfigClass { new(pub: any): base.ComponentConfig; create(): any; }
 export let componentConfigClasses: {[componentConfigName: string]: ComponentConfigClass} = {}
 export function registerComponentConfigClass(name: string, configClass: ComponentConfigClass) {
   if (componentConfigClasses[name] != null) {
