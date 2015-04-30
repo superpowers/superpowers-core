@@ -9,8 +9,8 @@ export default class Assets extends SupData.base.Dictionary {
     this.server = server;
   }
 
-  acquire(id: string, owner: any, callback: (err: Error) => any) {
-    if (this.server.data.entries.byId[id] == null || this.server.data.entries.byId[id].type == null) { callback(new Error(`Invalid asset id: ${id}`)); return; }
+  acquire(id: string, owner: any, callback: (err: Error, item: any) => any) {
+    if (this.server.data.entries.byId[id] == null || this.server.data.entries.byId[id].type == null) { callback(new Error(`Invalid asset id: ${id}`), null); return; }
 
     super.acquire(id, owner, callback);
   }

@@ -9,4 +9,14 @@ export default class Internals extends Hash {
   constructor(pub: any) {
     super(pub, Internals.schema);
   }
+
+  incrementNextEntryId() {
+    this.pub.nextEntryId++;
+    this.emit('change');
+  }
+
+  incrementNextBuildId() {
+    this.pub.nextBuildId++;
+    this.emit('change');
+  }
 }
