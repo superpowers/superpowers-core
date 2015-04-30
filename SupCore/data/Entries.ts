@@ -22,7 +22,7 @@ export default class Entries extends SupData.base.TreeById {
   diagnosticsByEntryId: { [key: string]: SupData.Diagnostics } = {};
   dependenciesByAssetId: any = {};
 
-  constructor(pub: any, nextId?: number) {
+  constructor(pub: EntryNode[], nextId?: number) {
     super(pub, Entries.schema, nextId);
 
     this.walk((node: EntryNode, parentNode: EntryNode) => {
