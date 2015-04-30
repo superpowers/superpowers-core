@@ -16,11 +16,13 @@ export default function confirm(label: string, validationLabel: string, callback
 
   let onKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
+      event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
       if (callback != null) callback(true);
     }
     else if (event.keyCode === 27) {
+      event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
       if (callback != null) callback(false);

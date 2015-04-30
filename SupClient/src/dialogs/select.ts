@@ -27,6 +27,7 @@ export default function select(label: string, options: {[value: string]: string}
       if (callback != null) callback(value);
     }
     else if (event.keyCode === 27) {
+      event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
       if (callback != null) callback(null);

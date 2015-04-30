@@ -29,12 +29,14 @@ export default function prompt(label: string, placeholder: string, initialValue:
 
   let onKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 13) {
+      event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
       let value = (inputElt.value !== "") ? inputElt.value : null;
       if (callback != null) callback(value);
     }
     else if (event.keyCode == 27) {
+    event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
       if (callback != null) callback(null);

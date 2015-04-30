@@ -79,6 +79,7 @@ export default function filter(list: string[], placeholder: string, callback: (v
       }
     }
     else if (event.keyCode === 13) {
+      event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
@@ -87,6 +88,7 @@ export default function filter(list: string[], placeholder: string, callback: (v
     }
 
     else if (event.keyCode === 27) {
+      event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
