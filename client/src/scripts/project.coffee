@@ -105,7 +105,7 @@ module.exports = (projectId) ->
 
   for toolName, tool of SupClient.pluginPaths.toolsByName
     if toolName == 'main' and tool.pluginPath == 'sparklinlabs/home'
-      openTool toolName
+      ui.homeTab = openTool toolName
       continue
 
     toolElt = document.createElement('li')
@@ -532,7 +532,7 @@ openTool = (name) ->
     ui.panesElt.appendChild iframe
 
   onTabActivate tab
-  return
+  tab
 
 onNewAssetClick = ->
   SupClient.dialogs.prompt "Enter a name for the new asset.", "Asset name", null, "Create", (name) =>
