@@ -19,7 +19,7 @@ export default class ListById extends EventEmitter {
 
     for (let item of this.pub) {
       // TODO: Remove this cast at some point, legacy stuff from Superpowers 0.4
-      if (typeof item.id == 'number') item.id = item.id.toString();
+      if (typeof item.id === "number") item.id = item.id.toString();
 
       this.byId[item.id] = item;
       maxItemId = Math.max(maxItemId, item.id);
@@ -81,7 +81,7 @@ export default class ListById extends EventEmitter {
     this.pub.splice(actualIndex, 0, item);
 
     callback(null, index);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_move(id: string, newIndex: number) {
@@ -100,7 +100,7 @@ export default class ListById extends EventEmitter {
     delete this.byId[id];
 
     callback(null, index);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_remove(id: string) {
@@ -124,7 +124,7 @@ export default class ListById extends EventEmitter {
     item[key] = value;
 
     callback(null, value);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_setProperty(id: string, key: string, value: number|string|boolean) {

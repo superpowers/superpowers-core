@@ -28,7 +28,7 @@ export default class TreeById extends EventEmitter {
     let maxNodeId = -1;
     this.walk((node, parentNode) => {
       // TODO: Remove this cast at some point, legacy stuff from Superpowers 0.4
-      if (typeof node.id == 'number') node.id = node.id.toString();
+      if (typeof node.id === "number") node.id = node.id.toString();
 
       maxNodeId = Math.max(maxNodeId, parseInt(node.id));
       this.byId[node.id] = node;
@@ -94,7 +94,7 @@ export default class TreeById extends EventEmitter {
     siblings.splice(index, 0, node);
 
     callback(null, index);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_add(node: TreeNode, parentId: string, index: number) {
@@ -132,7 +132,7 @@ export default class TreeById extends EventEmitter {
     this.parentNodesById[id] = parentNode;
 
     callback(null, index);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_move(id: string, parentId: string, index: number) {
@@ -166,7 +166,7 @@ export default class TreeById extends EventEmitter {
     });
 
     callback(null);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_remove(id: string) {
@@ -196,7 +196,7 @@ export default class TreeById extends EventEmitter {
     node[key] = value;
 
     callback(null, value);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_setProperty(id: string, key: string, value: any) {

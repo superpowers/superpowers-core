@@ -3,10 +3,12 @@ import Hash from "./Hash";
 import * as path from "path";
 import * as fs from "fs";
 
-export default class Resource extends Hash {
-  serverData: any;
+interface ServerData { [name: string]: SupCore.data.base.Dictionary; };
 
-  constructor(pub: any, schema: any, serverData: any) {
+export default class Resource extends Hash {
+  serverData: ServerData;
+
+  constructor(pub: any, schema: any, serverData: ServerData) {
     super(pub, schema);
     this.serverData = serverData;
     if (pub != null) this.setup();
@@ -17,10 +19,10 @@ export default class Resource extends Hash {
   setup() {}
 
   load(resourcePath: string) {
-    fs.readFile(path.join(resourcePath, "resource.json"), { encoding: 'utf8' }, (err, json) => {
+    fs.readFile(path.join(resourcePath, "resource.json"), { encoding: "utf8" }, (err, json) => {
       if (err != null) {
-        if (err.code === 'ENOENT') {
-          this.init( () => { this.emit('load') } );
+        if (err.code === "ENOENT") {
+          this.init( () => { this.emit("load") } );
           return;
         }
 
@@ -29,7 +31,7 @@ export default class Resource extends Hash {
 
       this.pub = JSON.parse(json);
       this.setup();
-      this.emit('load');
+      this.emit("load");
     });
   }
 
@@ -40,7 +42,7 @@ export default class Resource extends Hash {
 
     fs.mkdir(path.join(resourcePath), (err) => {
       if (err != null && err.code !== "EEXIST") { callback(err); return; }
-      fs.writeFile(path.join(resourcePath, "resource.json"), json, { encoding: 'utf8' }, callback);
+      fs.writeFile(path.join(resourcePath, "resource.json"), json, { encoding: "utf8" }, callback);
     });
   }
 
