@@ -42,7 +42,11 @@ export default class ListById extends EventEmitter {
     for (let key in item) {
       let value = item[key];
       let rule = this.schema[key];
-      if (rule == null) { callback(`Invalid key: ${key}`); return; }
+      if (rule == null) {
+        if(key == "id" && value == null) continue;
+        callback(`Invalid key: ${key}`);
+        return;
+      }
       let violation = base.getRuleViolation(value, rule, true);
       if (violation != null) { callback(`Invalid value for ${key}: ${base.formatRuleViolation(violation)}`); return; }
 

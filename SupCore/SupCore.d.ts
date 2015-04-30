@@ -168,7 +168,7 @@ declare module SupCore {
       }
 
       interface TreeNode {
-        id?: string;
+        id: string;
         name: string;
         children?: TreeNode[];
         [name: string]: any;

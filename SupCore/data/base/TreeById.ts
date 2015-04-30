@@ -2,7 +2,7 @@ import * as base from "./index";
 import { EventEmitter } from "events";
 
 interface TreeNode {
-  id?: string;
+  id: string;
   name: string;
   children?: TreeNode[];
   [name: string]: any;
@@ -73,7 +73,11 @@ export default class TreeById extends EventEmitter {
     for (let key in node) {
       let value = node[key];
       let rule = this.schema[key];
-      if (rule == null) { callback(`Invalid key: ${key}`); return; }
+      if (rule == null) {
+        if(key == "id" && value == null) continue;
+        callback(`Invalid key: ${key}`);
+        return;
+      }
       let violation = base.getRuleViolation(value, rule, true);
       if (violation != null) { callback(`Invalid value for ${key}: ${base.formatRuleViolation(violation)}`); return; }
 
