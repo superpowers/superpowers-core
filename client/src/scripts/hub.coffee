@@ -102,7 +102,7 @@ onNewProjectClick = ->
     SupClient.dialogs.prompt "Enter a description for the project.", "Project description", null, "Create", (description) =>
       description ?= ""
       socket.emit 'add:projects', name, description, (err, id) ->
-        alert err if err?
+        if err? then alert(err); return
 
         ui.projectsTreeView.clearSelection()
         ui.projectsTreeView.addToSelection ui.projectsTreeView.treeRoot.querySelector("li[data-id='#{id}']")
@@ -121,7 +121,7 @@ onRenameProjectClick = ->
     return if ! newName? or newName == project.name
 
     socket.emit 'setProperty:projects', project.id, 'name', newName, (err) ->
-      alert err if err?
+      if err? then alert(err); return;
       return
     return
   return
@@ -136,7 +136,7 @@ onEditDescriptionClick = ->
     return if ! newDescription? or newDescription == project.description
 
     socket.emit 'setProperty:projects', project.id, 'description', newDescription, (err) ->
-      alert err if err?
+      if err? then alert(err); return;
       return
 
     return
