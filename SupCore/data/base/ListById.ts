@@ -44,7 +44,7 @@ export default class ListById extends EventEmitter {
       let rule = this.schema[key];
       if (rule == null) { callback(`Invalid key: ${key}`); return; }
       let violation = base.getRuleViolation(value, rule, true);
-      if (violation != null) { callback(`Invalid value: ${base.formatRuleViolation(violation)}`); return; }
+      if (violation != null) { callback(`Invalid value for ${key}: ${base.formatRuleViolation(violation)}`); return; }
 
       missingKeys.splice(missingKeys.indexOf(key), 1);
     }
@@ -119,7 +119,7 @@ export default class ListById extends EventEmitter {
     let rule = this.schema[key];
     if (rule == null) { callback(`Invalid key: ${key}`); return; }
     let violation = base.getRuleViolation(value, rule);
-    if (violation != null) { callback(`Invalid value: ${base.formatRuleViolation(violation)}`); return; }
+    if (violation != null) { callback(`Invalid value for ${key}: ${base.formatRuleViolation(violation)}`); return; }
 
     item[key] = value;
 

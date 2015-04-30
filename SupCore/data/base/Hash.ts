@@ -20,7 +20,7 @@ export default class Hash extends EventEmitter {
 
     if (rule == null) { callback(`Invalid key: ${path}`); return; }
     let violation = base.getRuleViolation(value, rule);
-    if (violation != null) { callback(`Invalid value: ${base.formatRuleViolation(violation)}`); return; }
+    if (violation != null) { callback(`Invalid value for ${path}: ${base.formatRuleViolation(violation)}`); return; }
 
     let obj = this.pub;
     for (let part of parts.slice(0, parts.length - 1)) obj = obj[part];
