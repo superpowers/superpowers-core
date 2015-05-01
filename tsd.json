@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "0cb00c5d47421ecbd9f18fe131d1786fad7d53d7"
+      "commit": "7acdb48f24afc060260818c5937f471d73331807"
     },
     "async/async.d.ts": {
       "commit": "25da006de5de3d2e31252fdc988296c7c212f231"
@@ -28,6 +28,9 @@
     },
     "socket.io/socket.io.d.ts": {
       "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
+    },
+    "recursive-readdir/recursive-readdir.d.ts": {
+      "commit": "7acdb48f24afc060260818c5937f471d73331807"
     }
   }
 }

@@ -18,8 +18,8 @@ import ProjectHub from "./ProjectHub";
 require("coffee-script/register");
 
 // Globals
-global.SupAPI = SupAPI;
-global.SupCore = SupCore;
+(<any>global).SupAPI = SupAPI;
+(<any>global).SupCore = SupCore;
 
 SupCore.log("Server starting...");
 
