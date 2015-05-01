@@ -26,7 +26,7 @@ export default class Rooms extends SupData.base.Dictionary {
     });
   }
 
-  release(id: string, owner: any, options: any) {
+  release(id: string, owner: any, options?: any) {
     super.release(id, owner, options);
     if (owner == null) return;
 

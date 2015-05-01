@@ -31,7 +31,7 @@ startStopServerButton.addEventListener 'click', ->
 startServer = ->
   startStopServerButton.textContent = 'Stop'
 
-  serverPath = path.join path.resolve(path.dirname(nodeProcess.mainModule.filename)), '../../server/start.js'
+  serverPath = path.join path.resolve(path.dirname(nodeProcess.mainModule.filename)), '../../server/index.js'
   exports.serverProcess = child_process.fork serverPath, silent: true
   exports.serverProcess.on 'exit', (chunk) ->
     exports.serverProcess = null

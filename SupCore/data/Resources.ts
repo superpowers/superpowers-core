@@ -11,8 +11,8 @@ export default class Resources extends SupData.base.Dictionary {
     this.server = server;
   }
 
-  acquire(id: string, owner: any, callback: (err: Error, item?: any) => any) {
-    if (SupData.resourceClasses[id] == null) { callback(new Error(`Invalid resource id: ${id}`)); return; }
+  acquire(id: string, owner: any, callback: (err: Error, item: any) => any) {
+    if (SupData.resourceClasses[id] == null) { callback(new Error(`Invalid resource id: ${id}`), null); return; }
 
     super.acquire(id, owner, callback);
   }

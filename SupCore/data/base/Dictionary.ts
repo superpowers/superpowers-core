@@ -13,7 +13,7 @@ export default class Dictionary extends EventEmitter {
     this.unloadDelaySeconds = unloadDelaySeconds;
   }
 
-  acquire(id: string, owner: any, callback: (err: Error, item?: any) => any) {
+  acquire(id: string, owner: any, callback: (err: Error, item: any) => any) {
     if (this.refCountById[id] == null) this.refCountById[id] = 0;
     this.refCountById[id]++;
     //console.log(`Acquiring ${id}: ${this.refCountById[id]} refs`);
@@ -30,7 +30,7 @@ export default class Dictionary extends EventEmitter {
 
     if (item == null) {
       try { item = this._load(id); }
-      catch (e) { callback(e); return; }
+      catch (e) { callback(e, null); return; }
       this.byId[id] = item;
     }
 

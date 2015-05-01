@@ -13,6 +13,21 @@
     },
     "lodash/lodash.d.ts": {
       "commit": "caee0398cbc82b1bd2cc00843d911a664d498c25"
+    },
+    "express/express.d.ts": {
+      "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
+    },
+    "yargs/yargs.d.ts": {
+      "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
+    },
+    "rimraf/rimraf.d.ts": {
+      "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
+    },
+    "tv4/tv4.d.ts": {
+      "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
+    },
+    "socket.io/socket.io.d.ts": {
+      "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
     }
   }
 }

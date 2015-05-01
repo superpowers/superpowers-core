@@ -4,30 +4,47 @@ declare module SupCore {
   function log(message: string): void;
 
   module data {
+
+    interface ProjectServerData {
+      manifest: Manifest;
+      internals: Internals;
+      members: Members;
+      entries: Entries;
+
+      assets: Assets;
+      rooms: Rooms;
+      resources: Resources;
+    }
+
     function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;
     function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;
 
-    interface AssetClass { new(id: string, pub: any, serverData?: any): base.Asset; }
-    var assetClasses: {[assetName: string]: AssetClass};
+    interface AssetClass { new(id: string, pub: any, serverData?: ProjectServerData): base.Asset; }
+    var assetClasses: { [assetName: string]: AssetClass };
     function registerAssetClass(name: string, assetClass: AssetClass): void;
 
     interface ComponentConfigClass { new(pub: any): base.ComponentConfig; create(): any; }
-    var componentConfigClasses: {[componentConfigName: string]: ComponentConfigClass};
+    var componentConfigClasses: { [componentConfigName: string]: ComponentConfigClass };
     function registerComponentConfigClass(name: string, configClass: ComponentConfigClass): void;
 
     // This registers a plugin * resource * (see SupCore.data.Resources), not just a resource class, hence the name
-    interface ResourceClass { new(pub: any, serverData?: any): base.Resource; }
-    var resourceClasses: {[resourceName: string]: ResourceClass};
+    interface ResourceClass { new(pub: any, serverData?: ProjectServerData): base.Resource; }
+    var resourceClasses: { [resourceName: string]: ResourceClass };
     function registerResource(name: string, resourceClass: ResourceClass): void;
 
     // Deprecated
-    var assetPlugins: {[assetName: string]: AssetClass};
+    var assetPlugins: { [assetName: string]: AssetClass };
     function addAssetPlugin(name: string, assetClass: AssetClass): void;
-    var componentConfigPlugins: {[componentConfigName: string]: ComponentConfigClass};
+    var componentConfigPlugins: { [componentConfigName: string]: ComponentConfigClass };
     function addComponentConfigPlugin(name: string, configClass: ComponentConfigClass): void;
 
+    interface ProjectItem {
+      id: string;
+      name: string;
+      description: string;
+    }
     class Projects extends base.ListById {
-      constructor(pub: any[]);
+      constructor(pub: ProjectItem[]);
       generateProjectId(): string;
     }
 
@@ -36,6 +53,8 @@ declare module SupCore {
     }
     class Internals extends base.Hash {
       constructor(pub: any);
+      incrementNextEntryId(): void;
+      incrementNextBuildId(): void;
     }
     class Members extends base.ListById {
       constructor(pub: any[]);
@@ -58,7 +77,7 @@ declare module SupCore {
       diagnosticsByEntryId: { [key: string]: Diagnostics };
       dependenciesByAssetId: any;
 
-      constructor(pub: any, nextId?: number);
+      constructor(pub: EntryNode[], nextId?: number);
       add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
       client_add(node: EntryNode, parentId: string, index: number): void;
       move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
@@ -71,16 +90,14 @@ declare module SupCore {
       server: any;
 
       constructor(server: any);
-      acquire(id: string, owner: any, callback: (err: Error) => any): void;
-      _load(id: string): void;
+      // _load(id: string): void;
     }
     class Resources extends base.Dictionary {
       server: any;
       resourceClassesById: any;
 
       constructor(server: any);
-      acquire(id: string, owner: any, callback: (err: Error, item?: any) => any): void;
-      _load(id: string): void;
+      // _load(id: string): void;
     }
 
     class Room extends base.Hash {
@@ -101,9 +118,7 @@ declare module SupCore {
       server: any;
 
       constructor(server: any);
-      acquire(id: string, owner: any, callback: (err: Error, item?: any) => any): void;
-      release(id: string, owner: any, options: any): void;
-      _load(id: string): void;
+      // _load(id: string): void;
 
     }
     class RoomUsers extends base.ListById {
@@ -130,7 +145,7 @@ declare module SupCore {
         // Hash
         keys?: { length?: number; minLength?: number; maxLength?: number; };
         values?: Rule;
-        properties?: {[key: string]: Rule};
+        properties?: { [key: string]: Rule };
       }
       interface Violation {
         message: string; path?: string;
@@ -199,21 +214,21 @@ declare module SupCore {
         byId: { [key: string]: any; };
         refCountById: { [key: string]: number; };
         unloadDelaySeconds: number;
-        unloadTimeoutsById: {[id: string]: number};
+        unloadTimeoutsById: { [id: string]: number };
 
         constructor(unloadDelaySeconds: number);
-        acquire(id: string, owner: any, callback: (err: Error, item?: any) => any): void;
-        release(id: string, owner: any, options?: {skipUnloadDelay: boolean}): void;
-        _load(id: string): void;
-        _unload(id: string): void;
+        acquire(id: string, owner: any, callback: (err: Error, item: any) => any): void;
+        release(id: string, owner: any, options?: { skipUnloadDelay: boolean }): void;
+        // _load(id: string): void;
+        // _unload(id: string): void;
         releaseAll(id: string): void;
       }
 
-      class Asset extends Hash{
+      class Asset extends Hash {
         id: string;
-        serverData: any;
+        serverData: ProjectServerData;
 
-        constructor(id: string, pub: any, schema: any, serverData: any);
+        constructor(id: string, pub: any, schema: any, serverData: ProjectServerData);
         // OVERRIDE: Make sure to call super(callback). Called when creating a new asset
         init(options: any, callback: Function): void;
 
@@ -237,9 +252,9 @@ declare module SupCore {
       }
 
       class Resource extends Hash {
-        serverData: any;
+        serverData: ProjectServerData;
 
-        constructor(pub: any, schema: any, serverData: any);
+        constructor(pub: any, schema: any, serverData: ProjectServerData);
 
         // OVERRIDE: Make sure to call super(callback). Called when creating a new resource
         init(callback: Function): void;

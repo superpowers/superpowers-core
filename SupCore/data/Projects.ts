@@ -1,6 +1,12 @@
 import ListById from "./base/ListById";
 import * as _ from "lodash";
 
+interface ProjectItem {
+  id: string;
+  name: string;
+  description: string;
+}
+
 let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 export default class Projects extends ListById {
@@ -9,7 +15,7 @@ export default class Projects extends ListById {
     description: { type: "string", maxLength: 300 }
   }
 
-  constructor(pub: any[]) {
+  constructor(pub: ProjectItem[]) {
     super(pub, Projects.schema, this.generateProjectId);
   }
 
