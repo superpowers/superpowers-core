@@ -44,6 +44,9 @@ declare module SupCore {
       description: string;
     }
     class Projects extends base.ListById {
+      pub: ProjectItem[];
+      byId: { [id: string]: ProjectItem; };
+
       constructor(pub: ProjectItem[]);
       generateProjectId(): string;
     }
@@ -74,6 +77,9 @@ declare module SupCore {
       dependentAssetIds?: any[];
     }
     class Entries extends base.TreeById {
+      pub: EntryNode[];
+      byId: { [id: string]: EntryNode };
+
       diagnosticsByEntryId: { [key: string]: Diagnostics };
       dependenciesByAssetId: any;
 

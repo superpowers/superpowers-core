@@ -19,6 +19,9 @@ export default class Entries extends SupData.base.TreeById {
     dependentAssetIds: { type: "array", items: { type: "string" } }
   }
 
+  pub: EntryNode[];
+  byId: { [id: string]: EntryNode };
+
   diagnosticsByEntryId: { [key: string]: SupData.Diagnostics } = {};
   dependenciesByAssetId: any = {};
 

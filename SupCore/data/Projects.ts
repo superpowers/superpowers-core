@@ -15,6 +15,9 @@ export default class Projects extends ListById {
     description: { type: "string", maxLength: 300 }
   }
 
+  pub: ProjectItem[];
+  byId: { [id: string]: ProjectItem; };
+
   constructor(pub: ProjectItem[]) {
     super(pub, Projects.schema, this.generateProjectId);
   }
