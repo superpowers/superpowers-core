@@ -49,7 +49,7 @@ export default function project(projectId: string) {
   document.querySelector(".project-buttons .run").addEventListener("click", () => { runGame(); });
   document.querySelector(".project-buttons .export").addEventListener("click", () => { exportGame(); });
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runGame({ debug: true }); });
-  if ((<any>window).nwDispatcher != null) {
+  if ((<any>window).nwDispatcher == null) {
     (<HTMLButtonElement>document.querySelector(".project-buttons .export")).title = "Export game (only works from the Superpowers app for technical reasons)";
     (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).style.display = "none";
   }
