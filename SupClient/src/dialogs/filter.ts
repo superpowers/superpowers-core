@@ -81,8 +81,8 @@ export default function filter(list: string[], placeholder: string, callback: (v
     else if (event.keyCode === 13) {
       event.preventDefault();
       document.body.removeChild(dialogElt);
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("keyup", onKeyUp, true);
       let value = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
       if (callback != null) callback(value);
     }
@@ -90,8 +90,8 @@ export default function filter(list: string[], placeholder: string, callback: (v
     else if (event.keyCode === 27) {
       event.preventDefault();
       document.body.removeChild(dialogElt);
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("keyup", onKeyUp, true);
       if (callback != null) callback(null);
     }
   }
