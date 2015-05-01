@@ -594,7 +594,7 @@ function onTrashEntryClick() {
         if (! confirm) return;
 
         function trashEntry(entry: SupCore.data.EntryNode) {
-          if (entry.type != null)
+          if (entry.type == null)
             for (let entryChild of entry.children) trashEntry(entryChild)
 
           socket.emit("trash:entries", entry.id, (err: string) => {
