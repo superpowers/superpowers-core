@@ -10,6 +10,7 @@ SupClient/**.js
 SupAPI/**.js
 server/**.js
 client/**.js
+launcher/src/**.js
 syntax: regexp
 ^projects/
 ^public/

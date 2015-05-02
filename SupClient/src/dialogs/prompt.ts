@@ -1,5 +1,5 @@
 export default function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
-  options: {type?: string; pattern?: string;}|((value: string) => any), callback: (value: string) => any) {
+  options: {type?: string; pattern?: string;}|((value: string) => any), callback?: (value: string) => any) {
 
   if (callback == null && typeof options === 'function') {
     callback = <(value: string) => any>options;

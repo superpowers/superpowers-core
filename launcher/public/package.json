@@ -7,8 +7,8 @@
     "icon": "icon.png",
     "width": 800,
     "height": 480,
-    "toolbar": false,
-    "frame": false,
+    "toolbar": true,
+    "frame": true,
     "resizable": false
   },
   "node-remote": "*"
