@@ -324,7 +324,7 @@ if (nwDispatcher != null) {
     let options = {
       min_width: 800, min_height: 480,
       width: 1000, height: 600,
-      toolbar: false, frame: true
+      toolbar: false, frame: true, focus: true
     };
 
     if (url.substring(0, "data:".length) === "data:") {

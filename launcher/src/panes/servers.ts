@@ -92,7 +92,7 @@ function onServerActivate() {
     { title: "Superpowers", icon: "icon.png",
     width: 1000, height: 600,
     min_width: 800, min_height: 480,
-    toolbar: false, frame: false });
+    toolbar: false, frame: false, focus: true });
 }
 
 start();
