@@ -358,7 +358,7 @@ function exportGame() {
   fileInput.setAttribute("nwsaveas", "");
   fileInput.click();
 
-  fileInput.addEventListener("change", (event) => {
+  fileInput.addEventListener("change", function(event) {
     let outputFolder = this.value;
     let isFolderEmpty = false;
 
