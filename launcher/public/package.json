@@ -8,7 +8,7 @@
     "width": 800,
     "height": 480,
     "toolbar": true,
-    "frame": true,
+    "frame": false,
     "resizable": false
   },
   "node-remote": "*"
