@@ -375,6 +375,10 @@ function exportGame() {
   });
 }
 
+function showDevTools() {
+  if (nwDispatcher != null) nwDispatcher.requireNwGui().Window.get().showDevTools();
+}
+
 function createEntryElement(entry: any) {
   let liElt = document.createElement("li");
   (<any>liElt.dataset).id = entry.id;
@@ -484,14 +488,15 @@ function onMessageChat(message: string) {
 
 function onMessageHotKey(action: string) {
   switch (action) {
-    case "newAsset" :    onNewAssetClick(); break;
-    case "newFolder" :   onNewFolderClick(); break;
-    case "searchEntry" : onSearchEntryDialog(); break;
-    case "closeTab" :    onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
-    case "previousTab" : onActivatePreviousTab(); break;
-    case "nextTab" :     onActivateNextTab(); break;
-    case "run" :         runGame(); break;
-    case "debug" :       runGame({ debug: true }); break;
+    case "newAsset":     onNewAssetClick(); break;
+    case "newFolder":    onNewFolderClick(); break;
+    case "searchEntry":  onSearchEntryDialog(); break;
+    case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
+    case "previousTab":  onActivatePreviousTab(); break;
+    case "nextTab":      onActivateNextTab(); break;
+    case "run":          runGame(); break;
+    case "debug":        runGame({ debug: true }); break;
+    case "devtools":     showDevTools(); break;
   }
 }
 

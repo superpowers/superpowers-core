@@ -100,7 +100,7 @@ export function setupHotkeys() {
 
     function sendMessage(action: string) {
       if (window.parent != null) window.parent.postMessage({ type: "hotkey", content: action }, origin);
-      else window.postMessage({ type: "hotkey", content: action}, origin);
+      else window.postMessage({ type: "hotkey", content: action }, origin);
     }
 
     if (event.keyCode == 78 && (event.ctrlKey || event.metaKey)) { // CTRL-N
@@ -128,6 +128,10 @@ export function setupHotkeys() {
     }
     if (event.keyCode === 117 || (event.keyCode === 80 && event.metaKey && event.shiftKey)) { // F6 or Cmd-Shift-P
       event.preventDefault(); sendMessage("debug");
+    }
+
+    if (event.keyCode === 123 && (<any>window).nwDispatcher != null) { // F12
+      event.preventDefault(); sendMessage("devtools");
     }
   });
 }
