@@ -7,7 +7,7 @@
     "icon": "icon.png",
     "width": 800,
     "height": 480,
-    "toolbar": true,
+    "toolbar": false,
     "frame": false,
     "resizable": false
   },
