@@ -1,6 +1,7 @@
 let nodeRequire = require;
 let TreeView = require("dnd-tree-view");
 let TabStrip = require("tab-strip");
+import newAssetDialog from "../dialogs/newAsset";
 
 let info: { projectId?: string } = {};
 let data: { manifest?: SupCore.data.Manifest; entries?: SupCore.data.Entries};
@@ -237,12 +238,15 @@ function onEntryAdded(entry: SupCore.data.EntryNode, parentId: string, index: nu
   ui.entriesTreeView.insertAt(liElt, nodeType, index, parentElt);
 }
 
+let autoOpenAsset = true;
 function onEntryAddedAck(err: string, id: string) {
   if (err != null) { alert(err); return; }
 
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`));
   updateSelectedEntry();
+
+  if (autoOpenAsset) openEntry(id);
 }
 
 function onEntryMoved(id: string, parentId: string, index: number) {
@@ -568,14 +572,11 @@ function openTool(name: string) {
 }
 
 function onNewAssetClick() {
-  SupClient.dialogs.prompt("Enter a name for the new asset.", "Asset name", null, "Create", (name) => {
-    if (name == null) return
+  newAssetDialog("Enter a name for the new asset.", ui.assetsTypeByName, autoOpenAsset, (name, type, open) => {
+    if (name == null) return;
 
-    SupClient.dialogs.select("Choose a type for the new asset.", ui.assetsTypeByName, "Create", (type) => {
-      if (type == null) return;
-
-      socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
-    });
+    autoOpenAsset = open;
+    socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
   });
 }
 
