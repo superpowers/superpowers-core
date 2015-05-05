@@ -782,7 +782,7 @@ function onActivateNextTab() {
   for (let tabIndex = 0; ui.tabStrip.tabsRoot.children.length; tabIndex++) {
     let tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
     if (tabElt == activeTabElt) {
-      let newTabIndex = (tabIndex === 0) ? ui.tabStrip.tabsRoot.children.length - 1 : tabIndex - 1;
+      let newTabIndex = (tabIndex === ui.tabStrip.tabsRoot.children.length - 1) ? 0 : tabIndex + 1;
       onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
       return;
     }
