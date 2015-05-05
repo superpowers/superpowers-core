@@ -25,7 +25,7 @@ export default function() {
     }
 
     if (event.keyCode === 9 && event.ctrlKey) { // CTRL-TAB
-      event.preventDefault()
+      event.preventDefault();
       if (event.shiftKey) sendMessage("previousTab");
       else sendMessage("nextTab");
     }

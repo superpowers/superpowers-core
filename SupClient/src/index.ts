@@ -1,10 +1,10 @@
 import * as io from "socket.io-client";
 
 import ProjectClient from "./ProjectClient"
-import setupHotKeys from "./setupHotKeys";
+import setupHotkeys from "./setupHotkeys";
 import * as component from "./component";
 import * as dialogs from "./dialogs/index";
-export { ProjectClient, setupHotKeys, component, dialogs };
+export { ProjectClient, setupHotkeys, component, dialogs };
 
 let pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous
