@@ -7,7 +7,7 @@ import * as dialogs from "./dialogs/index";
 export { ProjectClient, setupHotkeys, table, dialogs };
 
 interface ComponentEditorClass {
-  new (tbody: HTMLTableSectionElement, config: any, projectClient: any, editConfig: Function): {
+  new (tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): {
     destroy(): void;
     config_setProperty(path: string, value: any): void;
   }
