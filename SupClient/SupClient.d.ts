@@ -1,7 +1,17 @@
 /// <reference path="./typings/socket.io-client/socket.io-client.d.ts" />
 
 declare module SupClient {
-  let pluginPaths: {all: string[], editorsByAssetType: {[assetType: string]: any}, toolsByName: {[toolName: string]: any}};
+
+  interface ComponentEditorClass {
+    new (tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: any): {
+      destroy(): void;
+      config_setProperty(path: string, value: any): void;
+    };
+  }
+  let componentEditorClasses: { [name: string]: ComponentEditorClass };
+  function registerComponentEditorClass(name: string, plugin: ComponentEditorClass): void;
+
+  let pluginPaths: { all: string[], editorsByAssetType: { [assetType: string]: any }, toolsByName: { [toolName: string]: any } };
 
   function connect(projectId: string, options?: {reconnection: boolean; promptCredentials: boolean;}): SocketIOClient.Socket;
   function onAssetTrashed(): void;
@@ -13,14 +23,21 @@ declare module SupClient {
   function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById): number;
   function findEntryByPath(entries: any, path: string|string[]): any;
 
-  module component {
-    function createSetting(parentElt: HTMLDivElement, name: string, options?: {checkbox?: boolean; title?: string;}):
-      {rowElt: HTMLTableRowElement; keyElt: HTMLTableHeaderCellElement; valueElt: HTMLTableDataCellElement; checkboxElt: HTMLInputElement;};
-    function createTextField(parentElt: HTMLTableDataCellElement, value: string): HTMLInputElement;
-    function createNumberField(parentElt: HTMLTableDataCellElement, value: any, min?: any, max?: any): HTMLInputElement;
-    function createBooleanField(parentElt: HTMLTableDataCellElement, value: boolean): HTMLInputElement;
-    function createSelectBox(parentElt: HTMLTableDataCellElement, options: {[value: string]: string;}, initialValue?: string): HTMLSelectElement;
-    function createSelectOption(parentElt: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
+  module table {
+
+    interface RowParts {
+      row: HTMLTableRowElement;
+      labelCell: HTMLTableHeaderCellElement;
+      valueCell: HTMLTableDataCellElement;
+      checkbox?: HTMLInputElement;
+    }
+
+    function appendRow(parentTableBody: HTMLTableSectionElement, name: string, options?: { checkbox?: boolean; title?: string; }): RowParts;
+    function appendTextField(parentCell: HTMLTableDataCellElement, value: string): HTMLInputElement;
+    function appendNumberField(parentCell: HTMLTableDataCellElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement;
+    function appendBooleanField(parentCell: HTMLTableDataCellElement, value: boolean): HTMLInputElement;
+    function appendSelectBox(parentCell: HTMLTableDataCellElement, options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
+    function appendSelectOption(parentCell: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
   }
 
   module dialogs {

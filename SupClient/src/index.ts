@@ -2,9 +2,27 @@ import * as io from "socket.io-client";
 
 import ProjectClient from "./ProjectClient"
 import setupHotkeys from "./setupHotkeys";
-import * as component from "./component";
+import * as table from "./table";
 import * as dialogs from "./dialogs/index";
-export { ProjectClient, setupHotkeys, component, dialogs };
+export { ProjectClient, setupHotkeys, table, dialogs };
+
+interface ComponentEditorClass {
+  new (tbody: HTMLTableSectionElement, config: any, projectClient: any, editConfig: Function): {
+    destroy(): void;
+    config_setProperty(path: string, value: any): void;
+  }
+}
+
+export let componentEditorClasses: {[name: string]: ComponentEditorClass} = {};
+export function registerComponentEditorClass(name: string, plugin: ComponentEditorClass) {
+  if (componentEditorClasses[name] != null) {
+    console.error(`SupClient.registerComponentEditorClass: Tried to register two or more classes named "${name}"`);
+    return;
+  }
+
+  componentEditorClasses[name] = plugin;
+};
+
 
 let pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous
