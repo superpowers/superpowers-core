@@ -46,6 +46,14 @@ export function appendTextField(parent: HTMLTableDataCellElement, value: string)
   return input;
 }
 
+export function appendTextAreaField(parent: HTMLTableDataCellElement, value: string): HTMLTextAreaElement {
+  let textarea = document.createElement("textarea");
+  parent.appendChild(textarea);
+  textarea.value = value;
+
+  return textarea;
+}
+
 export function appendNumberField(parent: HTMLTableDataCellElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement {
   let input = createInput("number", parent);
   input.value = <any>value;
