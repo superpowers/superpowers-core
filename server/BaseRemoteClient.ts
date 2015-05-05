@@ -11,6 +11,7 @@ export default class BaseRemoteClient {
   constructor(server: BaseServer, socket: SocketIO.Socket) {
     this.server = server;
     this.socket = socket;
+    this.socket.on("error", (err: Error) => { SupCore.log((<any>err).stack); });
     this.socket.on("disconnect", this._onDisconnect);
 
     this.socket.on("sub", this._onSubscribe);
