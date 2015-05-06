@@ -9,6 +9,7 @@ cd ../model & call gulp
 cd ../p2js & call npm install & call gulp
 cd ../rngjs & call gulp
 cd ../scene & call gulp
+cd ../settings & call gulp
 cd ../socketio & call npm install & call gulp
 cd ../sound & call gulp
 cd ../sprite & call gulp
