@@ -24,6 +24,21 @@ export function registerComponentEditorClass(name: string, plugin: ComponentEdit
   componentEditorClasses[name] = plugin;
 };
 
+// Settings editors
+interface SettingsEditorClass {
+  new(tbody: HTMLTableSectionElement, projectClient: ProjectClient): {};
+}
+
+export let settingsEditorClasses: { [name: string]: SettingsEditorClass } = {};
+export function registerSettingsEditorClass(name: string, plugin: SettingsEditorClass) {
+  if (settingsEditorClasses[name] != null) {
+    console.error(`SupClient.registerSettingsEditorClass: Tried to register two or more classes named "${name}"`);
+    return;
+  }
+
+  settingsEditorClasses[name] = plugin;
+}
+
 // Plugins list
 let pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous

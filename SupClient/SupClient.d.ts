@@ -11,6 +11,12 @@ declare module SupClient {
   let componentEditorClasses: { [name: string]: ComponentEditorClass };
   function registerComponentEditorClass(name: string, plugin: ComponentEditorClass): void;
 
+  interface SettingsEditorClass {
+    new (tbody: HTMLTableSectionElement, projectClient: ProjectClient): {};
+  }
+  let settingsEditorClasses: { [name: string]: SettingsEditorClass };
+  function registerSettingsEditorClass(name: string, plugin: SettingsEditorClass): void;
+
   let pluginPaths: { all: string[], editorsByAssetType: { [assetType: string]: any }, toolsByName: { [toolName: string]: any } };
 
   function connect(projectId: string, options?: {reconnection: boolean; promptCredentials: boolean;}): SocketIOClient.Socket;
