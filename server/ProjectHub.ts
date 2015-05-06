@@ -24,7 +24,7 @@ export default class ProjectHub {
 
     let serveProjects = (callback: ErrorCallback) => {
       async.each(fs.readdirSync(this.projectsPath), (projectFolder: string, cb: (err: Error) => any) => {
-        if (projectFolder.indexOf(".") != -1) { cb(null); return; }
+        if (projectFolder.indexOf(".") !== -1) { cb(null); return; }
         this.loadProject(projectFolder, null, cb);
       }, callback);
     };

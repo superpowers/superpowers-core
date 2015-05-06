@@ -178,7 +178,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
           let dependentAssetIds = depEntry.dependentAssetIds;
           let index = dependentAssetIds.indexOf(id);
-          if (index != -1) {
+          if (index !== -1) {
             dependentAssetIds.splice(index, 1);
             removedDependencyEntryIds.push(depId);
           }
@@ -404,7 +404,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           recursiveReaddir(buildPath, (err, entries) => {
             for (let entry of entries) {
               let relativePath = path.relative(buildPath, entry);
-              if (path.sep == "\\") relativePath = relativePath.replace(/\\/g, "/");
+              if (path.sep === "\\") relativePath = relativePath.replace(/\\/g, "/");
               files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
             }
 

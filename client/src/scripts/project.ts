@@ -367,7 +367,7 @@ function exportGame() {
     let isFolderEmpty = false;
 
     let fs = nodeRequire("fs");
-    try { isFolderEmpty = fs.readdirSync(outputFolder).length == 0 }
+    try { isFolderEmpty = fs.readdirSync(outputFolder).length === 0; }
     catch (e) { alert(`Error while checking if folder was empty: ${e.message}`); return; }
     if (! isFolderEmpty) { alert("Output folder must be empty."); return; }
 
@@ -427,7 +427,7 @@ function onEntryDrop(dropInfo: any, orderedNodes: any) {
 
   let sourceParentNode = data.entries.parentNodesById[entryIds[0]];
   let sourceChildren = (sourceParentNode != null && sourceParentNode.children != null) ? sourceParentNode.children : data.entries.pub;
-  let sameParent = (sourceParentNode != null && dropPoint.parentId == sourceParentNode.id);
+  let sameParent = (sourceParentNode != null && dropPoint.parentId === sourceParentNode.id);
 
   let i = 0;
   for (let id of entryIds) {
@@ -441,8 +441,8 @@ function updateSelectedEntry() {
   let allButtons = document.querySelectorAll(".entries-buttons button.edit");
   for (let index = 0; index < allButtons.length; index++) {
     let button = <HTMLButtonElement>allButtons.item(index);
-    let disabled = (ui.entriesTreeView.selectedNodes.length == 0 ||
-      (button.classList.contains("single") && ui.entriesTreeView.selectedNodes.length != 1) ||
+    let disabled = (ui.entriesTreeView.selectedNodes.length === 0 ||
+      (button.classList.contains("single") && ui.entriesTreeView.selectedNodes.length !== 1) ||
       (button.classList.contains("asset-only") && ui.entriesTreeView.selectedNodes[0].classList.contains("group")));
 
     button.disabled = disabled;
@@ -769,7 +769,7 @@ function onActivatePreviousTab() {
   let activeTabElt = ui.tabStrip.tabsRoot.querySelector(".active");
   for (let tabIndex = 0; ui.tabStrip.tabsRoot.children.length; tabIndex++) {
     let tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
-    if (tabElt == activeTabElt) {
+    if (tabElt === activeTabElt) {
       let newTabIndex = (tabIndex === 0) ? ui.tabStrip.tabsRoot.children.length - 1 : tabIndex - 1;
       onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
       return;
@@ -781,7 +781,7 @@ function onActivateNextTab() {
   let activeTabElt = ui.tabStrip.tabsRoot.querySelector(".active");
   for (let tabIndex = 0; ui.tabStrip.tabsRoot.children.length; tabIndex++) {
     let tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
-    if (tabElt == activeTabElt) {
+    if (tabElt === activeTabElt) {
       let newTabIndex = (tabIndex === ui.tabStrip.tabsRoot.children.length - 1) ? 0 : tabIndex + 1;
       onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
       return;

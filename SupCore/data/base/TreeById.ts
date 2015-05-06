@@ -74,7 +74,7 @@ export default class TreeById extends EventEmitter {
       let value = node[key];
       let rule = this.schema[key];
       if (rule == null) {
-        if(key == "id" && value == null) continue;
+        if(key === "id" && value == null) continue;
         callback(`Invalid key: ${key}`);
         return;
       }
@@ -130,7 +130,7 @@ export default class TreeById extends EventEmitter {
     oldSiblings.splice(oldIndex, 1);
 
     let actualIndex = index;
-    if (siblings == oldSiblings && oldIndex < actualIndex) actualIndex--;
+    if (siblings === oldSiblings && oldIndex < actualIndex) actualIndex--;
     siblings.splice(actualIndex, 0, node);
 
     this.parentNodesById[id] = parentNode;
@@ -150,7 +150,7 @@ export default class TreeById extends EventEmitter {
     oldSiblings.splice(oldIndex, 1);
 
     let actualIndex = index;
-    if (siblings == oldSiblings && oldIndex < actualIndex) actualIndex--;
+    if (siblings === oldSiblings && oldIndex < actualIndex) actualIndex--;
     siblings.splice(actualIndex, 0, node);
 
     this.parentNodesById[id] = parentNode;

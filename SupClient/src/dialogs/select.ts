@@ -23,7 +23,7 @@ export default function select(label: string, options: {[value: string]: string}
       event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
-      let value = (selectElt.value != "") ? selectElt.value : null;
+      let value = (selectElt.value !== "") ? selectElt.value : null;
       if (callback != null) callback(value);
     }
     else if (event.keyCode === 27) {
@@ -56,7 +56,7 @@ export default function select(label: string, options: {[value: string]: string}
   validateButtonElt.addEventListener("click", () => {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);
-    let value = (selectElt.value != "") ? selectElt.value : null;
+    let value = (selectElt.value !== "") ? selectElt.value : null;
     if (callback != null) callback(value);
   });
 

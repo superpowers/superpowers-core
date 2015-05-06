@@ -53,7 +53,7 @@ export default class BaseRemoteClient {
 
     let roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
 
-    if (this.subscriptions.indexOf(roomName) != -1) { callback(`You're already subscribed to ${id}`, null); return; }
+    if (this.subscriptions.indexOf(roomName) !== -1) { callback(`You're already subscribed to ${id}`, null); return; }
 
     if (id == null) {
       this.socket.join(roomName);
@@ -80,7 +80,7 @@ export default class BaseRemoteClient {
     let roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
 
     let index = this.subscriptions.indexOf(roomName);
-     if (index == -1) return;
+     if (index === -1) return;
 
     if (id != null) { (<SupCore.data.base.Dictionary>data).release(id, this); }
 

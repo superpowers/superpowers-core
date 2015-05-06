@@ -34,7 +34,7 @@ interface Violation {
 export function getRuleViolation(value: any, rule: Rule, create = false): Violation {
   if (!create && ! rule.mutable) return { message: "Immutable" };
 
-  let optional = rule.type[rule.type.length - 1] == "?";
+  let optional = rule.type[rule.type.length - 1] === "?";
   if (optional && value == null) return null;
 
   let ruleType: string;
@@ -70,7 +70,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       if (typeof value !== "string") return { message: "Expected string for enum" };
 
       let items = <string[]>rule.items;
-      if (items.indexOf(value) == -1) return { message: `Invalid enum value: ${value}` };
+      if (items.indexOf(value) === -1) return { message: `Invalid enum value: ${value}` };
       break;
     }
 
@@ -88,7 +88,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
           if (rule.values == null) return { message: `Unexpected hash key: ${key}`, path: key };
 
           if (rule.keys != null) {
-            if (rule.keys.length != null && key.length != rule.keys.length) return { message: `Key should have length of ${rule.keys.length}, got ${key.length}`, path: key };
+            if (rule.keys.length != null && key.length !== rule.keys.length) return { message: `Key should have length of ${rule.keys.length}, got ${key.length}`, path: key };
             if (rule.keys.minLength != null && key.length < rule.keys.minLength) return { message: `Key length (${key.length}) is less than minimum length (${rule.keys.minLength})`, path: key };
             if (rule.keys.maxLength != null && key.length > rule.keys.maxLength) return { message: `Key length (${key.length}) is greater than maximum length (${rule.keys.maxLength})`, path: key };
           }
@@ -114,7 +114,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       let actualMissingKeys: string[] = [];
       for (let missingKey of missingKeys) {
         let missingKeyRuleType = ruleProperties[missingKey].type;
-        if (missingKeyRuleType[missingKeyRuleType.length - 1] != "?") actualMissingKeys.push(missingKey);
+        if (missingKeyRuleType[missingKeyRuleType.length - 1] !== "?") actualMissingKeys.push(missingKey);
       }
       if (actualMissingKeys.length > 0) return { message: `Missing hash keys: ${actualMissingKeys.join(", ") }` };
       break;

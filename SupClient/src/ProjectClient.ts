@@ -55,7 +55,7 @@ export default class ProjectClient {
   unsubEntries(subscriber: EntriesSubscriber) {
     this.entriesSubscribers.splice(this.entriesSubscribers.indexOf(subscriber), 1);
 
-    if (this.entriesSubscribers.length == 0 && ! this._keepEntriesSubscription) {
+    if (this.entriesSubscribers.length === 0 && ! this._keepEntriesSubscription) {
       this.socket.emit('unsub', 'entries');
 
       this.socket.off('add:entries', this._onEntryAdded);

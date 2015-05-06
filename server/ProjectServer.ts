@@ -86,7 +86,7 @@ export default class ProjectServer {
         (cb: (err: Error) => any) => {
           fs.readFile(path.join(this.projectPath, "internals.json"), { encoding: "utf8" }, (err, internalsJSON) => {
             if (err != null) {
-              if (err.code != "ENOENT") { cb(err); return; }
+              if (err.code !== "ENOENT") { cb(err); return; }
               internalsData = { nextBuildId: 0, nextEntryId: null };
             } else {
               try { internalsData = JSON.parse(internalsJSON); }
@@ -99,7 +99,7 @@ export default class ProjectServer {
 
         (cb: (err: Error) => any) => {
           fs.readdir(path.join(this.projectPath, "builds"), (err, entryIds) => {
-            if (err != null && err.code != "ENOENT") { cb(err); return; }
+            if (err != null && err.code !== "ENOENT") { cb(err); return; }
 
             if (entryIds != null) {
               for (let entryId of entryIds) {
@@ -128,7 +128,7 @@ export default class ProjectServer {
         let membersData: any;
 
         if (err != null) {
-          if (err.code != "ENOENT") { callback(err); return; }
+          if (err.code !== "ENOENT") { callback(err); return; }
           membersData = [];
         } else {
           try { membersData = JSON.parse(membersJSON); }
@@ -347,7 +347,7 @@ export default class ProjectServer {
       if (depEntry == null) { missingAssetIds.push(depId); continue; }
 
       let dependentAssetIds = depEntry.dependentAssetIds;
-      if (dependentAssetIds.indexOf(assetId) == -1) {
+      if (dependentAssetIds.indexOf(assetId) === -1) {
         dependentAssetIds.push(assetId);
         addedDependencyEntryIds.push(depId);
       }
@@ -379,7 +379,7 @@ export default class ProjectServer {
 
       let dependentAssetIds = depEntry.dependentAssetIds;
       let index = dependentAssetIds.indexOf(assetId);
-      if (index != -1) {
+      if (index !== -1) {
         dependentAssetIds.splice(index, 1);
         removedDependencyEntryIds.push(depId);
       }
@@ -390,12 +390,12 @@ export default class ProjectServer {
       if (existingDiag != null) {
         for (let missingAssetId of missingAssetIds) {
           let index = existingDiag.data.missingAssetIds.indexOf(missingAssetId);
-          if (index != -1) {
+          if (index !== -1) {
             existingDiag.data.missingAssetIds.splice(index, 1);
           }
         }
 
-        if (existingDiag.data.missingAssetIds.length == 0) this._clearDiagnostic(assetId, "missingDependencies");
+        if (existingDiag.data.missingAssetIds.length === 0) this._clearDiagnostic(assetId, "missingDependencies");
         else this._setDiagnostic(assetId, "missingDependencies", "error", existingDiag.data);
       }
     }
@@ -404,7 +404,7 @@ export default class ProjectServer {
       this.io.in("sub:entries").emit("remove:dependencies", assetId, removedDependencyEntryIds);
     }
 
-    if (assetDependencies.length == 0) {
+    if (assetDependencies.length === 0) {
       delete this.data.entries.dependenciesByAssetId[assetId];
     }
   }

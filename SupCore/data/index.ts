@@ -23,7 +23,7 @@ export {
 
 export function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean {
   for (let sibling of siblings) {
-    if (sibling.id != id && sibling.name === name) return true;
+    if (sibling.id !== id && sibling.name === name) return true;
   }
   return false;
 }

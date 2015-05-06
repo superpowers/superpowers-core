@@ -51,7 +51,7 @@ function onAddServerClick() {
 }
 
 function onRenameServerClick() {
-  if (serversTreeView.selectedNodes.length != 1) return;
+  if (serversTreeView.selectedNodes.length !== 1) return;
 
   let node = serversTreeView.selectedNodes[0];
 
@@ -63,7 +63,7 @@ function onRenameServerClick() {
 }
 
 function onEditAddressClick() {
-  if (serversTreeView.selectedNodes.length != 1) return;
+  if (serversTreeView.selectedNodes.length !== 1) return;
 
   let node = serversTreeView.selectedNodes[0];
 
@@ -75,7 +75,7 @@ function onEditAddressClick() {
 }
 
 function onRemoveAddressClick() {
-  if (serversTreeView.selectedNodes.length != 1) return;
+  if (serversTreeView.selectedNodes.length !== 1) return;
 
   let node = serversTreeView.selectedNodes[0];
 

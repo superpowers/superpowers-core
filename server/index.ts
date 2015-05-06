@@ -41,7 +41,7 @@ app.get("/builds/:projectId/:buildId/*", (req, res) => {
 });
 
 app.use((err: any, req: express.Request, res: express.Response, next: Function) => {
-  if (err.status == 404) {res.status(404).end("File not found"); return; }
+  if (err.status === 404) {res.status(404).end("File not found"); return; }
   next();
 });
 
@@ -58,7 +58,7 @@ httpServer.on("error", (err: NodeJS.ErrnoException) => {
 });
 
 // Load plugins
-function shouldIgnorePlugin(pluginName: string) { return pluginName.indexOf(".") != -1 || pluginName === "node_modules"; }
+function shouldIgnorePlugin(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 
 let pluginsPath = `${__dirname}/../plugins`;
 let pluginNamesByAuthor: { [author: string]: string[] } = {};
@@ -73,7 +73,7 @@ for (let pluginAuthor of fs.readdirSync(pluginsPath)) {
 }
 
 // First pass
-let requiredPluginFiles = [ "data", "components", "componentEditors", "api", "runtime" ];
+let requiredPluginFiles = [ "data", "components", "componentEditors", "settingsEditors", "api", "runtime" ];
 
 for (let pluginAuthor in pluginNamesByAuthor) {
   let pluginNames = pluginNamesByAuthor[pluginAuthor];

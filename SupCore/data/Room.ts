@@ -94,7 +94,7 @@ export default class Room extends SupData.base.Hash {
   }
 
   server_appendMessage(client: any, text: string, callback: (err: string, entry?: any) => any) {
-    if (typeof(text) != "string" || text.length > 300) { callback("Your message was too long"); return; }
+    if (typeof(text) !== "string" || text.length > 300) { callback("Your message was too long"); return; }
 
     let entry = { timestamp: Date.now(), author: client.socket.username, text: text };
     this.pub.history.push(entry);

@@ -55,7 +55,7 @@ export default class Dictionary extends EventEmitter {
     this.refCountById[id]--;
     //console.log(`Releasing ${id}: ${this.refCountById[id]} refs left`);
 
-    if (this.refCountById[id] == 0) {
+    if (this.refCountById[id] === 0) {
       delete this.refCountById[id];
 
       // Schedule unloading the asset after a while

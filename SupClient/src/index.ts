@@ -6,14 +6,15 @@ import * as table from "./table";
 import * as dialogs from "./dialogs/index";
 export { ProjectClient, setupHotkeys, table, dialogs };
 
+// Component editors
 interface ComponentEditorClass {
-  new (tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): {
+  new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): {
     destroy(): void;
     config_setProperty(path: string, value: any): void;
   }
 }
 
-export let componentEditorClasses: {[name: string]: ComponentEditorClass} = {};
+export let componentEditorClasses: { [name: string]: ComponentEditorClass } = {};
 export function registerComponentEditorClass(name: string, plugin: ComponentEditorClass) {
   if (componentEditorClasses[name] != null) {
     console.error(`SupClient.registerComponentEditorClass: Tried to register two or more classes named "${name}"`);
@@ -23,13 +24,13 @@ export function registerComponentEditorClass(name: string, plugin: ComponentEdit
   componentEditorClasses[name] = plugin;
 };
 
-
+// Plugins list
 let pluginsXHR = new XMLHttpRequest();
 pluginsXHR.open('GET', '/plugins.json', false); // Synchronous
 pluginsXHR.send(null);
 
 let internalPluginPaths: any;
-if (pluginsXHR.status == 200) internalPluginPaths = JSON.parse(pluginsXHR.responseText);
+if (pluginsXHR.status === 200) internalPluginPaths = JSON.parse(pluginsXHR.responseText);
 export let pluginPaths = internalPluginPaths;
 
 export function connect(projectId: string, options: { reconnection: boolean; promptCredentials: boolean; } = { reconnection: false, promptCredentials: false }) {

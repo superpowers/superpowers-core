@@ -10,7 +10,7 @@ export default function() {
       else window.postMessage({ type: "hotkey", content: action }, origin);
     }
 
-    if (event.keyCode == 78 && (event.ctrlKey || event.metaKey)) { // CTRL-N
+    if (event.keyCode === 78 && (event.ctrlKey || event.metaKey)) { // CTRL-N
       event.preventDefault();
       if (event.shiftKey) sendMessage("newFolder");
       else sendMessage("newAsset");

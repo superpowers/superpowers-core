@@ -93,7 +93,7 @@ callback: (name: string, type: string, open: boolean) => any) {
       let open = openCheckboxElt.checked;
       if (callback != null) callback(name, type, open);
     }
-    else if (event.keyCode == 27) {
+    else if (event.keyCode === 27) {
     event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
