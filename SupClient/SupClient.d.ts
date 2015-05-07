@@ -12,7 +12,7 @@ declare module SupClient {
   function registerComponentEditorClass(name: string, plugin: ComponentEditorClass): void;
 
   interface SettingsEditorClass {
-    new (tbody: HTMLTableSectionElement, projectClient: ProjectClient): {};
+    new (container: HTMLDivElement, projectClient: ProjectClient): {};
   }
   let settingsEditorClasses: { [name: string]: SettingsEditorClass };
   function registerSettingsEditorClass(name: string, plugin: SettingsEditorClass): void;
@@ -38,6 +38,7 @@ declare module SupClient {
       checkbox?: HTMLInputElement;
     }
 
+    function createTable(parent?: HTMLElement): { table: HTMLTableElement; tbody: HTMLTableSectionElement; };
     function appendRow(parentTableBody: HTMLTableSectionElement, name: string, options?: { checkbox?: boolean; title?: string; }): RowParts;
     function appendTextField(parentCell: HTMLTableDataCellElement, value: string): HTMLInputElement;
     function appendTextAreaField(parent: HTMLTableDataCellElement, value: string): HTMLTextAreaElement;

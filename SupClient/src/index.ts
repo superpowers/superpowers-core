@@ -26,7 +26,7 @@ export function registerComponentEditorClass(name: string, plugin: ComponentEdit
 
 // Settings editors
 interface SettingsEditorClass {
-  new(tbody: HTMLTableSectionElement, projectClient: ProjectClient): {};
+  new(container: HTMLDivElement, projectClient: ProjectClient): {};
 }
 
 export let settingsEditorClasses: { [name: string]: SettingsEditorClass } = {};

@@ -5,7 +5,17 @@ interface RowParts {
   checkbox?: HTMLInputElement;
 }
 
-export function createInput(type: string, parent?: HTMLElement) {
+export function createTable(parent?: HTMLElement) {
+  let table = document.createElement("table");
+  if (parent != null) parent.appendChild(table);
+
+  let tbody = document.createElement("tbody");
+  table.appendChild(tbody);
+
+  return { table, tbody };
+}
+
+function createInput(type: string, parent?: HTMLElement) {
   let input = document.createElement("input");
   input.type = type;
   if (parent != null) parent.appendChild(input);
