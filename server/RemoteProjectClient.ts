@@ -42,6 +42,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.socket.on("edit:rooms", this._onEditRoom);
 
     // Project
+    this.socket.on("vacuum:project", this._onVacuumProject);
     this.socket.on("build:project", this._onBuildProject);
   }
 
@@ -425,4 +426,29 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       });
     });
   };
+
+  _onVacuumProject = (callback: (err: string) => any) => {
+    if (!this.errorIfCant("vacuumProject", callback)) return;
+
+    let assetsPath = path.join(this.server.projectPath, `assets`);
+
+    fs.readdir(assetsPath, (err, assetFolders) => {
+      if (err != null) throw err;
+
+      let removedAssetIds: string[] = [];
+      for (let assetFolder in assetFolders) {
+        if (this.server.data.entries.byId[assetFolder] == null) {
+          removedAssetIds.push(assetFolder);
+        }
+      }
+
+      async.each(removedAssetIds, (removedAssetId, cb) => {
+        let folderPath = path.join(assetsPath, removedAssetId);
+        rimraf(folderPath, (err) => {
+          if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(<any>err).stack}`);
+          cb();
+        });
+      }, () => { callback(null); });
+    });
+  }
 }
