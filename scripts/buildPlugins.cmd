@@ -7,6 +7,7 @@ cd ../gameSettings & call gulp
 cd ../home & call gulp
 cd ../model & call gulp
 cd ../p2js & call npm install & call gulp
+cd ../projectSettings & call gulp
 cd ../rngjs & call gulp
 cd ../scene & call gulp
 cd ../settings & call gulp

@@ -9,6 +9,7 @@ cd ../gameSettings && gulp
 cd ../home && gulp
 cd ../model && gulp
 cd ../p2js && npm install && gulp
+cd ../projectSettings && gulp
 cd ../rngjs && gulp
 cd ../scene && gulp
 cd ../settings && gulp
