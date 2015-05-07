@@ -12,11 +12,6 @@ import * as SupAPI from "../SupAPI/index";
 import * as SupCore from "../SupCore/index";
 import ProjectHub from "./ProjectHub";
 
-// Temporarily support loading CoffeeScript plugins directly
-// NOTE: THIS IS ONLY A TEMPORARY WORKAROUND. Please transpile your plugins
-// to JavaScript with a gulpfile or, even better, port them to TypeScript :)
-require("coffee-script/register");
-
 // Globals
 (<any>global).SupAPI = SupAPI;
 (<any>global).SupCore = SupCore;
