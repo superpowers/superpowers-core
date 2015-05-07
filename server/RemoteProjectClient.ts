@@ -448,7 +448,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       let removedFolderCount = 0;
       async.each(removedAssetIds, (removedAssetId, cb) => {
         let folderPath = path.join(assetsPath, removedAssetId);
-        console.log(folderPath);
         rimraf(folderPath, (err) => {
           if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(<any>err).stack}`);
           else removedFolderCount++;
