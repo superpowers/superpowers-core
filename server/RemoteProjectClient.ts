@@ -427,28 +427,34 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  _onVacuumProject = (callback: (err: string) => any) => {
+  _onVacuumProject = (callback: (err: string, deletedCount?: number) => any) => {
     if (!this.errorIfCant("vacuumProject", callback)) return;
 
-    let assetsPath = path.join(this.server.projectPath, `assets`);
+    let assetsPath = path.join(this.server.projectPath, "assets");
 
     fs.readdir(assetsPath, (err, assetFolders) => {
       if (err != null) throw err;
 
+      let assetFolderRegex = /^[0-9]*$/;
       let removedAssetIds: string[] = [];
-      for (let assetFolder in assetFolders) {
+      for (let assetFolder of assetFolders) {
+        if (!assetFolderRegex.test(assetFolder)) continue;
+
         if (this.server.data.entries.byId[assetFolder] == null) {
           removedAssetIds.push(assetFolder);
         }
       }
 
+      let removedFolderCount = 0;
       async.each(removedAssetIds, (removedAssetId, cb) => {
         let folderPath = path.join(assetsPath, removedAssetId);
+        console.log(folderPath);
         rimraf(folderPath, (err) => {
           if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(<any>err).stack}`);
+          else removedFolderCount++;
           cb();
         });
-      }, () => { callback(null); });
+      }, () => { callback(null, removedFolderCount); });
     });
   }
 }
