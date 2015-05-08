@@ -97,3 +97,28 @@ export function appendSelectOption(parent: HTMLSelectElement, value: string, lab
 
   return option;
 }
+
+export function appendVectorFields(parent: HTMLTableDataCellElement, values: {x: number; y: number; z: number}):
+{x: HTMLInputElement; y: HTMLInputElement; z: HTMLInputElement;} {
+  let divElement = document.createElement("div");
+  divElement.className = "vector";
+  parent.appendChild(divElement);
+
+  let fields: {x: HTMLInputElement; y: HTMLInputElement; z: HTMLInputElement;} = { x: null, y: null, z: null };
+  fields.x = document.createElement("input");
+  fields.x.type = "number";
+  fields.x.value = values.x.toString();
+  divElement.appendChild(fields.x);
+
+  fields.y = document.createElement("input");
+  fields.y.type = "number";
+  fields.y.value = values.y.toString();
+  divElement.appendChild(fields.y);
+
+  fields.z = document.createElement("input");
+  fields.z.type = "number";
+  fields.z.value = values.z.toString();
+  divElement.appendChild(fields.z);
+
+  return fields;
+}
