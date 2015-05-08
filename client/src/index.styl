@@ -1,9 +1,9 @@
-@import 'nib'
-@import 'styles/tabStrip'
+@import "nib"
+@import "styles/tabStrip"
 
 body
   display flex
-  font-family 'Roboto'
+  font-family "Roboto"
 
   &:not(.maximized)
     border 1px solid #666
@@ -12,13 +12,13 @@ body
     flex 1
 
   > .hub
-    @import 'styles/hub'
+    @import "styles/hub"
 
   > .project
-    @import 'styles/project'
+    @import "styles/project"
 
   .controls
-    @import 'styles/controls'
+    @import "styles/controls"
 
 body.browser
   border none
