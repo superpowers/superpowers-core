@@ -176,6 +176,7 @@ function onDisconnected() {
 
   (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = true;
+  (<HTMLButtonElement>document.querySelector(".project-buttons .export")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = true;
