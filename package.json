@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "async": "^0.9.0",
+    "coffeeify": "^1.1.0",
     "cookies-js": "^1.2.1",
     "cson-parser": "^1.0.8",
     "dnd-tree-view": "^1.2.0",
