@@ -144,7 +144,9 @@ export default class ProjectClient {
     let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    let asset = this.assetsById[assetId] = new SupCore.data.assetClasses[assetType](assetId, assetData);
+    let asset: SupCore.data.base.Asset = null;
+    if (assetData != null) asset = this.assetsById[assetId] = new SupCore.data.assetClasses[assetType](assetId, assetData);
+
     for (let subscriber of subscribers) { subscriber.onAssetReceived(assetId, asset); }
   }
 
@@ -177,7 +179,9 @@ export default class ProjectClient {
     let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
-    let resource = this.resourcesById[resourceId] = new SupCore.data.resourceClasses[resourceId](resourceData);
+    let resource: SupCore.data.base.Resource = null;
+    if (resourceData != null) resource = this.resourcesById[resourceId] = new SupCore.data.resourceClasses[resourceId](resourceData);
+
     for (let subscriber of subscribers) { subscriber.onResourceReceived(resourceId, resource); }
   }
 
