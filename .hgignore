@@ -1,8 +1,5 @@
 syntax: glob
 node_modules/
-plugins/sparklinlabs/*/public/**.js
-plugins/sparklinlabs/*/public/**.css
-plugins/sparklinlabs/*/public/**.html
 *.sublime-*
 bin/
 SupCore/**.js
@@ -11,6 +8,7 @@ SupAPI/**.js
 server/**.js
 client/**.js
 launcher/src/**.js
+plugins/
 syntax: regexp
 ^projects/
 ^public/
