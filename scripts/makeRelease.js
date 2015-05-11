@@ -20,7 +20,7 @@ function shouldDistribute(file) {
   if (_.endsWith(file, '.orig')) return false;
   if (_.endsWith(file, '.jade')) return false;
   if (_.endsWith(file, '.styl')) return false;
-  if (_.endsWith(file, '.ts') && file.indexOf('/typings/') === -1) return false;
+  if (_.endsWith(file, '.ts') && file.indexOf('/typings/') === -1 && file.indexOf("/node_modules/") === -1) return false;
   if (_.startsWith(file, 'client')) return false;
   if (_.startsWith(file, 'scripts')) return false;
   if (_.startsWith(file, 'projects')) return false;
