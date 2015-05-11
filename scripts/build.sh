@@ -11,5 +11,5 @@ cd ../SupRuntime && gulp
 cd ../player && gulp
 cd ../../client && gulp
 cd ../launcher && gulp
-cd ../scripts && ./buildPlugins.sh
+cd ../scripts && node buildPlugins.js
 popd

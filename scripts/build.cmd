@@ -9,5 +9,5 @@ cd ../SupRuntime & call gulp
 cd ../player & call gulp
 cd ../../client & call gulp
 cd ../launcher & call gulp
-cd ../scripts & call buildPlugins.cmd
+cd ../scripts & call node buildPlugins.js
 popd
