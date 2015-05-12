@@ -1,0 +1,43 @@
+@import "nib"
+
+.resize-handle
+  background-color rgba(0, 0, 0, 0.2)
+  background-clip content-box
+  z-index 1
+
+  &:not(.disabled):hover
+    background-color rgba(0, 0, 0, 0.3)
+
+  &.left
+    border-right 5px solid transparent
+    margin-right -5px
+    width 6px
+    cursor ew-resize
+
+  &.right
+    border-left 5px solid transparent
+    margin-left -5px
+    width 6px
+    cursor ew-resize
+
+  &.top
+    border-bottom 5px solid transparent
+    margin-bottom -5px
+    height 6px
+    cursor ns-resize
+
+  &.bottom
+    border-top 5px solid transparent
+    margin-top -5px
+    height 6px
+    cursor ns-resize
+
+  &.disabled
+    cursor default
+
+html.handle-dragging
+  * { user-select: none; }
+  iframe { pointer-events: none; }
+
+  &.vertical * { cursor: ew-resize; }
+  &.horizontal * { cursor: ns-resize; }
