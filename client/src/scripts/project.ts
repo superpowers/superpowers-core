@@ -135,7 +135,7 @@ export default function project(projectId: string) {
 
     toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
     toolElt.addEventListener("mouseleave", (event) => {
-      if (ui.openInNewWindowButton.parentElement == null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
+      if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
     });
     anchorElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
     toolsList.appendChild(toolElt);
@@ -408,8 +408,7 @@ function createEntryElement(entry: any) {
   if (entry.type != null) {
     liElt.addEventListener("mouseenter", (event) => { liElt.appendChild(ui.openInNewWindowButton); });
     liElt.addEventListener("mouseleave", (event) => {
-      if (ui.openInNewWindowButton.parentElement != null)
-        ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
+      if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
     });
 
     let diagnosticsSpan = document.createElement("span");
