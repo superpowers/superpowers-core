@@ -289,8 +289,8 @@ function onDiagnosticSet(id: string, newDiag: any) {
 
   let existingDiag = diagnostics.byId[newDiag.id];
   if (existingDiag != null) {
-    existingDiag.type = newDiag.type
-    existingDiag.data = newDiag.data
+    existingDiag.type = newDiag.type;
+    existingDiag.data = newDiag.data;
   } else diagnostics.client_add(newDiag, null);
 
   let diagnosticsElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .diagnostics`);
