@@ -32,13 +32,18 @@ export default class Dictionary extends EventEmitter {
       try { item = this._load(id); }
       catch (e) { callback(e, null); return; }
       this.byId[id] = item;
+
+      item.on("load", () => {
+        // Bail if entry was evicted from the cache
+        if (this.byId[id] == null) return;
+        this.emit("itemLoad", id, item);
+      });
     }
 
     if (item.pub != null) callback(null, item);
-    else item.on('load',() => {
+    else item.on("load", () => {
       // Bail if entry was evicted from the cache
       if (this.byId[id] == null) return;
-      this.emit('itemLoad', id, item);
       callback(null, item);
       return;
     });
