@@ -463,6 +463,7 @@ function onEntryActivate() {
 function onMessage(event: any) {
   if (event.data.type === "chat") onMessageChat(event.data.content);
   if (event.data.type === "hotkey") onMessageHotKey(event.data.content);
+  if (event.data.type === "openEntry") openEntry(event.data.id, event.data.options);
 }
 
 function onMessageChat(message: string) {
@@ -537,7 +538,7 @@ function onSearchEntryDialog() {
   });
 }
 
-function openEntry(id: string) {
+function openEntry(id: string, optionValues?: {[name: string]: any}) {
   let entry = data.entries.byId[id];
 
   // Just toggle folders
@@ -551,9 +552,15 @@ function openEntry(id: string) {
     ui.tabStrip.tabsRoot.appendChild(tab);
 
     iframe = document.createElement("iframe");
-    iframe.src = `/plugins/${SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${id}`;
+    let options = "";
+    if (optionValues != null)
+      for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
+    iframe.src = `/plugins/${SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${id}${options}`;
     (<any>iframe.dataset).assetId = id;
     ui.panesElt.appendChild(iframe);
+  } else if (optionValues != null) {
+    let origin: string = (<any>window.location).origin;
+    iframe.contentWindow.postMessage(optionValues, origin);
   }
   onTabActivate(tab);
 }
