@@ -2,11 +2,12 @@
 
 declare module SupClient {
 
+  interface ComponentEditorObject {
+    destroy(): void;
+    config_setProperty(path: string, value: any): void;
+  }
   interface ComponentEditorClass {
-    new (tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: any): {
-      destroy(): void;
-      config_setProperty(path: string, value: any): void;
-    };
+    new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): ComponentEditorObject
   }
   let componentEditorClasses: { [name: string]: ComponentEditorClass };
   function registerComponentEditorClass(name: string, plugin: ComponentEditorClass): void;

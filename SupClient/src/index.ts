@@ -7,11 +7,13 @@ import * as dialogs from "./dialogs/index";
 export { ProjectClient, setupHotkeys, table, dialogs };
 
 // Component editors
+interface ComponentEditorObject {
+  destroy(): void;
+  config_setProperty(path: string, value: any): void;
+}
+
 interface ComponentEditorClass {
-  new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): {
-    destroy(): void;
-    config_setProperty(path: string, value: any): void;
-  }
+  new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): ComponentEditorObject
 }
 
 export let componentEditorClasses: { [name: string]: ComponentEditorClass } = {};
