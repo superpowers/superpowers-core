@@ -527,6 +527,8 @@ function onClickToggleNotifications(event: any) {
 }
 
 function onSearchEntryDialog() {
+  if (data == null) return;
+
   let entries: string[] = [];
   data.entries.walk((node: SupCore.data.EntryNode) => {
     if (node.type != null) entries.push(data.entries.getPathFromId(node.id));
