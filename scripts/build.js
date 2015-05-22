@@ -55,7 +55,7 @@ async.eachSeries(buildPaths, function(buildPath, callback) {
       var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "install" ], spawnOptions);
 
       npm.on("close", function(status) {
-        if (status !== 0) errors.push("[" + pluginAuthor + "/" + pluginName + "] npm exited with status code " + status);
+        if (status !== 0) errors.push("[" + buildPath + "] npm exited with status code " + status);
         cb();
       });
     },
@@ -66,7 +66,7 @@ async.eachSeries(buildPaths, function(buildPath, callback) {
       var gulp = child_process.spawn("gulp" + (execSuffix ? ".cmd" : ""), [], spawnOptions);
 
       gulp.on("close", function(status) {
-        if (status !== 0) errors.push("[" + pluginAuthor + "/" + pluginName + "] gulp exited with status code " + status);
+        if (status !== 0) errors.push("[" + buildPath + "] gulp exited with status code " + status);
         cb();
       });
     }
