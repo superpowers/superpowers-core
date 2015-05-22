@@ -1,5 +1,6 @@
 var path = require("path");
 var fs = require("fs");
+var async = require("async");
 var child_process = require("child_process");
 
 function shouldIgnoreFolder(pluginName) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
@@ -41,27 +42,43 @@ fs.readdirSync(rootPluginsPath).forEach(function(pluginAuthor) {
 var execSuffix = process.platform == "win32";
 var errors = [];
 
-buildPaths.forEach(function(buildPath) {
+async.eachSeries(buildPaths, function(buildPath, callback) {
   log("Building /" + path.relative(rootPath, buildPath));
 
   var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
 
-  if (fs.existsSync(buildPath + "/package.json")) {
-    var result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install" ], spawnOptions);
-    if (result.status !== 0) errors.push("[" + pluginAuthor + "/" + pluginName + "] npm exited with status code " + result.status);
-  }
+  async.series([
 
-  if (fs.existsSync(buildPath + "/gulpfile.js")) {
-    var result = child_process.spawnSync("gulp" + (execSuffix ? ".cmd" : ""), [], spawnOptions);
-    if (result.status !== 0) errors.push("[" + pluginAuthor + "/" + pluginName + "] gulp exited with status code " + result.status);
-  }
+    function(cb) {
+      if (!fs.existsSync(buildPath + "/package.json")) { cb(); return; }
 
+      var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "install" ], spawnOptions);
+
+      npm.on("close", function(status) {
+        if (status !== 0) errors.push("[" + pluginAuthor + "/" + pluginName + "] npm exited with status code " + status);
+        cb();
+      });
+    },
+
+    function(cb) {
+      if (!fs.existsSync(buildPath + "/gulpfile.js")) { cb(); return; }
+
+      var gulp = child_process.spawn("gulp" + (execSuffix ? ".cmd" : ""), [], spawnOptions);
+
+      gulp.on("close", function(status) {
+        if (status !== 0) errors.push("[" + pluginAuthor + "/" + pluginName + "] gulp exited with status code " + status);
+        cb();
+      });
+    }
+
+  ], callback);
+}, function() {
   console.log("");
-});
 
-if (errors.length > 0) {
-  log("There were errors:");
-  errors.forEach(function(error) {
-    console.log(error);
-  });
-} else log("Build complete.");
+  if (errors.length > 0) {
+    log("There were errors:");
+    errors.forEach(function(error) {
+      console.log(error);
+    });
+  } else log("Build complete.");
+});
