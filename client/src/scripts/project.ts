@@ -1,7 +1,9 @@
+import newAssetDialog from "../dialogs/newAsset";
+
 let nodeRequire = require;
 let TreeView = require("dnd-tree-view");
+let PerfectResize = require("perfect-resize");
 let TabStrip = require("tab-strip");
-import newAssetDialog from "../dialogs/newAsset";
 
 let info: { projectId?: string } = {};
 let data: { manifest?: SupCore.data.Manifest; entries?: SupCore.data.Entries};
@@ -45,6 +47,9 @@ export default function project(projectId: string) {
       onTrashEntryClick();
     }
   });
+
+  // Make sidebar resizable
+  new PerfectResize(document.querySelector(".project .sidebar"), "left");
 
   // Project info
   document.querySelector(".project-buttons .run").addEventListener("click", () => { runGame(); });
