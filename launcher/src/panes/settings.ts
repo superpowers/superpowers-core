@@ -9,19 +9,27 @@ if (fs.existsSync(serverPaths.config)) {
   let userConfig = JSON.parse(fs.readFileSync(serverPaths.config, { encoding: "utf8" }));
   try { schemas.validate(userConfig, "config"); }
   catch(e) { userConfig = {}; }
+
+  if(userConfig.port != null) {
+    userConfig.mainPort = userConfig.port;
+    delete userConfig.port;
+  }
   _.merge(config, userConfig);
 }
 
-let portInput = <HTMLInputElement>document.querySelector("input.server-port");
+let mainPortInput = <HTMLInputElement>document.querySelector("input.main-server-port");
+let buildPortInput = <HTMLInputElement>document.querySelector("input.build-server-port");
 let passwordInput = <HTMLInputElement>document.querySelector("input.server-password");
 let maxRecentBuildsInput = <HTMLInputElement>document.querySelector("input.max-recent-builds");
 
-portInput.value = config.port.toString();
+mainPortInput.value = config.mainPort.toString();
+buildPortInput.value = config.buildPort.toString();
 passwordInput.value = config.password;
 maxRecentBuildsInput.value = config.maxRecentBuilds.toString();
 
 document.querySelector("button.save-settings").addEventListener("click", (event) => {
-  config.port = parseInt(portInput.value);
+  config.mainPort = parseInt(mainPortInput.value);
+  config.buildPort = parseInt(buildPortInput.value);
   config.password = passwordInput.value;
   config.maxRecentBuilds = parseInt(maxRecentBuildsInput.value);
 

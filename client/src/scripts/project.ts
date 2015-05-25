@@ -6,7 +6,7 @@ let PerfectResize = require("perfect-resize");
 let TabStrip = require("tab-strip");
 
 let info: { projectId?: string } = {};
-let data: { manifest?: SupCore.data.Manifest; entries?: SupCore.data.Entries};
+let data: { config?: { buildPort: number; }; manifest?: SupCore.data.Manifest; entries?: SupCore.data.Entries; };
 let ui: {
   entriesTreeView?: any;
   openInNewWindowButton?: HTMLButtonElement;
@@ -152,6 +152,7 @@ export default function project(projectId: string) {
   socket.on("connect", onConnected);
   socket.on("disconnect", onDisconnected);
 
+  socket.on("welcome", onWelcome);
   socket.on("setProperty:manifest", onSetManifestProperty);
 
   socket.on("add:entries", onEntryAdded);
@@ -168,7 +169,7 @@ export default function project(projectId: string) {
 
 // Network callbacks
 function onConnected() {
-  data = {}
+  data = {};
   socket.emit("sub", "manifest", null, onManifestReceived);
   socket.emit("sub", "entries", null, onEntriesReceived);
 }
@@ -186,6 +187,10 @@ function onDisconnected() {
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = true;
   (<HTMLDivElement>document.querySelector(".connecting")).style.display = "";
+}
+
+function onWelcome(clientId: number, config: { buildPort: number }) {
+  data.config = config;
 }
 
 function onManifestReceived(err: string, manifest: any) {
@@ -354,7 +359,7 @@ function runGame(options: { debug: boolean; } = { debug: false }) {
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) { alert(err); return; }
 
-    let url = `/player?project=${info.projectId}&build=${buildId}`;
+    let url = `${window.location.protocol}//${window.location.hostname}:${data.config.buildPort}/player?project=${info.projectId}&build=${buildId}`;
     if (options.debug) url += "&debug";
 
     window.open(url, `player_${info.projectId}`);

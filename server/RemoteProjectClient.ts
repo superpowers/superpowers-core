@@ -17,7 +17,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   constructor(server: ProjectServer, id: string, socket: SocketIO.Socket) {
     super(server, socket);
     this.id = id;
-    this.socket.emit("welcome", this.id);
+    this.socket.emit("welcome", this.id, { buildPort: config.buildPort });
 
     // Manifest
     this.socket.on("setProperty:manifest", this._onSetManifestProperty);

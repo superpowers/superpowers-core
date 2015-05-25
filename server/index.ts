@@ -4,6 +4,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as http from "http";
 import * as express from "express";
+import * as socketio from "socket.io";
 
 import * as paths from "./paths";
 import * as buildFiles from "./buildFiles";
@@ -23,34 +24,38 @@ process.on("uncaughtException", (err: Error) => {
   process.exit(1);
 });
 
-// Server
+function handle404(err: any, req: express.Request, res: express.Response, next: Function) {
+  if (err.status === 404) {res.status(404).end("File not found"); return; }
+  next();
+}
+
+// Main HTTP Server
+let mainApp = express();
+mainApp.use("/", express.static(`${__dirname}/../public`));
+
+let mainHttpServer = http.createServer(mainApp);
+mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EADDRINUSE") {
+    SupCore.log(`Could not start the server: another application is already listening on port ${config.mainPort}.`);
+    process.exit()
+  } else throw(err);
+});
+
+let io = socketio(mainHttpServer, { transports: ["websocket"] });
+
+// Build HTTP Server
 let hub: ProjectHub = null;
 
-let app = express();
-app.use("/", express.static(`${__dirname}/../public`));
+let buildApp = express();
+buildApp.use("/", express.static(`${__dirname}/../public`));
 
-app.get("/builds/:projectId/:buildId/*", (req, res) => {
+buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
   let projectServer = hub.serversById[req.params.projectId];
   if (projectServer == null) { res.status(404).end("No such project"); return; }
   res.sendFile(path.join(projectServer.projectPath, "builds", req.params.buildId, req.params[0]));
 });
 
-app.use((err: any, req: express.Request, res: express.Response, next: Function) => {
-  if (err.status === 404) {res.status(404).end("File not found"); return; }
-  next();
-});
-
-let httpServer = http.createServer(app);
-
-import * as socketio from "socket.io";
-let io = socketio(httpServer, { transports: ["websocket"] });
-
-httpServer.on("error", (err: NodeJS.ErrnoException) => {
-  if (err.code === "EADDRINUSE") {
-    SupCore.log(`Could not start the server: another application is already listening on port ${config.port}.`);
-    process.exit()
-  } else throw(err);
-});
+let buildHttpServer = http.createServer(buildApp);
 
 // Load plugins
 function shouldIgnorePlugin(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
@@ -82,7 +87,10 @@ for (let pluginAuthor in pluginNamesByAuthor) {
     if (fs.existsSync(apiModulePath)) require(apiModulePath);
 
     // Expose public stuff
-    app.use(`/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+    mainApp.use(`/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+    buildApp.use(`/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+    mainApp.use(handle404);
+    buildApp.use(handle404);
 
     // Ensure all required files exist
     for (let requiredFile of requiredPluginFiles) {
@@ -146,9 +154,11 @@ buildFiles.init(pluginNamesByAuthor, () => {
 
     let hostname = (config.password.length === 0) ? "localhost" : "";
 
-    httpServer.listen(config.port, hostname, () => {
-      SupCore.log(`Server started on port ${config.port}.`);
-      if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
+    mainHttpServer.listen(config.mainPort, hostname, () => {
+      buildHttpServer.listen(config.buildPort, hostname, () => {
+        SupCore.log(`Main server started on port ${config.mainPort}, build server started on port ${config.buildPort}.`);
+        if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
+      })
     });
   });
 });
@@ -159,7 +169,8 @@ let isQuitting = false;
 function onExit() {
   if(isQuitting) return;
   isQuitting = true;
-  httpServer.close();
+  mainHttpServer.close();
+  buildHttpServer.close();
 
   SupCore.log("Saving all projects...");
 

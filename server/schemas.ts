@@ -4,7 +4,10 @@ import * as tv4 from "tv4";
 let config = {
   type: "object",
   properties: {
+    // Deprecated, use mainPort instead
     port: { type: "number" },
+    mainPort: { type: "number" },
+    buildPort: { type: "number" },
     password: { type: "string" },
     maxRecentBuilds: { type: "number", min: 1 }
   }
