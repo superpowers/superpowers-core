@@ -3,6 +3,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as http from "http";
+import * as querystring from "querystring";
 import * as express from "express";
 import * as socketio from "socket.io";
 
@@ -47,6 +48,8 @@ let io = socketio(mainHttpServer, { transports: ["websocket"] });
 let hub: ProjectHub = null;
 
 let buildApp = express();
+
+buildApp.get("/", (req: express.Request, res: express.Response) => { res.redirect(`http://${req.hostname}:${config.mainPort}/?${querystring.stringify(req.query)}`); });
 buildApp.use("/", express.static(`${__dirname}/../public`));
 
 buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
