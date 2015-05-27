@@ -44,10 +44,10 @@ declare module SupClient {
     function appendTextField(parentCell: HTMLTableDataCellElement, value: string): HTMLInputElement;
     function appendTextAreaField(parent: HTMLTableDataCellElement, value: string): HTMLTextAreaElement;
     function appendNumberField(parentCell: HTMLTableDataCellElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement;
+    function appendNumberFields(parentCell: HTMLTableDataCellElement, values: number[], min?: number|string, max?: number|string): HTMLInputElement[];
     function appendBooleanField(parentCell: HTMLTableDataCellElement, value: boolean): HTMLInputElement;
     function appendSelectBox(parentCell: HTMLTableDataCellElement, options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
     function appendSelectOption(parentCell: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
-    function appendVectorFields(parent: HTMLTableDataCellElement, values: {x: number; y: number; z: number}): {x: HTMLInputElement; y: HTMLInputElement; z: HTMLInputElement;}
   }
 
   module dialogs {
