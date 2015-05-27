@@ -23,7 +23,7 @@ declare module SupCore {
     var assetClasses: { [assetName: string]: AssetClass };
     function registerAssetClass(name: string, assetClass: AssetClass): void;
 
-    interface ComponentConfigClass { new(pub: any, serverData?: ProjectServerData): base.ComponentConfig; create(): any; }
+    interface ComponentConfigClass { new(pub: any, sceneAsset?: any): base.ComponentConfig; create(): any; }
     var componentConfigClasses: { [componentConfigName: string]: ComponentConfigClass };
     function registerComponentConfigClass(name: string, configClass: ComponentConfigClass): void;
 
