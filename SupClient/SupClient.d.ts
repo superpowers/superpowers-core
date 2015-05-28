@@ -48,6 +48,7 @@ declare module SupClient {
     function appendBooleanField(parentCell: HTMLTableDataCellElement, value: boolean): HTMLInputElement;
     function appendSelectBox(parentCell: HTMLTableDataCellElement, options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
     function appendSelectOption(parentCell: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
+    function appendColorField(parent: HTMLTableDataCellElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
   }
 
   module dialogs {

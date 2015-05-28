@@ -107,3 +107,21 @@ export function appendSelectOption(parent: HTMLSelectElement, value: string, lab
 
   return option;
 }
+
+export function appendColorField(parent: HTMLTableDataCellElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; } {
+  let colorParent = <any>document.createElement("div");
+  colorParent.classList.add("inputs");
+  parent.appendChild(colorParent);
+
+  let textField = SupClient.table.appendTextField(colorParent, value);
+  textField.classList.add("color");
+
+  let pickerField = document.createElement("input");
+  pickerField.style.padding = "0";
+  pickerField.style.alignSelf = "center";
+  pickerField.type = "color";
+  pickerField.value = `#${value}`;
+  colorParent.appendChild(pickerField);
+
+  return { textField, pickerField };
+}
