@@ -10,7 +10,7 @@
   background #f0f0f0
   color #444
 
-  button
+  .project-management button, .entries-buttons button
     opacity 0.5
     cursor pointer
 
@@ -137,23 +137,31 @@
     text-overflow ellipsis
     overflow-x hidden
 
-  .diagnostics span
-    background rgba(0,0,0,0.2)
-    color rgba(0,0,0,0.8)
-    font-size 80%
+  .diagnostics
+    &:empty { padding: 0; }
+  
+    span
+      background rgba(0,0,0,0.2)
+      color rgba(0,0,0,0.8)
+      font-size 80%
 
-.openInNewWindow
-  background transparent
-  border none
-  opacity 0.5
+.open-in-new-window
   cursor pointer
   align-self stretch
+  border none
+  background-color transparent
+  background-position center center
+  background-repeat no-repeat
+  opacity 0.3
+
+  background-image url(images/entries/open-in-new-window.svg)
+  width 28px
 
   &:hover
-    opacity 1
+    background-color rgba(0,0,0,0.1)
 
   &:active
-    background-color #eee
+    background-color #fff
 
 .tools
   background rgba(0,0,0,0.1)

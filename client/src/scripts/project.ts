@@ -79,8 +79,7 @@ export default function project(projectId: string) {
   document.querySelector(".entries-buttons .trash-entry").addEventListener("click", onTrashEntryClick);
 
   ui.openInNewWindowButton = document.createElement("button");
-  ui.openInNewWindowButton.classList.add("openInNewWindow");
-  ui.openInNewWindowButton.textContent = "[>]";
+  ui.openInNewWindowButton.className = "open-in-new-window";
   ui.openInNewWindowButton.title = "Open in new window";
   ui.openInNewWindowButton.addEventListener("click", onOpenInNewWindowClick);
 
