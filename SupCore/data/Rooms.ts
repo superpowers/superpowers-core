@@ -20,7 +20,7 @@ export default class Rooms extends SupData.base.Dictionary {
 
       item.join(owner, (err: string, roomUser: any, index: number) => {
         if (err != null) { callback(new Error(err)); return; }
-        this.server.io.in(`sub:rooms:${id}`).emit('edit:rooms', id, 'join', roomUser, index);
+        this.server.io.in(`sub:rooms:${id}`).emit("edit:rooms", id, "join", roomUser, index);
         callback(null, item);
       });
     });
@@ -32,7 +32,7 @@ export default class Rooms extends SupData.base.Dictionary {
 
     this.byId[id].leave(owner, (err: string, roomUserId: string) => {
       if (err != null) throw new Error(err);
-      this.server.io.in(`sub:rooms:${id}`).emit('edit:rooms', id, 'leave', roomUserId);
+      this.server.io.in(`sub:rooms:${id}`).emit("edit:rooms", id, "leave", roomUserId);
     });
   }
 

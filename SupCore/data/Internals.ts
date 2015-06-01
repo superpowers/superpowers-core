@@ -2,8 +2,8 @@ import Hash from "./base/Hash";
 
 export default class Internals extends Hash {
   static schema = {
-    nextBuildId: { type: 'integer', min: 0, mutable: true },
-    nextEntryId: { type: 'integer', min: 0, mutable: true }
+    nextBuildId: { type: "integer", min: 0, mutable: true },
+    nextEntryId: { type: "integer", min: 0, mutable: true }
   }
 
   constructor(pub: any) {
@@ -12,11 +12,11 @@ export default class Internals extends Hash {
 
   incrementNextEntryId() {
     this.pub.nextEntryId++;
-    this.emit('change');
+    this.emit("change");
   }
 
   incrementNextBuildId() {
     this.pub.nextBuildId++;
-    this.emit('change');
+    this.emit("change");
   }
 }

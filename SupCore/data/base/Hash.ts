@@ -13,7 +13,7 @@ export default class Hash extends EventEmitter {
   }
 
   setProperty(path: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {
-    let parts = path.split('.');
+    let parts = path.split(".");
 
     let rule = this.schema[parts[0]];
     for (let part of parts.slice(1)) rule = rule.properties[part];
@@ -27,11 +27,11 @@ export default class Hash extends EventEmitter {
     obj[parts[parts.length - 1]] = value;
 
     callback(null, value);
-    this.emit('change');
+    this.emit("change");
   }
 
   client_setProperty(path: string, value: number|string|boolean) {
-    let parts = path.split('.');
+    let parts = path.split(".");
 
     let obj = this.pub;
     for (let part of parts.slice(0, parts.length - 1)) obj = obj[part];

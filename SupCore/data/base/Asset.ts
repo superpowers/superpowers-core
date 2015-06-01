@@ -25,12 +25,12 @@ export default class Asset extends Hash {
   destroy(callback: Function) { callback(); }
 
   load(assetPath: string) {
-    fs.readFile(path.join(assetPath, "asset.json"), { encoding: 'utf8' },(err, json) => {
+    fs.readFile(path.join(assetPath, "asset.json"), { encoding: "utf8" },(err, json) => {
       if (err != null) throw err;
 
       this.pub = JSON.parse(json)
       this.setup()
-      this.emit('load');
+      this.emit("load");
     });
   }
 
@@ -38,7 +38,7 @@ export default class Asset extends Hash {
 
   save(assetPath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);
-    fs.writeFile(path.join(assetPath, "asset.json"), json, { encoding: 'utf8' }, callback);
+    fs.writeFile(path.join(assetPath, "asset.json"), json, { encoding: "utf8" }, callback);
   }
 
   server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any) {

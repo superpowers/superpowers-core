@@ -1,5 +1,5 @@
 export default function() {
-  document.addEventListener('keydown', (event) => {
+  document.addEventListener("keydown", (event) => {
     if (document.querySelector(".dialog") != null) return;
 
     // window.location.origin isn't listed in lib.d.ts as of TypeScript 1.5
