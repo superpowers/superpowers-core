@@ -776,15 +776,20 @@ function onTabActivate(tabElement: any) {
 }
 
 function onTabClose(tabElement: HTMLLIElement) {
+  let assetId = (<any>tabElement.dataset).assetId;
+  let frameElt: HTMLIFrameElement;
+  if (assetId != null) frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
+  else {
+    let toolName = (<any>tabElement.dataset).pane;
+    if (toolName == "main") return;
+
+    frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${toolName}']`);
+  }
+
   if (tabElement.classList.contains("active")) {
     let activeTabElement = (tabElement.nextSibling != null) ? tabElement.nextSibling : tabElement.previousSibling;
     onTabActivate(activeTabElement);
   }
-
-  let assetId = (<any>tabElement.dataset).assetId;
-  let frameElt: HTMLIFrameElement;
-  if (assetId != null) frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
-  else frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${(<any>tabElement.dataset).pane}']`);
 
   tabElement.parentElement.removeChild(tabElement);
   frameElt.parentElement.removeChild(frameElt);
