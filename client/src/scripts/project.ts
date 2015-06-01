@@ -625,8 +625,7 @@ function onTrashEntryClick() {
         if (! confirm) return;
 
         function trashEntry(entry: SupCore.data.EntryNode) {
-          if (entry.type == null)
-            for (let entryChild of entry.children) trashEntry(entryChild)
+          if (entry.type == null) for (let entryChild of entry.children) trashEntry(entryChild);
 
           socket.emit("trash:entries", entry.id, (err: string) => {
             if (err != null) alert(err);
@@ -640,10 +639,10 @@ function onTrashEntryClick() {
         ui.entriesTreeView.clearSelection();
       });
 
-    } else warnBrokenDependence(selectedEntries[0]);
+    } else warnBrokenDependency(selectedEntries[0]);
   }
 
-  function warnBrokenDependence(entry: SupCore.data.EntryNode) {
+  function warnBrokenDependency(entry: SupCore.data.EntryNode) {
     if (entry.type == null) for (let entryChild of entry.children) selectedEntries.push(entryChild);
 
     if (entry.dependentAssetIds != null && entry.dependentAssetIds.length > 0) {
@@ -654,7 +653,7 @@ function onTrashEntryClick() {
   }
 
   for (let selectedNode of ui.entriesTreeView.selectedNodes) selectedEntries.push(data.entries.byId[selectedNode.dataset.id]);
-  warnBrokenDependence(selectedEntries[0]);
+  warnBrokenDependency(selectedEntries[0]);
 }
 
 function onOpenInNewWindowClick(event: any) {
