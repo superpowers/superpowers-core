@@ -77,9 +77,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
   _onAddEntry = (name: string, type: string, options: any, callback: (err: string, newId?: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
+    
+    name = name.trim();
+    if (name.length == 0) { callback("Entry name cannot be empty"); return; }
+    if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
     let entry: SupCore.data.EntryNode = { id: null, name, type, diagnostics: [], dependentAssetIds: [] };
-
     if (options == null) options = {};
 
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
