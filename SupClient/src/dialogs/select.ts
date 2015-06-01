@@ -1,14 +1,10 @@
 export default function select(label: string, options: {[value: string]: string}, validationLabel: string, callback: (value: string) => any) {
-  let dialogElt = document.createElement("div");
-  dialogElt.className = "dialog";
-
-  let messageElt = document.createElement("div");
-  messageElt.className = "message",
-  dialogElt.appendChild(messageElt);
+  let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
+  let formElt = document.createElement("form"); dialogElt.appendChild(formElt);
 
   let labelElt = document.createElement("label");
   labelElt.textContent = label;
-  messageElt.appendChild(labelElt);
+  formElt.appendChild(labelElt);
 
   let selectElt = document.createElement("select");
   for (let optionName in options) {
@@ -17,58 +13,59 @@ export default function select(label: string, options: {[value: string]: string}
     optionElt.value = options[optionName];
     selectElt.appendChild(optionElt);
   }
-
-  let onKeyDown = (event: KeyboardEvent) => {
-    if (event.keyCode === 13) {
+  formElt.appendChild(selectElt);
+  
+  selectElt.addEventListener("keydown", (event) => {
+    if (event.keyCode == 13) {
       event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);
-      let value = (selectElt.value !== "") ? selectElt.value : null;
-      if (callback != null) callback(value);
+      if (callback != null) callback((selectElt.value !== "") ? selectElt.value : null);
     }
-    else if (event.keyCode === 27) {
-      event.preventDefault();
-      document.body.removeChild(dialogElt);
-      document.removeEventListener("keydown", onKeyDown);
-      if (callback != null) callback(null);
-    }
-  }
+  });
 
-  document.addEventListener("keydown", onKeyDown);
-  messageElt.appendChild(selectElt);
-
+  // Buttons
   let buttonsElt = document.createElement("div");
   buttonsElt.className = "buttons";
-  messageElt.appendChild(buttonsElt);
+  formElt.appendChild(buttonsElt);
 
   let cancelButtonElt = document.createElement("button");
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
-  cancelButtonElt.addEventListener("click", () => {
-    document.body.removeChild(dialogElt);
-    document.removeEventListener("keydown", onKeyDown);
-    if (callback != null) callback(null);
-  });
+  cancelButtonElt.addEventListener("click", closeDialog);
 
   let validateButtonElt = document.createElement("button");
   validateButtonElt.textContent = validationLabel;
   validateButtonElt.className = "validate-button";
-  validateButtonElt.addEventListener("click", () => {
-    document.body.removeChild(dialogElt);
-    document.removeEventListener("keydown", onKeyDown);
-    let value = (selectElt.value !== "") ? selectElt.value : null;
-    if (callback != null) callback(value);
-  });
 
   if (navigator.platform === "Win32") {
     buttonsElt.appendChild(validateButtonElt);
     buttonsElt.appendChild(cancelButtonElt);
-  }
-  else {
+  } else {
     buttonsElt.appendChild(cancelButtonElt);
     buttonsElt.appendChild(validateButtonElt);
   }
+  
+  // Validation and cancellation
+  formElt.addEventListener("submit", () => {
+    if (! formElt.checkValidity()) return;
 
+    event.preventDefault();
+    document.body.removeChild(dialogElt);
+    document.removeEventListener("keydown", onKeyDown);
+    if (callback != null) callback((selectElt.value !== "") ? selectElt.value : null);
+  });
+
+  function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
+  document.addEventListener("keydown", onKeyDown);
+  
+  function closeDialog() {
+    document.body.removeChild(dialogElt);
+    document.removeEventListener("keydown", onKeyDown);
+    if (callback != null) callback(null);
+  }
+
+  // Show dialog
   document.body.appendChild(dialogElt);
   selectElt.focus();
 }

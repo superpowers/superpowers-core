@@ -1,22 +1,21 @@
-export default function newAssetDialog(label: string, typeList: {[value: string]: string}, open: boolean,
+export default function newAssetDialog(label: string, typeList: { [value: string]: string }, open: boolean,
 callback: (name: string, type: string, open: boolean) => any) {
 
-  let dialogElt = document.createElement("div");
-  dialogElt.className = "dialog";
-
-  let messageElt = document.createElement("div");
-  messageElt.className = "message";
-  dialogElt.appendChild(messageElt);
+  let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
+  let formElt = document.createElement("form"); dialogElt.appendChild(formElt);
 
   // Prompt name
   let labelElt = document.createElement("label");
   labelElt.textContent = label;
-  messageElt.appendChild(labelElt);
+  formElt.appendChild(labelElt);
 
   let nameInputElt = document.createElement("input");
-  nameInputElt.placeholder = "Asset name"
-  messageElt.appendChild(nameInputElt);
-
+  nameInputElt.required = true;
+  nameInputElt.placeholder = "Asset name";
+  nameInputElt.pattern = "[^/]+";
+  nameInputElt.title = "Must contain no slashes and not only whitespace."
+  formElt.appendChild(nameInputElt);
+  
   // Select type
   let typeSelectElt = document.createElement("select");
   for (let typeName in typeList) {
@@ -25,12 +24,12 @@ callback: (name: string, type: string, open: boolean) => any) {
     optionElt.value = typeList[typeName];
     typeSelectElt.appendChild(optionElt);
   }
-  messageElt.appendChild(typeSelectElt);
+  formElt.appendChild(typeSelectElt);
 
   let downElt = document.createElement("div");
   downElt.style.display = "flex";
   downElt.style.alignItems = "center";
-  messageElt.appendChild(downElt);
+  formElt.appendChild(downElt);
 
   // Auto-open checkbox
   let openCheckboxElt = document.createElement("input");
@@ -40,12 +39,12 @@ callback: (name: string, type: string, open: boolean) => any) {
   openCheckboxElt.style.margin = "0 0.5em 0 0";
   downElt.appendChild(openCheckboxElt);
 
-  let openlabelElt = document.createElement("label");
-  openlabelElt.textContent = "Open after creation";
-  openlabelElt.setAttribute("for","auto-open-checkbox");
-  openlabelElt.style.flex = "1";
-  openlabelElt.style.margin = "0";
-  downElt.appendChild(openlabelElt);
+  let openLabelElt = document.createElement("label");
+  openLabelElt.textContent = "Open after creation";
+  openLabelElt.setAttribute("for","auto-open-checkbox");
+  openLabelElt.style.flex = "1";
+  openLabelElt.style.margin = "0";
+  downElt.appendChild(openLabelElt);
 
   // Buttons
   let buttonsElt = document.createElement("div");
@@ -55,53 +54,40 @@ callback: (name: string, type: string, open: boolean) => any) {
   let cancelButtonElt = document.createElement("button");
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
-  cancelButtonElt.addEventListener("click", () => {
-    document.body.removeChild(dialogElt);
-    document.removeEventListener("keydown", onKeyDown);
-    if (callback != null) callback(null, null, null);
-  });
+  cancelButtonElt.addEventListener("click", closeDialog);
 
   let validateButtonElt = document.createElement("button");
   validateButtonElt.textContent = "Create";
   validateButtonElt.className = "validate-button";
-  validateButtonElt.addEventListener("click", () => {
-    document.body.removeChild(dialogElt);
-    document.removeEventListener("keydown", onKeyDown);
-    let name = (nameInputElt.value !== "") ? nameInputElt.value : null;
-    let type = typeSelectElt.value;
-    let open = openCheckboxElt.checked;
-    if (callback != null) callback(name, type, open);
-  });
 
   if (navigator.platform === "Win32") {
     buttonsElt.appendChild(validateButtonElt);
     buttonsElt.appendChild(cancelButtonElt);
-  }
-  else {
-    downElt.appendChild(cancelButtonElt);
-    downElt.appendChild(validateButtonElt);
+  } else {
+    buttonsElt.appendChild(cancelButtonElt);
+    buttonsElt.appendChild(validateButtonElt);
   }
 
-  // Keyboard event
-  function onKeyDown(event: KeyboardEvent) {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      document.body.removeChild(dialogElt);
-      document.removeEventListener("keydown", onKeyDown);
-      let name = (nameInputElt.value !== "") ? nameInputElt.value : null;
-      let type = typeSelectElt.value;
-      let open = openCheckboxElt.checked;
-      if (callback != null) callback(name, type, open);
-    }
-    else if (event.keyCode === 27) {
+  // Validation and cancellation
+  formElt.addEventListener("submit", () => {
+    if (! formElt.checkValidity()) return;
+
     event.preventDefault();
-      document.body.removeChild(dialogElt);
-      document.removeEventListener("keydown", onKeyDown);
-      if (callback != null) callback(null, null, null);
-    }
-  }
+    document.body.removeChild(dialogElt);
+    document.removeEventListener("keydown", onKeyDown);
+    if (callback != null) callback(nameInputElt.value, typeSelectElt.value, openCheckboxElt.checked);
+  });
+  
+  function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
 
+  function closeDialog() {
+    document.body.removeChild(dialogElt);
+    document.removeEventListener("keydown", onKeyDown);
+    if (callback != null) callback(null, null, null);
+  }
+  
+  // Show dialog
   document.body.appendChild(dialogElt);
   nameInputElt.select();
 }

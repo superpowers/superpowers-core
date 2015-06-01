@@ -1,83 +1,78 @@
+interface PromptOptions {
+   type?: string;
+   pattern?: string;
+}
+
+interface PromptCallback {
+  (value: string): void;
+}
+
 export default function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
-  options: {type?: string; pattern?: string;}|((value: string) => any), callback?: (value: string) => any) {
+options: PromptOptions | PromptCallback, callback?: PromptCallback) {
 
-  if (callback == null && typeof options === 'function') {
-    callback = <(value: string) => any>options;
-    options = null;
-  }
+  if (callback == null && typeof options === "function") {
+    callback = <PromptCallback>options;
+    options = {};
+  } else if (options == null) options = {};
+  let typedOptions = <PromptOptions>options;
 
-  if (options == null) options = {};
-  let typedOptions = <{type?: string; pattern?: string;}>options;
-
-  let dialogElt = document.createElement("div");
-  dialogElt.className = "dialog";
-
-  let messageElt = document.createElement("div");
-  messageElt.className = "message";
-  dialogElt.appendChild(messageElt);
+  let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
+  let formElt = document.createElement("form"); dialogElt.appendChild(formElt);
 
   let labelElt = document.createElement("label");
   labelElt.textContent = label;
-  messageElt.appendChild(labelElt);
+  formElt.appendChild(labelElt);
 
   let inputElt = document.createElement("input");
   if (typedOptions.type != null) inputElt.type = typedOptions.type;
-  // TODO: Wrap in a form element so the validation actually happens
   if (typedOptions.pattern != null) inputElt.pattern = typedOptions.pattern;
+  inputElt.required = true;
   inputElt.placeholder = (placeholder) ? placeholder : "";
   inputElt.value = (initialValue) ? initialValue : "";
+  formElt.appendChild(inputElt);
 
-  let onKeyDown = (event: KeyboardEvent) => {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      document.body.removeChild(dialogElt);
-      document.removeEventListener("keydown", onKeyDown);
-      let value = (inputElt.value !== "") ? inputElt.value : null;
-      if (callback != null) callback(value);
-    }
-    else if (event.keyCode === 27) {
-    event.preventDefault();
-      document.body.removeChild(dialogElt);
-      document.removeEventListener("keydown", onKeyDown);
-      if (callback != null) callback(null);
-    }
-  }
-
-  document.addEventListener("keydown", onKeyDown);
-  messageElt.appendChild(inputElt);
-
+  // Buttons
   let buttonsElt = document.createElement("div");
   buttonsElt.className = "buttons";
-  messageElt.appendChild(buttonsElt);
+  formElt.appendChild(buttonsElt);
 
   let cancelButtonElt = document.createElement("button");
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
-  cancelButtonElt.addEventListener("click", () => {
-    document.body.removeChild(dialogElt);
-    document.removeEventListener("keydown", onKeyDown);
-    if (callback != null) callback(null);
-  });
+  cancelButtonElt.addEventListener("click", closeDialog);
 
   let validateButtonElt = document.createElement("button");
   validateButtonElt.textContent = validationLabel;
   validateButtonElt.className = "validate-button";
-  validateButtonElt.addEventListener("click", () => {
-    document.body.removeChild(dialogElt);
-    document.removeEventListener("keydown", onKeyDown);
-    let value = (inputElt.value !== "") ? inputElt.value : null;
-    if (callback != null) callback(value);
-  });
 
   if (navigator.platform === "Win32") {
     buttonsElt.appendChild(validateButtonElt);
     buttonsElt.appendChild(cancelButtonElt);
-  }
-  else {
+  } else {
     buttonsElt.appendChild(cancelButtonElt);
     buttonsElt.appendChild(validateButtonElt);
   }
+  
+  // Validation and cancellation
+  formElt.addEventListener("submit", () => {
+    if (! formElt.checkValidity()) return;
 
+    event.preventDefault();
+    document.body.removeChild(dialogElt);
+    document.removeEventListener("keydown", onKeyDown);
+    if (callback != null) callback(inputElt.value);
+  });
+
+  function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
+  document.addEventListener("keydown", onKeyDown);
+  
+  function closeDialog() {
+    document.body.removeChild(dialogElt);
+    document.removeEventListener("keydown", onKeyDown);
+    if (callback != null) callback(null);
+  }
+  
+  // Show dialog
   document.body.appendChild(dialogElt);
   inputElt.select();
 }

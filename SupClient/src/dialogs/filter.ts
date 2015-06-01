@@ -1,21 +1,17 @@
-///<reference path = "./fuzzy.d.ts"/>
+/// <reference path="./fuzzy.d.ts" />
 import fuzzy = require("fuzzy");
 
 export default function filter(list: string[], placeholder: string, callback: (value: string) => any) {
-  let dialogElt = document.createElement("div");
-  dialogElt.className = "dialog";
-
-  let messageElt = document.createElement("div");
-  messageElt.className = "message";
-  dialogElt.appendChild(messageElt);
+  let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
+  let formElt = document.createElement("form"); dialogElt.appendChild(formElt);
 
   let inputElt = document.createElement("input");
   inputElt.placeholder = (placeholder != null) ? placeholder : "";
-  messageElt.appendChild(inputElt);
+  formElt.appendChild(inputElt);
 
   let labelParentElt = document.createElement("div");
   labelParentElt.className = "filter-parent";
-  messageElt.appendChild(labelParentElt);
+  formElt.appendChild(labelParentElt);
 
   let labelElts: HTMLDivElement[] = [];
   let selectedIndex: number;
