@@ -53,7 +53,7 @@ declare module SupClient {
 
   module dialogs {
     function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
-      options: {type?: string; pattern?: string;}|((value: string) => any), callback: (value: string) => any): void;
+      options: { type?: string; pattern?: string; required?: boolean; }|((value: string) => any), callback: (value: string) => any): void;
     function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
       callback: (value: string) => any): void;
     function confirm(label: string, validationLabel: string, callback: (value: boolean) => any): void;

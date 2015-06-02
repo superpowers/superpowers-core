@@ -1,6 +1,7 @@
 interface PromptOptions {
    type?: string;
    pattern?: string;
+   required?: boolean;
 }
 
 interface PromptCallback {
@@ -26,7 +27,7 @@ options: PromptOptions | PromptCallback, callback?: PromptCallback) {
   let inputElt = document.createElement("input");
   if (typedOptions.type != null) inputElt.type = typedOptions.type;
   if (typedOptions.pattern != null) inputElt.pattern = typedOptions.pattern;
-  inputElt.required = true;
+  inputElt.required = (typedOptions.required != null) ? typedOptions.required : true;
   inputElt.placeholder = (placeholder) ? placeholder : "";
   inputElt.value = (initialValue) ? initialValue : "";
   formElt.appendChild(inputElt);

@@ -101,7 +101,7 @@ function onNewProjectClick() {
   SupClient.dialogs.prompt("Enter a name for the project.", "My project", null, "Create", (name) => {
     if (name == null) return;
 
-    SupClient.dialogs.prompt("Enter a description for the project.", "Project description", null, "Create", (description) => {
+    SupClient.dialogs.prompt("Enter a description for the project.", "Project description", null, "Create", { required: false }, (description) => {
       if (description == null) description = "";
       socket.emit("add:projects", name, description, (err: string, id: string) => {
         if (err != null) { alert(err); return; }
@@ -134,7 +134,7 @@ function onEditDescriptionClick() {
   let selectedNode = ui.projectsTreeView.selectedNodes[0];
   let project = data.projects.byId[selectedNode.dataset.id];
 
-  SupClient.dialogs.prompt("Enter a new description for the project.", null, project.description, "Update", (newDescription) => {
+  SupClient.dialogs.prompt("Enter a new description for the project.", null, project.description, "Update", { required: false }, (newDescription) => {
     if (newDescription == null || newDescription === project.description) return;
 
     socket.emit("setProperty:projects", project.id, "description", newDescription, (err: string) => {
