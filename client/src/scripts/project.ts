@@ -387,7 +387,7 @@ function exportGame() {
       playerWindow.removeEventListener("load", doExport);
 
       socket.emit("build:project", (err: string, buildId: string, files: any) => {
-        playerWindow.postMessage({ type: "save", projectId: info.projectId, buildId, outputFolder, files }, (<any>window.location).origin);
+        playerWindow.postMessage({ type: "save", projectId: info.projectId, buildId, buildPort: data.config.buildPort, outputFolder, files }, (<any>window.location).origin);
       });
     };
 

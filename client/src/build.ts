@@ -23,7 +23,10 @@ window.addEventListener("message", (event) => {
   let progressMax = event.data.files.length;
   async.eachLimit(event.data.files, 10, (file: string, cb: (err: Error) => any) => {
     let outputFilename = file;
-    if (_.startsWith(outputFilename, buildPath)) outputFilename = outputFilename.substr(buildPath.length);
+    if (_.startsWith(outputFilename, buildPath)) {
+      outputFilename = outputFilename.substr(buildPath.length);
+      file = `${window.location.protocol}//${window.location.hostname}:${event.data.buildPort}${file}`;
+    }
     outputFilename = outputFilename.replace(/\//g, path.sep);
 
     let outputPath = `${event.data.outputFolder}${outputFilename}`;
