@@ -31,7 +31,7 @@ window.addEventListener("message", (event) => {
 
     let xhr = new XMLHttpRequest();
     xhr.open("GET", file);
-    xhr.responseType = "arraybuffer"
+    xhr.responseType = "arraybuffer";
 
     xhr.onload = (event) => {
       if (xhr.status !== 200) { cb(new Error(`Failed to download ${file}, got status ${xhr.status}`)); return; }
@@ -47,10 +47,10 @@ window.addEventListener("message", (event) => {
 
     xhr.send();
   } , (err: Error) => {
-    nwWindow.setProgressBar -1
+    nwWindow.setProgressBar(-1);
     if (err != null) { alert(err); return; }
     // TODO: Add link to open in file browser
-    document.title = "Superpowers — Exported"
-    statusElt.textContent = `Exported to ${event.data.outputFolder}`
+    document.title = "Superpowers — Exported";
+    statusElt.textContent = `Exported to ${event.data.outputFolder}`;
   });
 });
