@@ -14,7 +14,7 @@ export default function confirm(label: string, validationLabel: string, callback
   let cancelButtonElt = document.createElement("button");
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
-  cancelButtonElt.addEventListener("click", closeDialog);
+  cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); closeDialog(); });
 
   let validateButtonElt = document.createElement("button");
   validateButtonElt.textContent = validationLabel;

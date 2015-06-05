@@ -32,7 +32,7 @@ export default function select(label: string, options: {[value: string]: string}
   let cancelButtonElt = document.createElement("button");
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
-  cancelButtonElt.addEventListener("click", closeDialog);
+  cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); closeDialog(); });
 
   let validateButtonElt = document.createElement("button");
   validateButtonElt.textContent = validationLabel;
