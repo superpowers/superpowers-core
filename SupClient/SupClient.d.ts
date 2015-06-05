@@ -41,14 +41,14 @@ declare module SupClient {
 
     function createTable(parent?: HTMLElement): { table: HTMLTableElement; tbody: HTMLTableSectionElement; };
     function appendRow(parentTableBody: HTMLTableSectionElement, name: string, options?: { checkbox?: boolean; title?: string; }): RowParts;
-    function appendTextField(parentCell: HTMLTableDataCellElement, value: string): HTMLInputElement;
-    function appendTextAreaField(parent: HTMLTableDataCellElement, value: string): HTMLTextAreaElement;
-    function appendNumberField(parentCell: HTMLTableDataCellElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement;
-    function appendNumberFields(parentCell: HTMLTableDataCellElement, values: number[], min?: number|string, max?: number|string): HTMLInputElement[];
-    function appendBooleanField(parentCell: HTMLTableDataCellElement, value: boolean): HTMLInputElement;
-    function appendSelectBox(parentCell: HTMLTableDataCellElement, options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
+    function appendTextField(parentCell: HTMLElement, value: string): HTMLInputElement;
+    function appendTextAreaField(parent: HTMLElement, value: string): HTMLTextAreaElement;
+    function appendNumberField(parentCell: HTMLElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement;
+    function appendNumberFields(parentCell: HTMLElement, values: (number|string)[], min?: number|string, max?: number|string): HTMLInputElement[];
+    function appendBooleanField(parentCell: HTMLElement, value: boolean): HTMLInputElement;
+    function appendSelectBox(parentCell: HTMLElement, options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
     function appendSelectOption(parentCell: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
-    function appendColorField(parent: HTMLTableDataCellElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
+    function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
   }
 
   module dialogs {

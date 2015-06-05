@@ -49,14 +49,14 @@ export function appendRow(parentTableBody: HTMLTableSectionElement, name: string
   return { row, labelCell, valueCell, checkbox };
 }
 
-export function appendTextField(parent: HTMLTableDataCellElement, value: string): HTMLInputElement {
+export function appendTextField(parent: HTMLElement, value: string): HTMLInputElement {
   let input = createInput("text", parent);
   input.value = value;
 
   return input;
 }
 
-export function appendTextAreaField(parent: HTMLTableDataCellElement, value: string): HTMLTextAreaElement {
+export function appendTextAreaField(parent: HTMLElement, value: string): HTMLTextAreaElement {
   let textarea = document.createElement("textarea");
   parent.appendChild(textarea);
   textarea.value = value;
@@ -64,7 +64,7 @@ export function appendTextAreaField(parent: HTMLTableDataCellElement, value: str
   return textarea;
 }
 
-export function appendNumberField(parent: HTMLTableDataCellElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement {
+export function appendNumberField(parent: HTMLElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement {
   let input = createInput("number", parent);
   input.value = <any>value;
   if (min != null) input.min = <any>min;
@@ -73,7 +73,7 @@ export function appendNumberField(parent: HTMLTableDataCellElement, value: numbe
   return input;
 }
 
-export function appendNumberFields(parent: HTMLTableDataCellElement, values: number[], min?: number|string, max?: number|string): HTMLInputElement[] {
+export function appendNumberFields(parent: HTMLElement, values: (number|string)[], min?: number|string, max?: number|string): HTMLInputElement[] {
   let inputsParent = <any>document.createElement("div");
   inputsParent.classList.add("inputs");
   parent.appendChild(inputsParent);
@@ -83,14 +83,14 @@ export function appendNumberFields(parent: HTMLTableDataCellElement, values: num
   return inputs;
 }
 
-export function appendBooleanField(parent: HTMLTableDataCellElement, value: boolean): HTMLInputElement {
+export function appendBooleanField(parent: HTMLElement, value: boolean): HTMLInputElement {
   let input = createInput("checkbox", parent);
   input.checked = value;
 
   return input;
 }
 
-export function appendSelectBox(parent: HTMLTableDataCellElement, options: { [value: string]: string; }, initialValue=""): HTMLSelectElement {
+export function appendSelectBox(parent: HTMLElement, options: { [value: string]: string; }, initialValue=""): HTMLSelectElement {
   let selectInput = document.createElement("select");
   parent.appendChild(selectInput);
   for (let value in options) appendSelectOption(selectInput, value, options[value]);
@@ -108,7 +108,7 @@ export function appendSelectOption(parent: HTMLSelectElement, value: string, lab
   return option;
 }
 
-export function appendColorField(parent: HTMLTableDataCellElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; } {
+export function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; } {
   let colorParent = <any>document.createElement("div");
   colorParent.classList.add("inputs");
   parent.appendChild(colorParent);
