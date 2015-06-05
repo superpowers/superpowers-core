@@ -40,8 +40,10 @@ export function appendRow(parentTableBody: HTMLTableSectionElement, name: string
     container.appendChild(nameElt);
 
     checkbox = createInput("checkbox", container);
+  } else {
+    labelCell.textContent = name;
+    if (options != null && options.title != null) labelCell.title = options.title;
   }
-  else labelCell.textContent = name;
 
   let valueCell = document.createElement("td");
   row.appendChild(valueCell);
