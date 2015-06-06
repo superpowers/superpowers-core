@@ -17,7 +17,7 @@ export default function info(label: string, validationLabel: string, callback: (
   buttonsElt.appendChild(validateButtonElt);
 
   // Validation and cancellation
-  formElt.addEventListener("submit", () => { event.preventDefault(); closeDialog(); });
+  formElt.addEventListener("submit", (event) => { event.preventDefault(); closeDialog(); });
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);

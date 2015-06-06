@@ -29,7 +29,7 @@ export default function confirm(label: string, validationLabel: string, callback
   }
   
   // Validation and cancellation
-  formElt.addEventListener("submit", () => {
+  formElt.addEventListener("submit", (event) => {
     if (! formElt.checkValidity()) return;
 
     event.preventDefault();

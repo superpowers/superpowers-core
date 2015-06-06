@@ -69,7 +69,7 @@ callback: (name: string, type: string, open: boolean) => any) {
   }
 
   // Validation and cancellation
-  formElt.addEventListener("submit", () => {
+  formElt.addEventListener("submit", (event) => {
     if (! formElt.checkValidity()) return;
 
     event.preventDefault();

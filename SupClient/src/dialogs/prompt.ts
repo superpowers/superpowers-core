@@ -55,7 +55,7 @@ options: PromptOptions | PromptCallback, callback?: PromptCallback) {
   }
   
   // Validation and cancellation
-  formElt.addEventListener("submit", () => {
+  formElt.addEventListener("submit", (event) => {
     if (! formElt.checkValidity()) return;
 
     event.preventDefault();

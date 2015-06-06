@@ -47,7 +47,7 @@ export default function select(label: string, options: {[value: string]: string}
   }
   
   // Validation and cancellation
-  formElt.addEventListener("submit", () => {
+  formElt.addEventListener("submit", (event) => {
     if (! formElt.checkValidity()) return;
 
     event.preventDefault();
