@@ -27,7 +27,7 @@ declare module SupClient {
   function getTreeViewInsertionPoint(treeView: any): { parentId: string; index: number };
 
   function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById): { parentId: string; index: number };
-  function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById): number;
+  function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById, reversed?: boolean): number;
   function findEntryByPath(entries: any, path: string|string[]): any;
 
   module table {

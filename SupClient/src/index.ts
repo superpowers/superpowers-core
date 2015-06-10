@@ -173,12 +173,13 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
   return { parentId, index };
 }
 
-export function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById) {
+export function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById, reversed = false) {
   let targetEntryId = dropInfo.target.dataset.id;
   let targetNode = listById.byId[targetEntryId];
 
   let index = listById.pub.indexOf(targetNode)
-  if (dropInfo.where === "below") index++;
+  if (! reversed && dropInfo.where === "below") index++;
+  if (  reversed && dropInfo.where === "above") index++;
   return index;
 }
 
