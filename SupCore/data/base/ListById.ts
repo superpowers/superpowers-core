@@ -77,7 +77,6 @@ export default class ListById extends EventEmitter {
 
     if (index == null || index < 0 || index >= this.pub.length) index = this.pub.length;
     let oldIndex = this.pub.indexOf(item);
-
     this.pub.splice(oldIndex, 1);
 
     let actualIndex = index;
@@ -91,7 +90,10 @@ export default class ListById extends EventEmitter {
   client_move(id: string, newIndex: number) {
     let item = this.byId[id];
 
-    this.pub.splice(this.pub.indexOf(item), 1);
+    let oldIndex = this.pub.indexOf(item);
+    this.pub.splice(oldIndex, 1);
+
+    if (oldIndex < newIndex) newIndex--;
     this.pub.splice(newIndex, 0, item);
   }
 
