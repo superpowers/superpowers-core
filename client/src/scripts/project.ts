@@ -37,12 +37,12 @@ export default function project(projectId: string) {
       onRenameEntryClick();
     }
 
-    if (event.keyCode === 68 && (event.ctrlKey || event.metaKey)) { // CTRL+D
+    if (event.keyCode === 68 && (event.ctrlKey || event.metaKey)) { // Ctrl+D
       event.preventDefault();
       onDuplicateEntryClick();
     }
 
-    if (event.keyCode === 46) { // SUPPR
+    if (event.keyCode === 46) { // Delete
       event.preventDefault();
       onTrashEntryClick();
     }
