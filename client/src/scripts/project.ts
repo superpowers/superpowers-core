@@ -132,16 +132,20 @@ export default function project(projectId: string) {
     let containerElt = document.createElement("div");
     toolElt.appendChild(containerElt);
 
-    let anchorElt = document.createElement("a");
-    anchorElt.target = "_blank";
-    anchorElt.textContent = tool.title.en;
-    containerElt.appendChild(anchorElt);
+    let iconElt = document.createElement("img");
+    iconElt.src = `/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+    containerElt.appendChild(iconElt);
+
+    let nameSpanElt = document.createElement("span");
+    nameSpanElt.className = "name";
+    nameSpanElt.textContent = tool.title.en;
+    containerElt.appendChild(nameSpanElt);
 
     toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
     toolElt.addEventListener("mouseleave", (event) => {
       if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
     });
-    anchorElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
+    nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
     toolsList.appendChild(toolElt);
   }
 

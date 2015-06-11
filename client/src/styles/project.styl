@@ -165,7 +165,6 @@
 
 .tools
   background rgba(0,0,0,0.1)
-  overflow-y auto
   border-top 1px solid #acacac
 
   ul
@@ -175,20 +174,31 @@
 
   li
     display flex
+    align-items center
+    height 28px
 
     &:hover
       background rgba(0,0,0,0.1)
-      a { text-decoration: none; }
+      .name { text-decoration: none; }
 
     &:active
       background #fff
 
     div
       flex 1
+      display flex
+      align-items center
 
-      a
-        display block
-        padding 0.5em
+      > img
+        width 24px
+        height 24px
+
+      .name
+        flex 1
+        white-space pre
+        text-overflow ellipsis
+        overflow-x hidden
+        padding 0.25em
         text-decoration underline
         cursor pointer
 
