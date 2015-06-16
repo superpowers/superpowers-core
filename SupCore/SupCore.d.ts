@@ -51,8 +51,15 @@ declare module SupCore {
       generateProjectId(): string;
     }
 
+    interface ProjectManifest {
+      id: string;
+      name: string;
+      description: string;
+    }
     class Manifest extends base.Hash {
-      constructor(pub: any);
+      pub: ProjectManifest;
+
+      constructor(pub: ProjectManifest);
     }
     class Internals extends base.Hash {
       constructor(pub: any);
