@@ -4,5 +4,5 @@ export default {
   mainPort: 4237,
   buildPort: 4238,
   password: "",
-  maxRecentBuilds: 50
+  maxRecentBuilds: 10
 }
