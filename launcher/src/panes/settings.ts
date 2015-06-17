@@ -6,9 +6,13 @@ import * as schemas from "../../../server/schemas";
 
 let fs = nodeRequire("fs");
 if (fs.existsSync(serverPaths.config)) {
-  let userConfig = JSON.parse(fs.readFileSync(serverPaths.config, { encoding: "utf8" }));
-  try { schemas.validate(userConfig, "config"); }
-  catch(e) { userConfig = {}; }
+  let userConfig: any;
+  try {
+    userConfig = JSON.parse(fs.readFileSync(serverPaths.config, { encoding: "utf8" }));
+    schemas.validate(userConfig, "config");
+  } catch(e) {
+    userConfig = {};
+  }
 
   if(userConfig.port != null) {
     userConfig.mainPort = userConfig.port;
