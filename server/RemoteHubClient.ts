@@ -2,6 +2,7 @@ import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
 
+import * as paths from "./paths";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
@@ -32,7 +33,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
 
     while(true) {
       try {
-        fs.mkdirSync(path.join(this.server.projectsPath, projectFolder));
+        fs.mkdirSync(path.join(paths.projects, projectFolder));
       } catch(e) {
         projectFolder = `${originalProjectFolder}-${projectFolderNumber++}`;
         continue;
@@ -40,7 +41,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
       break;
     }
 
-    let projectPath = path.join(this.server.projectsPath, projectFolder);
+    let projectPath = path.join(paths.projects, projectFolder);
     fs.mkdirSync(path.join(projectPath, "assets"));
     fs.mkdirSync(path.join(projectPath, "rooms"));
 

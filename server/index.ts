@@ -55,7 +55,7 @@ buildApp.use("/", express.static(`${__dirname}/../public`));
 buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
   let projectServer = hub.serversById[req.params.projectId];
   if (projectServer == null) { res.status(404).end("No such project"); return; }
-  res.sendFile(path.join(projectServer.projectPath, "builds", req.params.buildId, req.params[0]));
+  res.sendFile(path.join(projectServer.buildsPath, req.params.buildId, req.params[0]));
 });
 
 let buildHttpServer = http.createServer(buildApp);
@@ -150,7 +150,7 @@ fs.writeFileSync(`${__dirname}/../public/plugins.json`, JSON.stringify(pluginsIn
 
 buildFiles.init(pluginNamesByAuthor, () => {
   // Project hub
-  hub = new ProjectHub(io, paths.projects, (err: Error) => {
+  hub = new ProjectHub(io, (err: Error) => {
     if (err != null) { SupCore.log(`Failed to start server:\n${(<any>err).stack}`); return; }
 
     SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${paths.projects}.`);

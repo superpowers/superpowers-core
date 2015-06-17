@@ -77,7 +77,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
   _onAddEntry = (name: string, type: string, options: any, callback: (err: string, newId?: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
-    
+
     name = name.trim();
     if (name.length == 0) { callback("Entry name cannot be empty"); return; }
     if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
@@ -353,16 +353,15 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     let buildId = this.server.data.internals.pub.nextBuildId;
     this.server.data.internals.incrementNextBuildId();
 
-    let projectBuildsPath = `${this.server.projectPath}/builds/`;
-    let buildPath = projectBuildsPath + buildId;
+    let buildPath = `${this.server.buildsPath}/${buildId}`;
 
     let game = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
 
-    try { fs.mkdirSync(projectBuildsPath); } catch(e) {}
+    try { fs.mkdirSync(this.server.buildsPath); } catch(e) {}
     try { fs.mkdirSync(buildPath); }
     catch(err) { callback(`Could not create folder for build ${buildId}`); return; }
 
-    fs.mkdirSync(path.join(buildPath, "assets"));
+    fs.mkdirSync(`${buildPath}/assets`);
 
     let assetIdsToExport: string[] = [];
     this.server.data.entries.walk((entry: SupCore.data.EntryNode, parent: SupCore.data.EntryNode) => {
@@ -370,7 +369,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
 
     async.each(assetIdsToExport, (assetId, cb) => {
-      let folderPath = path.join(buildPath, "assets", assetId.toString());
+      let folderPath = `${buildPath}/assets/${assetId}`;
       fs.mkdir(folderPath, (err) => {
         this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.data.base.Asset) => {
           asset.save(folderPath, (err) => {
@@ -382,10 +381,10 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     }, (err) => {
       if (err != null) { callback("Could not export all assets"); return; }
 
-      fs.mkdirSync(path.join(buildPath, "resources"));
+      fs.mkdirSync(`${buildPath}/resources`);
 
       async.each(Object.keys(SupCore.data.resourceClasses), (resourceName, cb) => {
-        let folderPath = path.join(buildPath, "resources", resourceName.toString());
+        let folderPath = `${buildPath}/resources/${resourceName}`;
         fs.mkdir(folderPath, (err) => {
           this.server.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.data.base.Resource) => {
             resource.save(folderPath, (err) => {
@@ -398,7 +397,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         if (err != null) { callback("Could not export all resources"); return; }
 
         let json = JSON.stringify(game, null, 2);
-        fs.writeFile(path.join(buildPath, "game.json"), json, { encoding: "utf8" }, (err) => {
+        fs.writeFile(`${buildPath}/game.json`, json, { encoding: "utf8" }, (err) => {
           if (err != null) { callback("Could not save game.json"); return; }
 
           // this.server.log(`Done generating build ${buildId}...`);
@@ -417,7 +416,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
             // Remove an old build to avoid using too much disk space
             let buildToDeleteId = buildId - config.maxRecentBuilds;
-            let buildToDeletePath = `${projectBuildsPath}${buildToDeleteId}`;
+            let buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
             rimraf(buildToDeletePath, (err) => {
               if (err != null) {
                 this.server.log(`Failed to remove build ${buildToDeleteId}:`);

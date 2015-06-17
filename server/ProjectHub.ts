@@ -1,8 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as async from "async";
-import authMiddleware from "./authenticate";
 
+import * as paths from "./paths";
+import authMiddleware from "./authenticate";
 import ProjectServer from "./ProjectServer";
 import RemoteHubClient from "./RemoteHubClient";
 
@@ -10,7 +11,6 @@ export default class ProjectHub {
 
   globalIO: SocketIO.Server;
   io: SocketIO.Namespace;
-  projectsPath: string;
 
   data = {
     projects: <SupCore.data.Projects>null
@@ -18,14 +18,13 @@ export default class ProjectHub {
 
   serversById: { [serverId: string]: ProjectServer } = {};
 
-  constructor(globalIO: SocketIO.Server, projectsPath: string, callback: (err: Error) => any) {
+  constructor(globalIO: SocketIO.Server, callback: (err: Error) => any) {
     this.globalIO = globalIO;
-    this.projectsPath = projectsPath;
 
     let serveProjects = (callback: ErrorCallback) => {
-      async.each(fs.readdirSync(this.projectsPath), (projectFolder: string, cb: (err: Error) => any) => {
-        if (projectFolder.indexOf(".") !== -1) { cb(null); return; }
-        this.loadProject(projectFolder, null, cb);
+      async.each(fs.readdirSync(paths.projects), (folderName: string, cb: (err: Error) => any) => {
+        if (folderName.indexOf(".") !== -1) { cb(null); return; }
+        this.loadProject(folderName, null, cb);
       }, callback);
     };
 
@@ -59,8 +58,8 @@ export default class ProjectHub {
     // this.clients.push(client);
   }
 
-  loadProject(projectFolder: string, manifestData: { id: string; name: string; description: string; }, callback: (err: Error) => any) {
-    let server = new ProjectServer(this.globalIO, path.join(this.projectsPath, projectFolder), manifestData, (err) => {
+  loadProject(folderName: string, manifestData: { id: string; name: string; description: string; }, callback: (err: Error) => any) {
+    let server = new ProjectServer(this.globalIO, folderName, manifestData, (err) => {
       if (err != null) { callback(err); return; }
 
       this.serversById[server.data.manifest.pub.id] = server;

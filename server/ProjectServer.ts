@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as async from "async";
 
+import * as paths from "./paths";
 import authMiddleware from "./authenticate";
 import RemoteProjectClient from "./RemoteProjectClient";
 import * as schemas from "./schemas";
@@ -21,13 +22,14 @@ export default class ProjectServer {
     resources: SupCore.data.Resources;
   };
   projectPath: string;
+  buildsPath: string;
 
   scheduledSaveCallbacks: { [name: string]: { lastTime: number, timeoutId: NodeJS.Timer, callback: (callback: (err: Error) => any) => any } } = {};
   nextClientId = 0;
   clientsBySocketId: { [socketId: string]: RemoteProjectClient } = {};
 
-  constructor(globalIO: SocketIO.Server, projectPath: string, manifestData: any, callback: (err: Error) => any) {
-    this.projectPath = projectPath;
+  constructor(globalIO: SocketIO.Server, folderName: string, manifestData: any, callback: (err: Error) => any) {
+    this.projectPath = path.join(paths.projects, folderName);
 
     this.data = {
       manifest: null,
@@ -53,10 +55,16 @@ export default class ProjectServer {
     };
 
     let loadManifest = (callback: (err: Error) => any) => {
-      if (manifestData != null) {
-        this.data.manifest = new SupCore.data.Manifest(manifestData);
+      let done = (data: any) => {
+        this.data.manifest = new SupCore.data.Manifest(data);
         this.data.manifest.on("change", this._onManifestChanged);
+
+        this.buildsPath = path.join(paths.builds, this.data.manifest.pub.id);
         callback(null);
+      };
+
+      if (manifestData != null) {
+        done(manifestData);
         return;
       }
 
@@ -70,11 +78,7 @@ export default class ProjectServer {
         try { schemas.validate(manifestData, "projectManifest"); }
         catch(err) { callback(err); return; }
 
-        this.data.manifest = new SupCore.data.Manifest(manifestData);
-        this.data.manifest.on("change", this._onManifestChanged);
-
-        callback(null);
-        return;
+        done(manifestData);
       });
     };
 
