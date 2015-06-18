@@ -102,7 +102,7 @@ export default class ProjectServer {
         },
 
         (cb: (err: Error) => any) => {
-          fs.readdir(path.join(this.projectPath, "builds"), (err, entryIds) => {
+          fs.readdir(this.buildsPath, (err, entryIds) => {
             if (err != null && err.code !== "ENOENT") { cb(err); return; }
 
             if (entryIds != null) {

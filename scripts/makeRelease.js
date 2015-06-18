@@ -31,7 +31,7 @@ function shouldDistribute(file) {
   if (_.startsWith(file, 'node_modules/.bin')) return false;
   if (_.startsWith(file, 'launcher/src')) return false;
   if (_.startsWith(file, 'bin')) return false;
-  if (_.startsWith(file, 'public/builds') || _.startsWith(file, 'projects')) return false;
+  if (_.startsWith(file, 'builds') || _.startsWith(file, 'projects')) return false;
   if (file === 'config.json') return false;
   return true;
 };
