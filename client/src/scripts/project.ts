@@ -274,7 +274,18 @@ function onEntryMoved(id: string, parentId: string, index: number) {
 
   ui.entriesTreeView.insertAt(entryElt, nodeType, index, parentElt);
 
+  updateEntryElementPath(id);
   refreshAssetTabElement(data.entries.byId[id]);
+}
+
+function updateEntryElementPath(id: string) {
+  let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  (<any>entryElt.dataset).dndText = data.entries.getPathFromId(id);
+
+  let node = data.entries.byId[id];
+  if (node.children != null) {
+    for (let child of node.children) updateEntryElementPath(child.id);
+  }
 }
 
 function onEntryTrashed(id: string) {
@@ -292,6 +303,7 @@ function onSetEntryProperty(id: string, key: string, value: any) {
   switch (key) {
     case "name":
       entryElt.querySelector(".name").textContent = value;
+      updateEntryElementPath(id);
       refreshAssetTabElement(data.entries.byId[id]);
       break;
   }
@@ -406,6 +418,7 @@ function showDevTools() {
 function createEntryElement(entry: any) {
   let liElt = document.createElement("li");
   (<any>liElt.dataset).id = entry.id;
+  (<any>liElt.dataset).dndText = data.entries.getPathFromId(entry.id);
 
   if (entry.type != null) {
     let iconElt = document.createElement("img");
