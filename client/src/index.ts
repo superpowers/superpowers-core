@@ -18,7 +18,8 @@ if (nwDispatcher != null) {
 
   function onMaximizeWindowClick() {
     let maximized = screen.availHeight <= win.height;
-    document.body.classList.toggle("maximized", ! maximized);
+    // NOTE: .toggle signature lacks the second argument in TypeScript 1.5 alpha
+    (<any>document.body.classList.toggle)("maximized", !maximized);
     if (maximized) win.unmaximize();
     else win.maximize();
   }
