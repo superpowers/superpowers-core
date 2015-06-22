@@ -104,7 +104,7 @@ export default function project(projectId: string) {
   let toggleNotificationsButton = <HTMLButtonElement>document.querySelector(".top .controls button.toggle-notifications");
   toggleNotificationsButton.addEventListener("click", onClickToggleNotifications);
 
-  if (localStorage.getItem("disableNotifications") != null) {
+  if (localStorage.getItem("superpowers-disable-notifications") != null) {
     toggleNotificationsButton.classList.add("disabled");
     toggleNotificationsButton.title = "Click to enable notifications";
   } else {
@@ -499,7 +499,7 @@ function onMessageChat(message: string) {
 
   if (! isHomeTabVisible) ui.homeTab.classList.add("blink");
 
-  if (localStorage.getItem("disableNotifications") != null) return;
+  if (localStorage.getItem("superpowers-disable-notifications") != null) return;
 
   function doNotification() {
     let notification = new (<any>window).Notification(`New chat message in "${data.manifest.pub.name}" project`,
@@ -539,15 +539,15 @@ function onMessageHotKey(action: string) {
 }
 
 function onClickToggleNotifications(event: any) {
-  let disableNotifications = (localStorage.getItem("disableNotifications") != null) ? true : false;
-  disableNotifications = ! disableNotifications;
+  let disableNotifications = (localStorage.getItem("superpowers-disable-notifications") != null) ? true : false;
+  disableNotifications = !disableNotifications;
 
   if (! disableNotifications) {
-    localStorage.removeItem("disableNotifications");
+    localStorage.removeItem("superpowers-disable-notifications");
     event.target.classList.remove("disabled");
     event.target.title = "Click to disable notifications";
   } else {
-    localStorage.setItem("disableNotifications", "true");
+    localStorage.setItem("superpowers-disable-notifications", "true");
     event.target.classList.add("disabled");
     event.target.title = "Click to enable notifications";
   }
