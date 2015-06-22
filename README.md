@@ -15,4 +15,16 @@
 
 Once it's done, run `node server/` and open `http://localhost:4237/` in your browser.
 
-When working on a particular part of Superpowers, run ``gulp`` where you're making changes to rebuild Jade, Stylus and TypeScript files on the fly.
+When working on a particular part of Superpowers, run ``gulp``
+where you're making changes to rebuild Jade, Stylus and TypeScript files on the fly.
+
+## Enabling development mode
+
+In order to catch as many runtime errors as possible while working on Superpowers,
+you can run the following in your browser's console:
+
+    localStorage.setItem("superpowers-dev-mode", "true");
+
+When development mode is enabled, the project header in the top-left corner
+will be blue. When it turns red, it's a good sign that you should
+open your dev tools and look for errors in the Console tab.

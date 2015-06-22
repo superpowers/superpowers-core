@@ -27,6 +27,17 @@ export default function project(projectId: string) {
   // Workaround for NW.js bug: https://github.com/nwjs/nw.js/issues/3360
   if (navigator.platform === "MacIntel") (<any>document.querySelector(".tabs-bar")).style.webkitAppRegion = "no-drag";
 
+  // Development mode
+  if (localStorage.getItem("superpowers-dev-mode") != null) {
+    let projectManagementDiv = <HTMLDivElement>document.querySelector(".project .project-management");
+    projectManagementDiv.style.backgroundColor = "#37d";
+
+    // According to http://stackoverflow.com/a/12747364/915914, window.onerror
+    // should be used rather than window.addEventListener("error", ...);
+    // to get all errors, including syntax errors.
+    window.onerror = onWindowDevError;
+  }
+
   // Hot-keys
   SupClient.setupHotkeys();
   document.addEventListener("keydown", (event) => {
@@ -487,10 +498,19 @@ function onEntryActivate() {
 }
 
 function onMessage(event: any) {
-  if (event.data.type === "chat") onMessageChat(event.data.content);
-  if (event.data.type === "hotkey") onMessageHotKey(event.data.content);
-  if (event.data.type === "openEntry") openEntry(event.data.id, event.data.options);
-  if (event.data.type === "openTool") openTool(event.data.name, event.data.options);
+  switch(event.data.type) {
+    case "chat": onMessageChat(event.data.content); break;
+    case "hotkey": onMessageHotKey(event.data.content); break;
+    case "openEntry": openEntry(event.data.id, event.data.options); break;
+    case "openTool": openTool(event.data.name, event.data.options); break;
+    case "error": onWindowDevError(); break;
+  }
+}
+
+function onWindowDevError() {
+  let projectManagementDiv = <HTMLDivElement>document.querySelector(".project .project-management");
+  projectManagementDiv.style.backgroundColor = "#c42";
+  return false;
 }
 
 function onMessageChat(message: string) {

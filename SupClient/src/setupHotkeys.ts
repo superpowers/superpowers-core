@@ -10,6 +10,10 @@ export default function() {
       else window.postMessage({ type: "hotkey", content: action }, origin);
     }
 
+    if (localStorage.getItem("superpowers-dev-mode") != null && window.parent != null) {
+      window.onerror = () => { window.parent.postMessage({ type: "error" }, origin); };
+    }
+
     if (event.keyCode === 78 && (event.ctrlKey || event.metaKey)) { // CTRL-N
       event.preventDefault();
       if (event.shiftKey) sendMessage("newFolder");
