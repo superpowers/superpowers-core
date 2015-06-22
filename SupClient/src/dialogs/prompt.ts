@@ -53,7 +53,7 @@ options: PromptOptions | PromptCallback, callback?: PromptCallback) {
     buttonsElt.appendChild(cancelButtonElt);
     buttonsElt.appendChild(validateButtonElt);
   }
-  
+
   // Validation and cancellation
   formElt.addEventListener("submit", (event) => {
     if (! formElt.checkValidity()) return;
@@ -66,13 +66,13 @@ options: PromptOptions | PromptCallback, callback?: PromptCallback) {
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
-  
+
   function closeDialog() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);
     if (callback != null) callback(null);
   }
-  
+
   // Show dialog
   document.body.appendChild(dialogElt);
   inputElt.select();

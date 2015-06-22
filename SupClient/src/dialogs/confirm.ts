@@ -5,7 +5,7 @@ export default function confirm(label: string, validationLabel: string, callback
   let labelElt = document.createElement("label");
   labelElt.textContent = label;
   formElt.appendChild(labelElt);
-  
+
   // Buttons
   let buttonsElt = document.createElement("div");
   buttonsElt.className = "buttons";
@@ -27,7 +27,7 @@ export default function confirm(label: string, validationLabel: string, callback
     buttonsElt.appendChild(cancelButtonElt);
     buttonsElt.appendChild(validateButtonElt);
   }
-  
+
   // Validation and cancellation
   formElt.addEventListener("submit", (event) => {
     if (! formElt.checkValidity()) return;
@@ -37,10 +37,10 @@ export default function confirm(label: string, validationLabel: string, callback
     document.removeEventListener("keydown", onKeyDown);
     if (callback != null) callback(true);
   });
-  
+
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
-  
+
   function closeDialog() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);

@@ -21,7 +21,7 @@ export default function info(label: string, validationLabel: string, callback: (
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
-  
+
   function closeDialog() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);

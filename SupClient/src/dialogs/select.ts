@@ -14,7 +14,7 @@ export default function select(label: string, options: {[value: string]: string}
     selectElt.appendChild(optionElt);
   }
   formElt.appendChild(selectElt);
-  
+
   selectElt.addEventListener("keydown", (event) => {
     if (event.keyCode == 13) {
       event.preventDefault();
@@ -45,7 +45,7 @@ export default function select(label: string, options: {[value: string]: string}
     buttonsElt.appendChild(cancelButtonElt);
     buttonsElt.appendChild(validateButtonElt);
   }
-  
+
   // Validation and cancellation
   formElt.addEventListener("submit", (event) => {
     if (! formElt.checkValidity()) return;
@@ -58,7 +58,7 @@ export default function select(label: string, options: {[value: string]: string}
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
-  
+
   function closeDialog() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);

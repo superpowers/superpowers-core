@@ -15,7 +15,7 @@ callback: (name: string, type: string, open: boolean) => any) {
   nameInputElt.pattern = "[^/]+";
   nameInputElt.title = "Must contain no slashes and not only whitespace."
   formElt.appendChild(nameInputElt);
-  
+
   // Select type
   let typeSelectElt = document.createElement("select");
   for (let typeName in typeList) {
@@ -86,7 +86,7 @@ callback: (name: string, type: string, open: boolean) => any) {
     document.removeEventListener("keydown", onKeyDown);
     if (callback != null) callback(null, null, null);
   }
-  
+
   // Show dialog
   document.body.appendChild(dialogElt);
   nameInputElt.select();
