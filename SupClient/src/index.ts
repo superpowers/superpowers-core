@@ -13,7 +13,7 @@ interface ComponentEditorObject {
 }
 
 interface ComponentEditorClass {
-  new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): ComponentEditorObject
+  new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): ComponentEditorObject;
 }
 
 export let componentEditorClasses: { [name: string]: ComponentEditorClass } = {};

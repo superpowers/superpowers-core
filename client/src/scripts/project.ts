@@ -20,7 +20,7 @@ let socket: SocketIOClient.Socket;
 export default function project(projectId: string) {
   info.projectId = projectId;
 
-  let template = <any>document.getElementById("project-template")
+  let template = <any>document.getElementById("project-template");
   let clone = document.importNode(template.content, true);
   document.body.appendChild(clone);
 
@@ -495,9 +495,9 @@ function onMessage(event: any) {
 
 function onMessageChat(message: string) {
   let isHomeTabVisible = ui.homeTab.classList.contains("active");
-  if (isHomeTabVisible && ! document.hidden) return;
+  if (isHomeTabVisible && !document.hidden) return;
 
-  if (! isHomeTabVisible) ui.homeTab.classList.add("blink");
+  if (!isHomeTabVisible) ui.homeTab.classList.add("blink");
 
   if (localStorage.getItem("superpowers-disable-notifications") != null) return;
 
@@ -505,13 +505,13 @@ function onMessageChat(message: string) {
     let notification = new (<any>window).Notification(`New chat message in "${data.manifest.pub.name}" project`,
       { icon: "/images/icon.png", body: message });
 
-    let closeTimeoutId = setTimeout( () => { notification.close(); }, 5000);
+    let closeTimeoutId = setTimeout(() => { notification.close(); }, 5000);
 
     notification.addEventListener("click", () => {
-      window.focus()
+      window.focus();
       onTabActivate(ui.homeTab);
       clearTimeout(closeTimeoutId);
-      notification.close()
+      notification.close();
     });
   }
 
