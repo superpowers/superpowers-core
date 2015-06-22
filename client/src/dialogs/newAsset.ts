@@ -69,15 +69,31 @@ callback: (name: string, type: string, open: boolean) => any) {
   }
 
   // Validation and cancellation
-  formElt.addEventListener("submit", (event) => {
-    if (! formElt.checkValidity()) return;
-
-    event.preventDefault();
+  function submit() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);
     if (callback != null) callback(nameInputElt.value, typeSelectElt.value, openCheckboxElt.checked);
+  }
+
+  formElt.addEventListener("submit", (event) => {
+    if (! formElt.checkValidity()) return;
+    event.preventDefault();
+    submit();
   });
-  
+
+  typeSelectElt.addEventListener("keydown", (event) => {
+    if (event.keyCode == 13) {
+      event.preventDefault();
+
+      if (! formElt.checkValidity()) {
+        validateButtonElt.click();
+        return;
+      }
+
+      submit();
+    }
+  });
+
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
 
