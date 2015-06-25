@@ -1,4 +1,18 @@
-export default function select(label: string, options: {[value: string]: string}, validationLabel: string, callback: (value: string) => any) {
+interface SelectOptions {
+  size?: number;
+}
+
+interface SelectCallback {
+  (value: string): void;
+}
+
+export default function select(label: string, choices: { [value: string]: string }, validationLabel: string, options: SelectOptions|SelectCallback, callback?: SelectCallback) {
+  if (callback == null && typeof options === "function") {
+    callback = <SelectCallback>options;
+    options = {};
+  } else if (options == null) options = {};
+  let typedOptions = <SelectOptions>options;
+
   let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
   let formElt = document.createElement("form"); dialogElt.appendChild(formElt);
 
@@ -7,16 +21,18 @@ export default function select(label: string, options: {[value: string]: string}
   formElt.appendChild(labelElt);
 
   let selectElt = document.createElement("select");
-  for (let optionName in options) {
+  for (let choiceName in choices) {
     let optionElt = document.createElement("option");
-    optionElt.textContent = optionName;
-    optionElt.value = options[optionName];
+    optionElt.textContent = choiceName;
+    optionElt.value = choices[choiceName];
     selectElt.appendChild(optionElt);
   }
+
+  if (typedOptions.size != null) selectElt.size = typedOptions.size;
   formElt.appendChild(selectElt);
 
   selectElt.addEventListener("keydown", (event) => {
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
       event.preventDefault();
       document.body.removeChild(dialogElt);
       document.removeEventListener("keydown", onKeyDown);

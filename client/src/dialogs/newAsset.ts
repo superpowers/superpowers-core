@@ -24,6 +24,7 @@ callback: (name: string, type: string, open: boolean) => any) {
     optionElt.value = typeList[typeName];
     typeSelectElt.appendChild(optionElt);
   }
+  typeSelectElt.size = 5;
   formElt.appendChild(typeSelectElt);
 
   let downElt = document.createElement("div");

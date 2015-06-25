@@ -58,7 +58,7 @@ declare module SupClient {
       callback: (value: string) => any): void;
     function confirm(label: string, validationLabel: string, callback: (value: boolean) => any): void;
     function info(label: string, validationLabel: string, callback: () => any): void;
-    function select(label: string, options: {[value: string]: string}, validationLabel: string, callback: (value: string) => any): void;
+    function select(label: string, choices: {[value: string]: string}, validationLabel: string, options: { size?: number; }, callback: (value: string) => any): void;
     function filter(list: string[], placeholder: string, callback: (value: string) => any): void;
   }
 
