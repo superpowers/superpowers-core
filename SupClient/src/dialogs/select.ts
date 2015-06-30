@@ -46,6 +46,7 @@ export default function select(label: string, choices: { [value: string]: string
   formElt.appendChild(buttonsElt);
 
   let cancelButtonElt = document.createElement("button");
+  cancelButtonElt.type = "button";
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
   cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); closeDialog(); });

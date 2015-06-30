@@ -36,6 +36,7 @@ export default function prompt(label: string, placeholder: string, initialValue:
   formElt.appendChild(buttonsElt);
 
   let cancelButtonElt = document.createElement("button");
+  cancelButtonElt.type = "button";
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
   cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); closeDialog(); });

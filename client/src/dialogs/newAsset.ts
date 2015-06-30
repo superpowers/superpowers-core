@@ -53,6 +53,7 @@ callback: (name: string, type: string, open: boolean) => any) {
   downElt.appendChild(buttonsElt);
 
   let cancelButtonElt = document.createElement("button");
+  cancelButtonElt.type = "button";
   cancelButtonElt.textContent = "Cancel";
   cancelButtonElt.className = "cancel-button";
   cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); closeDialog(); });
