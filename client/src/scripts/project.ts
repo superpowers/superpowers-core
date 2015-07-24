@@ -258,7 +258,12 @@ function onEntryAdded(entry: SupCore.data.EntryNode, parentId: string, index: nu
   let nodeType = (entry.children != null) ? "group" : "item";
 
   let parentElt: HTMLLIElement;
-  if (parentId != null) parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
+  if (parentId != null) {
+    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
+    let parentEntry = data.entries.byId[parentId];
+    let childrenElt = parentElt.querySelector("span.children"); 
+    childrenElt.textContent = `(${parentEntry.children.length})`;
+  }
 
   ui.entriesTreeView.insertAt(liElt, nodeType, index, parentElt);
 }
@@ -277,13 +282,28 @@ function onEntryAddedAck(err: string, id: string) {
 function onEntryMoved(id: string, parentId: string, index: number) {
   data.entries.client_move(id, parentId, index);
 
-  let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  let entryElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  
+  let oldParentId: string = (<any>entryElt.dataset).parentId;
+  if (oldParentId != null) {
+    let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
+    let parentEntry = data.entries.byId[oldParentId];
+    let childrenElt = oldParentElt.querySelector("span.children"); 
+    childrenElt.textContent = `(${parentEntry.children.length})`;
+  }
+  
   let nodeType = (entryElt.classList.contains("group")) ? "group" : "item";
 
   let parentElt: HTMLLIElement;
-  if (parentId != null) parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`)
+  if (parentId != null) {
+    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
+    let parentEntry = data.entries.byId[parentId];
+    let childrenElt = parentElt.querySelector("span.children"); 
+    childrenElt.textContent = `(${parentEntry.children.length})`;
+  }
 
   ui.entriesTreeView.insertAt(entryElt, nodeType, index, parentElt);
+  (<any>entryElt.dataset).parentId = parentId;
 
   updateEntryElementPath(id);
   refreshAssetTabElement(data.entries.byId[id]);
@@ -303,6 +323,15 @@ function onEntryTrashed(id: string) {
   data.entries.client_remove(id);
 
   let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  
+  let oldParentId: string = (<any>entryElt.dataset).parentId;
+  if (oldParentId != null) {
+    let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
+    let parentEntry = data.entries.byId[oldParentId];
+    let childrenElt = oldParentElt.querySelector("span.children"); 
+    childrenElt.textContent = `(${parentEntry.children.length})`;
+  }
+  
   ui.entriesTreeView.remove(entryElt);
 }
 
@@ -430,6 +459,8 @@ function createEntryElement(entry: any) {
   let liElt = document.createElement("li");
   (<any>liElt.dataset).id = entry.id;
   (<any>liElt.dataset).dndText = data.entries.getPathFromId(entry.id);
+  let parentEntry = data.entries.parentNodesById[entry.id];
+  if (parentEntry != null) (<any>liElt.dataset).parentId = parentEntry.id;
 
   if (entry.type != null) {
     let iconElt = document.createElement("img");
@@ -458,6 +489,15 @@ function createEntryElement(entry: any) {
       diagnosticsSpan.appendChild(diagSpan);
     }
     liElt.appendChild(diagnosticsSpan);
+  } else {
+    let childrenElt = document.createElement("span");
+    childrenElt.className = "children";
+    childrenElt.textContent = `(${entry.children.length})`;
+    liElt.appendChild(childrenElt);
+    childrenElt.style.display = "none";
+    
+    liElt.addEventListener("mouseenter", (event) => { childrenElt.style.display = ""; });
+    liElt.addEventListener("mouseleave", (event) => { childrenElt.style.display = "none"; });
   }
   return liElt;
 }
