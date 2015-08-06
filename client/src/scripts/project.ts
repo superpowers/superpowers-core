@@ -303,7 +303,8 @@ function onEntryMoved(id: string, parentId: string, index: number) {
   }
 
   ui.entriesTreeView.insertAt(entryElt, nodeType, index, parentElt);
-  (<any>entryElt.dataset).parentId = parentId;
+  if (parentId != null) (<any>entryElt.dataset).parentId = parentId;
+  else delete (<any>entryElt.dataset).parentId;
 
   updateEntryElementPath(id);
   refreshAssetTabElement(data.entries.byId[id]);
