@@ -1,10 +1,12 @@
 import * as SupData from "./index";
+import * as fs from "fs";
 import * as path from "path";
+import * as async from "async";
 
 export default class Assets extends SupData.base.Dictionary {
-  server: any;
+  server: ProjectServer;
 
-  constructor(server: any) {
+  constructor(server: ProjectServer) {
     super();
     this.server = server;
   }
@@ -22,8 +24,21 @@ export default class Assets extends SupData.base.Dictionary {
     if (assetClass == null) throw new Error(`No data plugin for asset type "${entry.type}"`);
 
     let asset = new assetClass(id, null, this.server.data);
-    asset.load(path.join(this.server.projectPath, `assets/${id}`));
 
+    // Remove these at some point, asset migration from Superpowers 0.11
+    let oldDirPath = path.join(this.server.projectPath, `assets/${id}`);
+    fs.stat(oldDirPath, (err, stats) => {
+      let fullAssetPath = this.server.data.entries.getPathFromId(id).replace("/", "__");
+      let dirPath = path.join(this.server.projectPath, `assets/${id}-${fullAssetPath}`);
+
+      if (stats == null) asset.load(dirPath);
+      else {
+        fs.rename(oldDirPath, dirPath, (err) => {
+          if (err != null) throw err;
+          asset.load(dirPath);
+        });
+      }
+    })
     return asset;
   }
 }

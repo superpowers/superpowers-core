@@ -99,7 +99,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         let assetClass = SupCore.data.assetClasses[entry.type];
         let asset = new assetClass(entry.id, null, this.server.data);
         asset.init({ name: entry.name }, () => {
-          let assetPath = path.join(this.server.projectPath, `assets/${entry.id}`);
+          let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace("/", "__");
+          let assetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
           fs.mkdirSync(assetPath);
           asset.save(assetPath, onEntryCreated);
         });
@@ -129,7 +130,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       this.server.data.internals.incrementNextEntryId();
 
-      let newAssetPath = path.join(this.server.projectPath, `assets/${entry.id}`);
+      let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace("/", "__");
+      let newAssetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
 
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
         fs.mkdirSync(newAssetPath);
@@ -248,9 +250,26 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
+    let fullAssetPath = this.server.data.entries.getPathFromId(id);
+    let oldDirPath = path.join(this.server.projectPath, `assets/${id}-${fullAssetPath}`);
+
     this.server.data.entries.setProperty(id, key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err); return; }
 
+      if (key === "name") {
+        let saveScheduled = false;
+        if (this.server.scheduledSaveCallbacks[`assets:${id}`] != null) {
+          clearTimeout(this.server.scheduledSaveCallbacks[`assets:${id}`].timeoutId);
+          delete this.server.scheduledSaveCallbacks[`assets:${id}`];
+          saveScheduled = true;
+        }
+
+        let fullAssetPath = this.server.data.entries.getPathFromId(id);
+        let dirPath = path.join(this.server.projectPath, `assets/${id}-${fullAssetPath}`);
+        fs.rename(oldDirPath, dirPath, (err) => {
+          if (saveScheduled) this.server.scheduleAssetSave(id);
+        });
+      }
       this.server.io.in("sub:entries").emit("setProperty:entries", id, key, actualValue);
       callback(null);
     });
@@ -437,19 +456,18 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     fs.readdir(assetsPath, (err, assetFolders) => {
       if (err != null) throw err;
 
-      let assetFolderRegex = /^[0-9]*$/;
-      let removedAssetIds: string[] = [];
+      let assetFolderRegex = /^[0-9]+-.+$/;
+      let removedAssetPaths: string[] = [];
       for (let assetFolder of assetFolders) {
         if (!assetFolderRegex.test(assetFolder)) continue;
 
-        if (this.server.data.entries.byId[assetFolder] == null) {
-          removedAssetIds.push(assetFolder);
-        }
+        let assetId = (<string>assetFolder).substring(0, (<string>assetFolder).indexOf("-"));
+        if (this.server.data.entries.byId[assetId] == null) removedAssetPaths.push(assetFolder);
       }
 
       let removedFolderCount = 0;
-      async.each(removedAssetIds, (removedAssetId, cb) => {
-        let folderPath = path.join(assetsPath, removedAssetId);
+      async.each(removedAssetPaths, (removedAssetPath, cb) => {
+        let folderPath = path.join(assetsPath, removedAssetPath);
         rimraf(folderPath, (err) => {
           if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(<any>err).stack}`);
           else removedFolderCount++;

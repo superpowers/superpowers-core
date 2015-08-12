@@ -1,21 +1,10 @@
 ///<reference path="../typings/tsd.d.ts"/>
+///<reference path="./ProjectServer.d.ts"/>
 
 declare module SupCore {
   function log(message: string): void;
 
   module data {
-
-    interface ProjectServerData {
-      manifest: Manifest;
-      internals: Internals;
-      members: Members;
-      entries: Entries;
-
-      assets: Assets;
-      rooms: Rooms;
-      resources: Resources;
-    }
-
     function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;
     function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;
 

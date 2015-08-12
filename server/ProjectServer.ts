@@ -225,9 +225,7 @@ export default class ProjectServer {
   }
 
   _onAssetLoaded = (assetId: string, item: SupCore.data.base.Asset) => {
-    let assetPath = path.join(this.projectPath, `assets/${assetId}`);
-    let saveCallback = item.save.bind(item, assetPath);
-    item.on("change", () => { this._scheduleSave(60, `assets:${assetId}`, saveCallback); });
+    item.on("change", () => { this.scheduleAssetSave(assetId); });
 
     item.on("setDiagnostic", (diagnosticId: string, type: string, data: any) => { this._setDiagnostic(assetId, diagnosticId, type, data); });
     item.on("clearDiagnostic", (diagnosticId: string) => { this._clearDiagnostic(assetId, diagnosticId); });
@@ -283,6 +281,14 @@ export default class ProjectServer {
       scheduledCallback.callback = callback;
     }
   };
+
+  scheduleAssetSave = (id: string) => {
+    let item = this.data.assets.byId[id];
+    let fullEntryPath = this.data.entries.getPathFromId(id).replace("/", "__");
+    let assetPath = path.join(this.projectPath, `assets/${id}-${fullEntryPath}`);
+    let saveCallback = item.save.bind(item, assetPath);
+    this._scheduleSave(60, `assets:${id}`, saveCallback);
+  }
 
   _onManifestChanged = () => { this._scheduleSave(60, "manifest", this._saveManifest); };
   _onInternalsChanged = () => { this._scheduleSave(60, "internals", this._saveInternals); };
