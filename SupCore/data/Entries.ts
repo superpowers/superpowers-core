@@ -112,4 +112,6 @@ export default class Entries extends SupData.base.TreeById {
     });
     return entries;
   }
+
+  getStoragePathFromId(id: string) { return this.getPathFromId(id).replace(new RegExp("/","g"), "__"); }
 }

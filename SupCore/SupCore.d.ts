@@ -87,6 +87,7 @@ declare module SupCore {
       remove(id: string, callback: (err: string) => any): void;
       setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any): void;
       getForStorage(): EntryNode[];
+      getStoragePathFromId(id: string): string;
     }
 
     class Assets extends base.Dictionary {

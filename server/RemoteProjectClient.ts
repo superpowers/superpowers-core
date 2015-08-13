@@ -99,7 +99,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         let assetClass = SupCore.data.assetClasses[entry.type];
         let asset = new assetClass(entry.id, null, this.server.data);
         asset.init({ name: entry.name }, () => {
-          let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace(new RegExp("/","g"), "__");
+          let fullAssetPath = this.server.data.entries.getStoragePathFromId(entry.id);
           let assetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
           fs.mkdirSync(assetPath);
           asset.save(assetPath, onEntryCreated);
@@ -130,7 +130,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       this.server.data.internals.incrementNextEntryId();
 
-      let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace(new RegExp("/","g"), "__");
+      let fullAssetPath = this.server.data.entries.getStoragePathFromId(id);
       let newAssetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
 
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
@@ -157,7 +157,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let oldFullAssetPath = this.server.data.entries.getPathFromId(id).replace(new RegExp("/","g"), "__");
+    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
 
     this.server.data.entries.move(id, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
@@ -253,7 +253,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let oldFullAssetPath = this.server.data.entries.getPathFromId(id).replace(new RegExp("/","g"), "__");
+    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
 
     this.server.data.entries.setProperty(id, key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err); return; }
@@ -279,7 +279,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     }
 
     let oldDirPath = path.join(this.server.projectPath, `assets/${assetId}-${oldFullAssetPath}`);
-    let fullAssetPath = this.server.data.entries.getPathFromId(assetId).replace(new RegExp("/","g"), "__");
+    let fullAssetPath = this.server.data.entries.getStoragePathFromId(assetId);
     let dirPath = path.join(this.server.projectPath, `assets/${assetId}-${fullAssetPath}`);
 
     fs.rename(oldDirPath, dirPath, (err) => {
