@@ -284,8 +284,7 @@ export default class ProjectServer {
 
   scheduleAssetSave = (id: string) => {
     let item = this.data.assets.byId[id];
-    let fullEntryPath = this.data.entries.getStoragePathFromId(id);
-    let assetPath = path.join(this.projectPath, `assets/${id}-${fullEntryPath}`);
+    let assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(id)}`);
     let saveCallback = item.save.bind(item, assetPath);
     this._scheduleSave(60, `assets:${id}`, saveCallback);
   }

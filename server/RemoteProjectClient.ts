@@ -99,8 +99,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         let assetClass = SupCore.data.assetClasses[entry.type];
         let asset = new assetClass(entry.id, null, this.server.data);
         asset.init({ name: entry.name }, () => {
-          let fullAssetPath = this.server.data.entries.getStoragePathFromId(entry.id);
-          let assetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
+          let assetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
           fs.mkdirSync(assetPath);
           asset.save(assetPath, onEntryCreated);
         });
@@ -130,8 +129,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       this.server.data.internals.incrementNextEntryId();
 
-      let fullAssetPath = this.server.data.entries.getStoragePathFromId(id);
-      let newAssetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
+      let newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(id)}`);
 
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
         fs.mkdirSync(newAssetPath);
@@ -157,7 +155,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
+    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id, { includeId: false });
 
     this.server.data.entries.move(id, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
@@ -253,7 +251,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
+    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id, { includeId: false });
 
     this.server.data.entries.setProperty(id, key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err); return; }
@@ -279,8 +277,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     }
 
     let oldDirPath = path.join(this.server.projectPath, `assets/${assetId}-${oldFullAssetPath}`);
-    let fullAssetPath = this.server.data.entries.getStoragePathFromId(assetId);
-    let dirPath = path.join(this.server.projectPath, `assets/${assetId}-${fullAssetPath}`);
+    let dirPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(assetId)}`);
 
     fs.rename(oldDirPath, dirPath, (err) => {
       if (saveScheduled) this.server.scheduleAssetSave(assetId);
@@ -400,7 +397,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
 
     async.each(assetIdsToExport, (assetId, cb) => {
-      let folderPath = `${buildPath}/assets/${assetId}-${this.server.data.entries.getStoragePathFromId(assetId)}`;
+      let folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(assetId)}`;
       fs.mkdir(folderPath, (err) => {
         this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.data.base.Asset) => {
           asset.save(folderPath, (err) => {
