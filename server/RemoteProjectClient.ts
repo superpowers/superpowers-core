@@ -400,7 +400,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
 
     async.each(assetIdsToExport, (assetId, cb) => {
-      let folderPath = `${buildPath}/assets/${assetId}`;
+      let folderPath = `${buildPath}/assets/${assetId}-${this.server.data.entries.getStoragePathFromId(assetId)}`;
       fs.mkdir(folderPath, (err) => {
         this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.data.base.Asset) => {
           asset.save(folderPath, (err) => {
