@@ -99,7 +99,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         let assetClass = SupCore.data.assetClasses[entry.type];
         let asset = new assetClass(entry.id, null, this.server.data);
         asset.init({ name: entry.name }, () => {
-          let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace("/", "__");
+          let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace(new RegExp("/","g"), "__");
           let assetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
           fs.mkdirSync(assetPath);
           asset.save(assetPath, onEntryCreated);
@@ -130,7 +130,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       this.server.data.internals.incrementNextEntryId();
 
-      let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace("/", "__");
+      let fullAssetPath = this.server.data.entries.getPathFromId(entry.id).replace(new RegExp("/","g"), "__");
       let newAssetPath = path.join(this.server.projectPath, `assets/${entry.id}-${fullAssetPath}`);
 
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
@@ -157,9 +157,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
+    let oldFullAssetPath = this.server.data.entries.getPathFromId(id).replace(new RegExp("/","g"), "__");
+
     this.server.data.entries.move(id, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
 
+      this._onEntryChangeFullPath(id, oldFullAssetPath);
       this.server.io.in("sub:entries").emit("move:entries", id, parentId, actualIndex);
       callback(null);
     });
@@ -250,28 +253,37 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let fullAssetPath = this.server.data.entries.getPathFromId(id);
-    let oldDirPath = path.join(this.server.projectPath, `assets/${id}-${fullAssetPath}`);
+    let oldFullAssetPath = this.server.data.entries.getPathFromId(id).replace(new RegExp("/","g"), "__");
 
     this.server.data.entries.setProperty(id, key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err); return; }
 
-      if (key === "name") {
-        let saveScheduled = false;
-        if (this.server.scheduledSaveCallbacks[`assets:${id}`] != null) {
-          clearTimeout(this.server.scheduledSaveCallbacks[`assets:${id}`].timeoutId);
-          delete this.server.scheduledSaveCallbacks[`assets:${id}`];
-          saveScheduled = true;
-        }
-
-        let fullAssetPath = this.server.data.entries.getPathFromId(id);
-        let dirPath = path.join(this.server.projectPath, `assets/${id}-${fullAssetPath}`);
-        fs.rename(oldDirPath, dirPath, (err) => {
-          if (saveScheduled) this.server.scheduleAssetSave(id);
-        });
-      }
+      if (key === "name") this._onEntryChangeFullPath(id, oldFullAssetPath);
       this.server.io.in("sub:entries").emit("setProperty:entries", id, key, actualValue);
       callback(null);
+    });
+  }
+
+  _onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string) => {
+    let entry = this.server.data.entries.byId[assetId];
+    if (entry.type == null) {
+      for (let child of entry.children) this._onEntryChangeFullPath(child.id, `${oldFullAssetPath}__${child.name}`);
+      return;
+    }
+
+    let saveScheduled = false;
+    if (this.server.scheduledSaveCallbacks[`assets:${assetId}`] != null) {
+      clearTimeout(this.server.scheduledSaveCallbacks[`assets:${assetId}`].timeoutId);
+      delete this.server.scheduledSaveCallbacks[`assets:${assetId}`];
+      saveScheduled = true;
+    }
+
+    let oldDirPath = path.join(this.server.projectPath, `assets/${assetId}-${oldFullAssetPath}`);
+    let fullAssetPath = this.server.data.entries.getPathFromId(assetId).replace(new RegExp("/","g"), "__");
+    let dirPath = path.join(this.server.projectPath, `assets/${assetId}-${fullAssetPath}`);
+
+    fs.rename(oldDirPath, dirPath, (err) => {
+      if (saveScheduled) this.server.scheduleAssetSave(assetId);
     });
   }
 
