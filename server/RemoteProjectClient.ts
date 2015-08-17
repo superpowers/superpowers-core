@@ -129,7 +129,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       this.server.data.internals.incrementNextEntryId();
 
-      let newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(id)}`);
+      let newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
 
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
         fs.mkdirSync(newAssetPath);
