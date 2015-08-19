@@ -49,6 +49,7 @@ declare module SupClient {
     function appendSelectBox(parentCell: HTMLElement, options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
     function appendSelectOption(parentCell: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
     function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
+    function appendAssetField(parent: HTMLElement, value: string): { textField: HTMLInputElement; buttonElt: HTMLButtonElement; };
   }
 
   module dialogs {
