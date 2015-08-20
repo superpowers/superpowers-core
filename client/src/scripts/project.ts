@@ -261,7 +261,7 @@ function onEntryAdded(entry: SupCore.data.EntryNode, parentId: string, index: nu
   if (parentId != null) {
     parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
     let parentEntry = data.entries.byId[parentId];
-    let childrenElt = parentElt.querySelector("span.children"); 
+    let childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
 
@@ -283,22 +283,22 @@ function onEntryMoved(id: string, parentId: string, index: number) {
   data.entries.client_move(id, parentId, index);
 
   let entryElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
-  
+
   let oldParentId: string = (<any>entryElt.dataset).parentId;
   if (oldParentId != null) {
     let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
     let parentEntry = data.entries.byId[oldParentId];
-    let childrenElt = oldParentElt.querySelector("span.children"); 
+    let childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
-  
+
   let nodeType = (entryElt.classList.contains("group")) ? "group" : "item";
 
   let parentElt: HTMLLIElement;
   if (parentId != null) {
     parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
     let parentEntry = data.entries.byId[parentId];
-    let childrenElt = parentElt.querySelector("span.children"); 
+    let childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
 
@@ -324,15 +324,15 @@ function onEntryTrashed(id: string) {
   data.entries.client_remove(id);
 
   let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
-  
+
   let oldParentId: string = (<any>entryElt.dataset).parentId;
   if (oldParentId != null) {
     let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
     let parentEntry = data.entries.byId[oldParentId];
-    let childrenElt = oldParentElt.querySelector("span.children"); 
+    let childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
-  
+
   ui.entriesTreeView.remove(entryElt);
 }
 
@@ -496,7 +496,7 @@ function createEntryElement(entry: any) {
     childrenElt.textContent = `(${entry.children.length})`;
     liElt.appendChild(childrenElt);
     childrenElt.style.display = "none";
-    
+
     liElt.addEventListener("mouseenter", (event) => { childrenElt.style.display = ""; });
     liElt.addEventListener("mouseleave", (event) => { childrenElt.style.display = "none"; });
   }
@@ -683,6 +683,7 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
 function onNewAssetClick() {
   newAssetDialog("Enter a name for the new asset.", ui.assetsTypeByName, autoOpenAsset, (name, type, open) => {
     if (name == null) return;
+    if (name === "") name = type;
 
     autoOpenAsset = open;
     socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
@@ -690,7 +691,7 @@ function onNewAssetClick() {
 }
 
 function onNewFolderClick() {
-  SupClient.dialogs.prompt("Enter a name for the new folder.", "Enter a name", null, "Create", (name) => {
+  SupClient.dialogs.prompt("Enter a name for the new folder.", "Enter a name", "Folder", "Create", (name) => {
     if (name == null) return;
 
     socket.emit("add:entries", name, null, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);

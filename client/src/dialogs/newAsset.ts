@@ -10,10 +10,9 @@ callback: (name: string, type: string, open: boolean) => any) {
   formElt.appendChild(labelElt);
 
   let nameInputElt = document.createElement("input");
-  nameInputElt.required = true;
   nameInputElt.placeholder = "Asset name";
   nameInputElt.pattern = "[^/]+";
-  nameInputElt.title = "Must contain no slashes and not only whitespace."
+  nameInputElt.title = "Must contain no slashes."
   formElt.appendChild(nameInputElt);
 
   // Select type
@@ -95,6 +94,15 @@ callback: (name: string, type: string, open: boolean) => any) {
       submit();
     }
   });
+
+  typeSelectElt.addEventListener("dblclick", (event) => {
+    if (! formElt.checkValidity()) {
+      validateButtonElt.click();
+      return;
+    }
+
+    submit();
+  })
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
