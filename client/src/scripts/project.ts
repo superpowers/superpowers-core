@@ -683,7 +683,7 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
 function onNewAssetClick() {
   newAssetDialog("Enter a name for the new asset.", ui.assetsTypeByName, autoOpenAsset, (name, type, open) => {
     if (name == null) return;
-    if (name === "") name = type;
+    if (name === "") name = SupClient.pluginPaths.editorsByAssetType[type].title.en;
 
     autoOpenAsset = open;
     socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
