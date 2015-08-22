@@ -311,7 +311,9 @@ export default class ProjectServer {
 
   _saveEntries = (callback: (err: Error) => any) => {
     let entriesJSON = JSON.stringify(this.data.entries.getForStorage(), null, 2);
-    fs.writeFile(path.join(this.projectPath, "entries.json"), entriesJSON, callback);
+    fs.writeFile(path.join(this.projectPath, "newEntries.json"), entriesJSON, () => {
+      fs.rename(path.join(this.projectPath, "newEntries.json"), path.join(this.projectPath, "entries.json"), callback)
+    });
   };
 
   _setDiagnostic(assetId: string, diagnosticId: string, type: string, data: any) {
