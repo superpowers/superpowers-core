@@ -44,6 +44,18 @@ export function appendRow(parentTableBody: HTMLTableSectionElement, name: string
   return { row, labelCell, valueCell, checkbox };
 }
 
+export function appendHeader(parent: HTMLElement, text: string) {
+  let headerRow = document.createElement("tr");
+  parent.appendChild(headerRow);
+
+  let headerTh = document.createElement("th");
+  headerTh.textContent = text;
+  headerTh.colSpan = 2;
+  headerRow.appendChild(headerTh);
+
+  return headerRow;
+}
+
 export function appendTextField(parent: HTMLElement, value: string) {
   let input = createInput("text", parent);
   input.value = value;
