@@ -286,6 +286,12 @@ export default class ProjectServer {
 
   scheduleAssetSave = (id: string) => {
     let item = this.data.assets.byId[id];
+    if (item == null) {
+      SupCore.log(`Tried to schedule an asset save for item with id ${id} but the asset is not loaded.`);
+      SupCore.log(JSON.stringify(this.data.entries.byId[id], null, 2));
+      SupCore.log((<any>new Error()).stack);
+      return;
+    }
     let assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(id)}`);
     let saveCallback = item.save.bind(item, assetPath);
     this._scheduleSave(saveDelay, `assets:${id}`, saveCallback);
