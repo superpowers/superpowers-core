@@ -187,23 +187,36 @@ export default class TreeById extends EventEmitter {
 
   // clear() {}
 
-  // FIXME: Replace key with path and support nested properties
-  setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any) {
+  setProperty(id: string, path: string, value: any, callback: (err: string, value?: any) => any) {
     let node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
-    let rule = this.schema[key];
-    if (rule == null) { callback(`Invalid key: ${key}`); return; }
-    let violation = base.getRuleViolation(value, rule);
-    if (violation != null) { callback(`Invalid value for ${key}: ${base.formatRuleViolation(violation)}`); return; }
+    let parts = path.split(".");
 
-    node[key] = value;
+    let rule = this.schema[parts[0]];
+    for (let part of parts.slice(1)) {
+      rule = rule.properties[part];
+      if (rule.type === "any") break;
+    }
+
+    if (rule == null) { callback(`Invalid key: ${path}`); return; }
+    if (rule.type !== "any") {
+      let violation = base.getRuleViolation(value, rule);
+      if (violation != null) { callback(`Invalid value for ${path}: ${base.formatRuleViolation(violation)}`); return; }
+    }
+
+    for (let part of parts.slice(0, parts.length - 1)) node = node[part];
+    node[parts[parts.length - 1]] = value;
 
     callback(null, value);
     this.emit("change");
   }
 
-  client_setProperty(id: string, key: string, value: any) {
-    this.byId[id][key] = value;
+  client_setProperty(id: string, path: string, value: any) {
+    let parts = path.split(".");
+
+    let node = this.byId[id];
+    for (let part of parts.slice(0, parts.length - 1)) node = node[part];
+    node[parts[parts.length - 1]] = value;
   }
 }

@@ -117,23 +117,36 @@ export default class ListById extends EventEmitter {
 
   // clear: ->
 
-  // FIXME: Replace key with path and support nested properties
-  setProperty(id: string, key: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {
+  setProperty(id: string, path: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {
     let item = this.byId[id];
     if (item == null) { callback(`Invalid item id: ${id}`); return; }
 
-    let rule = this.schema[key];
-    if (rule == null) { callback(`Invalid key: ${key}`); return; }
-    let violation = base.getRuleViolation(value, rule);
-    if (violation != null) { callback(`Invalid value for ${key}: ${base.formatRuleViolation(violation)}`); return; }
+    let parts = path.split(".");
 
-    item[key] = value;
+    let rule = this.schema[parts[0]];
+    for (let part of parts.slice(1)) {
+      rule = rule.properties[part];
+      if (rule.type === "any") break;
+    }
+
+    if (rule == null) { callback(`Invalid key: ${path}`); return; }
+    if (rule.type !== "any") {
+      let violation = base.getRuleViolation(value, rule);
+      if (violation != null) { callback(`Invalid value for ${path}: ${base.formatRuleViolation(violation)}`); return; }
+    }
+
+    for (let part of parts.slice(0, parts.length - 1)) item = item[part];
+    item[parts[parts.length - 1]] = value;
 
     callback(null, value);
     this.emit("change");
   }
 
-  client_setProperty(id: string, key: string, value: number|string|boolean) {
-    this.byId[id][key] = value;
+  client_setProperty(id: string, path: string, value: number|string|boolean) {
+    let parts = path.split(".");
+
+    let item = this.byId[id];
+    for (let part of parts.slice(0, parts.length - 1)) item = item[part];
+    item[parts[parts.length - 1]] = value;
   }
 }
