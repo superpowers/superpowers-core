@@ -269,18 +269,21 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       return;
     }
 
-    let saveScheduled = false;
-    if (this.server.scheduledSaveCallbacks[`assets:${assetId}`] != null) {
-      clearTimeout(this.server.scheduledSaveCallbacks[`assets:${assetId}`].timeoutId);
-      delete this.server.scheduledSaveCallbacks[`assets:${assetId}`];
-      saveScheduled = true;
+    let mustScheduleSave = false;
+    
+    let scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${assetId}`];
+    if (scheduledSaveCallback != null && scheduledSaveCallback.timeoutId != null) {
+      clearTimeout(scheduledSaveCallback.timeoutId);
+      scheduledSaveCallback.timeoutId = null;
+      scheduledSaveCallback.callback = null;
+      mustScheduleSave = true;
     }
 
     let oldDirPath = path.join(this.server.projectPath, `assets/${assetId}-${oldFullAssetPath}`);
     let dirPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(assetId)}`);
 
     fs.rename(oldDirPath, dirPath, (err) => {
-      if (saveScheduled) this.server.scheduleAssetSave(assetId);
+      if (mustScheduleSave) this.server.scheduleAssetSave(assetId);
     });
   }
 
