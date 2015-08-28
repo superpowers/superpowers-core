@@ -7,6 +7,8 @@ import authMiddleware from "./authenticate";
 import RemoteProjectClient from "./RemoteProjectClient";
 import * as schemas from "./schemas";
 
+const saveDelay = 60;
+
 export default class ProjectServer {
 
   io: SocketIO.Namespace;
@@ -237,13 +239,13 @@ export default class ProjectServer {
   _onRoomLoaded = (roomId: string, item: SupCore.data.Room) => {
     let roomPath = path.join(this.projectPath, `rooms/${roomId}`);
     let saveCallback = item.save.bind(item, roomPath);
-    item.on("change", () => { this._scheduleSave(60, `rooms:${roomId}`, saveCallback); });
+    item.on("change", () => { this._scheduleSave(saveDelay, `rooms:${roomId}`, saveCallback); });
   }
 
   _onResourceLoaded = (resourceId: string, item: SupCore.data.base.Resource) => {
     let resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
     let saveCallback = item.save.bind(item, resourcePath);
-    item.on("change", () => { this._scheduleSave(60, `resources:${resourceId}`, saveCallback); });
+    item.on("change", () => { this._scheduleSave(saveDelay, `resources:${resourceId}`, saveCallback); });
     item.on("command", (cmd: string, ...callbackArgs: any[]) => { this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, cmd, ...callbackArgs); });
   };
 
@@ -286,13 +288,13 @@ export default class ProjectServer {
     let item = this.data.assets.byId[id];
     let assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(id)}`);
     let saveCallback = item.save.bind(item, assetPath);
-    this._scheduleSave(60, `assets:${id}`, saveCallback);
+    this._scheduleSave(saveDelay, `assets:${id}`, saveCallback);
   }
 
-  _onManifestChanged = () => { this._scheduleSave(60, "manifest", this._saveManifest); };
-  _onInternalsChanged = () => { this._scheduleSave(60, "internals", this._saveInternals); };
-  _onMembersChanged = () => { this._scheduleSave(60, "members", this._saveMembers); };
-  _onEntriesChanged = () => { this._scheduleSave(60, "entries", this._saveEntries); };
+  _onManifestChanged = () => { this._scheduleSave(saveDelay, "manifest", this._saveManifest); };
+  _onInternalsChanged = () => { this._scheduleSave(saveDelay, "internals", this._saveInternals); };
+  _onMembersChanged = () => { this._scheduleSave(saveDelay, "members", this._saveMembers); };
+  _onEntriesChanged = () => { this._scheduleSave(saveDelay, "entries", this._saveEntries); };
 
   _saveManifest = (callback: (err: Error) => any) => {
     let manifestJSON = JSON.stringify(this.data.manifest.pub, null, 2);
