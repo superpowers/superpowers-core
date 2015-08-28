@@ -16,11 +16,16 @@ export default class Hash extends EventEmitter {
     let parts = path.split(".");
 
     let rule = this.schema[parts[0]];
-    for (let part of parts.slice(1)) rule = rule.properties[part];
+    for (let part of parts.slice(1)) {
+      rule = rule.properties[part];
+      if (rule.type === "any") break;
+    }
 
     if (rule == null) { callback(`Invalid key: ${path}`); return; }
-    let violation = base.getRuleViolation(value, rule);
-    if (violation != null) { callback(`Invalid value for ${path}: ${base.formatRuleViolation(violation)}`); return; }
+    if (rule.type !== "any") {
+      let violation = base.getRuleViolation(value, rule);
+      if (violation != null) { callback(`Invalid value for ${path}: ${base.formatRuleViolation(violation)}`); return; }
+    }
 
     let obj = this.pub;
     for (let part of parts.slice(0, parts.length - 1)) obj = obj[part];
