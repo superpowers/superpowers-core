@@ -1,4 +1,4 @@
-export default function newAssetDialog(label: string, typeList: { [value: string]: string }, open: boolean,
+export default function newAssetDialog(label: string, typeLabels: { [value: string]: string }, open: boolean,
 callback: (name: string, type: string, open: boolean) => any) {
 
   let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
@@ -17,10 +17,10 @@ callback: (name: string, type: string, open: boolean) => any) {
 
   // Select type
   let typeSelectElt = document.createElement("select");
-  for (let typeName in typeList) {
+  for (let typeName in typeLabels) {
     let optionElt = document.createElement("option");
     optionElt.textContent = typeName;
-    optionElt.value = typeList[typeName];
+    optionElt.value = typeLabels[typeName];
     typeSelectElt.appendChild(optionElt);
   }
   typeSelectElt.size = 5;
