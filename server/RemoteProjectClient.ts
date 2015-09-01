@@ -270,7 +270,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     }
 
     let mustScheduleSave = false;
-    
+
     let scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${assetId}`];
     if (scheduledSaveCallback != null && scheduledSaveCallback.timeoutId != null) {
       clearTimeout(scheduledSaveCallback.timeoutId);

@@ -516,7 +516,7 @@ function onEntryDrop(dropInfo: any, orderedNodes: any) {
   let i = 0;
   for (let id of entryIds) {
     socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => { if (err != null) alert(err); });
-    if (! sameParent || sourceChildren.indexOf(data.entries.byId[id]) >= dropPoint.index) i++;
+    if (!sameParent || sourceChildren.indexOf(data.entries.byId[id]) >= dropPoint.index) i++;
   }
   return false;
 }
