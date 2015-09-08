@@ -681,7 +681,7 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
 }
 
 function onNewAssetClick() {
-  newAssetDialog("Enter a name for the new asset.", ui.assetsTypeByName, autoOpenAsset, (name, type, open) => {
+  newAssetDialog(ui.assetsTypeByName, autoOpenAsset, (name, type, open) => {
     if (name == null) return;
     if (name === "") name = SupClient.pluginPaths.editorsByAssetType[type].title.en;
 

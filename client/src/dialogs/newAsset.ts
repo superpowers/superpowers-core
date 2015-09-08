@@ -1,4 +1,4 @@
-export default function newAssetDialog(label: string, typeLabels: { [value: string]: string }, open: boolean,
+export default function newAssetDialog(typeLabels: { [value: string]: string }, open: boolean,
 callback: (name: string, type: string, open: boolean) => any) {
 
   let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
@@ -6,14 +6,8 @@ callback: (name: string, type: string, open: boolean) => any) {
 
   // Prompt name
   let labelElt = document.createElement("label");
-  labelElt.textContent = label;
+  labelElt.textContent = "Select the type and enter a name for the new asset.";
   formElt.appendChild(labelElt);
-
-  let nameInputElt = document.createElement("input");
-  nameInputElt.placeholder = "Asset name";
-  nameInputElt.pattern = "[^/]+";
-  nameInputElt.title = "Must contain no slashes."
-  formElt.appendChild(nameInputElt);
 
   // Select type
   let typeSelectElt = document.createElement("select");
@@ -25,6 +19,12 @@ callback: (name: string, type: string, open: boolean) => any) {
   }
   typeSelectElt.size = 5;
   formElt.appendChild(typeSelectElt);
+
+  let nameInputElt = document.createElement("input");
+  nameInputElt.placeholder = "Asset name (optional)";
+  nameInputElt.pattern = "[^/]+";
+  nameInputElt.title = "Must contain no slashes."
+  formElt.appendChild(nameInputElt);
 
   let downElt = document.createElement("div");
   downElt.style.display = "flex";
@@ -115,5 +115,5 @@ callback: (name: string, type: string, open: boolean) => any) {
 
   // Show dialog
   document.body.appendChild(dialogElt);
-  nameInputElt.select();
+  typeSelectElt.focus();
 }
