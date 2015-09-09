@@ -44,8 +44,8 @@ declare module SupClient {
     function appendHeader(parentCell: HTMLElement, text: string): HTMLTableRowElement;
     function appendTextField(parentCell: HTMLElement, value: string): HTMLInputElement;
     function appendTextAreaField(parent: HTMLElement, value: string): HTMLTextAreaElement;
-    function appendNumberField(parentCell: HTMLElement, value: number|string, min?: number|string, max?: number|string): HTMLInputElement;
-    function appendNumberFields(parentCell: HTMLElement, values: (number|string)[], min?: number|string, max?: number|string): HTMLInputElement[];
+    function appendNumberField(parentCell: HTMLElement, value: number|string, min?: number|string, max?: number|string, step?: number|string): HTMLInputElement;
+    function appendNumberFields(parentCell: HTMLElement, values: (number|string)[], min?: number|string, max?: number|string, step?: number|string): HTMLInputElement[];
     function appendBooleanField(parentCell: HTMLElement, value: boolean): HTMLInputElement;
     function appendSelectBox(parentCell: HTMLElement, options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
     function appendSelectOption(parentCell: HTMLSelectElement, value: string, label: string): HTMLOptionElement;

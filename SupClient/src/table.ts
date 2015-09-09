@@ -71,16 +71,17 @@ export function appendTextAreaField(parent: HTMLElement, value: string) {
   return textarea;
 }
 
-export function appendNumberField(parent: HTMLElement, value: number|string, min?: number|string, max?: number|string) {
+export function appendNumberField(parent: HTMLElement, value: number|string, min?: number|string, max?: number|string, step?: number|string) {
   let input = createInput("number", parent);
   input.value = <any>value;
   if (min != null) input.min = <any>min;
   if (max != null) input.max = <any>max;
+  if (step != null) input.step = <any>step;
 
   return input;
 }
 
-export function appendNumberFields(parent: HTMLElement, values: (number|string)[], min?: number|string, max?: number|string) {
+export function appendNumberFields(parent: HTMLElement, values: (number|string)[], min?: number|string, max?: number|string, step?: number|string) {
   let inputsParent = <any>document.createElement("div");
   inputsParent.classList.add("inputs");
   parent.appendChild(inputsParent);
