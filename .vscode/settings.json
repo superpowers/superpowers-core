@@ -1,8 +1,8 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"files.exclude": {
-		".vscode": true,
-		"/builds/**": true,
-		"/typings/**": true
-	}
+  "files.exclude": {
+    ".vscode": true,
+    "/builds/**": true,
+    "/typings/**": true
+  }
 }
