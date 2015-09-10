@@ -19,10 +19,21 @@
 			// Workspace relative or absolute path to the runtime executable to be used. Default is the runtime executable on the PATH.
 			"runtimeExecutable": null,
 			// Optional arguments passed to the runtime executable.
-			"runtimeArguments": [],
+			"runtimeArgs": ["--nolazy"],
 			// Environment variables passed to the program.
-			"env": { },
+			"env": {},
 			// Use JavaScript source maps (if they exist).
+			"sourceMaps": true,
+			// If JavaScript source maps are enabled, the generated code is expected in this directory.
+			"outDir": null
+		},
+		{
+			"name": "Attach",
+			"type": "node",
+			// TCP/IP address. Default is "localhost".
+			"address": "localhost",
+			// Port to attach to.
+			"port": 8000,
 			"sourceMaps": true
 		}
 	]
