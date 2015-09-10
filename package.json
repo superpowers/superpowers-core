@@ -24,7 +24,7 @@
     "async": "^0.9.0",
     "cookies-js": "^1.2.1",
     "cson-parser": "^1.0.8",
-    "dnd-tree-view": "^1.4.1",
+    "dnd-tree-view": "^1.4.2",
     "express": "^4.11.2",
     "fuzzy": "^0.1.0",
     "lodash": "^3.2.0",
