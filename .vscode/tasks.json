@@ -1,0 +1,162 @@
+{
+	"version": "0.1.0",
+	"command": "gulp",
+	"suppressTaskName": true,
+	"showOutput": "silent",
+	"isShellCommand": true,
+	"tasks": [
+    // Core
+    {
+			"taskName": "client",
+			"args": [
+				"--cwd",
+				"./client"
+			]
+		},
+		{
+			"taskName": "server",
+			"args": [
+				"--cwd",
+				"./server"
+			]
+		},
+    {
+			"taskName": "launcher",
+			"args": [
+				"--cwd",
+				"./launcher"
+			]
+		},
+    {
+			"taskName": "SupAPI",
+			"args": [
+				"--cwd",
+				"./SupCore"
+			]
+		},
+    {
+			"taskName": "SupCore",
+			"args": [
+				"--cwd",
+				"./SupCore"
+			]
+		},
+    {
+			"taskName": "SupClient",
+      "isBuildCommand": true,
+			"args": [
+				"--cwd",
+				"./SupClient"
+			]
+		},
+
+    // System
+    {
+			"taskName": "player",
+			"args": [
+				"--cwd",
+				"./system/player"
+			]
+		},
+    {
+			"taskName": "SupEngine",
+			"args": [
+				"--cwd",
+				"./system/SupEngine"
+			]
+		},
+    {
+			"taskName": "SupRuntime",
+			"args": [
+				"--cwd",
+				"./system/SupRuntime"
+			]
+		},
+
+    // Plugins
+    {
+			"taskName": "arcadePhysics2D",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/arcadePhysics2D/"
+			]
+		},
+    {
+			"taskName": "cubicModel",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/cubicModel/"
+			]
+		},
+    {
+			"taskName": "font",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/font/"
+			]
+		},
+    {
+			"taskName": "light",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/light/"
+			]
+		},
+    {
+			"taskName": "model",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/model/"
+			]
+		},
+    {
+			"taskName": "scene",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/scene/"
+			]
+		},
+		{
+			"taskName": "shader",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/shader/"
+			]
+		},
+    {
+			"taskName": "sprite",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/sprite/"
+			]
+		},
+    {
+			"taskName": "sound",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/sound/"
+			]
+		},
+    {
+			"taskName": "textEditorWidget",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/textEditorWidget/"
+			]
+		},
+    {
+			"taskName": "tileMap",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/tileMap/"
+			]
+		},
+		{
+			"taskName": "typescript",
+			"args": [
+				"--cwd",
+				"./plugins/sparklinlabs/typescript/"
+			]
+		}
+	]
+}
