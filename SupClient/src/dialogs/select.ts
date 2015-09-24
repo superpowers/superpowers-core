@@ -64,14 +64,26 @@ export default function select(label: string, choices: { [value: string]: string
   }
 
   // Validation and cancellation
-  formElt.addEventListener("submit", (event) => {
-    if (! formElt.checkValidity()) return;
-
-    event.preventDefault();
+  function submit() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);
     if (callback != null) callback((selectElt.value !== "") ? selectElt.value : null);
+  }
+
+  formElt.addEventListener("submit", (event) => {
+    if (! formElt.checkValidity()) return;
+    event.preventDefault();
+    submit();
   });
+
+  selectElt.addEventListener("dblclick", (event) => {
+    if (! formElt.checkValidity()) {
+      validateButtonElt.click();
+      return;
+    }
+
+    submit();
+  })
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);
