@@ -1,6 +1,7 @@
 interface PromptOptions {
    type?: string;
    pattern?: string;
+   title?: string;
    required?: boolean;
 }
 
@@ -25,6 +26,7 @@ export default function prompt(label: string, placeholder: string, initialValue:
   let inputElt = document.createElement("input");
   if (typedOptions.type != null) inputElt.type = typedOptions.type;
   if (typedOptions.pattern != null) inputElt.pattern = typedOptions.pattern;
+  if (typedOptions.title != null) inputElt.title = typedOptions.title;
   inputElt.required = (typedOptions.required != null) ? typedOptions.required : true;
   inputElt.placeholder = (placeholder) ? placeholder : "";
   inputElt.value = (initialValue) ? initialValue : "";

@@ -250,6 +250,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
   _onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
+    if (key === "name" && value.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
     let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id, { includeId: false });
 

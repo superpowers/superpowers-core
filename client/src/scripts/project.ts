@@ -691,7 +691,7 @@ function onNewAssetClick() {
 }
 
 function onNewFolderClick() {
-  SupClient.dialogs.prompt("Enter a name for the new folder.", "Enter a name", "Folder", "Create", (name) => {
+  SupClient.dialogs.prompt("Enter a name for the new folder.", "Enter a name", "Folder", "Create", { pattern: "[^/]+", title: "Must contain no slashes." }, (name) => {
     if (name == null) return;
 
     socket.emit("add:entries", name, null, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
@@ -759,7 +759,7 @@ function onRenameEntryClick() {
   let selectedNode = ui.entriesTreeView.selectedNodes[0];
   let entry = data.entries.byId[selectedNode.dataset.id];
 
-  SupClient.dialogs.prompt("Enter a new name for the asset.", null, entry.name, "Rename", (newName) => {
+  SupClient.dialogs.prompt("Enter a new name for the asset.", null, entry.name, "Rename", { pattern: "[^/]+", title: "Must contain no slashes." }, (newName) => {
     if (newName == null || newName === entry.name) return;
 
     socket.emit("setProperty:entries", entry.id, "name", newName, (err: string) => {
