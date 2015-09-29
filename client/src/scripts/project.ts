@@ -713,7 +713,7 @@ function onTrashEntryClick() {
           if (entry.type == null) for (let entryChild of entry.children) trashEntry(entryChild);
 
           socket.emit("trash:entries", entry.id, (err: string) => {
-            if (err != null) alert(err);
+            if (err != null) { alert(err); return; }
           });
         }
 
@@ -763,7 +763,7 @@ function onRenameEntryClick() {
     if (newName == null || newName === entry.name) return;
 
     socket.emit("setProperty:entries", entry.id, "name", newName, (err: string) => {
-      if (err != null) alert(err);
+      if (err != null) { alert(err); return; }
     });
   });
 }
