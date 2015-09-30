@@ -25,7 +25,7 @@ export default class Assets extends SupData.base.Dictionary {
 
     let asset = new assetClass(id, null, this.server.data);
 
-    // Remove these at some point, asset migration from Superpowers 0.11
+    // NOTE: The way assets are laid out on disk was changed in Superpowers 0.11
     let oldDirPath = path.join(this.server.projectPath, `assets/${id}`);
     fs.stat(oldDirPath, (err, stats) => {
       let dirPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(id)}`);
