@@ -50,9 +50,12 @@ export default class ProjectServer {
 
     let migrate = (callback: (err: Error) => any) => {
       // Old projects didn't have a rooms or resources folder
+      // Delete ArcadePhysics2DSettingsResource, removed in Superpowers v0.13
       async.series([
         (cb: Function) => { fs.mkdir(path.join(this.projectPath, "rooms"), (err) => { cb(); }); },
-        (cb: Function) => { fs.mkdir(path.join(this.projectPath, "resources"), (err) => { cb(); }); }
+        (cb: Function) => { fs.mkdir(path.join(this.projectPath, "resources"), (err) => { cb(); }); },
+        (cb: Function) => { fs.unlink(path.join(this.projectPath, "resources/arcadePhysics2DSettings/resource.json"), (err) => { cb(); }); },
+        (cb: Function) => { fs.rmdir(path.join(this.projectPath, "resources/arcadePhysics2DSettings"), (err) => { cb(); }); }
       ], callback);
     };
 
