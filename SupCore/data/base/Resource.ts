@@ -22,7 +22,7 @@ export default class Resource extends Hash {
     fs.readFile(path.join(resourcePath, "resource.json"), { encoding: "utf8" }, (err, json) => {
       if (err != null) {
         if (err.code === "ENOENT") {
-          this.init( () => { this.emit("load") } );
+          this.init(() => { this.emit("load") });
           return;
         }
 
