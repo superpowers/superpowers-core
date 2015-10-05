@@ -786,8 +786,9 @@ function refreshAssetTabElement(entry: SupCore.data.EntryNode) {
   let tabElt = ui.tabStrip.tabsRoot.querySelector(`[data-asset-id='${entry.id}']`);
   if (tabElt == null) return;
 
-  tabElt.querySelector(".label").textContent = entry.name;
-  tabElt.title = data.entries.getPathFromId(entry.id);
+  let entryPath = data.entries.getPathFromId(entry.id);
+  tabElt.querySelector(".label").textContent = entryPath;
+  tabElt.title = entryPath;
 }
 
 function createAssetTabElement(entry: SupCore.data.EntryNode) {
@@ -800,17 +801,26 @@ function createAssetTabElement(entry: SupCore.data.EntryNode) {
     tabElt.appendChild(iconElt);
   }
 
+  let outerTabLabel = document.createElement("div");
+  outerTabLabel.classList.add("outer-label");
+  tabElt.appendChild(outerTabLabel);
+
+  let innerTabLabel = document.createElement("div");
+  innerTabLabel.classList.add("inner-label");
+  outerTabLabel.appendChild(innerTabLabel);
+
   let tabLabel = document.createElement("span");
   tabLabel.classList.add("label");
-  tabLabel.textContent = entry.name;
-  tabElt.appendChild(tabLabel);
+  innerTabLabel.appendChild(tabLabel);
 
   let closeButton = document.createElement("button");
   closeButton.classList.add("close");
   closeButton.addEventListener("click", () => { onTabClose(tabElt); });
   tabElt.appendChild(closeButton);
 
-  tabElt.title = data.entries.getPathFromId(entry.id);
+  let entryPath = data.entries.getPathFromId(entry.id);
+  tabLabel.textContent = entryPath;
+  tabElt.title = entryPath;
   (<any>tabElt.dataset).assetId = entry.id;
   return tabElt;
 }
