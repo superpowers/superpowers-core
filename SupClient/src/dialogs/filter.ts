@@ -22,28 +22,48 @@ export default function filter(list: string[], placeholder: string, callback: (v
     labelParentElt.scrollTop = (index - 3) * 20;
   }
 
+  let noSlashesList: string[] = [];
+  for (let text of list){
+    let noSlashesText = text;
+    while (noSlashesText.indexOf("/") !== -1) noSlashesText = noSlashesText.replace("/", " ");
+    noSlashesList.push(noSlashesText);
+  }
+
   let onKeyUp = (event: KeyboardEvent) => {
     if (inputElt.value !== "") {
       let previousSelectedResult = (selectedIndex != null) ? labelElts[selectedIndex].textContent : null;
       let newSelectedIndex: number;
 
       let results = fuzzy.filter(inputElt.value, list);
-      results.forEach((result, index) => {
+      let noSlashesResult = fuzzy.filter(inputElt.value, noSlashesList);
+
+      results = results.concat(noSlashesResult);
+      results.sort((a, b) => b.score - a.score);
+
+      let resultsFound: string[] = [];
+
+      for (let result of results) {
+        let resultText = list[result.index];
+
+        if (resultsFound.indexOf(resultText) !== -1) continue;
+        resultsFound.push(resultText);
+
+        let index = resultsFound.length - 1;
         if (labelElts[index] == null) {
           let labelElt = document.createElement("div");
-          labelElt.textContent = result.original;
+          labelElt.textContent = resultText;
           labelParentElt.appendChild(labelElt);
           labelElts.push(labelElt);
         }
         else {
           labelElts[index].className = "";
-          labelElts[index].textContent = result.original;
+          labelElts[index].textContent = resultText;
         }
 
-        if (result.original === previousSelectedResult) newSelectedIndex = index;
-      });
+        if (resultText === previousSelectedResult) newSelectedIndex = index;
+      }
 
-      while (labelElts.length > results.length) {
+      while (labelElts.length > resultsFound.length) {
         labelParentElt.removeChild(labelElts[labelElts.length - 1]);
         labelElts.pop();
       }
