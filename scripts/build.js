@@ -43,7 +43,7 @@ var execSuffix = process.platform == "win32";
 var errors = [];
 
 async.eachSeries(buildPaths, function(buildPath, callback) {
-  log("Building /" + path.relative(rootPath, buildPath));
+  log("Building " + path.sep + path.relative(rootPath, buildPath));
 
   var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
 
