@@ -16,16 +16,10 @@ declare module SupCore {
     var componentConfigClasses: { [componentConfigName: string]: ComponentConfigClass };
     function registerComponentConfigClass(name: string, configClass: ComponentConfigClass): void;
 
-    // This registers a plugin * resource * (see SupCore.data.Resources), not just a resource class, hence the name
+    // This registers a plugin *resource* (see SupCore.data.Resources), not just a resource class, hence the name
     interface ResourceClass { new(pub: any, serverData?: ProjectServerData): base.Resource; }
     var resourceClasses: { [resourceName: string]: ResourceClass };
     function registerResource(name: string, resourceClass: ResourceClass): void;
-
-    // Deprecated
-    var assetPlugins: { [assetName: string]: AssetClass };
-    function addAssetPlugin(name: string, assetClass: AssetClass): void;
-    var componentConfigPlugins: { [componentConfigName: string]: ComponentConfigClass };
-    function addComponentConfigPlugin(name: string, configClass: ComponentConfigClass): void;
 
     interface ProjectItem {
       id: string;
@@ -272,7 +266,7 @@ declare module SupCore {
         server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
       }
 
-      class ComponentConfig extends Hash{
+      class ComponentConfig extends Hash {
         constructor(pub: any, schema: any);
 
         // OVERRIDE: Called when loading a scene

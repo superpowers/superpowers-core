@@ -70,19 +70,3 @@ export function registerResource(name: string, resourceClass: ResourceClass) {
   resourceClasses[name] = resourceClass;
   return
 }
-
-// Deprecated
-export let assetPlugins = assetClasses;
-export let componentConfigPlugins = componentConfigClasses;
-
-export function addAssetPlugin(name: string, assetClass: AssetClass) {
-  console.warn("SupCore.data.addAssetPlugin and SupCore.data.assetPlugins are deprecated and will be removed soon. Please use SupCore.data.registerAssetClass and SupCore.data.assetClasses instead.");
-  registerAssetClass(name, assetClass);
-  return;
-}
-
-export function addComponentConfigPlugin(name: string, configClass: ComponentConfigClass) {
-  console.warn("SupCore.data.addComponentConfigPlugin and SupCore.data.componentConfigPlugins are deprecated and will be removed soon. Please use SupCore.data.registerComponentConfigClass and SupCore.data.componentConfigClasses instead.");
-  registerComponentConfigClass(name, configClass);
-  return;
-}
