@@ -345,7 +345,13 @@ function onSetEntryProperty(id: string, key: string, value: any) {
     case "name":
       entryElt.querySelector(".name").textContent = value;
       updateEntryElementPath(id);
-      refreshAssetTabElement(data.entries.byId[id]);
+
+      let walk = (entry: SupCore.data.EntryNode) => {
+        refreshAssetTabElement(entry);
+        if (entry.children != null) for (let child of entry.children) walk(child);
+      }
+
+      walk(data.entries.byId[id]);
       break;
   }
 }
@@ -782,12 +788,26 @@ function onDuplicateEntryClick() {
   });
 }
 
-function refreshAssetTabElement(entry: SupCore.data.EntryNode) {
-  let tabElt = ui.tabStrip.tabsRoot.querySelector(`[data-asset-id='${entry.id}']`);
+function refreshAssetTabElement(entry: SupCore.data.EntryNode, tabElt?: HTMLLIElement) {
+  if (tabElt == null) tabElt = ui.tabStrip.tabsRoot.querySelector(`[data-asset-id='${entry.id}']`);
   if (tabElt == null) return;
 
   let entryPath = data.entries.getPathFromId(entry.id);
-  tabElt.querySelector(".label").textContent = entryPath;
+  let entryLocation = "";
+  let entryName = entry.name;
+
+  let lastSlash = entryPath.lastIndexOf("/");
+  if (lastSlash !== -1) entryLocation = entryPath.slice(0, lastSlash);
+
+  const maxEntryLocationLength = 20;
+  while (entryLocation.length > maxEntryLocationLength) {
+    let slashIndex = entryLocation.indexOf("/", 2);
+    if (slashIndex === -1) break;
+    entryLocation = `…/${entryLocation.slice(slashIndex + 1)}`;
+  }
+
+  tabElt.querySelector(".label .location").textContent = entryLocation;
+  tabElt.querySelector(".label .name").textContent = entryName;
   tabElt.title = entryPath;
 }
 
@@ -801,27 +821,27 @@ function createAssetTabElement(entry: SupCore.data.EntryNode) {
     tabElt.appendChild(iconElt);
   }
 
-  let outerTabLabel = document.createElement("div");
-  outerTabLabel.classList.add("outer-label");
-  tabElt.appendChild(outerTabLabel);
-
-  let innerTabLabel = document.createElement("div");
-  innerTabLabel.classList.add("inner-label");
-  outerTabLabel.appendChild(innerTabLabel);
-
-  let tabLabel = document.createElement("span");
+  let tabLabel = document.createElement("div");
   tabLabel.classList.add("label");
-  innerTabLabel.appendChild(tabLabel);
+  tabElt.appendChild(tabLabel);
+
+  let tabLabelLocation = document.createElement("div");
+  tabLabelLocation.classList.add("location");
+  tabLabel.appendChild(tabLabelLocation);
+
+  let tabLabelName = document.createElement("div");
+  tabLabelName.classList.add("name");
+  tabLabel.appendChild(tabLabelName);
 
   let closeButton = document.createElement("button");
   closeButton.classList.add("close");
   closeButton.addEventListener("click", () => { onTabClose(tabElt); });
   tabElt.appendChild(closeButton);
 
-  let entryPath = data.entries.getPathFromId(entry.id);
-  tabLabel.textContent = entryPath;
-  tabElt.title = entryPath;
   (<any>tabElt.dataset).assetId = entry.id;
+
+  refreshAssetTabElement(entry, tabElt);
+
   return tabElt;
 }
 
