@@ -1,6 +1,6 @@
 /// <reference path="./typings/socket.io-client/socket.io-client.d.ts" />
 
-declare module SupClient {
+declare namespace SupClient {
 
   interface ComponentEditorObject {
     destroy(): void;
@@ -30,7 +30,7 @@ declare module SupClient {
   function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById, reversed?: boolean): number;
   function findEntryByPath(entries: any, path: string|string[]): any;
 
-  module table {
+  namespace table {
 
     interface RowParts {
       row: HTMLTableRowElement;
@@ -53,7 +53,7 @@ declare module SupClient {
     function appendAssetField(parent: HTMLElement, value: string): { textField: HTMLInputElement; buttonElt: HTMLButtonElement; };
   }
 
-  module dialogs {
+  namespace dialogs {
     function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
       options: { type?: string; pattern?: string; title?: string; required?: boolean; }|((value: string) => any), callback: (value: string) => any): void;
     function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,

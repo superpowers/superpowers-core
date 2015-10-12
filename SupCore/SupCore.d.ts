@@ -1,10 +1,10 @@
 ///<reference path="../typings/tsd.d.ts"/>
 ///<reference path="./ProjectServer.d.ts"/>
 
-declare module SupCore {
+declare namespace SupCore {
   function log(message: string): void;
 
-  module data {
+  namespace data {
     function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;
     function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;
 
@@ -123,7 +123,7 @@ declare module SupCore {
       constructor(pub: any[]);
     }
 
-    module base {
+    namespace base {
       interface Rule {
         mutable?: boolean;
         type: string;
