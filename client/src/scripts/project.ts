@@ -853,12 +853,16 @@ function createToolTabElement(toolName: string, tool: any) {
   iconElt.src = `/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   tabElt.appendChild(iconElt);
 
-  let tabLabel = document.createElement("span");
+  let tabLabel = document.createElement("div");
   tabLabel.classList.add("label");
   tabElt.appendChild(tabLabel);
 
+  let tabLabelName = document.createElement("div");
+  tabLabelName.classList.add("name");
+  tabLabel.appendChild(tabLabelName);
+
   if (toolName !== "main") {
-    tabLabel.textContent = tool.title.en;
+    tabLabelName.textContent = tool.title.en;
 
     let closeButton = document.createElement("button");
     closeButton.classList.add("close");
