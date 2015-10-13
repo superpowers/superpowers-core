@@ -2,11 +2,11 @@
 {
   "files.exclude": {
     ".vscode": true,
-    "/builds/**": true,
-    "/typings/**": true
+    "builds/**": true,
+    "typings/**": true
   },
   "search.exclude": {
     "**/node_modules": true,
-    "/projects/**": true,
+    "projects/**": true
   }
 }
