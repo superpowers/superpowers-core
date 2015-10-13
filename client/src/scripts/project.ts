@@ -877,7 +877,10 @@ function onTabActivate(tabElement: any) {
   let activeTab = ui.tabStrip.tabsRoot.querySelector(".active");
   if (activeTab != null) {
     activeTab.classList.remove("active");
-    (<HTMLIFrameElement>ui.panesElt.querySelector("iframe.active")).classList.remove("active");
+    
+    let activeIframe = (<HTMLIFrameElement>ui.panesElt.querySelector("iframe.active"));
+    activeIframe.contentWindow.postMessage({ type: "deactivate" }, (<any>window.location).origin);
+    activeIframe.classList.remove("active");
   }
 
   tabElement.classList.add("active");
