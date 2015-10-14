@@ -1,0 +1,58 @@
+table.properties
+  width 100%
+  border-collapse collapse
+  font-size 12px
+
+  th, td { border: 1px solid #ccc; }
+
+  th
+    text-align left
+    white-space nowrap
+    overflow-x hidden
+    text-overflow ellipsis
+    font-weight normal
+    background #eee
+    padding 0 0.5em
+  th > div
+    display flex
+    align-items center
+  th > div > div
+    flex 1
+    white-space nowrap
+    overflow-x hidden
+    text-overflow ellipsis
+    max-width 100px
+  th:only-child
+    background #777
+    color #eee
+    padding 0.5em
+
+  td input, td select, td textarea
+    width 100%
+
+  td input, td select, td textarea
+    margin 0
+    padding 0.5em 0.25em
+    border none
+
+  td select { padding: 0.25em 0; }
+
+  td input[type=checkbox]
+    width auto
+    margin 0.5em
+    cursor pointer
+
+  td input.color
+    font-family "Consolas", monospace
+  
+  td input[type=color]
+    padding 0
+
+  td .inputs
+    display flex
+    align-items center
+    > input:not([type=checkbox]) { flex: 1; }
+    > input:not(:last-of-type) { border-right: 1px solid #ccc; }
+
+  td .list
+    input:not(:last-of-type) { border-bottom: 1px solid #ccc; }

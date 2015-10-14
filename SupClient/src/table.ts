@@ -125,8 +125,6 @@ export function appendColorField(parent: HTMLElement, value: string) {
   textField.classList.add("color");
 
   let pickerField = document.createElement("input");
-  pickerField.style.padding = "0";
-  pickerField.style.alignSelf = "center";
   pickerField.type = "color";
   pickerField.value = `#${value}`;
   colorParent.appendChild(pickerField);
