@@ -72,7 +72,7 @@ export default function project(projectId: string) {
   }
 
   // Entries tree view
-  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view"), onEntryDrop);
+  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view"), { dropCallback: onEntryDrop });
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
 

@@ -13,7 +13,7 @@ export default function hub() {
   if (port.length === 0) port = "80";
   document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
 
-  ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"), onProjectsTreeViewDrop);
+  ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"));
   ui.projectsTreeView.on("activate", onProjectActivate);
 
   document.querySelector(".projects-buttons .new-project").addEventListener("click", onNewProjectClick);
@@ -90,8 +90,6 @@ function createProjectElement(manifest: SupCore.data.ProjectItem) {
 
   return liElt;
 }
-
-function onProjectsTreeViewDrop() { return false; }
 
 function onProjectActivate() {
   window.location.search = `?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
