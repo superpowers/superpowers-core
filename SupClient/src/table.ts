@@ -44,9 +44,9 @@ export function appendRow(parentTableBody: HTMLTableSectionElement, name: string
   return { row, labelCell, valueCell, checkbox };
 }
 
-export function appendHeader(parent: HTMLElement, text: string) {
+export function appendHeader(parentTableBody: HTMLTableSectionElement, text: string) {
   let headerRow = document.createElement("tr");
-  parent.appendChild(headerRow);
+  parentTableBody.appendChild(headerRow);
 
   let headerTh = document.createElement("th");
   headerTh.textContent = text;

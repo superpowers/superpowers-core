@@ -41,7 +41,7 @@ declare namespace SupClient {
 
     function createTable(parent?: HTMLElement): { table: HTMLTableElement; tbody: HTMLTableSectionElement; };
     function appendRow(parentTableBody: HTMLTableSectionElement, name: string, options?: { checkbox?: boolean; title?: string; }): RowParts;
-    function appendHeader(parentCell: HTMLElement, text: string): HTMLTableRowElement;
+    function appendHeader(parentTableBody: HTMLTableSectionElement, text: string): HTMLTableRowElement;
     function appendTextField(parentCell: HTMLElement, value: string): HTMLInputElement;
     function appendTextAreaField(parent: HTMLElement, value: string): HTMLTextAreaElement;
     function appendNumberField(parentCell: HTMLElement, value: number|string, min?: number|string, max?: number|string, step?: number|string): HTMLInputElement;
