@@ -10,20 +10,16 @@ gulp.task("jade", function() {
 var stylus = require("gulp-stylus");
 var nib = require("nib");
 gulp.task("stylus", function() {
-  return gulp.src("./src/index.styl").pipe(stylus({use: [ nib() ], errors: true})).pipe(gulp.dest("./public"));
+  return gulp.src("./src/index.styl").pipe(stylus({ use: [ nib() ], errors: true })).pipe(gulp.dest("./public"));
 });
 
 // TypeScript
 var ts = require("gulp-typescript");
+var tsProject = ts.createProject("src/tsconfig.json");
+
 gulp.task("typescript", function() {
-  var tsResult = gulp.src([ "**/*.ts", "!node_modules/**" ]).pipe(ts({
-    typescript: require("typescript"),
-    declarationFiles: false,
-    noImplicitAny: true,
-    module: "commonjs",
-    target: "ES5"
-  }));
-  return tsResult.js.pipe(gulp.dest("./"));
+  var tsResult = tsProject.src().pipe(ts(tsProject));
+  return tsResult.js.pipe(gulp.dest("src/"));
 });
 
 // Browserify
