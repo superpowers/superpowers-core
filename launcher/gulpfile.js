@@ -1,5 +1,8 @@
 var gulp = require("gulp");
 
+// Copy
+gulp.task("copy", function () { return gulp.src("../public/fonts/Roboto/*").pipe(gulp.dest("./public/fonts/Roboto")); });
+
 // Jade
 var jade = require("gulp-jade");
 gulp.task("jade", function() {
@@ -32,4 +35,4 @@ gulp.task("browserify", [ "typescript" ], function() {
 });
 
 // All
-gulp.task("default", [ "jade", "stylus", "typescript", "browserify" ]);
+gulp.task("default", [ "copy", "jade", "stylus", "typescript", "browserify" ]);
