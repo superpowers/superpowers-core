@@ -18,7 +18,8 @@ import ProjectHub from "./ProjectHub";
 (<any>global).SupAPI = SupAPI;
 (<any>global).SupCore = SupCore;
 
-SupCore.log("Server starting...");
+let version = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" })).version;
+SupCore.log(`Server starting on version ${version}...`);
 
 process.on("uncaughtException", (err: Error) => {
   SupCore.log(`The server crashed.\n${(<any>err).stack}`);
