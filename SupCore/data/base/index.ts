@@ -13,7 +13,9 @@ interface Rule {
 
   // Number
   min?: number;
+  minExcluded?: number;
   max?: number;
+  maxExcluded?: number;
 
   // String
   length?: number;
@@ -53,7 +55,9 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       if (ruleType === "integer" && (value % 1) !== 0) return { message: "Expected integer" };
 
       if (rule.min != null && value < rule.min) return { message: `Value (${value}) is less than minimum value (${rule.min})` };
+      if (rule.minExcluded != null && value <= rule.minExcluded) return { message: `Value (${value}) is less than minimum value (${rule.min})` };
       if (rule.max != null && value > rule.max) return { message: `Value (${value}) is greater than maximum value (${rule.max})` };
+      if (rule.maxExcluded != null && value >= rule.maxExcluded) return { message: `Value (${value}) is greater than maximum value (${rule.max})` };
       break;
     }
 

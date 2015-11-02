@@ -130,7 +130,9 @@ declare namespace SupCore {
 
         // Number
         min?: number;
+        minExcluded?: number;
         max?: number;
+        maxExcluded?: number;
 
         // String
         length?: number;
@@ -222,11 +224,12 @@ declare namespace SupCore {
         releaseAll(id: string): void;
       }
 
+      interface Schema { [key: string]: base.Rule; }
       class Asset extends Hash {
         id: string;
         serverData: ProjectServerData;
 
-        constructor(id: string, pub: any, schema: any, serverData: ProjectServerData);
+        constructor(id: string, pub: any, schema: Schema, serverData: ProjectServerData);
         // OVERRIDE: Make sure to call super(callback). Called when creating a new asset
         init(options: any, callback: Function): void;
 
@@ -252,7 +255,7 @@ declare namespace SupCore {
       class Resource extends Hash {
         serverData: ProjectServerData;
 
-        constructor(pub: any, schema: any, serverData: ProjectServerData);
+        constructor(pub: any, schema: Schema, serverData: ProjectServerData);
 
         // OVERRIDE: Make sure to call super(callback). Called when creating a new resource
         init(callback: Function): void;

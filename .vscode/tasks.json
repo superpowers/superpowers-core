@@ -96,6 +96,20 @@
       ]
     },
     {
+      "taskName": "gameSettings",
+      "args": [
+        "--cwd",
+        "./plugins/sparklinlabs/gameSettings/"
+      ]
+    },
+    {
+      "taskName": "home",
+      "args": [
+        "--cwd",
+        "./plugins/sparklinlabs/home/"
+      ]
+    },
+    {
       "taskName": "light",
       "args": [
         "--cwd",
@@ -107,6 +121,20 @@
       "args": [
         "--cwd",
         "./plugins/sparklinlabs/model/"
+      ]
+    },
+    {
+      "taskName": "p2js",
+      "args": [
+        "--cwd",
+        "./plugins/sparklinlabs/p2js/"
+      ]
+    },
+    {
+      "taskName": "projectSettings",
+      "args": [
+        "--cwd",
+        "./plugins/sparklinlabs/projectSettings/"
       ]
     },
     {
