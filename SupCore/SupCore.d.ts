@@ -1,5 +1,5 @@
-///<reference path="../typings/tsd.d.ts"/>
-///<reference path="./ProjectServer.d.ts"/>
+/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="./ProjectServer.d.ts" />
 
 declare namespace SupCore {
   function log(message: string): void;

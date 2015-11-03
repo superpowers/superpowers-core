@@ -1,4 +1,4 @@
-///<reference path="../typings/tsd.d.ts"/>
+/// <reference path="../typings/tsd.d.ts" />
 
 import * as data from "./data/index";
 export { data };
