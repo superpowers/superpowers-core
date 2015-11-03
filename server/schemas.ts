@@ -19,21 +19,10 @@ let projectManifest = {
   properties: {
     id: { type: "string", minLength: 4, maxLength: 4 },
     name: { type: "string", minLength: 1, maxLength: 80 },
-    description: { type: "string", maxLength: 300 }
+    description: { type: "string", maxLength: 300 },
+    formatVersion: { type: "integer", min: 0 }
   },
   required: [ "id", "name", "description" ]
-};
-
-// Project members
-let projectMembers = {
-  type: "array",
-  items: {
-    type: "object",
-    properties: {
-      id: { type: "string" },
-      cachedUsername: { type: "string" }
-    }
-  }
 };
 
 // Project entries
@@ -58,7 +47,7 @@ let projectEntries = {
   items: { $ref: "#/definitions/projectEntry" }
 };
 
-let schemas: { [name: string]: any } = { config, projectManifest, projectMembers, projectEntries };
+let schemas: { [name: string]: any } = { config, projectManifest, projectEntries };
 
 function validate(obj: any, schemaName: string) {
   let schema = schemas[schemaName];

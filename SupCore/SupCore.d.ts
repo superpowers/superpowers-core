@@ -41,16 +41,9 @@ declare namespace SupCore {
     }
     class Manifest extends base.Hash {
       pub: ProjectManifest;
+      migratedFromFormatVersion: number;
 
       constructor(pub: ProjectManifest);
-    }
-    class Internals extends base.Hash {
-      constructor(pub: any);
-      incrementNextEntryId(): void;
-      incrementNextBuildId(): void;
-    }
-    class Members extends base.ListById {
-      constructor(pub: any[]);
     }
     class Diagnostics extends base.ListById {
       constructor(pub: any[]);

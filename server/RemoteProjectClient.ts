@@ -22,9 +22,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     // Manifest
     this.socket.on("setProperty:manifest", this._onSetManifestProperty);
 
-    // Members
-    this.socket.on("remove:members", this._onRemoveMember);
-
     // Entries
     this.socket.on("add:entries", this._onAddEntry);
     this.socket.on("duplicate:entries", this._onDuplicateEntry);
@@ -60,19 +57,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  // Members
-
-  _onRemoveMember = (id: string, callback: (err: string) => any) => {
-    if (!this.errorIfCant("editMembers", callback)) return;
-
-    this.server.data.members.remove(id, (err) => {
-      if (err != null) { callback(err); return; }
-
-      this.server.io.in("sub:members").emit("remove:members", id);
-      callback(null);
-    });
-  };
-
   // Entries
 
   _onAddEntry = (name: string, type: string, options: any, callback: (err: string, newId?: string) => any) => {
@@ -87,8 +71,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
       if (err != null) { callback(err, null); return; }
-
-      this.server.data.internals.incrementNextEntryId();
 
       let onEntryCreated = () => {
         this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
@@ -126,8 +108,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
       if (err != null) { callback(err); return; }
-
-      this.server.data.internals.incrementNextEntryId();
 
       let newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
 
@@ -170,6 +150,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (!this.errorIfCant("editAssets", callback)) return;
 
     let entry = this.server.data.entries.byId[id];
+    let trashedAssetFolder = this.server.data.entries.getStoragePathFromId(id);
     let asset: SupCore.data.base.Asset = null;
 
     let doTrashEntry = () => {
@@ -233,7 +214,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         // from the tree so that nobody can subscribe to it after it's been destroyed
         asset.destroy(() => {
           this.server.data.assets.releaseAll(id);
-          callback(null);
+          this.server.moveAssetFolderToTrash(trashedAssetFolder, () => { callback(null); });
         });
       });
     };
@@ -382,8 +363,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     // this.server.log("Building project...");
 
-    let buildId = this.server.data.internals.pub.nextBuildId;
-    this.server.data.internals.incrementNextBuildId();
+    let buildId = this.server.nextBuildId;
+    this.server.nextBuildId++;
 
     let buildPath = `${this.server.buildsPath}/${buildId}`;
 
@@ -444,7 +425,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
             }
 
             files = files.concat(buildFiles.files);
-            callback(null, buildId, files);
+            callback(null, buildId.toString(), files);
 
             // Remove an old build to avoid using too much disk space
             let buildToDeleteId = buildId - config.maxRecentBuilds;
@@ -464,23 +445,14 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   _onVacuumProject = (callback: (err: string, deletedCount?: number) => any) => {
     if (!this.errorIfCant("vacuumProject", callback)) return;
 
-    let assetsPath = path.join(this.server.projectPath, "assets");
+    const trashedAssetsPath = path.join(this.server.projectPath, "trashedAssets");
 
-    fs.readdir(assetsPath, (err, assetFolders) => {
+    fs.readdir(trashedAssetsPath, (err, trashedAssetFolders) => {
       if (err != null) throw err;
 
-      let assetFolderRegex = /^[0-9]+-.+$/;
-      let removedAssetPaths: string[] = [];
-      for (let assetFolder of assetFolders) {
-        if (!assetFolderRegex.test(assetFolder)) continue;
-
-        let assetId = (<string>assetFolder).substring(0, (<string>assetFolder).indexOf("-"));
-        if (this.server.data.entries.byId[assetId] == null) removedAssetPaths.push(assetFolder);
-      }
-
       let removedFolderCount = 0;
-      async.each(removedAssetPaths, (removedAssetPath, cb) => {
-        let folderPath = path.join(assetsPath, removedAssetPath);
+      async.each(trashedAssetFolders, (trashedAssetFolder, cb) => {
+        let folderPath = path.join(trashedAssetsPath, trashedAssetFolder);
         rimraf(folderPath, (err) => {
           if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(<any>err).stack}`);
           else removedFolderCount++;

@@ -22,11 +22,10 @@ export default class RemoteHubClient extends BaseRemoteClient {
   can(action: string) { return true; }
 
   _onAddProject = (name: string, description: string, callback: (err: string, projectId?: string) => any) => {
-    if (! this.errorIfCant("editProjects", callback)) return;
+    if (!this.errorIfCant("editProjects", callback)) return;
 
     let manifest: SupCore.data.ProjectItem = { id: null, name, description };
 
-    // TODO: use lodash 3.0 with string methods when it's released
     let projectFolder = manifest.name.toLowerCase().slice(0, 16).replace(/[^a-z0-9]/g, "-");
     let originalProjectFolder = projectFolder;
     let projectFolderNumber = 1;
@@ -43,7 +42,9 @@ export default class RemoteHubClient extends BaseRemoteClient {
 
     let projectPath = path.join(paths.projects, projectFolder);
     fs.mkdirSync(path.join(projectPath, "assets"));
+    fs.mkdirSync(path.join(projectPath, "trashedAssets"));
     fs.mkdirSync(path.join(projectPath, "rooms"));
+    fs.mkdirSync(path.join(projectPath, "resources"));
 
     this.server.data.projects.add(manifest, null, (err: string, actualIndex: number) => {
       if (err != null) { callback(err); return; }
@@ -53,17 +54,6 @@ export default class RemoteHubClient extends BaseRemoteClient {
         fs.writeFile(path.join(projectPath, "manifest.json"), manifestJSON, { encoding: "utf8" }, callback);
       };
 
-      let writeInternals = (callback: (err: NodeJS.ErrnoException) => any) => {
-        let internalsJSON = JSON.stringify({ nextBuildId: 0, nextEntryId: 0 }, null, 2);
-        fs.writeFile(path.join(projectPath, "internals.json"), internalsJSON, { encoding: "utf8" }, callback);
-      };
-
-      let writeMembers = (callback: (err: NodeJS.ErrnoException) => any) => {
-        // TODO: Add the project creator
-        let membersJSON = JSON.stringify([], null, 2);
-        fs.writeFile(path.join(projectPath, "members.json"), membersJSON, { encoding: "utf8" }, callback);
-      };
-
       let writeEntries = (callback: (err: NodeJS.ErrnoException) => any) => {
         let entriesJSON = JSON.stringify([], null, 2);
         fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
@@ -71,7 +61,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
 
       let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, manifest, callback); };
 
-      async.series([ writeManifest, writeInternals, writeMembers, writeEntries, loadProject ], (err) => {
+      async.series([ writeManifest, writeEntries, loadProject ], (err) => {
         if (err != null) { SupCore.log(`Error while creating project:\n${err}`); return; }
 
         this.server.io.in("sub:projects").emit("add:projects", manifest, actualIndex);

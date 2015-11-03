@@ -6,6 +6,7 @@ import * as paths from "./paths";
 import authMiddleware from "./authenticate";
 import RemoteProjectClient from "./RemoteProjectClient";
 import * as schemas from "./schemas";
+import migrateProject from "./migrateProject";
 
 const saveDelay = 60;
 
@@ -15,8 +16,6 @@ export default class ProjectServer {
 
   data: {
     manifest: SupCore.data.Manifest;
-    internals: SupCore.data.Internals;
-    members: SupCore.data.Members;
     entries: SupCore.data.Entries;
 
     assets: SupCore.data.Assets;
@@ -25,6 +24,7 @@ export default class ProjectServer {
   };
   projectPath: string;
   buildsPath: string;
+  nextBuildId: number;
 
   scheduledSaveCallbacks: { [name: string]: { lastTime: number, timeoutId: NodeJS.Timer, callback: (callback: (err: Error) => any) => any } } = {};
   nextClientId = 0;
@@ -35,8 +35,6 @@ export default class ProjectServer {
 
     this.data = {
       manifest: null,
-      internals: null,
-      members: null,
       entries: null,
 
       assets: new SupCore.data.Assets(this),
@@ -48,21 +46,12 @@ export default class ProjectServer {
     this.data.rooms.on("itemLoad", this._onRoomLoaded);
     this.data.resources.on("itemLoad", this._onResourceLoaded);
 
-    let migrate = (callback: (err: Error) => any) => {
-      // Old projects didn't have a rooms or resources folder
-      // Delete ArcadePhysics2DSettingsResource, removed in Superpowers v0.13
-      async.series([
-        (cb: Function) => { fs.mkdir(path.join(this.projectPath, "rooms"), (err) => { cb(); }); },
-        (cb: Function) => { fs.mkdir(path.join(this.projectPath, "resources"), (err) => { cb(); }); },
-        (cb: Function) => { fs.unlink(path.join(this.projectPath, "resources/arcadePhysics2DSettings/resource.json"), (err) => { cb(); }); },
-        (cb: Function) => { fs.rmdir(path.join(this.projectPath, "resources/arcadePhysics2DSettings"), (err) => { cb(); }); }
-      ], callback);
-    };
-
     let loadManifest = (callback: (err: Error) => any) => {
       let done = (data: any) => {
-        this.data.manifest = new SupCore.data.Manifest(data);
+        try { this.data.manifest = new SupCore.data.Manifest(data); }
+        catch(err) { callback(err); return; }
         this.data.manifest.on("change", this._onManifestChanged);
+        if (this.data.manifest.migratedFromFormatVersion != null) this.data.manifest.emit("change");
 
         this.buildsPath = path.join(paths.builds, this.data.manifest.pub.id);
         callback(null);
@@ -86,69 +75,20 @@ export default class ProjectServer {
         done(manifestData);
       });
     };
+    
+    let setupNextBuildId = (callback: (err: Error) => any) => {
+      fs.readdir(this.buildsPath, (err, entryIds) => {
+        if (err != null && err.code !== "ENOENT") { callback(err); return; }
 
-    let loadInternals = (callback: (err: Error) => any) => {
-      let internalsData: any = null;
+        this.nextBuildId = 0;
 
-      async.series([
-
-        (cb: (err: Error) => any) => {
-          fs.readFile(path.join(this.projectPath, "internals.json"), { encoding: "utf8" }, (err, internalsJSON) => {
-            if (err != null) {
-              if (err.code !== "ENOENT") { cb(err); return; }
-              internalsData = { nextBuildId: 0, nextEntryId: null };
-            } else {
-              try { internalsData = JSON.parse(internalsJSON); }
-              catch(err) { cb(err); return; }
-            }
-
-            cb(null);
-          });
-        },
-
-        (cb: (err: Error) => any) => {
-          fs.readdir(this.buildsPath, (err, entryIds) => {
-            if (err != null && err.code !== "ENOENT") { cb(err); return; }
-
-            if (entryIds != null) {
-              for (let entryId of entryIds) {
-                let entryBuildId = parseInt(entryId);
-                if (isNaN(entryBuildId)) continue;
-                internalsData.nextBuildId = Math.max(entryBuildId + 1, internalsData.nextBuildId);
-              }
-            }
-
-            cb(null);
-          });
-        },
-
-      ], (err) => {
-        if (err != null) { callback(err); return; }
-
-        this.data.internals = new SupCore.data.Internals(internalsData);
-        this.data.internals.on("change", this._onInternalsChanged);
-
-        callback(null);
-      });
-    };
-
-    let loadMembers = (callback: (err: Error) => any) => {
-      fs.readFile(path.join(this.projectPath, "members.json"), { encoding: "utf8" }, (err, membersJSON) => {
-        let membersData: any;
-
-        if (err != null) {
-          if (err.code !== "ENOENT") { callback(err); return; }
-          membersData = [];
-        } else {
-          try { membersData = JSON.parse(membersJSON); }
-          catch(err) { callback(err); return; }
+        if (entryIds != null) {
+          for (let entryId of entryIds) {
+            let entryBuildId = parseInt(entryId);
+            if (isNaN(entryBuildId)) continue;
+            this.nextBuildId = Math.max(entryBuildId + 1, this.nextBuildId);
+          }
         }
-
-        try { schemas.validate(membersData, "projectMembers"); }
-        catch(err) { callback(err); return; }
-
-        this.data.members = new SupCore.data.Members(membersData);
-        this.data.members.on("change", this._onMembersChanged);
 
         callback(null);
       });
@@ -165,28 +105,29 @@ export default class ProjectServer {
         try { schemas.validate(entriesData, "projectEntries"); }
         catch(err) { callback(err); return; }
 
-        this.data.entries = new SupCore.data.Entries(entriesData, this.data.internals.pub.nextEntryId);
+        this.data.entries = new SupCore.data.Entries(entriesData);
         this.data.entries.on("change", this._onEntriesChanged);
-
-        // nextEntryId might be null if internals.json could be found
-        if (this.data.internals.pub.nextEntryId == null) {
-          this.data.internals.pub.nextEntryId = this.data.entries.nextId;
-        }
 
         callback(null);
       });
     };
 
+    // migrate() is called after loadEntries()
+    // because some migration code requires the entries to be loaded
+    let migrate = (callback: (err: Error) => any) => {
+      migrateProject(this, callback);
+    };
+
     let serve = (callback: (err: Error) => any) => {
-      // Setup the project"s namespace
+      // Setup the project's namespace
       this.io = globalIO.of(`/project:${this.data.manifest.pub.id}`);
       this.io.use(authMiddleware);
       this.io.on("connection", this._onAddSocket);
       callback(null);
     };
 
-    // prepareAssets() must happen after serve()
-    // since diagnostics rely on this.io being setup
+    // prepareAssets() is called after serve()
+    // because diagnostics rely on this.io being setup
     let prepareAssets = (callback: (err: Error) => any) => {
       async.each(Object.keys(this.data.entries.byId), (assetId, cb) => {
         // Ignore folders
@@ -202,7 +143,7 @@ export default class ProjectServer {
       }, callback);
     };
 
-    async.series([ migrate, loadManifest, loadMembers, loadInternals, loadEntries, serve, prepareAssets ], callback);
+    async.series([ loadManifest, setupNextBuildId, loadEntries, migrate, serve, prepareAssets ], callback);
   }
 
   log(message: string) {
@@ -223,6 +164,25 @@ export default class ProjectServer {
     this.scheduledSaveCallbacks = {};
 
     async.parallel(saveCallbacks, callback);
+  }
+  
+  moveAssetFolderToTrash(trashedAssetFolder: string, callback: (err: Error) => any) {
+
+    const assetsPath = path.join(this.projectPath, "assets");
+    const trashedAssetsPath = path.join(this.projectPath, "trashedAssets");
+    let folderPath = path.join(assetsPath, trashedAssetFolder);
+    let folderNumber = 0;
+
+    let renameSuccessful = false;
+    async.until(() => renameSuccessful, (cb) => {
+      let newFolderPath = path.join(trashedAssetsPath, trashedAssetFolder);
+      if (folderNumber > 0) newFolderPath = `${newFolderPath} (${folderNumber})`;
+      fs.rename(folderPath, newFolderPath, (err) => {
+        if (err != null) folderNumber++;
+        else renameSuccessful = true;
+        cb();
+      });
+    }, callback);
   }
 
   removeRemoteClient(socketId: string) {
@@ -301,23 +261,11 @@ export default class ProjectServer {
   }
 
   _onManifestChanged = () => { this._scheduleSave(saveDelay, "manifest", this._saveManifest); };
-  _onInternalsChanged = () => { this._scheduleSave(saveDelay, "internals", this._saveInternals); };
-  _onMembersChanged = () => { this._scheduleSave(saveDelay, "members", this._saveMembers); };
   _onEntriesChanged = () => { this._scheduleSave(saveDelay, "entries", this._saveEntries); };
 
   _saveManifest = (callback: (err: Error) => any) => {
     let manifestJSON = JSON.stringify(this.data.manifest.pub, null, 2);
     fs.writeFile(path.join(this.projectPath, "manifest.json"), manifestJSON, callback);
-  };
-
-  _saveInternals = (callback: (err: Error) => any) => {
-    let internalsJSON = JSON.stringify(this.data.internals.pub, null, 2);
-    fs.writeFile(path.join(this.projectPath, "internals.json"), internalsJSON, callback);
-  };
-
-  _saveMembers = (callback: (err: Error) => any) => {
-    let membersJSON = JSON.stringify(this.data.members.pub, null, 2);
-    fs.writeFile(path.join(this.projectPath, "members.json"), membersJSON, callback);
   };
 
   _saveEntries = (callback: (err: Error) => any) => {

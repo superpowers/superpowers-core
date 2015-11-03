@@ -11,6 +11,7 @@ syntax: regexp
 ^bin/
 ^plugins/
 ^projects/
+^projects-tmp/
 ^builds/
 ^public/
 ^launcher/public/
