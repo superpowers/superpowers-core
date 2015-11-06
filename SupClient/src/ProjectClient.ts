@@ -23,11 +23,11 @@ export default class ProjectClient {
   entries: SupCore.data.Entries;
   entriesSubscribers: EntriesSubscriber[] = [];
 
-  assetsById: {[assetId: string]: any} = {};
-  subscribersByAssetId: {[assetId: string]: AssetSubscriber[]} = {};
+  assetsById: { [assetId: string]: SupCore.data.base.Asset } = {};
+  subscribersByAssetId: { [assetId: string]: AssetSubscriber[] } = {};
 
-  resourcesById: {[resourceId: string]: any} = {};
-  subscribersByResourceId: {[assetId: string]: ResourceSubscriber[]} = {};
+  resourcesById: { [resourceId: string]: any} = {};
+  subscribersByResourceId: { [assetId: string]: ResourceSubscriber[] } = {};
 
   _keepEntriesSubscription: boolean;
 
@@ -100,6 +100,7 @@ export default class ProjectClient {
     subscribers.splice(index, 1);
     if (subscribers.length === 0) {
       delete this.subscribersByAssetId[assetId];
+      this.assetsById[assetId].client_unload();
       delete this.assetsById[assetId];
       this.socket.emit("unsub", "assets", assetId);
     }
@@ -145,7 +146,10 @@ export default class ProjectClient {
     if (subscribers == null) return;
 
     let asset: SupCore.data.base.Asset = null;
-    if (assetData != null) asset = this.assetsById[assetId] = new SupCore.data.assetClasses[assetType](assetId, assetData);
+    if (assetData != null) {
+      asset = this.assetsById[assetId] = new SupCore.data.assetClasses[assetType](assetId, assetData);
+      asset.client_load();
+    }
 
     for (let subscriber of subscribers) { subscriber.onAssetReceived(assetId, asset); }
   }
@@ -155,7 +159,7 @@ export default class ProjectClient {
     if (subscribers == null) return;
 
     let asset = this.assetsById[assetId];
-    asset.__proto__[`client_${command}`].apply(asset, args);
+    Object.getPrototypeOf(asset)[`client_${command}`].apply(asset, args);
 
     for (let subscriber of subscribers) { subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args)); }
   }
@@ -166,6 +170,7 @@ export default class ProjectClient {
 
     for (let subscriber of subscribers) { subscriber.onAssetTrashed(assetId); }
 
+    this.assetsById[assetId].client_unload();
     delete this.assetsById[assetId];
     delete this.subscribersByAssetId[assetId];
   }
@@ -190,7 +195,7 @@ export default class ProjectClient {
     if (subscribers == null) return;
 
     let resource = this.resourcesById[resourceId];
-    resource.__proto__[`client_${command}`].apply(resource, args);
+    Object.getPrototypeOf(resource)[`client_${command}`].apply(resource, args);
 
     for (let subscriber of subscribers) { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); }
   }

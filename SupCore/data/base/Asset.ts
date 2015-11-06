@@ -33,8 +33,10 @@ export default class Asset extends Hash {
       this.emit("load");
     });
   }
+  client_load() {}
 
   unload() { this.removeAllListeners(); }
+  client_unload() {}
 
   save(assetPath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);

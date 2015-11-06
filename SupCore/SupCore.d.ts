@@ -240,8 +240,12 @@ declare namespace SupCore {
         destroy(callback: Function): void;
 
         load(assetPath: string): void;
+        client_load(): void;
         unload(): void;
+        client_unload(): void;
+
         save(assetPath: string, callback: (err: Error) => any): void;
+
         server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any): void;
       }
 
