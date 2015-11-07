@@ -1,4 +1,6 @@
 export default function() {
+  let isBackspaceDown = false;
+  
   document.addEventListener("keydown", (event) => {
     if (document.querySelector(".dialog") != null) return;
 
@@ -13,6 +15,8 @@ export default function() {
     if (localStorage.getItem("superpowers-dev-mode") != null && window.parent != null) {
       window.onerror = () => { window.parent.postMessage({ type: "error" }, origin); };
     }
+    
+    if (event.keyCode === 8 /* Backspace */) isBackspaceDown = true;
 
     if (event.keyCode === 78 && (event.ctrlKey || event.metaKey)) { // CTRL-N
       event.preventDefault();
@@ -44,5 +48,18 @@ export default function() {
     if (event.keyCode === 123 && (<any>window).nwDispatcher != null) { // F12
       event.preventDefault(); sendMessage("devtools");
     }
+  });
+  
+  document.addEventListener("keyup", (event) => {
+    if (event.keyCode === 8 /* Backspace */) isBackspaceDown = false;
+  });
+  
+  window.addEventListener("beforeunload", (event) => {
+    if (isBackspaceDown) {
+      isBackspaceDown = false;
+      event.returnValue = "You pressed backspace.";
+      return "You pressed backspace.";
+    }
+    return null;
   });
 }
