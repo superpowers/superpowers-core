@@ -92,7 +92,13 @@ function createProjectElement(manifest: SupCore.data.ProjectItem) {
 }
 
 function onProjectActivate() {
-  window.location.search = `?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
+  let search = `?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
+
+  // When in NW.js, use location.replace to avoid creating an history item
+  // which could lead to accidentally navigating back by pressing Backspace
+  let nwDispatcher = (<any>window).nwDispatcher;
+  if (nwDispatcher != null) window.location.replace(`/${search}`);
+  else window.location.search = search;
 }
 
 function onNewProjectClick() {
