@@ -6,7 +6,7 @@ gulp.task("copy", function () { return gulp.src("../public/fonts/Roboto/*").pipe
 // Jade
 var jade = require("gulp-jade");
 gulp.task("jade", function() {
-  return gulp.src('./src/index.jade').pipe(jade()).pipe(gulp.dest('./public'));
+  return gulp.src([ "./src/index.jade", "./src/connectionStatus.jade" ]).pipe(jade()).pipe(gulp.dest("./public"));
 });
 
 // Stylus

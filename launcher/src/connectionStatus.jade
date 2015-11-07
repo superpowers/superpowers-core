@@ -1,0 +1,37 @@
+doctype html
+html
+  head
+    title Superpowers
+    meta(charset="utf8")
+    link(rel="stylesheet",href="index.css")
+    style.
+      body {
+        display: flex;
+        flex-flow: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .top {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 25px;
+        -webkit-app-region: drag;
+      }
+      .status { text-align: center; font-size: 2em; padding: 1em; }
+  body
+    .status
+    button.reload(hidden) Try again
+
+    .top
+
+    .controls
+      button.minimize
+      button.close
+
+    script.
+      var gui = window.nwDispatcher.requireNwGui();
+      var nwWindow = gui.Window.get();
+      document.querySelector(".controls .minimize").addEventListener("click", function() { nwWindow.minimize(); });
+      document.querySelector(".controls .close").addEventListener("click", function() { nwWindow.close(false); });
