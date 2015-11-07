@@ -96,8 +96,7 @@ function onProjectActivate() {
 
   // When in NW.js, use location.replace to avoid creating an history item
   // which could lead to accidentally navigating back by pressing Backspace
-  let nwDispatcher = (<any>window).nwDispatcher;
-  if (nwDispatcher != null) window.location.replace(`/${search}`);
+  if ((<any>window).nwDispatcher != null) window.location.replace(`/${search}`);
   else window.location.search = search;
 }
 
