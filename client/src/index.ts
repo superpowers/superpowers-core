@@ -1,5 +1,5 @@
-import hub from "./scripts/hub";
-import project from "./scripts/project";
+import hub from "./hub";
+import project from "./project";
 
 let qs = require("querystring").parse(window.location.search.slice(1));
 
