@@ -63,6 +63,7 @@ export default function project(projectId: string) {
   new PerfectResize(document.querySelector(".project .sidebar"), "left");
 
   // Project info
+  document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { window.location.href = "/"; });
   document.querySelector(".project-buttons .run").addEventListener("click", () => { runGame(); });
   document.querySelector(".project-buttons .export").addEventListener("click", () => { exportGame(); });
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runGame({ debug: true }); });

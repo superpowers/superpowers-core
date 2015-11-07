@@ -30,15 +30,14 @@
 
 .project-name
   font-weight bold
-  padding 1em
-  padding-right 0
+  padding 1em 0
   -webkit-app-region drag
   flex 1
   text-overflow ellipsis
   white-space nowrap
   overflow-x hidden
 
-.project-buttons
+.project-buttons, .project-icon
   margin 0 0.5em
 
   button
@@ -49,12 +48,10 @@
     width 30px
     height 30px
 
-  .export
-    background-image url(images/project/export.svg)
-  .debug
-    background-image url(images/project/debug.svg)
-  .run
-    background-image url(images/project/run.svg)
+  .export { background-image: url(images/project/export.svg); }
+  .debug { background-image: url(images/project/debug.svg); }
+  .run { background-image: url(images/project/run.svg); }
+  .go-to-hub { background-image: url(images/project/go-to-hub.svg); }
 
 .entries-buttons
   display flex
@@ -214,7 +211,7 @@
 
   .tabs-bar
     flex 1
-    @import "tabsBar"
+    @import "../styles/tabsBar"
 
   .panes
     flex 1
