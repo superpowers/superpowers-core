@@ -38,12 +38,23 @@ fs.readdirSync(rootPluginsPath).forEach(function(pluginAuthor) {
   });
 });
 
+// Filter
+if (process.argv.length > 2) {
+  var filter = process.argv[2];
+  var oldPathCount = buildPaths.length;
+  buildPaths = buildPaths.filter(function(buildPath) { return path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1; });
+  log("Rebuilding \"" + filter + "\", leaving out " + (oldPathCount - buildPaths.length) + " paths");
+}
+
 // Build
 var execSuffix = process.platform == "win32";
 var errors = [];
 
+log("Build paths: " + buildPaths.map(function(buildPath) { return path.sep + path.relative(rootPath, buildPath); }).join(", "));
+
+var progress = 0;
 async.eachSeries(buildPaths, function(buildPath, callback) {
-  log("Building " + path.sep + path.relative(rootPath, buildPath));
+  log("Building " + path.sep + path.relative(rootPath, buildPath) + " (" + (++progress) + "/" + buildPaths.length + ")");
 
   var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
 
