@@ -18,7 +18,7 @@ var browserify = require("browserify");
 var source = require("vinyl-source-stream");
 gulp.task("browserify", [ "typescript" ], function() {
   var bundler = browserify("./index.js", { standalone: "SupCore" });
-  function bundle() { return bundler.bundle().pipe(source("SupCore.js")).pipe(gulp.dest("../public/core")); };
+  function bundle() { return bundler.bundle().pipe(source("SupCore.js")).pipe(gulp.dest("../public")); };
   return bundle();
 });
 

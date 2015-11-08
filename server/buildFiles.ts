@@ -24,16 +24,10 @@ export function init(pluginNamesByAuthor: { [author: string]: string[] }, callba
     }
   };
 
+  files.push("/SupCore.js", "/SupAPI.js");
+
   async.parallel([
     (cb: () => any) => { readdirRecursive(`${__dirname}/../public/player`, (err: Error, entries: string[]) => {
-      addEntries(entries); cb();
-    }); },
-
-    (cb: () => any) => { readdirRecursive(`${__dirname}/../public/core`, (err: Error, entries: string[]) => {
-      addEntries(entries); cb();
-    }); },
-
-    (cb: () => any) => { readdirRecursive(`${__dirname}/../public/api`, (err: Error, entries: string[]) => {
       addEntries(entries); cb();
     }); },
 

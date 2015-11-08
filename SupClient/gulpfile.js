@@ -17,7 +17,7 @@ gulp.task("typescript", function() {
 var stylus = require("gulp-stylus");
 var nib = require("nib");
 gulp.task("stylus", function() {
-  return gulp.src("./src/**/*.styl").pipe(stylus({use: [ nib() ], errors: true})).pipe(gulp.dest("../public/client"));
+  return gulp.src("./src/styles/*.styl").pipe(stylus({ use: [ nib() ], errors: true })).pipe(gulp.dest("../public/styles"));
 });
 
 // Browserify
@@ -25,7 +25,7 @@ var browserify = require("browserify");
 var source = require("vinyl-source-stream");
 gulp.task("browserify", [ "typescript" ], function() {
   var bundler = browserify("./src/index.js", { standalone: "SupClient" });
-  function bundle() { return bundler.bundle().pipe(source("SupClient.js")).pipe(gulp.dest("../public/client")); };
+  function bundle() { return bundler.bundle().pipe(source("SupClient.js")).pipe(gulp.dest("../public")); };
   return bundle();
 });
 
