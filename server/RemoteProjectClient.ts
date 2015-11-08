@@ -1,7 +1,7 @@
 import BaseRemoteClient from "./BaseRemoteClient";
 import ProjectServer from "./ProjectServer";
 import config from "./config";
-import * as buildFiles from "./buildFiles";
+import { buildFilesBySystem } from "./loadSystems";
 import * as path from "path";
 import * as fs from "fs";
 import * as rimraf from "rimraf";
@@ -17,7 +17,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   constructor(server: ProjectServer, id: string, socket: SocketIO.Socket) {
     super(server, socket);
     this.id = id;
-    this.socket.emit("welcome", this.id, { buildPort: config.buildPort });
+    this.socket.emit("welcome", this.id, { buildPort: config.buildPort, systemName: this.server.system.name });
 
     // Manifest
     this.socket.on("setProperty:manifest", this._onSetManifestProperty);
@@ -59,6 +59,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
   // Entries
 
+  
   _onAddEntry = (name: string, type: string, options: any, callback: (err: string, newId?: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
@@ -66,7 +67,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (name.length == 0) { callback("Entry name cannot be empty"); return; }
     if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
-    let entry: SupCore.data.EntryNode = { id: null, name, type, diagnostics: [], dependentAssetIds: [] };
+    let entry: SupCore.Data.EntryNode = { id: null, name, type, diagnostics: [], dependentAssetIds: [] };
     if (options == null) options = {};
 
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
@@ -78,8 +79,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       };
 
       if (entry.type != null) {
-        let assetClass = SupCore.data.assetClasses[entry.type];
-        let asset = new assetClass(entry.id, null, this.server.data);
+        let assetClass = this.server.system.data.assetClasses[entry.type];
+        let asset = new assetClass(entry.id, null, this.server);
         asset.init({ name: entry.name }, () => {
           let assetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
           fs.mkdirSync(assetPath);
@@ -98,7 +99,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (entryToDuplicate == null) { callback(`Entry ${id} doesn't exist`); return; }
     if (entryToDuplicate.type == null) { callback("Entry to duplicate must be an asset"); return; }
 
-    let entry: SupCore.data.EntryNode = {
+    let entry: SupCore.Data.EntryNode = {
       id: null, name: newName, type: entryToDuplicate.type,
       diagnostics: _.cloneDeep(entryToDuplicate.diagnostics),
       dependentAssetIds: []
@@ -151,7 +152,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     let entry = this.server.data.entries.byId[id];
     let trashedAssetFolder = this.server.data.entries.getStoragePathFromId(id);
-    let asset: SupCore.data.base.Asset = null;
+    let asset: SupCore.Data.Base.Asset = null;
 
     let doTrashEntry = () => {
       // Clear all dependencies for this entry
@@ -280,7 +281,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (entry == null || entry.type == null) { callback("No such asset"); return; }
     if (command == null) { callback("Invalid command"); return; }
 
-    let commandMethod = SupCore.data.assetClasses[entry.type].prototype[`server_${command}`];
+    let commandMethod = this.server.system.data.assetClasses[entry.type].prototype[`server_${command}`];
     if (commandMethod == null) { callback("Invalid command"); return; }
     // if (callback == null) { this.server.log("Ignoring edit:assets command, missing a callback"); return; }
 
@@ -310,7 +311,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     if (command == null) { callback("Invalid command"); return; }
 
-    let commandMethod = SupCore.data.resourceClasses[id].prototype[`server_${command}`];
+    let commandMethod = this.server.system.data.resourceClasses[id].prototype[`server_${command}`];
     if (commandMethod == null) { callback("Invalid command"); return; }
     // if ! callback? then this.server.log "Ignoring edit:assets command, missing a callback"; return
 
@@ -340,7 +341,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     if (command == null) { callback("Invalid command"); return; }
 
-    let commandMethod = (<any>SupCore.data.Room.prototype)[`server_${command}`];
+    let commandMethod = (<any>SupCore.Data.Room.prototype)[`server_${command}`];
     if (commandMethod == null) { callback("Invalid command"); return; }
     // if (callback == null) { this.server.log("Ignoring edit:rooms command, missing a callback"); return; }
 
@@ -377,14 +378,14 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     fs.mkdirSync(`${buildPath}/assets`);
 
     let assetIdsToExport: string[] = [];
-    this.server.data.entries.walk((entry: SupCore.data.EntryNode, parent: SupCore.data.EntryNode) => {
+    this.server.data.entries.walk((entry: SupCore.Data.EntryNode, parent: SupCore.Data.EntryNode) => {
       if (entry.type != null) assetIdsToExport.push(entry.id);
     });
 
     async.each(assetIdsToExport, (assetId, cb) => {
       let folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(assetId)}`;
       fs.mkdir(folderPath, (err) => {
-        this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.data.base.Asset) => {
+        this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.Data.Base.Asset) => {
           asset.save(folderPath, (err) => {
             this.server.data.assets.release(assetId, null);
             cb();
@@ -396,10 +397,10 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       fs.mkdirSync(`${buildPath}/resources`);
 
-      async.each(Object.keys(SupCore.data.resourceClasses), (resourceName, cb) => {
+      async.each(Object.keys(this.server.system.data.resourceClasses), (resourceName, cb) => {
         let folderPath = `${buildPath}/resources/${resourceName}`;
         fs.mkdir(folderPath, (err) => {
-          this.server.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.data.base.Resource) => {
+          this.server.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
             resource.save(folderPath, (err) => {
               this.server.data.resources.release(resourceName, null);
               cb();
@@ -424,7 +425,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
               files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
             }
 
-            files = files.concat(buildFiles.files);
+            files = files.concat(buildFilesBySystem[this.server.system.name]);
             callback(null, buildId.toString(), files);
 
             // Remove an old build to avoid using too much disk space

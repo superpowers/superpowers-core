@@ -3,12 +3,9 @@ import * as fs from "fs";
 import * as path from "path";
 import * as async from "async";
 
-export default class Assets extends SupData.base.Dictionary {
-  server: ProjectServer;
-
-  constructor(server: ProjectServer) {
+export default class Assets extends SupData.Base.Dictionary {
+  constructor(public server: ProjectServer) {
     super();
-    this.server = server;
   }
 
   acquire(id: string, owner: any, callback: (err: Error, item: any) => any) {
@@ -20,10 +17,10 @@ export default class Assets extends SupData.base.Dictionary {
   _load(id: string) {
     let entry = this.server.data.entries.byId[id];
 
-    let assetClass = SupData.assetClasses[entry.type];
+    let assetClass = this.server.system.data.assetClasses[entry.type];
     if (assetClass == null) throw new Error(`No data plugin for asset type "${entry.type}"`);
 
-    let asset = new assetClass(id, null, this.server.data);
+    let asset = new assetClass(id, null, this.server);
 
     // NOTE: The way assets are laid out on disk was changed in Superpowers 0.11
     let oldDirPath = path.join(this.server.projectPath, `assets/${id}`);

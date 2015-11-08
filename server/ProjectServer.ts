@@ -11,17 +11,10 @@ import migrateProject from "./migrateProject";
 const saveDelay = 60;
 
 export default class ProjectServer {
-
   io: SocketIO.Namespace;
+  system: SupCore.System;
 
-  data: {
-    manifest: SupCore.data.Manifest;
-    entries: SupCore.data.Entries;
-
-    assets: SupCore.data.Assets;
-    rooms: SupCore.data.Rooms;
-    resources: SupCore.data.Resources;
-  };
+  data: ProjectServerData;
   projectPath: string;
   buildsPath: string;
   nextBuildId: number;
@@ -33,13 +26,16 @@ export default class ProjectServer {
   constructor(globalIO: SocketIO.Server, folderName: string, manifestData: any, callback: (err: Error) => any) {
     this.projectPath = path.join(paths.projects, folderName);
 
+    // FIXME: Don't hardcode the system
+    this.system = SupCore.systems["cape"];
+
     this.data = {
       manifest: null,
       entries: null,
 
-      assets: new SupCore.data.Assets(this),
-      rooms: new SupCore.data.Rooms(this),
-      resources: new SupCore.data.Resources(this)
+      assets: new SupCore.Data.Assets(this),
+      rooms: new SupCore.Data.Rooms(this),
+      resources: new SupCore.Data.Resources(this)
     }
 
     this.data.assets.on("itemLoad", this._onAssetLoaded);
@@ -48,7 +44,7 @@ export default class ProjectServer {
 
     let loadManifest = (callback: (err: Error) => any) => {
       let done = (data: any) => {
-        try { this.data.manifest = new SupCore.data.Manifest(data); }
+        try { this.data.manifest = new SupCore.Data.Manifest(data); }
         catch(err) { callback(err); return; }
         this.data.manifest.on("change", this._onManifestChanged);
         if (this.data.manifest.migratedFromFormatVersion != null) this.data.manifest.emit("change");
@@ -105,7 +101,7 @@ export default class ProjectServer {
         try { schemas.validate(entriesData, "projectEntries"); }
         catch(err) { callback(err); return; }
 
-        this.data.entries = new SupCore.data.Entries(entriesData);
+        this.data.entries = new SupCore.Data.Entries(entriesData, this);
         this.data.entries.on("change", this._onEntriesChanged);
 
         callback(null);
@@ -133,7 +129,7 @@ export default class ProjectServer {
         // Ignore folders
         if (this.data.entries.byId[assetId].type == null) { cb(); return; }
 
-        this.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.data.base.Asset) => {
+        this.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.Data.Base.Asset) => {
           if (err != null) { cb(err); return; }
 
           asset.restore();
@@ -144,8 +140,8 @@ export default class ProjectServer {
     };
 
     let prepareResources = (callback: (err: Error) => any) => {
-      async.each(Object.keys(SupCore.data.resourceClasses), (resourceName, cb) => {
-        this.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.data.base.Resource) => {
+      async.each(Object.keys(this.system.data.resourceClasses), (resourceName, cb) => {
+        this.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
           if (err != null) { cb(err); return; }
 
           //resource.restore();
@@ -206,7 +202,7 @@ export default class ProjectServer {
     delete this.clientsBySocketId[socketId];
   }
 
-  _onAssetLoaded = (assetId: string, item: SupCore.data.base.Asset) => {
+  _onAssetLoaded = (assetId: string, item: SupCore.Data.Base.Asset) => {
     item.on("change", () => { this.scheduleAssetSave(assetId); });
 
     item.on("setDiagnostic", (diagnosticId: string, type: string, data: any) => { this._setDiagnostic(assetId, diagnosticId, type, data); });
@@ -216,13 +212,13 @@ export default class ProjectServer {
     item.on("removeDependencies", (dependencyEntryIds: string[]) => { this._removeDependencies(assetId, dependencyEntryIds); });
   };
 
-  _onRoomLoaded = (roomId: string, item: SupCore.data.Room) => {
+  _onRoomLoaded = (roomId: string, item: SupCore.Data.Room) => {
     let roomPath = path.join(this.projectPath, `rooms/${roomId}`);
     let saveCallback = item.save.bind(item, roomPath);
     item.on("change", () => { this._scheduleSave(saveDelay, `rooms:${roomId}`, saveCallback); });
   }
 
-  _onResourceLoaded = (resourceId: string, item: SupCore.data.base.Resource) => {
+  _onResourceLoaded = (resourceId: string, item: SupCore.Data.Base.Resource) => {
     let resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
     let saveCallback = item.save.bind(item, resourcePath);
     item.on("change", () => { this._scheduleSave(saveDelay, `resources:${resourceId}`, saveCallback); });

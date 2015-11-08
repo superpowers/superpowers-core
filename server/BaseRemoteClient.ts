@@ -2,15 +2,9 @@ import ProjectHub from "./ProjectHub";
 import ProjectServer from "./ProjectServer";
 
 export default class BaseRemoteClient {
-
-  server: BaseServer;
-  socket: SocketIO.Socket;
-
   subscriptions: string[] = [];
 
-  constructor(server: BaseServer, socket: SocketIO.Socket) {
-    this.server = server;
-    this.socket = socket;
+  constructor(public server: BaseServer, public socket: SocketIO.Socket) {
     this.socket.on("error", (err: Error) => { SupCore.log((<any>err).stack); });
     this.socket.on("disconnect", this._onDisconnect);
 
@@ -41,7 +35,7 @@ export default class BaseRemoteClient {
       let [ sub, endpoint, id ] = subscription.split(":");
       if (id == null) continue;
 
-      (<SupCore.data.base.Dictionary>this.server.data[endpoint]).release(id, this);
+      (<SupCore.Data.Base.Dictionary>this.server.data[endpoint]).release(id, this);
     }
 
     this.server.removeRemoteClient(this.socket.id);
@@ -58,11 +52,11 @@ export default class BaseRemoteClient {
     if (id == null) {
       this.socket.join(roomName);
       this.subscriptions.push(roomName);
-      callback(null, (<SupCore.data.base.Hash>data).pub);
+      callback(null, (<SupCore.Data.Base.Hash>data).pub);
       return;
     }
 
-    (<SupCore.data.base.Dictionary>data).acquire(id, this, (err: Error, item: any) => {
+    (<SupCore.Data.Base.Dictionary>data).acquire(id, this, (err: Error, item: any) => {
       if (err != null) { callback(`Could not acquire asset: ${err}`, null); return; }
 
       this.socket.join(roomName);
@@ -82,7 +76,7 @@ export default class BaseRemoteClient {
     let index = this.subscriptions.indexOf(roomName);
      if (index === -1) return;
 
-    if (id != null) { (<SupCore.data.base.Dictionary>data).release(id, this); }
+    if (id != null) { (<SupCore.Data.Base.Dictionary>data).release(id, this); }
 
     this.socket.leave(roomName);
     this.subscriptions.splice(index, 1);

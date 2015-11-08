@@ -5,13 +5,26 @@ let TreeView = require("dnd-tree-view");
 let PerfectResize = require("perfect-resize");
 let TabStrip = require("tab-strip");
 
-let info: { projectId?: string } = {};
-let data: { config?: { buildPort: number; }; manifest?: SupCore.data.Manifest; entries?: SupCore.data.Entries; };
+let info: {
+  projectId?: string;
+} = {};
+
+let data: {
+  buildPort?: number;
+  systemName?: string;
+  manifest?: SupCore.Data.Manifest;
+  entries?: SupCore.Data.Entries;
+
+  assetTypesByName?: any;
+  editorsByAssetType?: any;
+  toolsByName?: any;
+};
+
 let ui: {
   entriesTreeView?: any;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
-  assetsTypeByName?: any;
+  
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
 } = {};
@@ -82,12 +95,6 @@ export default function project(projectId: string) {
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
 
-  ui.assetsTypeByName = {};
-  for (let assetType in SupClient.pluginPaths.editorsByAssetType) {
-    let editor = SupClient.pluginPaths.editorsByAssetType[assetType];
-    ui.assetsTypeByName[editor.title.en] = assetType;
-  }
-
   document.querySelector(".entries-buttons .new-asset").addEventListener("click", onNewAssetClick);
   document.querySelector(".entries-buttons .new-folder").addEventListener("click", onNewFolderClick);
   document.querySelector(".entries-buttons .search").addEventListener("click", onSearchEntryDialog);
@@ -134,42 +141,12 @@ export default function project(projectId: string) {
 
   window.addEventListener("message", onMessage);
 
-  // Tools and settings
-  let toolsList = document.querySelector(".sidebar .tools ul");
+  connect();
+}
 
-  for (let toolName in SupClient.pluginPaths.toolsByName) {
-    let tool = SupClient.pluginPaths.toolsByName[toolName];
-    if (toolName === "main" && tool.pluginPath === "sparklinlabs/home") {
-      ui.homeTab = openTool(toolName);
-      continue;
-    }
+function connect() {
+  socket = SupClient.connect(info.projectId, { promptCredentials: true, reconnection: true });
 
-    let toolElt = document.createElement("li");
-    (<any>toolElt.dataset).name = toolName;
-    let containerElt = document.createElement("div");
-    toolElt.appendChild(containerElt);
-
-    let iconElt = document.createElement("img");
-    iconElt.src = `/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
-    containerElt.appendChild(iconElt);
-
-    let nameSpanElt = document.createElement("span");
-    nameSpanElt.className = "name";
-    nameSpanElt.textContent = tool.title.en;
-    containerElt.appendChild(nameSpanElt);
-
-    toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
-    toolElt.addEventListener("mouseleave", (event) => {
-      if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
-    });
-    nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
-    toolsList.appendChild(toolElt);
-  }
-
-  // Network
-  socket = SupClient.connect(projectId, { promptCredentials: true, reconnection: true });
-
-  socket.on("connect", onConnected);
   socket.on("disconnect", onDisconnected);
 
   socket.on("welcome", onWelcome);
@@ -187,13 +164,52 @@ export default function project(projectId: string) {
   socket.on("remove:dependencies", onDependenciesRemoved);
 }
 
-// Network callbacks
-function onConnected() {
-  data = {};
-  socket.emit("sub", "manifest", null, onManifestReceived);
-  socket.emit("sub", "entries", null, onEntriesReceived);
+function setupAssetTypes(editorsByAssetType: any) {
+  data.editorsByAssetType = editorsByAssetType;
+
+  data.assetTypesByName = {};
+  for (let assetType in editorsByAssetType) {
+    let editor = editorsByAssetType[assetType];
+    data.assetTypesByName[editor.title.en] = assetType;
+  }
 }
 
+function setupTools(toolsByName: any) {
+  data.toolsByName = toolsByName;
+  
+  let toolsList = document.querySelector(".sidebar .tools ul");
+
+  for (let toolName in toolsByName) {
+    let tool = toolsByName[toolName];
+    if (toolName === "main" && tool.pluginPath === "sparklinlabs/home") {
+      ui.homeTab = openTool(toolName);
+      continue;
+    }
+
+    let toolElt = document.createElement("li");
+    (<any>toolElt.dataset).name = toolName;
+    let containerElt = document.createElement("div");
+    toolElt.appendChild(containerElt);
+
+    let iconElt = document.createElement("img");
+    iconElt.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+    containerElt.appendChild(iconElt);
+
+    let nameSpanElt = document.createElement("span");
+    nameSpanElt.className = "name";
+    nameSpanElt.textContent = tool.title.en;
+    containerElt.appendChild(nameSpanElt);
+
+    toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
+    toolElt.addEventListener("mouseleave", (event) => {
+      if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
+    });
+    nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
+    toolsList.appendChild(toolElt);
+  }
+}
+
+// Network callbacks
 function onDisconnected() {
   data = null;
   ui.entriesTreeView.clearSelection();
@@ -209,19 +225,30 @@ function onDisconnected() {
   (<HTMLDivElement>document.querySelector(".connecting")).style.display = "";
 }
 
-function onWelcome(clientId: number, config: { buildPort: number }) {
-  data.config = config;
+function onWelcome(clientId: number, config: { buildPort: number; systemName: string; }) {
+  data = {
+    buildPort: config.buildPort,
+    systemName: config.systemName
+  };
+
+  (<any>window).fetch(`/systems/${data.systemName}/plugins.json`).then((response: any) => response.json()).then((pluginPaths: any) => {
+    setupAssetTypes(pluginPaths.editorsByAssetType);
+    setupTools(pluginPaths.toolsByName);
+
+    socket.emit("sub", "manifest", null, onManifestReceived);
+    socket.emit("sub", "entries", null, onEntriesReceived);
+  });
 }
 
 function onManifestReceived(err: string, manifest: any) {
-  data.manifest = new SupCore.data.Manifest(manifest);
+  data.manifest = new SupCore.Data.Manifest(manifest);
 
   document.querySelector(".project .project-name").textContent = manifest.name;
   document.title = `${manifest.name} — Superpowers`;
 }
 
-function onEntriesReceived(err: string, entries: SupCore.data.EntryNode[]) {
-  data.entries = new SupCore.data.Entries(entries);
+function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
+  data.entries = new SupCore.Data.Entries(entries);
 
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
@@ -235,7 +262,7 @@ function onEntriesReceived(err: string, entries: SupCore.data.EntryNode[]) {
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = false;
 
-  function walk(entry: SupCore.data.EntryNode, parentEntry: SupCore.data.EntryNode, parentElt: HTMLLIElement) {
+  function walk(entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode, parentElt: HTMLLIElement) {
     let liElt = createEntryElement(entry);
     liElt.classList.add("collapsed");
 
@@ -257,7 +284,7 @@ function onSetManifestProperty(key: string, value: any) {
   }
 }
 
-function onEntryAdded(entry: SupCore.data.EntryNode, parentId: string, index: number) {
+function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: number) {
   data.entries.client_add(entry, parentId, index);
 
   let liElt = createEntryElement(entry);
@@ -352,7 +379,7 @@ function onSetEntryProperty(id: string, key: string, value: any) {
       entryElt.querySelector(".name").textContent = value;
       updateEntryElementPath(id);
 
-      let walk = (entry: SupCore.data.EntryNode) => {
+      let walk = (entry: SupCore.Data.EntryNode) => {
         refreshAssetTabElement(entry);
         if (entry.children != null) for (let child of entry.children) walk(child);
       }
@@ -427,7 +454,7 @@ function runGame(options: { debug: boolean; } = { debug: false }) {
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) { alert(err); return; }
 
-    let url = `${window.location.protocol}//${window.location.hostname}:${data.config.buildPort}/player?project=${info.projectId}&build=${buildId}`;
+    let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemName}/?project=${info.projectId}&build=${buildId}`;
     if (options.debug) url += "&debug";
 
     window.open(url, `player_${info.projectId}`);
@@ -456,7 +483,7 @@ function exportGame() {
       playerWindow.removeEventListener("load", doExport);
 
       socket.emit("build:project", (err: string, buildId: string, files: any) => {
-        playerWindow.postMessage({ type: "save", projectId: info.projectId, buildId, buildPort: data.config.buildPort, outputFolder, files }, (<any>window.location).origin);
+        playerWindow.postMessage({ type: "save", projectId: info.projectId, buildId, buildPort: data.buildPort, outputFolder, files }, (<any>window.location).origin);
       });
     };
 
@@ -477,7 +504,7 @@ function createEntryElement(entry: any) {
 
   if (entry.type != null) {
     let iconElt = document.createElement("img");
-    iconElt.src = `/plugins/${SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+    iconElt.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     liElt.appendChild(iconElt);
   }
 
@@ -630,7 +657,7 @@ function onSearchEntryDialog() {
   if (data == null) return;
 
   let entries: string[] = [];
-  data.entries.walk((node: SupCore.data.EntryNode) => {
+  data.entries.walk((node: SupCore.Data.EntryNode) => {
     if (node.type != null) entries.push(data.entries.getPathFromId(node.id));
   });
 
@@ -657,7 +684,7 @@ function openEntry(id: string, optionValues?: {[name: string]: any}) {
     let options = "";
     if (optionValues != null)
       for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
-    iframe.src = `/plugins/${SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${id}${options}`;
+    iframe.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${id}${options}`;
     (<any>iframe.dataset).assetId = id;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
@@ -672,7 +699,7 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
   let iframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${name}']`);
 
   if (tab == null) {
-    let tool = SupClient.pluginPaths.toolsByName[name];
+    let tool = data.toolsByName[name];
     tab = createToolTabElement(name, tool);
     ui.tabStrip.tabsRoot.appendChild(tab);
 
@@ -680,7 +707,7 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
     let options = "";
     if (optionValues != null)
       for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
-    iframe.src = `/plugins/${tool.pluginPath}/editors/${name}/?project=${info.projectId}${options}`;
+    iframe.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${name}/?project=${info.projectId}${options}`;
     (<any>iframe.dataset).name = name;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
@@ -693,9 +720,9 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
 }
 
 function onNewAssetClick() {
-  newAssetDialog(ui.assetsTypeByName, autoOpenAsset, (name, type, open) => {
+  newAssetDialog(data.assetTypesByName, autoOpenAsset, (name, type, open) => {
     if (name == null) return;
-    if (name === "") name = SupClient.pluginPaths.editorsByAssetType[type].title.en;
+    if (name === "") name = data.editorsByAssetType[type].title.en;
 
     autoOpenAsset = open;
     socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
@@ -713,7 +740,7 @@ function onNewFolderClick() {
 function onTrashEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length === 0) return;
 
-  let selectedEntries: SupCore.data.EntryNode[] = [];
+  let selectedEntries: SupCore.Data.EntryNode[] = [];
 
   function checkNextEntry() {
     selectedEntries.splice(0, 1);
@@ -721,7 +748,7 @@ function onTrashEntryClick() {
       SupClient.dialogs.confirm("Are you sure you want to trash the selected entries?", "Trash", (confirm) => {
         if (! confirm) return;
 
-        function trashEntry(entry: SupCore.data.EntryNode) {
+        function trashEntry(entry: SupCore.Data.EntryNode) {
           if (entry.type == null) for (let entryChild of entry.children) trashEntry(entryChild);
 
           socket.emit("trash:entries", entry.id, (err: string) => {
@@ -739,7 +766,7 @@ function onTrashEntryClick() {
     } else warnBrokenDependency(selectedEntries[0]);
   }
 
-  function warnBrokenDependency(entry: SupCore.data.EntryNode) {
+  function warnBrokenDependency(entry: SupCore.Data.EntryNode) {
     if (entry.type == null) for (let entryChild of entry.children) selectedEntries.push(entryChild);
 
     if (entry.dependentAssetIds != null && entry.dependentAssetIds.length > 0) {
@@ -757,11 +784,11 @@ function onOpenInNewWindowClick(event: any) {
   let id = event.target.parentElement.dataset.id;
   if (id != null) {
     let entry = data.entries.byId[id];
-    window.open(`${(<any>window.location).origin}/plugins/${SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${entry.id}`);
+    window.open(`${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${entry.id}`);
   } else {
     let name = event.target.parentElement.dataset.name;
-    let tool = SupClient.pluginPaths.toolsByName[name];
-    window.open(`${(<any>window.location).origin}/plugins/${SupClient.pluginPaths.toolsByName[name].pluginPath}/editors/${name}/?project=${info.projectId}`);
+    let tool = data.toolsByName[name];
+    window.open(`${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${info.projectId}`);
   }
 }
 
@@ -794,7 +821,7 @@ function onDuplicateEntryClick() {
   });
 }
 
-function refreshAssetTabElement(entry: SupCore.data.EntryNode, tabElt?: HTMLLIElement) {
+function refreshAssetTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLIElement) {
   if (tabElt == null) tabElt = ui.tabStrip.tabsRoot.querySelector(`[data-asset-id='${entry.id}']`);
   if (tabElt == null) return;
 
@@ -817,13 +844,13 @@ function refreshAssetTabElement(entry: SupCore.data.EntryNode, tabElt?: HTMLLIEl
   tabElt.title = entryPath;
 }
 
-function createAssetTabElement(entry: SupCore.data.EntryNode) {
+function createAssetTabElement(entry: SupCore.Data.EntryNode) {
   let tabElt = document.createElement("li");
 
   if (entry.type != null) {
     let iconElt = document.createElement("img");
     iconElt.classList.add("icon");
-    iconElt.src = `/plugins/${SupClient.pluginPaths.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`
+    iconElt.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`
     tabElt.appendChild(iconElt);
   }
 
@@ -856,7 +883,7 @@ function createToolTabElement(toolName: string, tool: any) {
 
   let iconElt = document.createElement("img");
   iconElt.classList.add("icon");
-  iconElt.src = `/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+  iconElt.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   tabElt.appendChild(iconElt);
 
   let tabLabel = document.createElement("div");
@@ -883,7 +910,7 @@ function onTabActivate(tabElement: any) {
   let activeTab = ui.tabStrip.tabsRoot.querySelector(".active");
   if (activeTab != null) {
     activeTab.classList.remove("active");
-    
+
     let activeIframe = (<HTMLIFrameElement>ui.panesElt.querySelector("iframe.active"));
     activeIframe.contentWindow.postMessage({ type: "deactivate" }, (<any>window.location).origin);
     activeIframe.classList.remove("active");

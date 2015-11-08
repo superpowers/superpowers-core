@@ -2,7 +2,7 @@ import SupData = require("./index");
 import path = require("path");
 import fs = require("fs");
 
-export default class Room extends SupData.base.Hash {
+export default class Room extends SupData.Base.Hash {
   static schema = {
     history: {
       type: "array",

@@ -1,6 +1,6 @@
 let TreeView = require("dnd-tree-view");
 
-let data: {projects?: SupCore.data.Projects};
+let data: {projects?: SupCore.Data.Projects};
 let ui: { projectsTreeView?: any } = {};
 let socket: SocketIOClient.Socket;
 
@@ -39,8 +39,8 @@ function onDisconnected() {
   data = null;
 }
 
-function onProjectsReceived(err: string, projects: SupCore.data.ProjectItem[]) {
-  data.projects = new SupCore.data.Projects(projects);
+function onProjectsReceived(err: string, projects: SupCore.Data.ProjectItem[]) {
+  data.projects = new SupCore.Data.Projects(projects);
 
   ui.projectsTreeView.clearSelection();
   ui.projectsTreeView.treeRoot.innerHTML = "";
@@ -51,7 +51,7 @@ function onProjectsReceived(err: string, projects: SupCore.data.ProjectItem[]) {
   }
 }
 
-function onProjectAdded(manifest: SupCore.data.ProjectItem, index: number) {
+function onProjectAdded(manifest: SupCore.Data.ProjectItem, index: number) {
   data.projects.client_add(manifest, index);
 
   let liElt = createProjectElement(manifest);
@@ -74,7 +74,7 @@ function onSetProjectProperty(id: string, key: string, value: any) {
 }
 
 // User interface
-function createProjectElement(manifest: SupCore.data.ProjectItem) {
+function createProjectElement(manifest: SupCore.Data.ProjectItem) {
   let liElt = document.createElement("li");
   (<any>liElt.dataset).id = manifest.id;
 

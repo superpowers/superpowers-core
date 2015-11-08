@@ -4,29 +4,20 @@
 declare namespace SupCore {
   function log(message: string): void;
 
-  namespace data {
+  namespace Data {
     function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;
     function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;
 
-    interface AssetClass { new(id: string, pub: any, serverData?: ProjectServerData): base.Asset; }
-    var assetClasses: { [assetName: string]: AssetClass };
-    function registerAssetClass(name: string, assetClass: AssetClass): void;
-
-    interface ComponentConfigClass { new(pub: any, sceneAsset?: any): base.ComponentConfig; create(): any; }
-    var componentConfigClasses: { [componentConfigName: string]: ComponentConfigClass };
-    function registerComponentConfigClass(name: string, configClass: ComponentConfigClass): void;
-
-    // This registers a plugin *resource* (see SupCore.data.Resources), not just a resource class, hence the name
-    interface ResourceClass { new(pub: any, serverData?: ProjectServerData): base.Resource; }
-    var resourceClasses: { [resourceName: string]: ResourceClass };
-    function registerResource(name: string, resourceClass: ResourceClass): void;
+    interface AssetClass { new(id: string, pub: any, server?: ProjectServer): Base.Asset; }
+    interface ComponentConfigClass { new(pub: any, sceneAsset?: any): Base.ComponentConfig; create(): any; }
+    interface ResourceClass { new(pub: any, server?: ProjectServer): Base.Resource; }
 
     interface ProjectItem {
       id: string;
       name: string;
       description: string;
     }
-    class Projects extends base.ListById {
+    class Projects extends Base.ListById {
       pub: ProjectItem[];
       byId: { [id: string]: ProjectItem; };
 
@@ -39,13 +30,13 @@ declare namespace SupCore {
       name: string;
       description: string;
     }
-    class Manifest extends base.Hash {
+    class Manifest extends Base.Hash {
       pub: ProjectManifest;
       migratedFromFormatVersion: number;
 
       constructor(pub: ProjectManifest);
     }
-    class Diagnostics extends base.ListById {
+    class Diagnostics extends Base.ListById {
       constructor(pub: any[]);
     }
 
@@ -59,14 +50,14 @@ declare namespace SupCore {
       diagnostics?: string[];
       dependentAssetIds?: any[];
     }
-    class Entries extends base.TreeById {
+    class Entries extends Base.TreeById {
       pub: EntryNode[];
       byId: { [id: string]: EntryNode };
 
       diagnosticsByEntryId: { [key: string]: Diagnostics };
       dependenciesByAssetId: any;
 
-      constructor(pub: EntryNode[], nextId?: number);
+      constructor(pub: EntryNode[], server?: ProjectServer);
       walk(callback: (node: EntryNode, parentNode?: EntryNode) => any): void;
       add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
       client_add(node: EntryNode, parentId: string, index: number): void;
@@ -77,21 +68,21 @@ declare namespace SupCore {
       getStoragePathFromId(id: string, options?: { includeId: boolean }): string;
     }
 
-    class Assets extends base.Dictionary {
-      server: any;
+    class Assets extends Base.Dictionary {
+      server: ProjectServer;
 
-      constructor(server: any);
+      constructor(server: ProjectServer);
       // _load(id: string): void;
     }
-    class Resources extends base.Dictionary {
-      server: any;
-      resourceClassesById: any;
+    class Resources extends Base.Dictionary {
+      server: ProjectServer;
+      resourceClassesById: ProjectServer;
 
-      constructor(server: any);
+      constructor(server: ProjectServer);
       // _load(id: string): void;
     }
 
-    class Room extends base.Hash {
+    class Room extends Base.Hash {
       users: RoomUsers;
 
       constructor(pub: any);
@@ -105,18 +96,18 @@ declare namespace SupCore {
       server_appendMessage(client: any, text: string, callback: (err: string, entry?: any) => any): void;
       client_appendMessage(entry: any): void;
     }
-    class Rooms extends base.Dictionary {
-      server: any;
+    class Rooms extends Base.Dictionary {
+      server: ProjectServer;
 
-      constructor(server: any);
+      constructor(server: ProjectServer);
       // _load(id: string): void;
 
     }
-    class RoomUsers extends base.ListById {
+    class RoomUsers extends Base.ListById {
       constructor(pub: any[]);
     }
 
-    namespace base {
+    namespace Base {
       interface Rule {
         mutable?: boolean;
         type: string;
@@ -217,12 +208,12 @@ declare namespace SupCore {
         releaseAll(id: string): void;
       }
 
-      interface Schema { [key: string]: base.Rule; }
+      interface Schema { [key: string]: Base.Rule; }
       class Asset extends Hash {
         id: string;
-        serverData: ProjectServerData;
+        server: ProjectServer;
 
-        constructor(id: string, pub: any, schema: Schema, serverData: ProjectServerData);
+        constructor(id: string, pub: any, schema: Schema, server: ProjectServer);
         // OVERRIDE: Make sure to call super(callback). Called when creating a new asset
         init(options: any, callback: Function): void;
 
@@ -253,9 +244,9 @@ declare namespace SupCore {
       }
 
       class Resource extends Hash {
-        serverData: ProjectServerData;
+        server: ProjectServer;
 
-        constructor(pub: any, schema: Schema, serverData: ProjectServerData);
+        constructor(pub: any, schema: Schema, server: ProjectServer);
 
         // OVERRIDE: Make sure to call super(callback). Called when creating a new resource
         init(callback: Function): void;
@@ -292,6 +283,42 @@ declare namespace SupCore {
       }
     }
   }
+
+  interface APIPlugin {
+    code: string;
+    defs: string;
+    exposeActorComponent?: { propertyName: string; className: string; };
+  }
+  
+  class SystemAPI {
+    contexts: { [contextName: string]: { plugins: { [pluginName: string]: APIPlugin; } } };
+
+    registerPlugin(contextName: string, pluginName: string, plugin: APIPlugin): void;
+  }
+  
+  class SystemData {
+    assetClasses: { [assetName: string]: SupCore.Data.AssetClass; };
+    componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; };
+    resourceClasses: { [resourceName: string]: SupCore.Data.ResourceClass };
+  
+    registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass): void;
+    registerComponentConfigClass(name: string, configClass: SupCore.Data.ComponentConfigClass): void;
+    // Register a plugin *resource* (see SupCore.Data.Resources), not just a resource class, hence the name
+    registerResource(name: string, resourceClass: SupCore.Data.ResourceClass): void;
+  }
+  
+  class System {
+    name: string;
+    api: SystemAPI;
+    data: SystemData;
+    
+    constructor(name: string);
+  }
+
+  // All loaded systems (server-side only)
+  var systems: { [system: string]: System };
+  // The currently active system
+  var system: System;
 
   class EventEmitter implements NodeJS.EventEmitter {
     static listenerCount(emitter: EventEmitter, event: string): number;

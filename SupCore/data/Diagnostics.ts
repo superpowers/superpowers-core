@@ -1,4 +1,4 @@
-import ListById from "./base/ListById";
+import ListById from "./Base/ListById";
 
 export default class Diagnostics extends ListById {
   static schema = {

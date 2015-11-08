@@ -3,12 +3,9 @@ import * as path from "path";
 
 let roomRegex = /^[A-Za-z0-9_]{1,20}$/;
 
-export default class Rooms extends SupData.base.Dictionary {
-  server: any;
-
-  constructor(server: any) {
-    super()
-    this.server = server;
+export default class Rooms extends SupData.Base.Dictionary {
+  constructor(public server: ProjectServer) {
+    super();
   }
 
   acquire(id: string, owner: any, callback: (err: Error, item?: any) => any) {

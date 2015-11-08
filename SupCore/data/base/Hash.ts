@@ -2,14 +2,8 @@ import * as base from "./index";
 import { EventEmitter } from "events";
 
 export default class Hash extends EventEmitter {
-  pub: any;
-  schema: any;
-
-  constructor(pub: any, schema: any) {
+  constructor(public pub: any, public schema: any) {
     super();
-
-    this.pub = pub;
-    this.schema = schema;
   }
 
   setProperty(path: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {

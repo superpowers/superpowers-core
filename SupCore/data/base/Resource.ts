@@ -4,12 +4,9 @@ import * as path from "path";
 import * as fs from "fs";
 
 export default class Resource extends Hash {
-  serverData: ProjectServerData;
-
-  constructor(pub: any, schema: any, serverData: ProjectServerData) {
+  constructor(pub: any, schema: any, public server: ProjectServer) {
     super(pub, schema);
-    this.serverData = serverData;
-    if (serverData == null) this.setup();
+    if (server == null) this.setup();
   }
 
   init(callback: Function) { this.setup(); callback(); }

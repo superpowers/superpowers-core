@@ -1,4 +1,4 @@
-import ListById from "./base/ListById";
+import ListById from "./Base/ListById";
 
 export default class RoomUsers extends ListById {
   static schema = {

@@ -7,10 +7,7 @@ import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
 export default class RemoteHubClient extends BaseRemoteClient {
-
-  server: ProjectHub;
-
-  constructor(server: ProjectHub, socket: SocketIO.Socket) {
+  constructor(public server: ProjectHub, socket: SocketIO.Socket) {
     super(server, socket);
 
     // Projects
@@ -24,7 +21,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
   _onAddProject = (name: string, description: string, callback: (err: string, projectId?: string) => any) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
-    let manifest: SupCore.data.ProjectItem = { id: null, name, description };
+    let manifest: SupCore.Data.ProjectItem = { id: null, name, description };
 
     let projectFolder = manifest.name.toLowerCase().slice(0, 16).replace(/[^a-z0-9]/g, "-");
     let originalProjectFolder = projectFolder;

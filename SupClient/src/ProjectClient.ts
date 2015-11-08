@@ -1,5 +1,5 @@
 interface EntriesSubscriber {
-  onEntriesReceived(entries: SupCore.data.Entries): void;
+  onEntriesReceived(entries: SupCore.Data.Entries): void;
   onEntryAdded(entry: any, parentId: string, index: number): void;
   onEntryMoved(id: string, parentId: string, index: number): void;
   onSetEntryProperty(id: string, key: string, value: any): void;
@@ -20,10 +20,10 @@ interface ResourceSubscriber {
 export default class ProjectClient {
   socket: SocketIOClient.Socket;
 
-  entries: SupCore.data.Entries;
+  entries: SupCore.Data.Entries;
   entriesSubscribers: EntriesSubscriber[] = [];
 
-  assetsById: { [assetId: string]: SupCore.data.base.Asset } = {};
+  assetsById: { [assetId: string]: SupCore.Data.Base.Asset } = {};
   subscribersByAssetId: { [assetId: string]: AssetSubscriber[] } = {};
 
   resourcesById: { [resourceId: string]: any} = {};
@@ -145,9 +145,9 @@ export default class ProjectClient {
     let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    let asset: SupCore.data.base.Asset = null;
+    let asset: SupCore.Data.Base.Asset = null;
     if (assetData != null) {
-      asset = this.assetsById[assetId] = new SupCore.data.assetClasses[assetType](assetId, assetData);
+      asset = this.assetsById[assetId] = new SupCore.system.data.assetClasses[assetType](assetId, assetData);
       asset.client_load();
     }
 
@@ -184,8 +184,8 @@ export default class ProjectClient {
     let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
-    let resource: SupCore.data.base.Resource = null;
-    if (resourceData != null) resource = this.resourcesById[resourceId] = new SupCore.data.resourceClasses[resourceId](resourceData);
+    let resource: SupCore.Data.Base.Resource = null;
+    if (resourceData != null) resource = this.resourcesById[resourceId] = new SupCore.system.data.resourceClasses[resourceId](resourceData);
 
     for (let subscriber of subscribers) { subscriber.onResourceReceived(resourceId, resource); }
   }
@@ -201,7 +201,7 @@ export default class ProjectClient {
   }
 
   _onEntriesReceived = (err: string, entries: any) => {
-    this.entries = new SupCore.data.Entries(entries);
+    this.entries = new SupCore.Data.Entries(entries);
 
     this.socket.on("add:entries", this._onEntryAdded);
     this.socket.on("move:entries", this._onEntryMoved);

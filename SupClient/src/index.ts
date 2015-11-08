@@ -1,3 +1,4 @@
+import "whatwg-fetch";
 import * as io from "socket.io-client";
 
 import ProjectClient from "./ProjectClient"
@@ -5,6 +6,9 @@ import setupHotkeys from "./setupHotkeys";
 import * as table from "./table";
 import * as dialogs from "./dialogs/index";
 export { ProjectClient, setupHotkeys, table, dialogs };
+
+// Initialize empty system
+SupCore.system = new SupCore.System("");
 
 // Component editors
 interface ComponentEditorObject {
@@ -42,14 +46,6 @@ export function registerSettingsEditorClass(name: string, plugin: SettingsEditor
 }
 
 // Plugins list
-let pluginsXHR = new XMLHttpRequest();
-pluginsXHR.open("GET", "/plugins.json", false); // Synchronous
-pluginsXHR.send(null);
-
-let internalPluginPaths: any;
-if (pluginsXHR.status === 200) internalPluginPaths = JSON.parse(pluginsXHR.responseText);
-export let pluginPaths = internalPluginPaths;
-
 export function connect(projectId: string, options: { reconnection: boolean; promptCredentials: boolean; } = { reconnection: false, promptCredentials: false }) {
   let namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
@@ -57,6 +53,10 @@ export function connect(projectId: string, options: { reconnection: boolean; pro
   let socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
     { transports: [ "websocket" ], reconnection: options.reconnection, query: { supServerAuth } }
   );
+
+  socket.on("welcome", (clientId: number, config: { systemName: string; }) => {
+    SupCore.system.name = config.systemName;
+  });
 
   if (options.promptCredentials) socket.on("error", onSocketError);
   return socket;
@@ -144,7 +144,7 @@ export function getTreeViewInsertionPoint(treeView: any) {
   return { parentId, index };
 }
 
-export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById) {
+export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.TreeById) {
   let parentId: string;
   let index: number;
 
@@ -173,7 +173,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.
   return { parentId, index };
 }
 
-export function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById, reversed = false) {
+export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed = false) {
   let targetEntryId = dropInfo.target.dataset.id;
   let targetNode = listById.byId[targetEntryId];
 

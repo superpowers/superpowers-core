@@ -1,4 +1,4 @@
-import Hash from "./base/Hash";
+import Hash from "./Base/Hash";
 
 interface ManifestPub {
   id: string;

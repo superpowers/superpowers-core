@@ -1,7 +1,9 @@
 /// <reference path="../typings/tsd.d.ts" />
 
-import * as data from "./data/index";
-export { data };
+import * as Data from "./Data";
+export { Data };
+
+export * from "./systems";
 
 export function log(message: string): void {
   let text = `${new Date().toISOString()} - ${message}`;

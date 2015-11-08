@@ -13,7 +13,7 @@ export default class ProjectHub {
   io: SocketIO.Namespace;
 
   data = {
-    projects: <SupCore.data.Projects>null
+    projects: <SupCore.Data.Projects>null
   };
 
   serversById: { [serverId: string]: ProjectServer } = {};
@@ -29,10 +29,10 @@ export default class ProjectHub {
     };
 
     let setupProjectsList = (callback: Function) => {
-      let data: SupCore.data.ProjectItem[] = [];
+      let data: SupCore.Data.ProjectItem[] = [];
       for (let id in this.serversById) data.push(this.serversById[id].data.manifest.pub);
 
-      this.data.projects = new SupCore.data.Projects(data);
+      this.data.projects = new SupCore.Data.Projects(data);
       callback();
     };
 

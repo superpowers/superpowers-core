@@ -1,6 +1,9 @@
 /// <reference path="./SupCore.d.ts" />
 
 interface ProjectServer {
+  io: SocketIO.Namespace;
+  system: SupCore.System;
+
   data: ProjectServerData;
   projectPath: string;
 
@@ -8,10 +11,10 @@ interface ProjectServer {
 }
 
 interface ProjectServerData {
-  manifest: SupCore.data.Manifest;
-  entries: SupCore.data.Entries;
+  manifest: SupCore.Data.Manifest;
+  entries: SupCore.Data.Entries;
 
-  assets: SupCore.data.Assets;
-  rooms: SupCore.data.Rooms;
-  resources: SupCore.data.Resources;
+  assets: SupCore.Data.Assets;
+  rooms: SupCore.Data.Rooms;
+  resources: SupCore.Data.Resources;
 }

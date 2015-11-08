@@ -3,7 +3,7 @@ var fs = require("fs");
 var async = require("async");
 var child_process = require("child_process");
 
-function shouldIgnoreFolder(pluginName) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
+function shouldIgnoreFolder(folderName) { return folderName.indexOf(".") !== -1 || folderName === "node_modules" || folderName === "public"; }
 
 function log(message) {
   var text = new Date().toISOString() + " - " + message;
@@ -17,24 +17,31 @@ var buildPaths = [
   rootPath,
   rootPath + "/SupCore",
   rootPath + "/SupClient",
-  rootPath + "/SupAPI",
   rootPath + "/server",
-  rootPath + "/system/SupEngine",
-  rootPath + "/system/SupRuntime",
-  rootPath + "/system/player",
   rootPath + "/client",
   rootPath + "/launcher",
 ];
 
-// Plugins
-var rootPluginsPath = path.resolve(__dirname + "/../plugins");
-fs.readdirSync(rootPluginsPath).forEach(function(pluginAuthor) {
-  if (shouldIgnoreFolder(pluginAuthor)) return;
+// Systems and plugins
+var systemsPath = rootPath + "/systems";
+fs.readdirSync(systemsPath).forEach(function(systemName) {
+  if (shouldIgnoreFolder(systemName)) return;
 
-  var pluginAuthorPath = rootPluginsPath + "/" + pluginAuthor;
-  fs.readdirSync(pluginAuthorPath).forEach(function(pluginName) {
-    if (shouldIgnoreFolder(pluginName)) return;
-    buildPaths.push(pluginAuthorPath + "/" + pluginName);
+  var systemPath = systemsPath + "/" + systemName;
+  fs.readdirSync(systemPath).forEach(function(systemFolder) {
+    if (shouldIgnoreFolder(systemFolder) || systemFolder === "plugins") return;
+    buildPaths.push(systemPath + "/" + systemFolder);
+  });
+
+  var systemPluginsPath = systemPath + "/plugins";
+  fs.readdirSync(systemPluginsPath).forEach(function(pluginAuthor) {
+    if (shouldIgnoreFolder(pluginAuthor)) return;
+
+    var pluginAuthorPath = systemPluginsPath + "/" + pluginAuthor;
+    fs.readdirSync(pluginAuthorPath).forEach(function(pluginName) {
+      if (shouldIgnoreFolder(pluginName)) return;
+      buildPaths.push(pluginAuthorPath + "/" + pluginName);
+    });
   });
 });
 

@@ -3,17 +3,10 @@ import Hash from "./Hash";
 import * as path from "path";
 import * as fs from "fs";
 
-interface ServerData { [name: string]: SupCore.data.base.Dictionary; };
-
 export default class Asset extends Hash {
-  id: string;
-  serverData: ServerData;
-
-  constructor(id: string, pub: any, schema: any, serverData: ServerData) {
+  constructor(public id: string, pub: any, schema: any, public server: ProjectServer) {
     super(pub, schema);
-    this.id = id;
-    this.serverData = serverData;
-    if (this.serverData == null) this.setup();
+    if (this.server == null) this.setup();
   }
 
   init(options: any, callback: Function) { this.setup(); callback(); }

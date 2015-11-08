@@ -11,7 +11,7 @@ interface EntryNode {
   dependentAssetIds?: any[];
 }
 
-export default class Entries extends SupData.base.TreeById {
+export default class Entries extends SupData.Base.TreeById {
   static schema = {
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     type: { type: "string?" },
@@ -25,8 +25,8 @@ export default class Entries extends SupData.base.TreeById {
   diagnosticsByEntryId: { [key: string]: SupData.Diagnostics } = {};
   dependenciesByAssetId: any = {};
 
-  constructor(pub: EntryNode[], nextId?: number) {
-    super(pub, Entries.schema, nextId);
+  constructor(pub: EntryNode[], public server?: ProjectServer) {
+    super(pub, Entries.schema);
 
     this.walk((node: EntryNode, parentNode: EntryNode) => {
       if (node.type == null) return;
@@ -38,7 +38,8 @@ export default class Entries extends SupData.base.TreeById {
   }
 
   add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    if (node.type != null && SupData.assetClasses[node.type] == null) { callback("Invalid asset type"); return; }
+    let assetClass = this.server.system.data.assetClasses[node.type];
+    if (node.type != null && assetClass == null) { callback("Invalid asset type"); return; }
 
     super.add(node, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }

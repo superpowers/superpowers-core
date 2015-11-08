@@ -18,16 +18,14 @@ declare namespace SupClient {
   let settingsEditorClasses: { [name: string]: SettingsEditorClass };
   function registerSettingsEditorClass(name: string, plugin: SettingsEditorClass): void;
 
-  let pluginPaths: { all: string[], editorsByAssetType: { [assetType: string]: any }, toolsByName: { [toolName: string]: any } };
-
   function connect(projectId: string, options?: {reconnection: boolean; promptCredentials: boolean;}): SocketIOClient.Socket;
   function onAssetTrashed(): void;
   function onDisconnected(): void;
   function setupHotkeys(): void;
   function getTreeViewInsertionPoint(treeView: any): { parentId: string; index: number };
 
-  function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.data.base.TreeById): { parentId: string; index: number };
-  function getListViewDropIndex(dropInfo: any, listById: SupCore.data.base.ListById, reversed?: boolean): number;
+  function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
+  function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
   function findEntryByPath(entries: any, path: string|string[]): any;
 
   namespace table {
@@ -67,7 +65,7 @@ declare namespace SupClient {
   class ProjectClient {
     socket: SocketIOClient.Socket;
 
-    entries: SupCore.data.Entries;
+    entries: SupCore.Data.Entries;
     entriesSubscribers: EntriesSubscriber[];
 
     assetsById: {[assetId: string]: any};
@@ -89,7 +87,7 @@ declare namespace SupClient {
 }
 
 interface EntriesSubscriber {
-  onEntriesReceived(entries: SupCore.data.Entries): void;
+  onEntriesReceived(entries: SupCore.Data.Entries): void;
   onEntryAdded(entry: any, parentId: string, index: number): void;
   onEntryMoved(id: string, parentId: string, index: number): void;
   onSetEntryProperty(id: string, key: string, value: any): void;
