@@ -167,22 +167,26 @@ export default class ProjectServer {
   }
   
   moveAssetFolderToTrash(trashedAssetFolder: string, callback: (err: Error) => any) {
-
     const assetsPath = path.join(this.projectPath, "assets");
     const trashedAssetsPath = path.join(this.projectPath, "trashedAssets");
-    let folderPath = path.join(assetsPath, trashedAssetFolder);
-    let folderNumber = 0;
-
-    let renameSuccessful = false;
-    async.until(() => renameSuccessful, (cb) => {
-      let newFolderPath = path.join(trashedAssetsPath, trashedAssetFolder);
-      if (folderNumber > 0) newFolderPath = `${newFolderPath} (${folderNumber})`;
-      fs.rename(folderPath, newFolderPath, (err) => {
-        if (err != null) folderNumber++;
-        else renameSuccessful = true;
-        cb();
-      });
-    }, callback);
+    
+    fs.mkdir(trashedAssetsPath, (err) => {
+      if (err != null && err.code !== "EEXIST") throw err;
+      
+      let folderPath = path.join(assetsPath, trashedAssetFolder);
+      let folderNumber = 0;
+  
+      let renameSuccessful = false;
+      async.until(() => renameSuccessful, (cb) => {
+        let newFolderPath = path.join(trashedAssetsPath, trashedAssetFolder);
+        if (folderNumber > 0) newFolderPath = `${newFolderPath} (${folderNumber})`;
+        fs.rename(folderPath, newFolderPath, (err) => {
+          if (err != null) folderNumber++;
+          else renameSuccessful = true;
+          cb();
+        });
+      }, callback);
+    });
   }
 
   removeRemoteClient(socketId: string) {

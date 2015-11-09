@@ -448,7 +448,10 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     const trashedAssetsPath = path.join(this.server.projectPath, "trashedAssets");
 
     fs.readdir(trashedAssetsPath, (err, trashedAssetFolders) => {
-      if (err != null) throw err;
+      if (err != null) {
+        if (err.code === "ENOENT") trashedAssetFolders = [];
+        else throw err;
+      }
 
       let removedFolderCount = 0;
       async.each(trashedAssetFolders, (trashedAssetFolder, cb) => {
