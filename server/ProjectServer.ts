@@ -75,7 +75,7 @@ export default class ProjectServer {
         done(manifestData);
       });
     };
-    
+
     let setupNextBuildId = (callback: (err: Error) => any) => {
       fs.readdir(this.buildsPath, (err, entryIds) => {
         if (err != null && err.code !== "ENOENT") { callback(err); return; }
@@ -126,7 +126,7 @@ export default class ProjectServer {
       callback(null);
     };
 
-    // prepareAssets() is called after serve()
+    // prepareAssets() and prepareResources() is called after serve()
     // because diagnostics rely on this.io being setup
     let prepareAssets = (callback: (err: Error) => any) => {
       async.each(Object.keys(this.data.entries.byId), (assetId, cb) => {
@@ -143,7 +143,20 @@ export default class ProjectServer {
       }, callback);
     };
 
-    async.series([ loadManifest, setupNextBuildId, loadEntries, migrate, serve, prepareAssets ], callback);
+    let prepareResources = (callback: (err: Error) => any) => {
+      async.each(Object.keys(SupCore.data.resourceClasses), (resourceName, cb) => {
+        this.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.data.base.Resource) => {
+          if (err != null) { cb(err); return; }
+
+          //resource.restore();
+          this.data.resources.release(resourceName, null, { skipUnloadDelay: true });
+          cb();
+        });
+      }, callback);
+      //});
+    };
+
+    async.series([ loadManifest, setupNextBuildId, loadEntries, migrate, serve, prepareAssets, prepareResources ], callback);
   }
 
   log(message: string) {
@@ -165,7 +178,7 @@ export default class ProjectServer {
 
     async.parallel(saveCallbacks, callback);
   }
-  
+
   moveAssetFolderToTrash(trashedAssetFolder: string, callback: (err: Error) => any) {
     const assetsPath = path.join(this.projectPath, "assets");
     const trashedAssetsPath = path.join(this.projectPath, "trashedAssets");

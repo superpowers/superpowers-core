@@ -3,15 +3,13 @@ import Hash from "./Hash";
 import * as path from "path";
 import * as fs from "fs";
 
-interface ServerData { [name: string]: SupCore.data.base.Dictionary; };
-
 export default class Resource extends Hash {
-  serverData: ServerData;
+  serverData: ProjectServerData;
 
-  constructor(pub: any, schema: any, serverData: ServerData) {
+  constructor(pub: any, schema: any, serverData: ProjectServerData) {
     super(pub, schema);
     this.serverData = serverData;
-    if (pub != null) this.setup();
+    if (serverData == null) this.setup();
   }
 
   init(callback: Function) { this.setup(); callback(); }
@@ -22,20 +20,42 @@ export default class Resource extends Hash {
     fs.readFile(path.join(resourcePath, "resource.json"), { encoding: "utf8" }, (err, json) => {
       if (err != null) {
         if (err.code === "ENOENT") {
-          this.init(() => { this.emit("load") });
+          this.init(() => { this._onLoaded(resourcePath, true); });
           return;
         }
-
         throw err;
       }
 
       this.pub = JSON.parse(json);
-      this.setup();
-      this.emit("load");
+      this._onLoaded(resourcePath, false);
+    });
+  }
+
+  _onLoaded(resourcePath: string, justCreated: boolean) {
+    if (justCreated) {
+      this.save(resourcePath, (err) => {
+        this.setup();
+        this.emit("load");
+      });
+      return;
+    }
+
+    this.migrate((hasMigrated) => {
+      if (hasMigrated) {
+        this.save(resourcePath, (err) => {
+          this.setup();
+          this.emit("load");
+        });
+      } else {
+        this.setup();
+        this.emit("load");
+      }
     });
   }
 
   unload() { this.removeAllListeners(); }
+
+  migrate(callback: (hasMigrated: boolean) => void) { callback(false); };
 
   save(resourcePath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);
