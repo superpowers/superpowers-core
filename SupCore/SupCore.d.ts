@@ -240,8 +240,11 @@ declare namespace SupCore {
         destroy(callback: Function): void;
 
         load(assetPath: string): void;
-        client_load(): void;
+        _onLoaded(assetPath: string, pub: any): void;
         unload(): void;
+        migrate(assetPath: string, pub: any, callback: (hasMigrated: boolean) => void): void;
+
+        client_load(): void;
         client_unload(): void;
 
         save(assetPath: string, callback: (err: Error) => any): void;
@@ -261,7 +264,9 @@ declare namespace SupCore {
         setup(): void;
 
         load(resourcePath: string): void;
+        _onLoaded(resourcePath: string): void;
         unload(): void;
+        migrate(resourcePath: string, callback: (hasMigrated: boolean) => void): void;
         save(resourcePath: string, callback: (err: Error) => any): void;
         server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
       }

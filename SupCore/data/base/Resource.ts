@@ -40,7 +40,7 @@ export default class Resource extends Hash {
       return;
     }
 
-    this.migrate((hasMigrated) => {
+    this.migrate(resourcePath, (hasMigrated) => {
       if (hasMigrated) {
         this.save(resourcePath, (err) => {
           this.setup();
@@ -55,7 +55,7 @@ export default class Resource extends Hash {
 
   unload() { this.removeAllListeners(); }
 
-  migrate(callback: (hasMigrated: boolean) => void) { callback(false); };
+  migrate(resourcePath: string, callback: (hasMigrated: boolean) => void) { callback(false); };
 
   save(resourcePath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);

@@ -13,7 +13,7 @@ export default class Asset extends Hash {
     super(pub, schema);
     this.id = id;
     this.serverData = serverData;
-    if (this.pub != null) this.setup();
+    if (this.serverData == null) this.setup();
   }
 
   init(options: any, callback: Function) { this.setup(); callback(); }
@@ -28,14 +28,32 @@ export default class Asset extends Hash {
     fs.readFile(path.join(assetPath, "asset.json"), { encoding: "utf8" },(err, json) => {
       if (err != null) throw err;
 
-      this.pub = JSON.parse(json)
-      this.setup()
-      this.emit("load");
+      let pub = JSON.parse(json)
+      this._onLoaded(assetPath, pub);
     });
   }
-  client_load() {}
+
+  _onLoaded(assetPath: string, pub: any) {
+    this.migrate(assetPath, pub, (hasMigrated) => {
+      if (hasMigrated) {
+        this.pub = pub;
+        this.save(assetPath, (err) => {
+          this.setup();
+          this.emit("load");
+        });
+      } else {
+        this.pub = pub;
+        this.setup();
+        this.emit("load");
+      }
+    });
+  }
 
   unload() { this.removeAllListeners(); }
+
+  migrate(assetPath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); };
+
+  client_load() {}
   client_unload() {}
 
   save(assetPath: string, callback: (err: Error) => any) {
