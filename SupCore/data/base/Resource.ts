@@ -20,19 +20,20 @@ export default class Resource extends Hash {
     fs.readFile(path.join(resourcePath, "resource.json"), { encoding: "utf8" }, (err, json) => {
       if (err != null) {
         if (err.code === "ENOENT") {
-          this.init(() => { this._onLoaded(resourcePath, true); });
+          this.init(() => { this._onLoaded(resourcePath, this.pub, true); });
           return;
         }
         throw err;
       }
 
-      this.pub = JSON.parse(json);
-      this._onLoaded(resourcePath, false);
+      let pub = JSON.parse(json);
+      this._onLoaded(resourcePath, pub, false);
     });
   }
 
-  _onLoaded(resourcePath: string, justCreated: boolean) {
+  _onLoaded(resourcePath: string, pub: any, justCreated: boolean) {
     if (justCreated) {
+      this.pub = pub;
       this.save(resourcePath, (err) => {
         this.setup();
         this.emit("load");
@@ -40,13 +41,15 @@ export default class Resource extends Hash {
       return;
     }
 
-    this.migrate(resourcePath, (hasMigrated) => {
+    this.migrate(resourcePath, pub, (hasMigrated) => {
       if (hasMigrated) {
+        this.pub = pub;
         this.save(resourcePath, (err) => {
           this.setup();
           this.emit("load");
         });
       } else {
+        this.pub = pub;
         this.setup();
         this.emit("load");
       }
@@ -55,7 +58,7 @@ export default class Resource extends Hash {
 
   unload() { this.removeAllListeners(); }
 
-  migrate(resourcePath: string, callback: (hasMigrated: boolean) => void) { callback(false); };
+  migrate(resourcePath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); };
 
   save(resourcePath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);

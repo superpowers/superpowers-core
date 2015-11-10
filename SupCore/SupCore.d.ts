@@ -264,9 +264,9 @@ declare namespace SupCore {
         setup(): void;
 
         load(resourcePath: string): void;
-        _onLoaded(resourcePath: string): void;
+        _onLoaded(resourcePath: string, pub: any): void;
         unload(): void;
-        migrate(resourcePath: string, callback: (hasMigrated: boolean) => void): void;
+        migrate(resourcePath: string, pub: any, callback: (hasMigrated: boolean) => void): void;
         save(resourcePath: string, callback: (err: Error) => any): void;
         server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
       }
