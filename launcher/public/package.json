@@ -7,7 +7,7 @@
   "node-main": "node-main.js",
   "window": {
     "title": "Superpowers",
-    "icon": "icon.png",
+    "icon": "images/icon.png",
     "width": 800,
     "height": 480,
     "toolbar": false,

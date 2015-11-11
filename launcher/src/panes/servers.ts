@@ -89,7 +89,7 @@ function onRemoveAddressClick() {
 function onServerActivate() {
   let gui = (<any>window).nwDispatcher.requireNwGui();
   let win = gui.Window.open("connectionStatus.html",
-    { title: "Superpowers", icon: "icon.png",
+    { title: "Superpowers", icon: "images/icon.png",
     width: 1000, height: 600,
     min_width: 800, min_height: 480,
     toolbar: false, frame: false, focus: true });
