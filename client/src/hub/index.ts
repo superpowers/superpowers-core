@@ -117,8 +117,11 @@ function onNewProjectClick() {
       socket.emit("add:projects", name, description, (err: string, id: string) => {
         if (err != null) { alert(err); return; }
 
-        ui.projectsTreeView.clearSelection()
-        ui.projectsTreeView.addToSelection(ui.projectsTreeView.treeRoot.querySelector(`li[data-id='${id}']`));
+        ui.projectsTreeView.clearSelection();
+
+        let node = ui.projectsTreeView.treeRoot.querySelector(`li[data-id='${id}']`);
+        ui.projectsTreeView.addToSelection(node);
+        ui.projectsTreeView.scrollIntoView(node);
       });
     });
   });
