@@ -43,7 +43,13 @@ export default class RemoteHubClient extends BaseRemoteClient {
     fs.mkdirSync(path.join(projectPath, "rooms"));
     fs.mkdirSync(path.join(projectPath, "resources"));
 
-    this.server.data.projects.add(manifest, null, (err: string, actualIndex: number) => {
+    let sortedIndex = 0;
+    for (let item of this.server.data.projects.pub) {
+      if (manifest.name.localeCompare(item.name) < 0) break;
+      sortedIndex++;
+    }
+
+    this.server.data.projects.add(manifest, sortedIndex, (err: string, actualIndex: number) => {
       if (err != null) { callback(err); return; }
 
       let writeManifest = (callback: (err: NodeJS.ErrnoException) => any) => {

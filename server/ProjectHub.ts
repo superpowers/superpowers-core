@@ -32,6 +32,7 @@ export default class ProjectHub {
       let data: SupCore.Data.ProjectItem[] = [];
       for (let id in this.serversById) data.push(this.serversById[id].data.manifest.pub);
 
+      data.sort(SupCore.Data.Projects.sort);
       this.data.projects = new SupCore.Data.Projects(data);
       callback();
     };

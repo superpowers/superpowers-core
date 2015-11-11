@@ -14,6 +14,10 @@ export default class Projects extends ListById {
     name: { type: "string", minLength: 1, maxLength: 80 },
     description: { type: "string", maxLength: 300 }
   }
+  
+  static sort(a: ProjectItem, b: ProjectItem) {
+    return a.name.localeCompare(b.name);
+  }
 
   pub: ProjectItem[];
   byId: { [id: string]: ProjectItem; };

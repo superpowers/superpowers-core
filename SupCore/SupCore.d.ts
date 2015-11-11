@@ -19,6 +19,7 @@ declare namespace SupCore {
     }
     class Projects extends Base.ListById {
       pub: ProjectItem[];
+      static sort(a: ProjectItem, b: ProjectItem): number;
       byId: { [id: string]: ProjectItem; };
 
       constructor(pub: ProjectItem[]);
