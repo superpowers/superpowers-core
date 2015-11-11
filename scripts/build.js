@@ -9,10 +9,11 @@ try { if (fs.statSync(__dirname + "/../system").isDirectory) oldSystemDirectoryE
 
 if (!systemsDirectoryExists && oldSystemDirectoryExists) {
   console.log("IMPORTANT: Superpowers now supports multiple systems, many things have moved.");
-  console.log("The system/ and plugins/ folders should be moved respectively to systems/cape/ and system/cape/plugins/.");
+  console.log("The system/ and plugins/ folders have moved respectively to systems/cape/ and system/cape/plugins/.");
   console.log("The repositories have also been renamed to cape-superpowers-system and cape-sparklinlabs-plugins.");
   console.log("");
-  console.log("The simplest approach is probably to start from a fresh clone to avoid any potential issues with left-over build files.");
+  console.log("The simplest approach is probably to do a fresh bootstrap from https://sparklinlabs.com/account to avoid any potential issues with left-over build files.");
+  console.log("As always, make sure to backup your projects and plugins!");
   process.exit(1);
 }
 
