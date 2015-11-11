@@ -78,15 +78,23 @@ function createProjectElement(manifest: SupCore.Data.ProjectItem) {
   let liElt = document.createElement("li");
   (<any>liElt.dataset).id = manifest.id;
 
-  let nameSpan = document.createElement("span");
-  nameSpan.className = "name";
-  nameSpan.textContent = manifest.name;
-  liElt.appendChild(nameSpan);
+  let icon = new Image();
+  icon.src = "images/icon.png";
+  liElt.appendChild(icon);
 
-  let descriptionSpan = document.createElement("span");
-  descriptionSpan.className = "description";
-  descriptionSpan.textContent = manifest.description;
-  liElt.appendChild(descriptionSpan);
+  let infoDiv = document.createElement("div");
+  infoDiv.className = "info";
+  liElt.appendChild(infoDiv);
+
+  let nameDiv = document.createElement("div");
+  nameDiv.className = "name";
+  nameDiv.textContent = manifest.name;
+  infoDiv.appendChild(nameDiv);
+
+  let descriptionDiv = document.createElement("div");
+  descriptionDiv.className = "description";
+  descriptionDiv.textContent = manifest.description;
+  infoDiv.appendChild(descriptionDiv);
 
   return liElt;
 }

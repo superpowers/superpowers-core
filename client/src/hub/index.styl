@@ -39,18 +39,37 @@
 
   ol.tree
     position absolute
+    font-size 1.5em
+    line-height 1.25
 
   li
     display flex
     white-space nowrap
+    padding 0.5em
+    align-items flex-start
+    height auto
 
-    .description
-      flex 1
+  img
+    width 48px
+    height 48px
+    margin-right 0.5em
+    border 1px solid rgba(0,0,0,0.2)
+    border-radius 4px
+    background #eee
+
+  .info
+    flex 1
+
+    > div
       overflow hidden
       text-overflow ellipsis
 
   .name
     font-weight bold
+
+  .description
+    color #888
+    font-size 0.7em
 
 .superpowers
   margin 0.5em
