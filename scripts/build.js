@@ -1,5 +1,21 @@
 var path = require("path");
 var fs = require("fs");
+
+var systemsDirectoryExists = false;
+try { if (fs.statSync(__dirname + "/../systems").isDirectory) systemsDirectoryExists = true; } catch(err) {}
+
+var oldSystemDirectoryExists = false;
+try { if (fs.statSync(__dirname + "/../system").isDirectory) oldSystemDirectoryExists = true; } catch(err) {}
+
+if (!systemsDirectoryExists && oldSystemDirectoryExists) {
+  console.log("IMPORTANT: Superpowers now supports multiple systems, many things have moved.");
+  console.log("The system/ and plugins/ folders should be moved respectively to systems/cape/ and system/cape/plugins/.");
+  console.log("The repositories have also been renamed to cape-superpowers-system and cape-sparklinlabs-plugins.");
+  console.log("");
+  console.log("The simplest approach is probably to start from a fresh clone to avoid any potential issues with left-over build files.");
+  process.exit(1);
+}
+
 var async = require("async");
 var child_process = require("child_process");
 
