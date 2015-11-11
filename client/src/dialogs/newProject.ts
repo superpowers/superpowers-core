@@ -1,13 +1,25 @@
-export default function newAssetDialog(typeLabels: { [value: string]: string }, open: boolean,
-callback: (name: string, type: string, open: boolean) => any) {
+interface NewProjectCallback {
+  (project: { type: string; name: string, description: string; }, open: boolean): any;
+}
+
+export default function newProjectDialog(typeLabels: { [value: string]: string }, open: boolean,
+callback: NewProjectCallback) {
 
   let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
   let formElt = document.createElement("form"); dialogElt.appendChild(formElt);
 
   // Prompt name
   let labelElt = document.createElement("label");
-  labelElt.textContent = "Select the type and enter a name for the new asset.";
+  labelElt.textContent = "Select the type and enter a name for the new project.";
   formElt.appendChild(labelElt);
+
+  // Name
+  let nameInputElt = document.createElement("input");
+  nameInputElt.required = true;
+  nameInputElt.placeholder = "Project name";
+  nameInputElt.pattern = "[^/]+";
+  nameInputElt.title = "Must contain no slashes."
+  formElt.appendChild(nameInputElt);
 
   // Type
   let typeSelectElt = document.createElement("select");
@@ -20,12 +32,10 @@ callback: (name: string, type: string, open: boolean) => any) {
   typeSelectElt.size = 5;
   formElt.appendChild(typeSelectElt);
 
-  // Name
-  let nameInputElt = document.createElement("input");
-  nameInputElt.placeholder = "Asset name (optional)";
-  nameInputElt.pattern = "[^/]+";
-  nameInputElt.title = "Must contain no slashes."
-  formElt.appendChild(nameInputElt);
+  // Description
+  let descriptionInputElt = document.createElement("input");
+  descriptionInputElt.placeholder = "Description (optional)";
+  formElt.appendChild(descriptionInputElt);
 
   // Auto-open checkbox
   let downElt = document.createElement("div");
@@ -74,7 +84,10 @@ callback: (name: string, type: string, open: boolean) => any) {
   function submit() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);
-    if (callback != null) callback(nameInputElt.value, typeSelectElt.value, openCheckboxElt.checked);
+    if (callback != null) {
+      let project = { type: typeSelectElt.value, name: nameInputElt.value, description: descriptionInputElt.value }
+      callback(project, openCheckboxElt.checked);
+    }
   }
 
   formElt.addEventListener("submit", (event) => {
@@ -111,10 +124,10 @@ callback: (name: string, type: string, open: boolean) => any) {
   function closeDialog() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);
-    if (callback != null) callback(null, null, null);
+    if (callback != null) callback(null, null);
   }
 
   // Show dialog
   document.body.appendChild(dialogElt);
-  typeSelectElt.focus();
+  nameInputElt.focus();
 }

@@ -1,3 +1,5 @@
+import newProjectDialog from "../dialogs/newProject";
+
 let TreeView = require("dnd-tree-view");
 
 let data: {projects?: SupCore.Data.Projects};
@@ -108,23 +110,26 @@ function onProjectActivate() {
   else window.location.search = search;
 }
 
+let autoOpenProject = true;
 function onNewProjectClick() {
-  SupClient.dialogs.prompt("Enter a name for the project.", "My project", null, "Create", (name) => {
-    if (name == null) return;
+  newProjectDialog({ "Cape game project": "cape" }, autoOpenProject, (project, open) => {
+    if (project == null) return;
+    autoOpenProject = open;
 
-    SupClient.dialogs.prompt("Enter a description for the project.", "Project description", null, "Create", { required: false }, (description) => {
-      if (description == null) description = "";
-      socket.emit("add:projects", name, description, (err: string, id: string) => {
-        if (err != null) { alert(err); return; }
-
-        ui.projectsTreeView.clearSelection();
-
-        let node = ui.projectsTreeView.treeRoot.querySelector(`li[data-id='${id}']`);
-        ui.projectsTreeView.addToSelection(node);
-        ui.projectsTreeView.scrollIntoView(node);
-      });
-    });
+    socket.emit("add:projects", project.name, project.description, onProjectAddedAck);
   });
+}
+
+function onProjectAddedAck(err: string, id: string) {
+  if (err != null) { alert(err); return; }
+
+  ui.projectsTreeView.clearSelection();
+
+  let node = ui.projectsTreeView.treeRoot.querySelector(`li[data-id='${id}']`);
+  ui.projectsTreeView.addToSelection(node);
+  ui.projectsTreeView.scrollIntoView(node);
+
+  if (autoOpenProject) onProjectActivate();
 }
 
 function onRenameProjectClick() {
