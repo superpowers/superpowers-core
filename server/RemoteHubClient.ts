@@ -18,7 +18,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
   // TODO: Implement roles and capabilities
   can(action: string) { return true; }
 
-  _onAddProject = (name: string, description: string, callback: (err: string, projectId?: string) => any) => {
+  _onAddProject = (name: string, description: string, pngIcon: Buffer, callback: (err: string, projectId?: string) => any) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
     let manifest: SupCore.Data.ProjectItem = { id: null, name, description };
@@ -38,6 +38,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     }
 
     let projectPath = path.join(paths.projects, projectFolder);
+    fs.mkdirSync(path.join(projectPath, "public"));
     fs.mkdirSync(path.join(projectPath, "assets"));
     fs.mkdirSync(path.join(projectPath, "trashedAssets"));
     fs.mkdirSync(path.join(projectPath, "rooms"));
@@ -52,19 +53,24 @@ export default class RemoteHubClient extends BaseRemoteClient {
     this.server.data.projects.add(manifest, sortedIndex, (err: string, actualIndex: number) => {
       if (err != null) { callback(err); return; }
 
-      let writeManifest = (callback: (err: NodeJS.ErrnoException) => any) => {
+      let writeManifest = (callback: (err?: NodeJS.ErrnoException) => any) => {
         let manifestJSON = JSON.stringify(manifest, null, 2);
         fs.writeFile(path.join(projectPath, "manifest.json"), manifestJSON, { encoding: "utf8" }, callback);
       };
 
-      let writeEntries = (callback: (err: NodeJS.ErrnoException) => any) => {
+      let writeEntries = (callback: (err?: NodeJS.ErrnoException) => any) => {
         let entriesJSON = JSON.stringify([], null, 2);
         fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
+      };
+      
+      let writeIcon = (callback: (err?: NodeJS.ErrnoException) => any) => {
+        if (pngIcon == null) { callback(); return; }
+        fs.writeFile(path.join(projectPath, "public/icon.png"), pngIcon, callback);
       };
 
       let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, manifest, callback); };
 
-      async.series([ writeManifest, writeEntries, loadProject ], (err) => {
+      async.series([ writeManifest, writeEntries, writeIcon, loadProject ], (err) => {
         if (err != null) { SupCore.log(`Error while creating project:\n${err}`); return; }
 
         this.server.io.in("sub:projects").emit("add:projects", manifest, actualIndex);

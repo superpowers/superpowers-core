@@ -81,7 +81,13 @@ function createProjectElement(manifest: SupCore.Data.ProjectItem) {
   (<any>liElt.dataset).id = manifest.id;
 
   let icon = new Image();
-  icon.src = "images/icon.png";
+  icon.src = `/projects/${manifest.id}/icon.png`;
+
+  function onIconError() {
+    icon.src = "/images/default-project-icon.png";
+    icon.removeEventListener("error", onIconError);
+  }
+  icon.addEventListener("error", onIconError);
   liElt.appendChild(icon);
 
   let infoDiv = document.createElement("div");
@@ -116,7 +122,7 @@ function onNewProjectClick() {
     if (project == null) return;
     autoOpenProject = open;
 
-    socket.emit("add:projects", project.name, project.description, onProjectAddedAck);
+    socket.emit("add:projects", project.name, project.description, project.icon, onProjectAddedAck);
   });
 }
 

@@ -25,13 +25,19 @@ process.on("uncaughtException", (err: Error) => {
 });
 
 function handle404(err: any, req: express.Request, res: express.Response, next: Function) {
-  if (err.status === 404) {res.status(404).end("File not found"); return; }
+  if (err.status === 404) { res.status(404).end("File not found"); return; }
   next();
 }
+
+let hub: ProjectHub = null;
 
 // Main HTTP server
 let mainApp = express();
 mainApp.use("/", express.static(`${__dirname}/../public`));
+mainApp.use("/projects/:projectId/*", (req, res) => {
+  let projectPath = hub.serversById[req.params.projectId].projectPath;
+  res.sendFile(req.params[0], { root: `${projectPath}/public` });
+});
 
 let mainHttpServer = http.createServer(mainApp);
 mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
@@ -44,8 +50,6 @@ mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
 let io = socketio(mainHttpServer, { transports: ["websocket"] });
 
 // Build HTTP server
-let hub: ProjectHub = null;
-
 let buildApp = express();
 
 buildApp.get("/", (req: express.Request, res: express.Response) => { res.redirect(`http://${req.hostname}:${config.mainPort}/?${querystring.stringify(req.query)}`); });
