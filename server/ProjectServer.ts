@@ -27,7 +27,7 @@ export default class ProjectServer {
     this.projectPath = path.join(paths.projects, folderName);
 
     // FIXME: Don't hardcode the system
-    this.system = SupCore.systems["cape"];
+    this.system = SupCore.systems["supGame"];
 
     this.data = {
       manifest: null,

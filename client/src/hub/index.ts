@@ -118,7 +118,7 @@ function onProjectActivate() {
 
 let autoOpenProject = true;
 function onNewProjectClick() {
-  newProjectDialog({ "Cape game project": "cape" }, autoOpenProject, (project, open) => {
+  newProjectDialog({ "Superpowers game project": "supGame" }, autoOpenProject, (project, open) => {
     if (project == null) return;
     autoOpenProject = open;
 
