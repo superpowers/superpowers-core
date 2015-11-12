@@ -177,7 +177,8 @@ function setupAssetTypes(editorsByAssetType: any) {
 function setupTools(toolsByName: any) {
   data.toolsByName = toolsByName;
   
-  let toolsList = document.querySelector(".sidebar .tools ul");
+  let toolsList = <HTMLUListElement>document.querySelector(".sidebar .tools ul");
+  toolsList.innerHTML = "";
 
   for (let toolName in toolsByName) {
     let tool = toolsByName[toolName];
