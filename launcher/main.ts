@@ -1,0 +1,210 @@
+/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../typings/github-electron/github-electron-main.d.ts" />
+
+import * as app from "app";  // Module to control application life.
+import * as BrowserWindow from "browser-window";  // Module to create native browser window.
+import * as ipc from "ipc";
+import * as dialog from "dialog";
+
+import * as _ from "lodash";
+import * as async from "async";
+import * as fs from "fs";
+import * as path from "path";
+let mkdirp = require("mkdirp");
+let toBuffer = require("typedarray-to-buffer");
+
+declare let fetch: Fetch;
+require("isomorphic-fetch");
+
+// Keep a global reference of the window object, if you don't, the window will
+// be closed automatically when the JavaScript object is garbage collected.
+let mainWindow: GitHubElectron.BrowserWindow;
+
+app.on("window-all-closed", function() {
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform != "darwin") {
+    app.quit();
+  }
+});
+
+app.on("ready", function() {
+  mainWindow = new BrowserWindow({
+    title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
+    width: 800, height: 480,
+    "auto-hide-menu-bar": true, frame: false, resizable: false
+  });
+
+  mainWindow.loadUrl(`${__dirname}/public/index.html`);
+
+  mainWindow.on("closed", function() { mainWindow = null; });
+});
+
+interface ServerWindow { window: GitHubElectron.BrowserWindow; address: string; }
+let serverWindowsById: { [id: string]: ServerWindow } = {};
+ipc.on("new-server-window", (event: Event, address: string) => {
+  let serverWindow = new BrowserWindow({
+    title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
+    width: 1000, height: 600,
+    "min-width": 800, "min-height": 480,
+    "auto-hide-menu-bar": true, frame: false
+  });
+  serverWindow.openDevTools();
+
+  serverWindowsById[serverWindow.id] = { window: serverWindow, address };
+
+  serverWindow.on("closed", () => { delete serverWindowsById[serverWindow.id]; })
+  serverWindow.loadUrl(`${__dirname}/public/connectionStatus.html`);
+
+  function onServerWindowLoaded(event: Event) {
+    serverWindow.webContents.removeListener("did-finish-load", onServerWindowLoaded);
+    serverWindow.webContents.send("connecting", address);
+    connect(serverWindowsById[serverWindow.id]);
+  }
+  serverWindow.webContents.addListener("did-finish-load", onServerWindowLoaded);
+})
+
+function connect(serverWindow: ServerWindow) {
+  serverWindow.window.loadUrl(`http://${serverWindow.address}`);
+  serverWindow.window.webContents.addListener("did-finish-load", onServerLoaded);
+
+  //TODO: invesitate did-fail-load
+  function onServerLoaded(event: Event) {
+    serverWindow.window.webContents.removeListener("did-finish-load", onServerLoaded);
+    serverWindow.window.webContents.executeJavaScript(`
+    if (document.body.childNodes.length === 0) {
+      var remote = require("remote");
+      require("ipc").send("connection-failed", remote.getCurrentWindow().id);
+    }`);
+  }
+}
+
+ipc.on("connecting", (event: Event, id: string) => { connect(serverWindowsById[id]); });
+ipc.on("connection-failed", (event: Event, id: string) => {
+  let serverWindow = serverWindowsById[id].window;
+  serverWindow.loadUrl(`${__dirname}/public/connectionStatus.html`);
+  serverWindow.webContents.addListener("did-finish-load", onConnectionFailed);
+
+  function onConnectionFailed() {
+    serverWindow.webContents.removeListener("did-finish-load", onConnectionFailed);
+    serverWindow.webContents.send("connection-failed", serverWindowsById[id].address);
+  }
+});
+
+ipc.on("request-export", (event: { sender: any }) => {
+  dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {
+    if (directory == null) return;
+
+    let outputFolder = directory[0];
+    let isFolderEmpty = false;
+    try { isFolderEmpty = fs.readdirSync(outputFolder).length === 0; }
+    catch (e) { event.sender.send("export-failed", `Error while checking if folder was empty: ${e.message}`); return; }
+    if (!isFolderEmpty) { event.sender.send("export-failed", "Output folder must be empty."); return; }
+
+    event.sender.send("export-succeed", outputFolder);
+  });
+})
+
+interface ExportData {
+  projectId: string, buildId: string,
+  address: string, mainPort: string, buildPort: string,
+  outputFolder: string, files: string[]
+}
+ipc.on("export", (event: { sender: any }, data: ExportData) => {
+  let exportWindow: GitHubElectron.BrowserWindow = new BrowserWindow({
+    title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
+    width: 1000, height: 600,
+    "min-width": 800, "min-height": 480,
+    "auto-hide-menu-bar": true,
+    "node-integration": true
+  });
+  //exportWindow.openDevTools();
+  exportWindow.loadUrl(`${data.address}:${data.mainPort}/build.html`);
+
+  let doExport = () => {
+    exportWindow.webContents.removeListener("did-finish-load", doExport);
+    exportWindow.webContents.executeJavaScript(`
+    document.title = "Superpowers — Exporting...";
+    document.querySelector(".status").textContent = "Exporting...";
+    `);
+
+    exportWindow.setProgressBar(0);
+    let progress = 0;
+    let progressMax = data.files.length;
+
+    /*let myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'text/plain');
+
+    let myInit: RequestInit = {
+      method: 'GET',
+      headers: myHeaders,
+      mode: 'cors',
+      cache: 'default'
+    };*/
+
+    async.eachLimit(data.files, 10, (file: string, cb: (err: Error) => any) => {
+      let buildPath = `/builds/${data.projectId}/${data.buildId}`;
+
+      let outputFilename = file;
+      if (_.startsWith(outputFilename, buildPath)) {
+        outputFilename = outputFilename.substr(buildPath.length);
+        file = `${data.address}:${data.buildPort}${file}`;
+      } else file = `${data.address}:${data.mainPort}${file}`;
+      outputFilename = outputFilename.replace(/\//g, path.sep);
+
+      let outputPath = `${data.outputFolder}${outputFilename}`;
+      exportWindow.webContents.executeJavaScript(`
+      document.querySelector(".status").textContent = "${outputPath}";
+      `);
+
+      /*fetch(file).then((response: Response) => {
+        let type = response.headers.get("content-type");//.replace("application/", "");
+        console.log(`first step - ${outputFilename} - type: ${type}`);
+        if (type === "json") return response.json();
+        else if (type === "octet-stream") return response.text();
+        //return response.arrayBuffer();
+      }).then((data) => {
+        console.log(`second step - ${outputFilename}`);
+        mkdirp(path.dirname(outputPath), (err: Error) => {
+          if (err != null) { cb(err); return; }
+          fs.writeFile(outputPath, data, () => {
+          //fs.writeFile(outputPath, toBuffer(new Uint8Array(data)).toString("binary"), { encoding: "binary" }, () => {
+            //console.log(`second step - ${outputFilename}`);
+            progress++;
+            exportWindow.setProgressBar(progress / progressMax);
+            cb(null);
+          });
+        //console.log(data);
+        });
+      });*/
+
+      let xhr = new XMLHttpRequest();
+      xhr.open("GET", file);
+      xhr.responseType = "arraybuffer";
+
+      xhr.onload = (event) => {
+        if (xhr.status !== 200) { cb(new Error(`Failed to download ${file}, got status ${xhr.status}`)); return; }
+        mkdirp(path.dirname(outputPath), (err: Error) => {
+          if (err != null) { cb(err); return; }
+          fs.writeFile(outputPath, toBuffer(new Uint8Array(xhr.response)).toString("binary"), { encoding: "binary" }, () => {
+            progress++;
+            exportWindow.setProgressBar(progress / progressMax);
+            cb(null);
+          });
+        });
+      }
+
+      xhr.send();
+    } , (err: Error) => {
+      exportWindow.setProgressBar(-1);
+      if (err != null) { alert(err); return; }
+      // TODO: Add link to open in file browser
+      exportWindow.webContents.executeJavaScript(`
+      document.title = "Superpowers — Exported";
+      document.querySelector(".status").textContent = "Exported to ${data.outputFolder}";
+      `);
+    });
+  };
+  exportWindow.webContents.addListener("did-finish-load", doExport);
+})
+

@@ -6,6 +6,7 @@ SupClient/**.js
 server/**.js
 client/**.js
 launcher/src/**.js
+launcher/main.js
 syntax: regexp
 ^systems/
 ^projects/

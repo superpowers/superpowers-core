@@ -11,13 +11,14 @@ let data: {
 let ui: { projectsTreeView?: any } = {};
 let socket: SocketIOClient.Socket;
 
+let port = window.location.port;
+if (port.length === 0) port = "80";
+
 export default function hub() {
   let template = <any>document.getElementById("hub-template");
   let clone = document.importNode(template.content, true);
   document.body.appendChild(clone);
 
-  let port = window.location.port;
-  if (port.length === 0) port = "80";
   document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
 
   ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"));
@@ -143,7 +144,7 @@ function onProjectActivate() {
 
   // When in NW.js, use location.replace to avoid creating an history item
   // which could lead to accidentally navigating back by pressing Backspace
-  if ((<any>window).nwDispatcher != null) window.location.replace(`/${search}`);
+  if (SupClient.isApp) window.location.replace(`${window.location.origin}/${search}`);
   else window.location.search = search;
 }
 

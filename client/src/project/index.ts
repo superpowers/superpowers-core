@@ -32,12 +32,23 @@ let ui: {
   entriesTreeView?: any;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
-  
+
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
   toolsElt?: HTMLUListElement;
 } = {};
 let socket: SocketIOClient.Socket;
+
+let remote: GitHubElectron.Remote;
+let ipc: GitHubElectron.InProcess;
+let shell: GitHubElectron.Shell;
+let BrowserWindow: any;
+if (SupClient.isApp) {
+  remote = nodeRequire("remote");
+  ipc = nodeRequire("ipc");
+  shell = nodeRequire("shell");
+  BrowserWindow = remote.require('browser-window');
+}
 
 export default function project(projectId: string) {
   info.projectId = projectId;
@@ -85,16 +96,11 @@ export default function project(projectId: string) {
   new PerfectResize(document.querySelector(".project .sidebar"), "left");
 
   // Project info
-  document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => {
-    // When in NW.js, use location.replace to avoid creating an history item
-    // which could lead to accidentally navigating back by pressing Backspace
-    if ((<any>window).nwDispatcher != null) window.location.replace("/");
-    else window.location.href = "/";
-  });
+  document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { window.location.replace("/"); });
   document.querySelector(".project-buttons .run").addEventListener("click", () => { runGame(); });
   document.querySelector(".project-buttons .export").addEventListener("click", () => { exportGame(); });
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runGame({ debug: true }); });
-  if ((<any>window).nwDispatcher == null) {
+  if (!SupClient.isApp) {
     (<HTMLButtonElement>document.querySelector(".project-buttons .export")).title = "Export game (only works from the Superpowers app for technical reasons)";
     (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).style.display = "none";
   }
@@ -148,7 +154,7 @@ export default function project(projectId: string) {
   // Panes and tools
   ui.panesElt = <HTMLDivElement>document.querySelector(".project .main .panes");
   ui.toolsElt = <HTMLUListElement>document.querySelector(".sidebar .tools ul");
- 
+
   // Messaging
   window.addEventListener("message", onMessage);
 
@@ -210,7 +216,7 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
     callback();
   });
 }
-  
+
 function setupTool(toolName: string) {
   let tool = data.toolsByName[toolName];
 
@@ -265,7 +271,7 @@ function onWelcome(clientId: number, config: { buildPort: number; systemName: st
   };
 
   window.fetch(`/systems/${data.systemName}/plugins.json`).then((response) => response.json()).then((pluginsInfo: SupCore.PluginsInfo) => {
-    
+
     async.parallel([
       (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
       (cb: Function) => { setupTools(pluginsInfo.paths.tools, cb); }
@@ -292,7 +298,7 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
 
   (<HTMLDivElement>document.querySelector(".connecting")).style.display = "none";
 
-  if ((<any>window).nwDispatcher != null) (<HTMLButtonElement>document.querySelector(".project-buttons .export")).disabled = false;
+  if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .export")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = false;
@@ -462,31 +468,19 @@ function onDependenciesRemoved(id: string, depIds: string[]) {
 }
 
 // User interface
-// Make sure windows have a frame in NW.js
-let nwDispatcher = (<any>window).nwDispatcher;
-if (nwDispatcher != null) {
-  let gui = nwDispatcher.requireNwGui();
-  let nwWindow = gui.Window.get();
-  nwWindow.on("new-win-policy", (frame: any, url: string, policy: any) => {
-    let options = {
-      min_width: 800, min_height: 480,
-      width: 1000, height: 600,
-      toolbar: false, frame: true, focus: true
-    };
-
-    if (url.substring(0, "data:".length) === "data:") {
-      options.width = 800;
-      options.height = 480;
-    }
-
-    policy.setNewWindowManifest(options);
-  });
-}
-
-let gameWindow: any;
+let gameWindow: GitHubElectron.BrowserWindow;
 function runGame(options: { debug: boolean; } = { debug: false }) {
-  if (nwDispatcher != null && gameWindow != null) gameWindow.close();
-  gameWindow = window.open("build.html", `player_${info.projectId}`);
+  if (SupClient.isApp) {
+    if (gameWindow != null) gameWindow.destroy();
+    gameWindow = new BrowserWindow({
+      title: "Superpowers", icon: `${window.location.origin}/images/icon.png`,
+      width: 1000, height: 600,
+      "min-width": 800, "min-height": 480,
+      "auto-hide-menu-bar": true
+    });
+    gameWindow.on("closed", () => { gameWindow = null; });
+    gameWindow.loadUrl(`${window.location.origin}/build.html`);
+  } else window.open("build.html", `player_${info.projectId}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) { alert(err); return; }
@@ -494,42 +488,29 @@ function runGame(options: { debug: boolean; } = { debug: false }) {
     let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemName}/?project=${info.projectId}&build=${buildId}`;
     if (options.debug) url += "&debug";
 
-    window.open(url, `player_${info.projectId}`);
+    if (SupClient.isApp) {
+      if (gameWindow != null) gameWindow.loadUrl(url);
+    } else window.open(url, `player_${info.projectId}`);
   });
 }
 
+
 function exportGame() {
-  let fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.setAttribute("nwdirectory", "");
-  fileInput.setAttribute("nwsaveas", "");
-  fileInput.click();
+  if (SupClient.isApp) ipc.send("request-export");
+}
 
-  fileInput.addEventListener("change", function(event) {
-    let outputFolder = this.value;
-    let isFolderEmpty = false;
-
-    let fs = nodeRequire("fs");
-    try { isFolderEmpty = fs.readdirSync(outputFolder).length === 0; }
-    catch (e) { alert(`Error while checking if folder was empty: ${e.message}`); return; }
-    if (! isFolderEmpty) { alert("Output folder must be empty."); return; }
-
-    let playerWindow = window.open("build.html", "player");
-
-    let doExport = () => {
-      playerWindow.removeEventListener("load", doExport);
-
-      socket.emit("build:project", (err: string, buildId: string, files: any) => {
-        playerWindow.postMessage({ type: "save", projectId: info.projectId, buildId, buildPort: data.buildPort, outputFolder, files }, (<any>window.location).origin);
-      });
-    };
-
-    playerWindow.addEventListener("load", doExport);
-  });
+if (SupClient.isApp) {
+  ipc.on("export-failed", (message: string) => { alert(message); })
+  ipc.on("export-succeed", (outputFolder: string) => {
+    socket.emit("build:project", (err: string, buildId: string, files: any) => {
+      let address = `${window.location.protocol}//${window.location.hostname}`
+      ipc.send("export", { projectId: info.projectId, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
+    });
+  })
 }
 
 function showDevTools() {
-  if (nwDispatcher != null) nwDispatcher.requireNwGui().Window.get().showDevTools();
+  if (remote != null) remote.getCurrentWindow().toggleDevTools();
 }
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
@@ -621,6 +602,7 @@ function onMessage(event: any) {
     case "hotkey": onMessageHotKey(event.data.content); break;
     case "openEntry": openEntry(event.data.id, event.data.options); break;
     case "openTool": openTool(event.data.name, event.data.options); break;
+    case "openLink": shell.openExternal(event.data.content); break;
     case "error": onWindowDevError(); break;
   }
 }
@@ -742,6 +724,8 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
     ui.tabStrip.tabsRoot.appendChild(tab);
 
     iframe = document.createElement("iframe");
+    //iframe.setAttribute("sandbox", "none");
+
     let options = "";
     if (optionValues != null)
       for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;

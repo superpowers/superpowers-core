@@ -31,7 +31,28 @@ html
       button.close
 
     script.
-      var gui = window.nwDispatcher.requireNwGui();
-      var nwWindow = gui.Window.get();
-      document.querySelector(".controls .minimize").addEventListener("click", function() { nwWindow.minimize(); });
-      document.querySelector(".controls .close").addEventListener("click", function() { nwWindow.close(false); });
+      var remote = require("remote");
+      var currentWindow = remote.getCurrentWindow();
+      var ipc = require("ipc");
+
+      document.querySelector(".controls .minimize").addEventListener("click", function() { currentWindow.minimize(); });
+      document.querySelector(".controls .close").addEventListener("click", function() { currentWindow.close(); });
+
+      // var address;
+      ipc.on("connecting", function(address) {
+        document.querySelector(".status").textContent = "Connecting to " + address + "...";
+      });
+
+      ipc.on("connection-failed", function(address) {
+        var statusElt = document.querySelector(".status");
+        statusElt.textContent = "Could not connect to " + address;
+
+        var reloadButton = document.querySelector(".reload");
+        reloadButton.hidden = false;
+        reloadButton.addEventListener("click", function() {
+          statusElt.textContent = "Connecting to " + address + "..."
+          reloadButton.hidden = true;
+          ipc.send("connecting", currentWindow.id);
+        });
+      });
+

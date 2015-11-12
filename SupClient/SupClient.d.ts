@@ -2,6 +2,8 @@
 
 declare namespace SupClient {
 
+  let isApp: boolean;
+
   interface ComponentEditorObject {
     destroy(): void;
     config_setProperty(path: string, value: any): void;

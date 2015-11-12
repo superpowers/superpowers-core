@@ -1,4 +1,4 @@
-import "whatwg-fetch";
+import "isomorphic-fetch";
 import * as io from "socket.io-client";
 
 import ProjectClient from "./ProjectClient"
@@ -9,6 +9,8 @@ export { ProjectClient, setupHotkeys, table, dialogs };
 
 // Initialize empty system
 SupCore.system = new SupCore.System("");
+
+export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 
 // Component editors
 interface ComponentEditorObject {

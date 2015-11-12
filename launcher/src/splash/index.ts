@@ -1,6 +1,6 @@
 export {};
 
-let gui = (<any>window).nwDispatcher.requireNwGui();
+let shell: GitHubElectron.Shell = nodeRequire("shell");
 let packageInfo = require("../../../package.json");
 
 let splash = <HTMLDivElement>document.querySelector(".splash");
@@ -8,7 +8,7 @@ let splash = <HTMLDivElement>document.querySelector(".splash");
 splash.addEventListener("click", (event) => {
   if ((<Element>event.target).tagName === "A") {
     event.preventDefault();
-    gui.Shell.openExternal((<HTMLAnchorElement>event.target).href);
+    shell.openExternal((<HTMLAnchorElement>event.target).href);
     return;
   }
 
