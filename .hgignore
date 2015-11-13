@@ -3,15 +3,12 @@ node_modules/
 *.sublime-*
 SupCore/**.js
 SupClient/**.js
-SupAPI/**.js
 server/**.js
 client/**.js
 launcher/src/**.js
 syntax: regexp
-^bin/
-^plugins/
+^systems/
 ^projects/
-^projects-tmp/
 ^builds/
 ^public/
 ^launcher/public/
