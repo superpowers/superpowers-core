@@ -1,28 +1,24 @@
 import ListById from "./Base/ListById";
 import * as _ from "lodash";
 
-interface ProjectItem {
-  id: string;
-  name: string;
-  description: string;
-}
-
 let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 export default class Projects extends ListById {
   static schema = {
     name: { type: "string", minLength: 1, maxLength: 80 },
-    description: { type: "string", maxLength: 300 }
+    description: { type: "string", maxLength: 300 },
+    formatVersion: { type: "number?" },
+    system: { type: "string" }
   }
   
-  static sort(a: ProjectItem, b: ProjectItem) {
+  static sort(a: SupCore.Data.ProjectManifestPub, b: SupCore.Data.ProjectManifestPub) {
     return a.name.localeCompare(b.name);
   }
 
-  pub: ProjectItem[];
-  byId: { [id: string]: ProjectItem; };
+  pub: SupCore.Data.ProjectManifestPub[];
+  byId: { [id: string]: SupCore.Data.ProjectManifestPub; };
 
-  constructor(pub: ProjectItem[]) {
+  constructor(pub: SupCore.Data.ProjectManifestPub[]) {
     super(pub, Projects.schema, this.generateProjectId);
   }
 

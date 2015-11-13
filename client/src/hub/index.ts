@@ -1,8 +1,13 @@
+import * as async from "async";
 import newProjectDialog from "../dialogs/newProject";
 
 let TreeView = require("dnd-tree-view");
 
-let data: {projects?: SupCore.Data.Projects};
+let data: {
+  projects: SupCore.Data.Projects;
+  systemsByProjectType: { [title: string]: string; }
+} = {} as any;
+
 let ui: { projectsTreeView?: any } = {};
 let socket: SocketIOClient.Socket;
 
@@ -22,38 +27,64 @@ export default function hub() {
   document.querySelector(".projects-buttons .rename-project").addEventListener("click", onRenameProjectClick);
   document.querySelector(".projects-buttons .edit-description").addEventListener("click", onEditDescriptionClick);
 
-  socket = SupClient.connect(null, { promptCredentials: true, reconnection: false });
+  loadSystemsInfo(() => {
+    socket = SupClient.connect(null, { promptCredentials: true, reconnection: true });
 
-  socket.on("connect", onConnected);
-  socket.on("disconnect", onDisconnected);
+    socket.on("connect", onConnected);
+    socket.on("disconnect", onDisconnected);
+  
+    socket.on("add:projects", onProjectAdded);
+    socket.on("setProperty:projects", onSetProjectProperty);
+  });
+}
 
-  socket.on("add:projects", onProjectAdded);
-  socket.on("setProperty:projects", onSetProjectProperty);
+interface SystemManifest {
+  title: string;
+}
+
+function loadSystemsInfo(callback: Function) {
+  data.systemsByProjectType = {};
+  
+  window.fetch("/systems.json").then((response) => response.json()).then((systemsInfo: SupCore.SystemsInfo) => {
+    async.each(systemsInfo.list, (systemName, cb) => {
+      window.fetch(`/systems/${systemName}/manifest.json`).then((response) => response.json()).then((manifest: SystemManifest) => {
+        data.systemsByProjectType[`${manifest.title} project`] = systemName;
+        cb();
+      });
+    }, () => { callback(); });
+  });
 }
 
 // Network callbacks
 function onConnected() {
-  data = {};
   socket.emit("sub", "projects", null, onProjectsReceived);
+
+  const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
+  for (let i = 0; i < buttons.length; i++) buttons[i].disabled = false;
 }
 
 function onDisconnected() {
-  data = null;
+  data.projects = null;
+
+  const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
+  for (let i = 0; i < buttons.length; i++) buttons[i].disabled = true;
+  ui.projectsTreeView.clearSelection();
+  ui.projectsTreeView.treeRoot.innerHTML = "";
 }
 
-function onProjectsReceived(err: string, projects: SupCore.Data.ProjectItem[]) {
+function onProjectsReceived(err: string, projects: SupCore.Data.ProjectManifestPub[]) {
   data.projects = new SupCore.Data.Projects(projects);
 
   ui.projectsTreeView.clearSelection();
   ui.projectsTreeView.treeRoot.innerHTML = "";
 
   for (let manifest of projects) {
-    let liElt = createProjectElement(manifest);
+    const liElt = createProjectElement(manifest);
     ui.projectsTreeView.append(liElt, "item");
   }
 }
 
-function onProjectAdded(manifest: SupCore.Data.ProjectItem, index: number) {
+function onProjectAdded(manifest: SupCore.Data.ProjectManifestPub, index: number) {
   data.projects.client_add(manifest, index);
 
   let liElt = createProjectElement(manifest);
@@ -76,7 +107,7 @@ function onSetProjectProperty(id: string, key: string, value: any) {
 }
 
 // User interface
-function createProjectElement(manifest: SupCore.Data.ProjectItem) {
+function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
   let liElt = document.createElement("li");
   (<any>liElt.dataset).id = manifest.id;
 
@@ -118,11 +149,11 @@ function onProjectActivate() {
 
 let autoOpenProject = true;
 function onNewProjectClick() {
-  newProjectDialog({ "Superpowers game project": "supGame" }, autoOpenProject, (project, open) => {
+  newProjectDialog(data.systemsByProjectType, autoOpenProject, (project, open) => {
     if (project == null) return;
     autoOpenProject = open;
 
-    socket.emit("add:projects", project.name, project.description, project.icon, onProjectAddedAck);
+    socket.emit("add:projects", project.name, project.description, project.system, project.icon, onProjectAddedAck);
   });
 }
 

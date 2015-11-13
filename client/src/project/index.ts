@@ -1,4 +1,5 @@
 import newAssetDialog from "../dialogs/newAsset";
+import * as async from "async";
 
 let nodeRequire = require;
 let TreeView = require("dnd-tree-view");
@@ -9,15 +10,22 @@ let info: {
   projectId?: string;
 } = {};
 
+interface EditorManifest {
+  title: string;
+  // assetType: string; <- for asset editors, soon
+  pinned: boolean;
+  pluginPath: string;
+}
+
 let data: {
   buildPort?: number;
   systemName?: string;
-  manifest?: SupCore.Data.Manifest;
+  manifest?: SupCore.Data.ProjectManifest;
   entries?: SupCore.Data.Entries;
 
-  assetTypesByName?: any;
-  editorsByAssetType?: any;
-  toolsByName?: any;
+  assetTypesByTitle?: { [title: string]: string; };
+  editorsByAssetType?: { [assetType: string]: EditorManifest };
+  toolsByName?: { [name: string]: EditorManifest };
 };
 
 let ui: {
@@ -27,6 +35,7 @@ let ui: {
   
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
+  toolsElt?: HTMLUListElement;
 } = {};
 let socket: SocketIOClient.Socket;
 
@@ -136,9 +145,11 @@ export default function project(projectId: string) {
     toggleNotificationsButton.title = "Click to disable notifications";
   }
 
-  // Panes
+  // Panes and tools
   ui.panesElt = <HTMLDivElement>document.querySelector(".project .main .panes");
-
+  ui.toolsElt = <HTMLUListElement>document.querySelector(".sidebar .tools ul");
+ 
+  // Messaging
   window.addEventListener("message", onMessage);
 
   connect();
@@ -164,50 +175,71 @@ function connect() {
   socket.on("remove:dependencies", onDependenciesRemoved);
 }
 
-function setupAssetTypes(editorsByAssetType: any) {
-  data.editorsByAssetType = editorsByAssetType;
+function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback: Function) {
+  data.editorsByAssetType = {};
+  data.assetTypesByTitle = {};
 
-  data.assetTypesByName = {};
-  for (let assetType in editorsByAssetType) {
-    let editor = editorsByAssetType[assetType];
-    data.assetTypesByName[editor.title.en] = assetType;
-  }
+  let pluginsRoot = `/systems/${data.systemName}/plugins`;
+
+  async.each(Object.keys(editorPaths), (assetType, cb) => {
+    let pluginPath = editorPaths[assetType];
+    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${assetType}/manifest.json`).then((response) => response.json()).then((manifest: EditorManifest) => {
+      data.editorsByAssetType[assetType] = manifest;
+      data.editorsByAssetType[assetType].pluginPath = pluginPath;
+      data.assetTypesByTitle[manifest.title] = assetType;
+      cb();
+    });
+  }, () => { callback(); });
 }
 
-function setupTools(toolsByName: any) {
-  data.toolsByName = toolsByName;
-  
-  let toolsList = <HTMLUListElement>document.querySelector(".sidebar .tools ul");
-  toolsList.innerHTML = "";
+function setupTools(toolPaths: { [name: string]: string; }, callback: Function) {
+  data.toolsByName = {};
 
-  for (let toolName in toolsByName) {
-    let tool = toolsByName[toolName];
-    if (toolName === "main" && tool.pluginPath === "sparklinlabs/home") {
-      ui.homeTab = openTool(toolName);
-      continue;
-    }
+  let pluginsRoot = `/systems/${data.systemName}/plugins`;
 
-    let toolElt = document.createElement("li");
-    (<any>toolElt.dataset).name = toolName;
-    let containerElt = document.createElement("div");
-    toolElt.appendChild(containerElt);
-
-    let iconElt = document.createElement("img");
-    iconElt.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
-    containerElt.appendChild(iconElt);
-
-    let nameSpanElt = document.createElement("span");
-    nameSpanElt.className = "name";
-    nameSpanElt.textContent = tool.title.en;
-    containerElt.appendChild(nameSpanElt);
-
-    toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
-    toolElt.addEventListener("mouseleave", (event) => {
-      if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
+  async.each(Object.keys(toolPaths), (toolName, cb) => {
+    let pluginPath = toolPaths[toolName];
+    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`).then((response) => response.json()).then((manifest: EditorManifest) => {
+      data.toolsByName[toolName] = manifest;
+      data.toolsByName[toolName].pluginPath = pluginPath;
+      cb();
     });
-    nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
-    toolsList.appendChild(toolElt);
+  }, () => {
+    ui.toolsElt.innerHTML = "";
+    for (let toolName in data.toolsByName) setupTool(toolName);
+    callback();
+  });
+}
+  
+function setupTool(toolName: string) {
+  let tool = data.toolsByName[toolName];
+
+  if (tool.pinned) {
+    // TODO: Support multiple pinned tabs
+    ui.homeTab = openTool(toolName);
+    return;
   }
+
+  let toolElt = document.createElement("li");
+  toolElt.dataset["name"] = toolName;
+  let containerElt = document.createElement("div");
+  toolElt.appendChild(containerElt);
+
+  let iconElt = document.createElement("img");
+  iconElt.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+  containerElt.appendChild(iconElt);
+
+  let nameSpanElt = document.createElement("span");
+  nameSpanElt.className = "name";
+  nameSpanElt.textContent = tool.title;
+  containerElt.appendChild(nameSpanElt);
+
+  toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
+  toolElt.addEventListener("mouseleave", (event) => {
+    if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
+  });
+  nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
+  ui.toolsElt.appendChild(toolElt);
 }
 
 // Network callbacks
@@ -232,17 +264,21 @@ function onWelcome(clientId: number, config: { buildPort: number; systemName: st
     systemName: config.systemName
   };
 
-  (<any>window).fetch(`/systems/${data.systemName}/plugins.json`).then((response: any) => response.json()).then((pluginPaths: any) => {
-    setupAssetTypes(pluginPaths.editorsByAssetType);
-    setupTools(pluginPaths.toolsByName);
-
-    socket.emit("sub", "manifest", null, onManifestReceived);
-    socket.emit("sub", "entries", null, onEntriesReceived);
+  window.fetch(`/systems/${data.systemName}/plugins.json`).then((response) => response.json()).then((pluginsInfo: SupCore.PluginsInfo) => {
+    
+    async.parallel([
+      (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
+      (cb: Function) => { setupTools(pluginsInfo.paths.tools, cb); }
+    ], (err) => {
+      if (err) throw err;
+      socket.emit("sub", "manifest", null, onManifestReceived);
+      socket.emit("sub", "entries", null, onEntriesReceived);
+    });
   });
 }
 
 function onManifestReceived(err: string, manifest: any) {
-  data.manifest = new SupCore.Data.Manifest(manifest);
+  data.manifest = new SupCore.Data.ProjectManifest(manifest);
 
   document.querySelector(".project .project-name").textContent = manifest.name;
   document.title = `${manifest.name} — Superpowers`;
@@ -390,7 +426,7 @@ function onSetEntryProperty(id: string, key: string, value: any) {
   }
 }
 
-function onDiagnosticSet(id: string, newDiag: any) {
+function onDiagnosticSet(id: string, newDiag: SupCore.Data.DiagnosticsItem) {
   let diagnostics = data.entries.diagnosticsByEntryId[id];
 
   let existingDiag = diagnostics.byId[newDiag.id];
@@ -496,7 +532,7 @@ function showDevTools() {
   if (nwDispatcher != null) nwDispatcher.requireNwGui().Window.get().showDevTools();
 }
 
-function createEntryElement(entry: any) {
+function createEntryElement(entry: SupCore.Data.EntryNode) {
   let liElt = document.createElement("li");
   (<any>liElt.dataset).id = entry.id;
   (<any>liElt.dataset).dndText = data.entries.getPathFromId(entry.id);
@@ -722,9 +758,9 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
 }
 
 function onNewAssetClick() {
-  newAssetDialog(data.assetTypesByName, autoOpenAsset, (name, type, open) => {
+  newAssetDialog(data.assetTypesByTitle, autoOpenAsset, (name, type, open) => {
     if (name == null) return;
-    if (name === "") name = data.editorsByAssetType[type].title.en;
+    if (name === "") name = data.editorsByAssetType[type].title;
 
     autoOpenAsset = open;
     socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
@@ -880,7 +916,7 @@ function createAssetTabElement(entry: SupCore.Data.EntryNode) {
   return tabElt;
 }
 
-function createToolTabElement(toolName: string, tool: any) {
+function createToolTabElement(toolName: string, tool: EditorManifest) {
   let tabElt = document.createElement("li");
 
   let iconElt = document.createElement("img");
@@ -897,7 +933,7 @@ function createToolTabElement(toolName: string, tool: any) {
   tabLabel.appendChild(tabLabelName);
 
   if (toolName !== "main") {
-    tabLabelName.textContent = tool.title.en;
+    tabLabelName.textContent = tool.title;
 
     let closeButton = document.createElement("button");
     closeButton.classList.add("close");

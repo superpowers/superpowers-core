@@ -18,10 +18,16 @@ export default class RemoteHubClient extends BaseRemoteClient {
   // TODO: Implement roles and capabilities
   can(action: string) { return true; }
 
-  _onAddProject = (name: string, description: string, pngIcon: Buffer, callback: (err: string, projectId?: string) => any) => {
+  _onAddProject = (name: string, description: string, system: string, pngIcon: Buffer, callback: (err: string, projectId?: string) => any) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
-    let manifest: SupCore.Data.ProjectItem = { id: null, name, description };
+    let manifest: SupCore.Data.ProjectManifestPub = {
+      id: null,
+      name,
+      description,
+      system,
+      formatVersion: SupCore.Data.ProjectManifest.currentFormatVersion
+    };
 
     let projectFolder = manifest.name.toLowerCase().slice(0, 16).replace(/[^a-z0-9]/g, "-");
     let originalProjectFolder = projectFolder;
@@ -68,7 +74,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
         fs.writeFile(path.join(projectPath, "public/icon.png"), pngIcon, callback);
       };
 
-      let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, manifest, callback); };
+      let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, callback); };
 
       async.series([ writeManifest, writeEntries, writeIcon, loadProject ], (err) => {
         if (err != null) { SupCore.log(`Error while creating project:\n${err}`); return; }

@@ -24,12 +24,12 @@ export default class ProjectHub {
     let serveProjects = (callback: ErrorCallback) => {
       async.each(fs.readdirSync(paths.projects), (folderName: string, cb: (err: Error) => any) => {
         if (folderName.indexOf(".") !== -1) { cb(null); return; }
-        this.loadProject(folderName, null, cb);
+        this.loadProject(folderName, cb);
       }, callback);
     };
 
     let setupProjectsList = (callback: Function) => {
-      let data: SupCore.Data.ProjectItem[] = [];
+      let data: SupCore.Data.ProjectManifestPub[] = [];
       for (let id in this.serversById) data.push(this.serversById[id].data.manifest.pub);
 
       data.sort(SupCore.Data.Projects.sort);
@@ -59,8 +59,8 @@ export default class ProjectHub {
     // this.clients.push(client);
   }
 
-  loadProject(folderName: string, manifestData: { id: string; name: string; description: string; }, callback: (err: Error) => any) {
-    let server = new ProjectServer(this.globalIO, folderName, manifestData, (err) => {
+  loadProject(folderName: string, callback: (err: Error) => any) {
+    let server = new ProjectServer(this.globalIO, folderName, (err) => {
       if (err != null) { callback(err); return; }
 
       this.serversById[server.data.manifest.pub.id] = server;

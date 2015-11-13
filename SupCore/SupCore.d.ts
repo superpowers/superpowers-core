@@ -12,33 +12,38 @@ declare namespace SupCore {
     interface ComponentConfigClass { new(pub: any, sceneAsset?: any): Base.ComponentConfig; create(): any; }
     interface ResourceClass { new(pub: any, server?: ProjectServer): Base.Resource; }
 
-    interface ProjectItem {
-      id: string;
-      name: string;
-      description: string;
-    }
     class Projects extends Base.ListById {
-      pub: ProjectItem[];
-      static sort(a: ProjectItem, b: ProjectItem): number;
-      byId: { [id: string]: ProjectItem; };
+      pub: ProjectManifestPub[];
+      static sort(a: ProjectManifestPub, b: ProjectManifestPub): number;
+      byId: { [id: string]: ProjectManifestPub; };
 
-      constructor(pub: ProjectItem[]);
+      constructor(pub: ProjectManifestPub[]);
       generateProjectId(): string;
     }
 
-    interface ProjectManifest {
+    interface ProjectManifestPub {
       id: string;
       name: string;
       description: string;
+      system: string;
+      formatVersion: number;
     }
-    class Manifest extends Base.Hash {
-      pub: ProjectManifest;
+    class ProjectManifest extends Base.Hash {
+      pub: ProjectManifestPub;
       migratedFromFormatVersion: number;
+      static currentFormatVersion: number;
 
-      constructor(pub: ProjectManifest);
+      constructor(pub: ProjectManifestPub);
     }
+    
+    interface DiagnosticsItem {
+      id: string;
+      type: string;
+      data: any;
+    }
+    
     class Diagnostics extends Base.ListById {
-      constructor(pub: any[]);
+      constructor(pub: DiagnosticsItem[]);
     }
 
     interface EntryNode {
@@ -48,7 +53,7 @@ declare namespace SupCore {
       [name: string]: any;
 
       type?: string;
-      diagnostics?: string[];
+      diagnostics?: DiagnosticsItem[];
       dependentAssetIds?: any[];
     }
     class Entries extends Base.TreeById {
@@ -283,6 +288,18 @@ declare namespace SupCore {
         server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
       }
     }
+  }
+
+  interface PluginsInfo {
+    list: string[];
+    paths: {
+      editors: { [assetType: string]: string; };
+      tools: { [name: string]: string; };
+    };
+  }
+  
+  interface SystemsInfo {
+    list: string[];
   }
 
   interface APIPlugin {

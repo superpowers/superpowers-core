@@ -2,7 +2,7 @@
 
 import Projects from "./Projects";
 
-import Manifest from "./Manifest";
+import ProjectManifest from "./ProjectManifest";
 import Diagnostics from "./Diagnostics";
 import Entries from "./Entries";
 
@@ -15,7 +15,7 @@ import RoomUsers from "./RoomUsers";
 
 export {
   Base,
-  Projects, Manifest, Diagnostics, Entries,
+  Projects, ProjectManifest, Diagnostics, Entries,
   Assets, Resources, Rooms, Room, RoomUsers
 };
 

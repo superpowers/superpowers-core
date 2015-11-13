@@ -23,11 +23,8 @@ export default class ProjectServer {
   nextClientId = 0;
   clientsBySocketId: { [socketId: string]: RemoteProjectClient } = {};
 
-  constructor(globalIO: SocketIO.Server, folderName: string, manifestData: any, callback: (err: Error) => any) {
+  constructor(globalIO: SocketIO.Server, folderName: string, callback: (err: Error) => any) {
     this.projectPath = path.join(paths.projects, folderName);
-
-    // FIXME: Don't hardcode the system
-    this.system = SupCore.systems["supGame"];
 
     this.data = {
       manifest: null,
@@ -44,24 +41,21 @@ export default class ProjectServer {
 
     let loadManifest = (callback: (err: Error) => any) => {
       let done = (data: any) => {
-        try { this.data.manifest = new SupCore.Data.Manifest(data); }
+        try { this.data.manifest = new SupCore.Data.ProjectManifest(data); }
         catch(err) { callback(err); return; }
         this.data.manifest.on("change", this._onManifestChanged);
         if (this.data.manifest.migratedFromFormatVersion != null) this.data.manifest.emit("change");
+
+        this.system = SupCore.systems[this.data.manifest.pub.system];
 
         this.buildsPath = path.join(paths.builds, this.data.manifest.pub.id);
         callback(null);
       };
 
-      if (manifestData != null) {
-        done(manifestData);
-        return;
-      }
-
       fs.readFile(path.join(this.projectPath, "manifest.json"), { encoding: "utf8" }, (err, manifestJSON) => {
         if (err != null) { callback(err); return; }
 
-        let manifestData: any;
+        let manifestData: SupCore.Data.ProjectManifest;
         try { manifestData = JSON.parse(manifestJSON); }
         catch(err) { callback(err); return; }
 

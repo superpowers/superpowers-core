@@ -20,6 +20,8 @@ let projectManifest = {
     id: { type: "string", minLength: 4, maxLength: 4 },
     name: { type: "string", minLength: 1, maxLength: 80 },
     description: { type: "string", maxLength: 300 },
+    // Introduced in Superpowers v0.15
+    system: { type: "string" },
     formatVersion: { type: "integer", min: 0 }
   },
   required: [ "id", "name", "description" ]

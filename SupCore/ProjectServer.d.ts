@@ -11,7 +11,7 @@ interface ProjectServer {
 }
 
 interface ProjectServerData {
-  manifest: SupCore.Data.Manifest;
+  manifest: SupCore.Data.ProjectManifest;
   entries: SupCore.Data.Entries;
 
   assets: SupCore.Data.Assets;

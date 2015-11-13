@@ -1,5 +1,5 @@
 interface NewProjectCallback {
-  (project: { type: string; name: string, description: string; icon: File; }, open: boolean): any;
+  (project: { type: string; name: string, description: string; system: string; icon: File; }, open: boolean): any;
 }
 
 export default function newProjectDialog(typeLabels: { [value: string]: string }, open: boolean,
@@ -150,6 +150,7 @@ callback: NewProjectCallback) {
         type: typeSelectElt.value,
         name: nameInputElt.value,
         description: descriptionInputElt.value,
+        system: typeSelectElt.value,
         icon: iconFile
       };
       callback(project, openCheckboxElt.checked);

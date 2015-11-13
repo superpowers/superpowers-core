@@ -57,15 +57,13 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     }
     
     // Second pass, because data modules might depend on API modules
-    interface EditorOrToolInfo {
-      title: { [language: string]: string };
-      pluginPath: string;
-    }
-    
-    let pluginsInfo = {
-      all: <string[]>[],
-      editorsByAssetType: <{ [assetType: string]: EditorOrToolInfo }>{},
-      toolsByName: <{ [toolName: string]: EditorOrToolInfo }>{} };
+    let pluginsInfo: {
+      list: string[],
+      paths: {
+        editors: { [assetType: string]: string; },
+        tools: { [name: string]: string; }
+      }
+    } = { list: [], paths: { editors: {}, tools: {} } };
 
     for (let pluginAuthor in pluginNamesByAuthor) {
       let pluginNames = pluginNamesByAuthor[pluginAuthor];
@@ -77,34 +75,27 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
         // Load data module
         let dataModulePath = `${pluginPath}/data`;
         if (fs.existsSync(dataModulePath)) require(dataModulePath);
-  
+
         // Collect plugin info
-        pluginsInfo.all.push(`${pluginAuthor}/${pluginName}`);
+        pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);
         if (fs.existsSync(`${pluginPath}/editors`)) {
           for (let editorName of fs.readdirSync(`${pluginPath}/editors`)) {
-            let title = editorName;
-            try { title = JSON.parse(fs.readFileSync(`${pluginPath}/public/editors/${editorName}/locales/en/main.json`, { encoding: "utf8" })).title; }
-            catch(e) {}
-  
             if (SupCore.system.data.assetClasses[editorName] != null) {
-              pluginsInfo.editorsByAssetType[editorName] = {
-                title: { en: title },
-                pluginPath: `${pluginAuthor}/${pluginName}`
-              };
+              pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
             } else {
-              pluginsInfo.toolsByName[editorName] = { pluginPath: `${pluginAuthor}/${pluginName}`, title: { en: title } };
+              pluginsInfo.paths.tools[editorName] = `${pluginAuthor}/${pluginName}`;
             }
           }
         }
       }
     }
 
-    fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo));
+    fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo, null, 2));
 
     // Build files
     let buildFiles: string[] = buildFilesBySystem[systemName] = [ "/SupCore.js" ];
 
-    async.eachSeries(pluginsInfo.all, (plugin, cb) => {
+    async.eachSeries(pluginsInfo.list, (plugin, cb) => {
       let pluginPublicPath = `${systemPath}/plugins/${plugin}/public`;
       readdirRecursive(pluginPublicPath, (err, entries) => {
         for (let entry of entries) {
@@ -124,6 +115,9 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
       });
     });
   }, () => {
+    let systemsInfo: SupCore.SystemsInfo = { list: Object.keys(SupCore.systems) };
+    fs.writeFileSync(`${__dirname}/../public/systems.json`, JSON.stringify(systemsInfo, null, 2));
+
     SupCore.system = null;
     callback();
   });
