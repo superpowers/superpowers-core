@@ -354,7 +354,7 @@ function onEntryMoved(id: string, parentId: string, index: number) {
 
   let entryElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
 
-  let oldParentId: string = (<any>entryElt.dataset).parentId;
+  let oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
     let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
     let parentEntry = data.entries.byId[oldParentId];
@@ -373,8 +373,8 @@ function onEntryMoved(id: string, parentId: string, index: number) {
   }
 
   ui.entriesTreeView.insertAt(entryElt, nodeType, index, parentElt);
-  if (parentId != null) (<any>entryElt.dataset).parentId = parentId;
-  else delete (<any>entryElt.dataset).parentId;
+  if (parentId != null) entryElt.dataset["parentId"] = parentId;
+  else delete entryElt.dataset["parentId"];
 
   updateEntryElementPath(id);
   refreshAssetTabElement(data.entries.byId[id]);
@@ -382,7 +382,7 @@ function onEntryMoved(id: string, parentId: string, index: number) {
 
 function updateEntryElementPath(id: string) {
   let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
-  (<any>entryElt.dataset).dndText = data.entries.getPathFromId(id);
+  entryElt.dataset["dndText"] = data.entries.getPathFromId(id);
 
   let node = data.entries.byId[id];
   if (node.children != null) {
@@ -395,7 +395,7 @@ function onEntryTrashed(id: string) {
 
   let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
 
-  let oldParentId: string = (<any>entryElt.dataset).parentId;
+  let oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
     let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
     let parentEntry = data.entries.byId[oldParentId];
@@ -534,10 +534,10 @@ function showDevTools() {
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
   let liElt = document.createElement("li");
-  (<any>liElt.dataset).id = entry.id;
-  (<any>liElt.dataset).dndText = data.entries.getPathFromId(entry.id);
+  liElt.dataset["id"] = entry.id;
+  liElt.dataset["dndText"] = data.entries.getPathFromId(entry.id);
   let parentEntry = data.entries.parentNodesById[entry.id];
-  if (parentEntry != null) (<any>liElt.dataset).parentId = parentEntry.id;
+  if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
   if (entry.type != null) {
     let iconElt = document.createElement("img");
@@ -723,7 +723,7 @@ function openEntry(id: string, optionValues?: {[name: string]: any}) {
     if (optionValues != null)
       for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
     iframe.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${id}${options}`;
-    (<any>iframe.dataset).assetId = id;
+    iframe.dataset["assetId"] = id;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
     let origin: string = (<any>window.location).origin;
@@ -746,7 +746,7 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
     if (optionValues != null)
       for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
     iframe.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${name}/?project=${info.projectId}${options}`;
-    (<any>iframe.dataset).name = name;
+    iframe.dataset["name"] = name;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
     let origin: string = (<any>window.location).origin;
@@ -909,7 +909,7 @@ function createAssetTabElement(entry: SupCore.Data.EntryNode) {
   closeButton.addEventListener("click", () => { onTabClose(tabElt); });
   tabElt.appendChild(closeButton);
 
-  (<any>tabElt.dataset).assetId = entry.id;
+  tabElt.dataset["assetId"] = entry.id;
 
   refreshAssetTabElement(entry, tabElt);
 
@@ -940,7 +940,7 @@ function createToolTabElement(toolName: string, tool: EditorManifest) {
     closeButton.addEventListener("click", () => { onTabClose(tabElt); });
     tabElt.appendChild(closeButton);
   }
-  (<any>tabElt.dataset).pane = toolName;
+  tabElt.dataset["pane"] = toolName;
   return tabElt;
 }
 
@@ -957,7 +957,7 @@ function onTabActivate(tabElement: any) {
   tabElement.classList.add("active");
   tabElement.classList.remove("blink");
 
-  let assetId = (<any>tabElement.dataset).assetId;
+  let assetId = tabElement.dataset["assetId"];
   let tabIframe: HTMLIFrameElement;
   if (assetId != null) tabIframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
   else tabIframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${tabElement.dataset.pane}']`);
@@ -968,11 +968,11 @@ function onTabActivate(tabElement: any) {
 }
 
 function onTabClose(tabElement: HTMLLIElement) {
-  let assetId = (<any>tabElement.dataset).assetId;
+  let assetId = tabElement.dataset["assetId"];
   let frameElt: HTMLIFrameElement;
   if (assetId != null) frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
   else {
-    let toolName = (<any>tabElement.dataset).pane;
+    let toolName = tabElement.dataset["pane"];
     if (toolName == "main") return;
 
     frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${toolName}']`);

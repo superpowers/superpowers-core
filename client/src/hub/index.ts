@@ -109,7 +109,7 @@ function onSetProjectProperty(id: string, key: string, value: any) {
 // User interface
 function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
   let liElt = document.createElement("li");
-  (<any>liElt.dataset).id = manifest.id;
+  liElt.dataset["id"] = manifest.id;
 
   let icon = new Image();
   icon.src = `/projects/${manifest.id}/icon.png`;
