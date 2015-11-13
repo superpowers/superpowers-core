@@ -505,6 +505,7 @@ function createEntryElement(entry: any) {
 
   if (entry.type != null) {
     let iconElt = document.createElement("img");
+    iconElt.draggable = false;
     iconElt.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     liElt.appendChild(iconElt);
   }
