@@ -7,7 +7,7 @@ interface EntryNode {
   [name: string]: any;
 
   type?: string;
-  diagnostics?: string[];
+  diagnostics?: SupCore.Data.DiagnosticsItem[];
   dependentAssetIds?: any[];
 }
 
