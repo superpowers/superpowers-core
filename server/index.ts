@@ -52,7 +52,11 @@ let io = socketio(mainHttpServer, { transports: ["websocket"] });
 // Build HTTP server
 let buildApp = express();
 
-buildApp.get("/", (req: express.Request, res: express.Response) => { res.redirect(`http://${req.hostname}:${config.mainPort}/?${querystring.stringify(req.query)}`); });
+function redirectToMainApp(req: express.Request, res: express.Response) {
+  res.redirect(`http://${req.hostname}:${config.mainPort}/?${querystring.stringify(req.query)}`);
+}
+
+buildApp.get("/", redirectToMainApp);
 buildApp.use("/", express.static(`${__dirname}/../public`));
 
 buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
@@ -70,16 +74,16 @@ loadSystems(mainApp, buildApp, () => {
   // Project hub
   hub = new ProjectHub(io, (err: Error) => {
     if (err != null) { SupCore.log(`Failed to start server:\n${(<any>err).stack}`); return; }
-  
+
     SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${paths.projects}.`);
-  
+
     let hostname = (config.password.length === 0) ? "localhost" : "";
-  
+
     mainHttpServer.listen(config.mainPort, hostname, () => {
       buildHttpServer.listen(config.buildPort, hostname, () => {
         SupCore.log(`Main server started on port ${config.mainPort}, build server started on port ${config.buildPort}.`);
         if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
-      })
+      });
     });
   });
 });
@@ -88,7 +92,7 @@ loadSystems(mainApp, buildApp, () => {
 let isQuitting = false;
 
 function onExit() {
-  if(isQuitting) return;
+  if (isQuitting) return;
   isQuitting = true;
   mainHttpServer.close();
   buildHttpServer.close();
@@ -100,6 +104,8 @@ function onExit() {
     else SupCore.log("Exited cleanly.");
     process.exit();
   });
+  
+  process.exit;
 }
 
 process.on("SIGINT", onExit);
