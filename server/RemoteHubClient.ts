@@ -52,7 +52,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
 
     let sortedIndex = 0;
     for (let item of this.server.data.projects.pub) {
-      if (manifest.name.localeCompare(item.name) < 0) break;
+      if (SupCore.Data.Projects.sort(manifest, item) < 0) break;
       sortedIndex++;
     }
 
