@@ -9,7 +9,7 @@ var packageInfo = require(sourceRootPath + "/package.json");
 var targetRootPath = __dirname + "/../../releases/" + packageInfo.version + "/content";
 
 try { mkdirp(targetRootPath); }
-catch (error) { console.log("Could not create superpowers-" + packageInfo.version + " folder"); return; }
+catch (error) { console.log("Could not create superpowers-" + packageInfo.version + " folder"); process.exit(1); }
 
 function shouldDistribute(file) {
   file = file.substring(sourceRootPath.length + 1).replace(/\\/g, "/");
@@ -19,7 +19,7 @@ function shouldDistribute(file) {
   if (_.endsWith(file, ".orig")) return false;
   if (_.endsWith(file, ".jade")) return false;
   if (_.endsWith(file, ".styl")) return false;
-  if (_.endsWith(file, ".ts") && file.indexOf("/typings/") === -1 && file.indexOf("/node_modules/") === -1) return false;
+  if (_.endsWith(file, ".ts") && file.indexOf("typings/") === -1 && file.indexOf("node_modules/") === -1) return false;
   if (_.startsWith(file, "client")) return false;
   if (_.startsWith(file, "scripts")) return false;
   if (_.startsWith(file, "node_modules/browserify")) return false;
