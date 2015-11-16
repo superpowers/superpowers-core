@@ -23,8 +23,8 @@ callback: (name: string, type: string, open: boolean) => any) {
   // Name
   let nameInputElt = document.createElement("input");
   nameInputElt.placeholder = "Asset name (optional)";
-  nameInputElt.pattern = "[^/]+";
-  nameInputElt.title = "Must contain no slashes."
+  nameInputElt.pattern = SupClient.namePattern;
+  nameInputElt.title = SupClient.namePatternDescription;
   formElt.appendChild(nameInputElt);
 
   // Auto-open checkbox

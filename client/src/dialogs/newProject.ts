@@ -76,8 +76,8 @@ callback: NewProjectCallback) {
   let nameInputElt = document.createElement("input");
   nameInputElt.required = true;
   nameInputElt.placeholder = "Project name";
-  nameInputElt.pattern = "[^/]+";
-  nameInputElt.title = "Must contain no slashes."
+  nameInputElt.pattern = SupClient.namePattern;
+  nameInputElt.title = SupClient.namePatternDescription;
   textContainerElt.appendChild(nameInputElt);
 
   // Description

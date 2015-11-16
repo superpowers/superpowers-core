@@ -1,6 +1,8 @@
 /// <reference path="./typings/socket.io-client/socket.io-client.d.ts" />
 
 declare namespace SupClient {
+  const namePattern: string;
+  const namePatternDescription: string;
 
   interface ComponentEditorObject {
     destroy(): void;

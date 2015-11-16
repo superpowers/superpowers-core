@@ -7,6 +7,11 @@ import * as table from "./table";
 import * as dialogs from "./dialogs/index";
 export { ProjectClient, setupHotkeys, table, dialogs };
 
+// Refuses filesystem-unsafe characters
+// See http://superuser.com/q/358855
+export const namePattern = "[^\\/:*?\"<>|\[\]&]+";
+export const namePatternDescription = "The following characters cannot be used: \, /, :, *, ?, \", <, >, |, [ and ].";
+
 // Initialize empty system
 SupCore.system = new SupCore.System("");
 

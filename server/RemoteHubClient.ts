@@ -29,7 +29,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
       formatVersion: SupCore.Data.ProjectManifest.currentFormatVersion
     };
 
-    let projectFolder = manifest.name.toLowerCase().slice(0, 16).replace(/[^a-z0-9]/g, "-");
+    let projectFolder = manifest.name.toLowerCase().slice(0, 32).replace(/[^a-z0-9]/g, "-");
     let originalProjectFolder = projectFolder;
     let projectFolderNumber = 1;
 
