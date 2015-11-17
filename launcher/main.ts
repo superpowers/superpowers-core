@@ -61,14 +61,24 @@ ipc.on("new-server-window", (event: Event, address: string) => {
 function connect(serverWindow: ServerWindow) {
   serverWindow.window.loadUrl(`http://${serverWindow.address}`);
   serverWindow.window.webContents.addListener("did-finish-load", onServerLoaded);
+  serverWindow.window.webContents.addListener("did-fail-load", onServerFailed);
 
-  // TODO: investigate did-fail-load
   function onServerLoaded(event: Event) {
     serverWindow.window.webContents.removeListener("did-finish-load", onServerLoaded);
-    serverWindow.window.webContents.executeJavaScript(`
-    if (document.body.childNodes.length === 0) {
-      require("ipc").send("connection-failed", remote.getCurrentWindow().id);
-    }`);
+    serverWindow.window.webContents.removeListener("did-fail-load", onServerFailed);
+  }
+
+  function onServerFailed(event: Event) {
+    serverWindow.window.webContents.removeListener("did-finish-load", onServerLoaded);
+    serverWindow.window.webContents.removeListener("did-fail-load", onServerFailed);
+
+    serverWindow.window.loadUrl(`${__dirname}/public/connectionStatus.html`);
+    serverWindow.window.webContents.addListener("did-finish-load", onConnectionFailed);
+
+    function onConnectionFailed() {
+      serverWindow.window.webContents.removeListener("did-finish-load", onConnectionFailed);
+      serverWindow.window.webContents.send("connection-failed", serverWindow.address);
+    }
   }
 }
 
@@ -88,16 +98,6 @@ ipc.on("new-standalone-window", (event: Event, address: string) => {
 });
 
 ipc.on("connecting", (event: Event, id: string) => { connect(serverWindowsById[id]); });
-ipc.on("connection-failed", (event: Event, id: string) => {
-  let serverWindow = serverWindowsById[id].window;
-  serverWindow.loadUrl(`${__dirname}/public/connectionStatus.html`);
-  serverWindow.webContents.addListener("did-finish-load", onConnectionFailed);
-
-  function onConnectionFailed() {
-    serverWindow.webContents.removeListener("did-finish-load", onConnectionFailed);
-    serverWindow.webContents.send("connection-failed", serverWindowsById[id].address);
-  }
-});
 
 ipc.on("request-export", (event: { sender: any }) => {
   dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {
