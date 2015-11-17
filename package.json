@@ -29,7 +29,6 @@
     "dnd-tree-view": "^2.3.2",
     "express": "^4.11.2",
     "fuzzy": "^0.1.0",
-    "isomorphic-fetch": "^2.2.0",
     "lodash": "^3.2.0",
     "mkdirp": "^0.5.0",
     "perfect-resize": "^2.1.1",

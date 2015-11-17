@@ -1,4 +1,3 @@
-import "isomorphic-fetch";
 import * as io from "socket.io-client";
 
 import ProjectClient from "./ProjectClient"
