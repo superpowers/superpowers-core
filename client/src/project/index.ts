@@ -806,11 +806,15 @@ function onOpenInNewWindowClick(event: any) {
   let id = event.target.parentElement.dataset.id;
   if (id != null) {
     let entry = data.entries.byId[id];
-    window.open(`${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${entry.id}`);
+    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${entry.id}`;
+    if (SupClient.isApp) ipc.send("new-standalone-window", address);
+    else window.open(address);
   } else {
     let name = event.target.parentElement.dataset.name;
     let tool = data.toolsByName[name];
-    window.open(`${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${info.projectId}`);
+    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${info.projectId}`
+    if (SupClient.isApp) ipc.send("new-standalone-window", address);
+    else window.open(address);
   }
 }
 

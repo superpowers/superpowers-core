@@ -72,6 +72,21 @@ function connect(serverWindow: ServerWindow) {
   }
 }
 
+let standaloneWindowById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
+ipc.on("new-standalone-window", (event: Event, address: string) => {
+  let standaloneWindow = new BrowserWindow({
+    title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
+    width: 1000, height: 600,
+    "min-width": 800, "min-height": 480,
+    "auto-hide-menu-bar": true
+  });
+
+  standaloneWindowById[standaloneWindow.id] = standaloneWindow;
+
+  standaloneWindow.on("closed", () => { delete standaloneWindowById[standaloneWindow.id]; })
+  standaloneWindow.loadUrl(address);
+});
+
 ipc.on("connecting", (event: Event, id: string) => { connect(serverWindowsById[id]); });
 ipc.on("connection-failed", (event: Event, id: string) => {
   let serverWindow = serverWindowsById[id].window;
