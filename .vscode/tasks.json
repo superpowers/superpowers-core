@@ -28,13 +28,6 @@
       ]
     },
     {
-      "taskName": "SupAPI",
-      "args": [
-        "--cwd",
-        "./SupCore"
-      ]
-    },
-    {
       "taskName": "SupCore",
       "args": [
         "--cwd",
@@ -55,21 +48,21 @@
       "taskName": "player",
       "args": [
         "--cwd",
-        "./system/player"
+        "./systems/supGame/player"
       ]
     },
     {
       "taskName": "SupEngine",
       "args": [
         "--cwd",
-        "./system/SupEngine"
+        "./systems/supGame/SupEngine"
       ]
     },
     {
       "taskName": "SupRuntime",
       "args": [
         "--cwd",
-        "./system/SupRuntime"
+        "./systems/supGame/SupRuntime"
       ]
     },
 
@@ -78,112 +71,112 @@
       "taskName": "arcadePhysics2D",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/arcadePhysics2D/"
+        "./systems/supGame/plugins/sparklinlabs/arcadePhysics2D/"
       ]
     },
     {
       "taskName": "cubicModel",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/cubicModel/"
+        "./systems/supGame/plugins/sparklinlabs/cubicModel/"
       ]
     },
     {
       "taskName": "font",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/font/"
+        "./systems/supGame/plugins/sparklinlabs/font/"
       ]
     },
     {
       "taskName": "gameSettings",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/gameSettings/"
+        "./systems/supGame/plugins/sparklinlabs/gameSettings/"
       ]
     },
     {
       "taskName": "home",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/home/"
+        "./systems/supGame/plugins/sparklinlabs/home/"
       ]
     },
     {
       "taskName": "light",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/light/"
+        "./systems/supGame/plugins/sparklinlabs/light/"
       ]
     },
     {
       "taskName": "model",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/model/"
+        "./systems/supGame/plugins/sparklinlabs/model/"
       ]
     },
     {
       "taskName": "p2js",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/p2js/"
+        "./systems/supGame/plugins/sparklinlabs/p2js/"
       ]
     },
     {
       "taskName": "projectSettings",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/projectSettings/"
+        "./systems/supGame/plugins/sparklinlabs/projectSettings/"
       ]
     },
     {
       "taskName": "scene",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/scene/"
+        "./systems/supGame/plugins/sparklinlabs/scene/"
       ]
     },
     {
       "taskName": "shader",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/shader/"
+        "./systems/supGame/plugins/sparklinlabs/shader/"
       ]
     },
     {
       "taskName": "sprite",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/sprite/"
+        "./systems/supGame/plugins/sparklinlabs/sprite/"
       ]
     },
     {
       "taskName": "sound",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/sound/"
+        "./systems/supGame/plugins/sparklinlabs/sound/"
       ]
     },
     {
       "taskName": "textEditorWidget",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/textEditorWidget/"
+        "./systems/supGame/plugins/sparklinlabs/textEditorWidget/"
       ]
     },
     {
       "taskName": "tileMap",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/tileMap/"
+        "./systems/supGame/plugins/sparklinlabs/tileMap/"
       ]
     },
     {
       "taskName": "typescript",
       "args": [
         "--cwd",
-        "./plugins/sparklinlabs/typescript/"
+        "./systems/supGame/plugins/sparklinlabs/typescript/"
       ]
     }
   ]
