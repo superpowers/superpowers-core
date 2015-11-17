@@ -44,7 +44,6 @@ ipc.on("new-server-window", (event: Event, address: string) => {
     "min-width": 800, "min-height": 480,
     "auto-hide-menu-bar": true, frame: false
   });
-  serverWindow.openDevTools();
 
   serverWindowsById[serverWindow.id] = { window: serverWindow, address };
 
