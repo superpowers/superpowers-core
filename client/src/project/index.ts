@@ -840,7 +840,7 @@ function onDuplicateEntryClick() {
   let entry = data.entries.byId[selectedNode.dataset.id];
   if (entry.type == null) return;
 
-  SupClient.dialogs.prompt("Enter a name for the new asset.", null, entry.name, "Duplicate", (newName) => {
+  SupClient.dialogs.prompt("Enter a name for the new asset.", null, entry.name, "Duplicate", { pattern: SupClient.namePattern, title: SupClient.namePatternDescription }, (newName) => {
     if (newName == null) return;
 
     socket.emit("duplicate:entries", newName, entry.id, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
