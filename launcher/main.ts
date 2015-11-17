@@ -1,8 +1,8 @@
 /// <reference path="../typings/tsd.d.ts" />
 /// <reference path="../typings/github-electron/github-electron-main.d.ts" />
 
-import * as app from "app";  // Module to control application life.
-import * as BrowserWindow from "browser-window";  // Module to create native browser window.
+import * as app from "app";
+import * as BrowserWindow from "browser-window";
 import * as ipc from "ipc";
 import * as dialog from "dialog";
 
@@ -10,11 +10,8 @@ import * as _ from "lodash";
 import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
+import * as http from "http";
 let mkdirp = require("mkdirp");
-let toBuffer = require("typedarray-to-buffer");
-
-declare let fetch: Fetch;
-require("isomorphic-fetch");
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -23,9 +20,7 @@ let mainWindow: GitHubElectron.BrowserWindow;
 app.on("window-all-closed", function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform != "darwin") {
-    app.quit();
-  }
+  if (process.platform != "darwin") app.quit();
 });
 
 app.on("ready", function() {
@@ -68,12 +63,11 @@ function connect(serverWindow: ServerWindow) {
   serverWindow.window.loadUrl(`http://${serverWindow.address}`);
   serverWindow.window.webContents.addListener("did-finish-load", onServerLoaded);
 
-  //TODO: invesitate did-fail-load
+  // TODO: investigate did-fail-load
   function onServerLoaded(event: Event) {
     serverWindow.window.webContents.removeListener("did-finish-load", onServerLoaded);
     serverWindow.window.webContents.executeJavaScript(`
     if (document.body.childNodes.length === 0) {
-      var remote = require("remote");
       require("ipc").send("connection-failed", remote.getCurrentWindow().id);
     }`);
   }
@@ -118,7 +112,6 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
     "auto-hide-menu-bar": true,
     "node-integration": true
   });
-  //exportWindow.openDevTools();
   exportWindow.loadUrl(`${data.address}:${data.mainPort}/build.html`);
 
   let doExport = () => {
@@ -131,16 +124,6 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
     exportWindow.setProgressBar(0);
     let progress = 0;
     let progressMax = data.files.length;
-
-    /*let myHeaders = new Headers();
-    myHeaders.append('Content-Type', 'text/plain');
-
-    let myInit: RequestInit = {
-      method: 'GET',
-      headers: myHeaders,
-      mode: 'cors',
-      cache: 'default'
-    };*/
 
     async.eachLimit(data.files, 10, (file: string, cb: (err: Error) => any) => {
       let buildPath = `/builds/${data.projectId}/${data.buildId}`;
@@ -157,44 +140,17 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
       document.querySelector(".status").textContent = "${outputPath}";
       `);
 
-      /*fetch(file).then((response: Response) => {
-        let type = response.headers.get("content-type");//.replace("application/", "");
-        console.log(`first step - ${outputFilename} - type: ${type}`);
-        if (type === "json") return response.json();
-        else if (type === "octet-stream") return response.text();
-        //return response.arrayBuffer();
-      }).then((data) => {
-        console.log(`second step - ${outputFilename}`);
+      http.get(file, (response) => {
         mkdirp(path.dirname(outputPath), (err: Error) => {
-          if (err != null) { cb(err); return; }
-          fs.writeFile(outputPath, data, () => {
-          //fs.writeFile(outputPath, toBuffer(new Uint8Array(data)).toString("binary"), { encoding: "binary" }, () => {
-            //console.log(`second step - ${outputFilename}`);
+          let localFile = fs.createWriteStream(outputPath);
+          localFile.on("finish", () => {
             progress++;
             exportWindow.setProgressBar(progress / progressMax);
             cb(null);
           });
-        //console.log(data);
+          response.pipe(localFile);
         });
-      });*/
-
-      let xhr = new XMLHttpRequest();
-      xhr.open("GET", file);
-      xhr.responseType = "arraybuffer";
-
-      xhr.onload = (event) => {
-        if (xhr.status !== 200) { cb(new Error(`Failed to download ${file}, got status ${xhr.status}`)); return; }
-        mkdirp(path.dirname(outputPath), (err: Error) => {
-          if (err != null) { cb(err); return; }
-          fs.writeFile(outputPath, toBuffer(new Uint8Array(xhr.response)).toString("binary"), { encoding: "binary" }, () => {
-            progress++;
-            exportWindow.setProgressBar(progress / progressMax);
-            cb(null);
-          });
-        });
-      }
-
-      xhr.send();
+      }).on("error", cb);
     } , (err: Error) => {
       exportWindow.setProgressBar(-1);
       if (err != null) { alert(err); return; }
