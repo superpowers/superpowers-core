@@ -1,7 +1,7 @@
 import * as config from "./config";
 
-let gui = (<any>window).nwDispatcher.requireNwGui();
-let nwWindow = gui.Window.get();
+let remote: GitHubElectron.Remote = nodeRequire("remote");
+let currentWindow = remote.getCurrentWindow();
 
 let path = nodeRequire("path");
 let child_process = nodeRequire("child_process");
@@ -36,12 +36,13 @@ function startServer() {
   let serverPath = path.join(path.resolve(path.dirname(nodeProcess.mainModule.filename)), "../../server/index.js");
   serverProcess = child_process.fork(serverPath, { silent: true });
   serverProcess.on("exit", () => {
+    console.log("server closed");
     serverProcess = null;
     startStopServerButton.disabled = false;
     startStopServerButton.textContent = "Start";
     myServerTextarea.value += "\n";
 
-    if (config.hasRequestedClose) nwWindow.close(true);
+    //if (config.hasRequestedClose) currentWindow.close();
   });
 
   serverProcess.on("message", (msg: string) => {

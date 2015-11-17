@@ -29,11 +29,5 @@ gulp.task("browserify-index", ["typescript"], function() {
   return bundle();
 });
 
-gulp.task("browserify-build", ["typescript"], function() {
-  var bundler = browserify("./src/build.js");
-  function bundle() { return bundler.bundle().pipe(source("build.js")).pipe(gulp.dest("../public")); }
-  return bundle();
-});
-
 // All
-gulp.task("default", [ "jade-index", "jade-build", "stylus-index", "typescript", "browserify-index", "browserify-build" ]);
+gulp.task("default", [ "jade-index", "jade-build", "stylus-index", "typescript", "browserify-index" ]);

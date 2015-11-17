@@ -1,10 +1,10 @@
 export {};
 
-let gui = (<any>window).nwDispatcher.requireNwGui();
+let shell: GitHubElectron.Shell = nodeRequire("shell");
 
 document.querySelector(".panes .community").addEventListener("click", (event) => {
   if ((<Element>event.target).tagName !== "A") return;
 
   event.preventDefault();
-  gui.Shell.openExternal((<HTMLAnchorElement>event.target).href);
+  shell.openExternal((<HTMLAnchorElement>event.target).href);
 });

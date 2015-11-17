@@ -86,50 +86,10 @@ function onRemoveAddressClick() {
  });
 }
 
+let ipc: GitHubElectron.InProcess = nodeRequire("ipc");
 function onServerActivate() {
-  let gui = (<any>window).nwDispatcher.requireNwGui();
-  let win = gui.Window.open("connectionStatus.html",
-    { title: "Superpowers", icon: "images/icon.png",
-    width: 1000, height: 600,
-    min_width: 800, min_height: 480,
-    toolbar: false, frame: false, focus: true });
-
   let address = serversTreeView.selectedNodes[0].dataset.address;
-
-  function onConnectingLoaded() {
-    win.removeListener("loaded", onConnectingLoaded);
-    win.window.document.querySelector(".status").textContent = `Connecting to ${address}...`;
-
-    win.window.location.replace(`http://${address}`);
-    win.on("loaded", onServerLoaded);
-  }
-  
-  function onServerLoaded() {
-    win.removeListener("loaded", onServerLoaded);
-
-    if (win.window.document.body.childNodes.length === 0) {
-      // Page failed to load
-      win.window.location.replace(`connectionStatus.html`);
-      win.on("loaded", onConnectionFailed);
-    }
-  }
-  
-  function onConnectionFailed() {
-    win.removeListener("loaded", onConnectionFailed);
-    let statusElt = win.window.document.querySelector(".status");
-    statusElt.textContent = `Could not connect to ${address}.`;
-    
-    let reloadButton = win.window.document.querySelector(".reload");
-    reloadButton.hidden = false;
-    reloadButton.addEventListener("click", () => {
-      statusElt.textContent = `Connecting to ${address}...`;
-      reloadButton.hidden = true;
-      win.window.location.replace(`http://${address}`);
-      win.on("loaded", onServerLoaded);
-    });
-  }
-
-  win.on("loaded", onConnectingLoaded);
+  ipc.send("new-server-window", address);
 }
 
 start();

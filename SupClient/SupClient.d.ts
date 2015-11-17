@@ -4,6 +4,8 @@ declare namespace SupClient {
   const namePattern: string;
   const namePatternDescription: string;
 
+  let isApp: boolean;
+
   interface ComponentEditorObject {
     destroy(): void;
     config_setProperty(path: string, value: any): void;
