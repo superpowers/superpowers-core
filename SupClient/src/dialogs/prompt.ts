@@ -57,7 +57,7 @@ export default function prompt(label: string, placeholder: string, initialValue:
 
   // Validation and cancellation
   formElt.addEventListener("submit", (event) => {
-    if (! formElt.checkValidity()) return;
+    if (!formElt.checkValidity()) return;
 
     event.preventDefault();
     document.body.removeChild(dialogElt);

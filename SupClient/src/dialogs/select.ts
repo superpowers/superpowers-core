@@ -71,13 +71,13 @@ export default function select(label: string, choices: { [value: string]: string
   }
 
   formElt.addEventListener("submit", (event) => {
-    if (! formElt.checkValidity()) return;
+    if (!formElt.checkValidity()) return;
     event.preventDefault();
     submit();
   });
 
   selectElt.addEventListener("dblclick", (event) => {
-    if (! formElt.checkValidity()) {
+    if (!formElt.checkValidity()) {
       validateButtonElt.click();
       return;
     }

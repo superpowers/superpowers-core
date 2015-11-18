@@ -313,7 +313,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     let commandMethod = this.server.system.data.resourceClasses[id].prototype[`server_${command}`];
     if (commandMethod == null) { callback("Invalid command"); return; }
-    // if ! callback? then this.server.log "Ignoring edit:assets command, missing a callback"; return
+    // if (callback == null) { this.server.log("Ignoring edit:assets command, missing a callback"); return; }
 
     this.server.data.resources.acquire(id, null, (err, resource) => {
       if (err != null) { callback("Could not acquire resource"); return; }

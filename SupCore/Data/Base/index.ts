@@ -34,7 +34,7 @@ interface Violation {
   message: string; path?: string;
 }
 export function getRuleViolation(value: any, rule: Rule, create = false): Violation {
-  if (!create && ! rule.mutable) return { message: "Immutable" };
+  if (!create && !rule.mutable) return { message: "Immutable" };
 
   let optional = rule.type[rule.type.length - 1] === "?";
   if (optional && value == null) return null;
@@ -125,7 +125,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
     }
 
     case "array": {
-      if (! Array.isArray(value)) return { message: "Expected array" };
+      if (!Array.isArray(value)) return { message: "Expected array" };
 
       if (rule.length != null && value.length !== rule.length) return { message: `Array should have length of ${rule.length}, got ${value.length}` };
       if (rule.minLength != null && value.length < rule.minLength) return { message: `Array length (${value.length}) is less than minimum length (${rule.minLength})` };

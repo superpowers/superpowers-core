@@ -659,7 +659,7 @@ function onClickToggleNotifications(event: any) {
   let disableNotifications = (localStorage.getItem("superpowers-disable-notifications") != null) ? true : false;
   disableNotifications = !disableNotifications;
 
-  if (! disableNotifications) {
+  if (!disableNotifications) {
     localStorage.removeItem("superpowers-disable-notifications");
     event.target.classList.remove("disabled");
     event.target.title = "Click to disable notifications";
@@ -764,7 +764,7 @@ function onTrashEntryClick() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
       SupClient.dialogs.confirm("Are you sure you want to trash the selected entries?", "Trash", (confirm) => {
-        if (! confirm) return;
+        if (!confirm) return;
 
         function trashEntry(entry: SupCore.Data.EntryNode) {
           if (entry.type == null) for (let entryChild of entry.children) trashEntry(entryChild);

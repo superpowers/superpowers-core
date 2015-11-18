@@ -161,8 +161,8 @@ export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.
   let targetNode = listById.byId[targetEntryId];
 
   let index = listById.pub.indexOf(targetNode)
-  if (! reversed && dropInfo.where === "below") index++;
-  if (  reversed && dropInfo.where === "above") index++;
+  if (!reversed && dropInfo.where === "below") index++;
+  if ( reversed && dropInfo.where === "above") index++;
   return index;
 }
 

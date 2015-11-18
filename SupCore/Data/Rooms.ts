@@ -9,7 +9,7 @@ export default class Rooms extends SupData.Base.Dictionary {
   }
 
   acquire(id: string, owner: any, callback: (err: Error, item?: any) => any) {
-    if (! roomRegex.test(id)) { callback( new Error(`Invalid room id: ${id}`)); return; }
+    if (!roomRegex.test(id)) { callback( new Error(`Invalid room id: ${id}`)); return; }
 
     super.acquire(id, owner, (err: Error, item: SupData.Room) => {
       if (err != null) { callback(err); return; }

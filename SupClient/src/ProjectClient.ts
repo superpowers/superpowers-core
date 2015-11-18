@@ -46,7 +46,7 @@ export default class ProjectClient {
   subEntries(subscriber: EntriesSubscriber) {
     this.entriesSubscribers.push(subscriber);
 
-    if (this.entriesSubscribers.length === 1 && ! this._keepEntriesSubscription) {
+    if (this.entriesSubscribers.length === 1 && !this._keepEntriesSubscription) {
       this.socket.emit("sub", "entries", null, this._onEntriesReceived);
     }
     else if (this.entries != null) subscriber.onEntriesReceived(this.entries);
@@ -55,7 +55,7 @@ export default class ProjectClient {
   unsubEntries(subscriber: EntriesSubscriber) {
     this.entriesSubscribers.splice(this.entriesSubscribers.indexOf(subscriber), 1);
 
-    if (this.entriesSubscribers.length === 0 && ! this._keepEntriesSubscription) {
+    if (this.entriesSubscribers.length === 0 && !this._keepEntriesSubscription) {
       this.socket.emit("unsub", "entries");
 
       this.socket.off("add:entries", this._onEntryAdded);

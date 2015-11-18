@@ -31,7 +31,7 @@ export default function confirm(label: string, validationLabel: string, callback
 
   // Validation and cancellation
   formElt.addEventListener("submit", (event) => {
-    if (! formElt.checkValidity()) return;
+    if (!formElt.checkValidity()) return;
 
     event.preventDefault();
     document.body.removeChild(dialogElt);
