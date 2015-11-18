@@ -1,3 +1,5 @@
+import "../window";
+import * as authentication from "../authentication";
 import newAssetDialog from "../dialogs/newAsset";
 import * as async from "async";
 
@@ -6,9 +8,7 @@ let TreeView = require("dnd-tree-view");
 let PerfectResize = require("perfect-resize");
 let TabStrip = require("tab-strip");
 
-let info: {
-  projectId?: string;
-} = {};
+let socket: SocketIOClient.Socket;
 
 interface EditorManifest {
   title: string;
@@ -37,7 +37,6 @@ let ui: {
   panesElt?: HTMLDivElement;
   toolsElt?: HTMLUListElement;
 } = {};
-let socket: SocketIOClient.Socket;
 
 let remote: GitHubElectron.Remote;
 let ipc: GitHubElectron.InProcess;
@@ -50,16 +49,12 @@ if (SupClient.isApp) {
   BrowserWindow = remote.require('browser-window');
 }
 
-export default function project(projectId: string) {
-  info.projectId = projectId;
-
-  let template = <any>document.getElementById("project-template");
-  let clone = document.importNode(template.content, true);
-  document.body.appendChild(clone);
-
+function start() {
+  if (SupClient.query.project == null) goToHub();
+  
   // Development mode
   if (localStorage.getItem("superpowers-dev-mode") != null) {
-    let projectManagementDiv = <HTMLDivElement>document.querySelector(".project .project-management");
+    let projectManagementDiv = <HTMLDivElement>document.querySelector(".project-management");
     projectManagementDiv.style.backgroundColor = "#37d";
 
     // According to http://stackoverflow.com/a/12747364/915914, window.onerror
@@ -90,10 +85,10 @@ export default function project(projectId: string) {
   });
 
   // Make sidebar resizable
-  new PerfectResize(document.querySelector(".project .sidebar"), "left");
+  new PerfectResize(document.querySelector(".sidebar"), "left");
 
   // Project info
-  document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { window.location.replace("/"); });
+  document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
   document.querySelector(".project-buttons .run").addEventListener("click", () => { runGame(); });
   document.querySelector(".project-buttons .export").addEventListener("click", () => { exportGame(); });
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runGame({ debug: true }); });
@@ -149,7 +144,7 @@ export default function project(projectId: string) {
   }
 
   // Panes and tools
-  ui.panesElt = <HTMLDivElement>document.querySelector(".project .main .panes");
+  ui.panesElt = <HTMLDivElement>document.querySelector(".main .panes");
   ui.toolsElt = <HTMLUListElement>document.querySelector(".sidebar .tools ul");
 
   // Messaging
@@ -158,9 +153,12 @@ export default function project(projectId: string) {
   connect();
 }
 
-function connect() {
-  socket = SupClient.connect(info.projectId, { promptCredentials: true, reconnection: true });
+start();
 
+function connect() {
+  socket = SupClient.connect(SupClient.query.project, { reconnection: true });
+
+  socket.on("error", authentication.handleError);
   socket.on("disconnect", onDisconnected);
 
   socket.on("welcome", onWelcome);
@@ -283,7 +281,7 @@ function onWelcome(clientId: number, config: { buildPort: number; systemName: st
 function onManifestReceived(err: string, manifest: any) {
   data.manifest = new SupCore.Data.ProjectManifest(manifest);
 
-  document.querySelector(".project .project-name").textContent = manifest.name;
+  document.querySelector(".project-name").textContent = manifest.name;
   document.title = `${manifest.name} — Superpowers`;
 }
 
@@ -319,7 +317,7 @@ function onSetManifestProperty(key: string, value: any) {
 
   switch (key) {
     case "name":
-      document.querySelector(".project .project-name").textContent = value;
+      document.querySelector(".project-name").textContent = value;
       break;
   }
 }
@@ -465,6 +463,8 @@ function onDependenciesRemoved(id: string, depIds: string[]) {
 }
 
 // User interface
+function goToHub() { window.location.replace("/"); }
+
 let gameWindow: GitHubElectron.BrowserWindow;
 function runGame(options: { debug: boolean; } = { debug: false }) {
   if (SupClient.isApp) {
@@ -477,17 +477,17 @@ function runGame(options: { debug: boolean; } = { debug: false }) {
     });
     gameWindow.on("closed", () => { gameWindow = null; });
     gameWindow.loadUrl(`${window.location.origin}/build.html`);
-  } else window.open("build.html", `player_${info.projectId}`);
+  } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) { alert(err); return; }
 
-    let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemName}/?project=${info.projectId}&build=${buildId}`;
+    let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemName}/?project=${SupClient.query.project}&build=${buildId}`;
     if (options.debug) url += "&debug";
 
     if (SupClient.isApp) {
       if (gameWindow != null) gameWindow.loadUrl(url);
-    } else window.open(url, `player_${info.projectId}`);
+    } else window.open(url, `player_${SupClient.query.project}`);
   });
 }
 
@@ -501,7 +501,7 @@ if (SupClient.isApp) {
   ipc.on("export-succeed", (outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
       let address = `${window.location.protocol}//${window.location.hostname}`
-      ipc.send("export", { projectId: info.projectId, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
+      ipc.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
     });
   })
 }
@@ -605,7 +605,7 @@ function onMessage(event: any) {
 }
 
 function onWindowDevError() {
-  let projectManagementDiv = <HTMLDivElement>document.querySelector(".project .project-management");
+  let projectManagementDiv = <HTMLDivElement>document.querySelector(".project-management");
   projectManagementDiv.style.backgroundColor = "#c42";
   return false;
 }
@@ -701,7 +701,7 @@ function openEntry(id: string, optionValues?: {[name: string]: any}) {
     let options = "";
     if (optionValues != null)
       for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
-    iframe.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${id}${options}`;
+    iframe.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}${options}`;
     iframe.dataset["assetId"] = id;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
@@ -721,12 +721,11 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
     ui.tabStrip.tabsRoot.appendChild(tab);
 
     iframe = document.createElement("iframe");
-    //iframe.setAttribute("sandbox", "none");
 
     let options = "";
     if (optionValues != null)
       for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
-    iframe.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${name}/?project=${info.projectId}${options}`;
+    iframe.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}${options}`;
     iframe.dataset["name"] = name;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
@@ -803,13 +802,13 @@ function onOpenInNewWindowClick(event: any) {
   let id = event.target.parentElement.dataset.id;
   if (id != null) {
     let entry = data.entries.byId[id];
-    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${info.projectId}&asset=${entry.id}`;
+    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${entry.id}`;
     if (SupClient.isApp) ipc.send("new-standalone-window", address);
     else window.open(address);
   } else {
     let name = event.target.parentElement.dataset.name;
     let tool = data.toolsByName[name];
-    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${info.projectId}`
+    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${SupClient.query.project}`
     if (SupClient.isApp) ipc.send("new-standalone-window", address);
     else window.open(address);
   }
@@ -909,22 +908,24 @@ function createToolTabElement(toolName: string, tool: EditorManifest) {
   iconElt.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   tabElt.appendChild(iconElt);
 
-  let tabLabel = document.createElement("div");
-  tabLabel.classList.add("label");
-  tabElt.appendChild(tabLabel);
+  if (!tool.pinned) {
+    let tabLabel = document.createElement("div");
+    tabLabel.classList.add("label");
+    tabElt.appendChild(tabLabel);
 
-  let tabLabelName = document.createElement("div");
-  tabLabelName.classList.add("name");
-  tabLabel.appendChild(tabLabelName);
-
-  if (toolName !== "main") {
+    let tabLabelName = document.createElement("div");
+    tabLabelName.classList.add("name");
+    tabLabel.appendChild(tabLabelName);
     tabLabelName.textContent = tool.title;
 
     let closeButton = document.createElement("button");
     closeButton.classList.add("close");
     closeButton.addEventListener("click", () => { onTabClose(tabElt); });
     tabElt.appendChild(closeButton);
+  } else {
+    tabElt.classList.add("pinned");
   }
+
   tabElt.dataset["pane"] = toolName;
   return tabElt;
 }

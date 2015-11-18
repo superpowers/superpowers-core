@@ -1,4 +1,6 @@
-&
+@import "../window"
+
+body
   display flex
 
 .sidebar
@@ -48,10 +50,10 @@
     width 30px
     height 30px
 
-  .export { background-image: url(images/project/export.svg); }
-  .debug { background-image: url(images/project/debug.svg); }
-  .run { background-image: url(images/project/run.svg); }
-  .go-to-hub { background-image: url(images/project/go-to-hub.svg); }
+  .export { background-image: url(/images/project/export.svg); }
+  .debug { background-image: url(/images/project/debug.svg); }
+  .run { background-image: url(/images/project/run.svg); }
+  .go-to-hub { background-image: url(/images/project/go-to-hub.svg); }
 
 .entries-buttons
   display flex
@@ -73,17 +75,17 @@
       background-color #fff
 
   .new-asset
-    background-image url(images/entries/new-asset.svg)
+    background-image url(/images/entries/new-asset.svg)
   .new-folder
-    background-image url(images/entries/new-folder.svg)
+    background-image url(/images/entries/new-folder.svg)
   .rename-entry
-    background-image url(images/entries/rename-entry.svg)
+    background-image url(/images/entries/rename-entry.svg)
   .duplicate-entry
-    background-image url(images/entries/duplicate-entry.svg)
+    background-image url(/images/entries/duplicate-entry.svg)
   .trash-entry
-    background-image url(images/entries/trash-entry.svg)
+    background-image url(/images/entries/trash-entry.svg)
   .search
-    background-image url(images/entries/search.svg)
+    background-image url(/images/entries/search.svg)
 
 .entries-tree-view
   flex 1
@@ -150,7 +152,7 @@
   background-repeat no-repeat
   opacity 0.3
 
-  background-image url(images/entries/open-in-new-window.svg)
+  background-image url(/images/entries/open-in-new-window.svg)
   width 28px
 
   &:hover
@@ -211,7 +213,8 @@
 
   .tabs-bar
     flex 1
-    @import "../styles/tabsBar"
+    -webkit-app-region drag
+    @import "tabsBar"
 
   .panes
     flex 1

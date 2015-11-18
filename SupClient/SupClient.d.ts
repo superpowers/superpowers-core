@@ -5,6 +5,7 @@ declare namespace SupClient {
   const namePatternDescription: string;
 
   let isApp: boolean;
+  let query: { project: string, asset: string; };
 
   interface ComponentEditorObject {
     destroy(): void;
@@ -22,7 +23,7 @@ declare namespace SupClient {
   let settingsEditorClasses: { [name: string]: SettingsEditorClass };
   function registerSettingsEditorClass(name: string, plugin: SettingsEditorClass): void;
 
-  function connect(projectId: string, options?: {reconnection: boolean; promptCredentials: boolean;}): SocketIOClient.Socket;
+  function connect(projectId: string, options?: { reconnection: boolean; }): SocketIOClient.Socket;
   function onAssetTrashed(): void;
   function onDisconnected(): void;
   function setupHotkeys(): void;

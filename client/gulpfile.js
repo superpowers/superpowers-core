@@ -2,13 +2,15 @@ var gulp = require("gulp");
 
 // Jade
 var jade = require("gulp-jade");
-gulp.task("jade-index", function() { return gulp.src("./src/index.jade").pipe(jade()).pipe(gulp.dest("../public")); });
+gulp.task("jade-hub", function() { return gulp.src("./src/hub/index.jade").pipe(jade()).pipe(gulp.dest("../public/hub")); });
+gulp.task("jade-project", function() { return gulp.src("./src/project/index.jade").pipe(jade()).pipe(gulp.dest("../public/project")); });
 gulp.task("jade-build", function() { return gulp.src("./src/build.jade").pipe(jade()).pipe(gulp.dest("../public")); });
 
 // Stylus
 var stylus = require("gulp-stylus");
 var nib = require("nib");
-gulp.task("stylus-index", function() { return gulp.src("./src/index.styl").pipe(stylus({ use: [ nib() ], errors: true })).pipe(gulp.dest("../public")); });
+gulp.task("stylus-hub", function() { return gulp.src("./src/hub/index.styl").pipe(stylus({ use: [ nib() ], errors: true })).pipe(gulp.dest("../public/hub")); });
+gulp.task("stylus-project", function() { return gulp.src("./src/project/index.styl").pipe(stylus({ use: [ nib() ], errors: true })).pipe(gulp.dest("../public/project")); });
 
 // TypeScript
 var ts = require("gulp-typescript");
@@ -23,11 +25,28 @@ gulp.task("typescript", function() {
 var browserify = require("browserify");
 var source = require("vinyl-source-stream");
 
-gulp.task("browserify-index", ["typescript"], function() {
-  var bundler = browserify("./src/index.js");
-  function bundle() { return bundler.bundle().pipe(source("index.js")).pipe(gulp.dest("../public")); }
+gulp.task("browserify-hub", [ "typescript" ], function() {
+  var bundler = browserify("./src/hub/index.js");
+  function bundle() { return bundler.bundle().pipe(source("index.js")).pipe(gulp.dest("../public/hub")); }
+  return bundle();
+});
+
+gulp.task("browserify-project", [ "typescript" ], function() {
+  var bundler = browserify("./src/project/index.js");
+  function bundle() { return bundler.bundle().pipe(source("index.js")).pipe(gulp.dest("../public/project")); }
   return bundle();
 });
 
 // All
-gulp.task("default", [ "jade-index", "jade-build", "stylus-index", "typescript", "browserify-index" ]);
+gulp.task("default", [
+  "jade-hub",
+  "jade-project",
+  "jade-build",
+  
+  "stylus-hub",
+  "stylus-project",
+  
+  "typescript",
+  "browserify-hub",
+  "browserify-project",
+]);

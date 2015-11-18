@@ -1,11 +1,3 @@
-import hub from "./hub";
-import project from "./project";
-
-let qs = require("querystring").parse(window.location.search.slice(1));
-
-if (qs.project != null) project(qs.project);
-else hub();
-
 if (SupClient.isApp) {
   let nodeRequire = require;
   let remote: GitHubElectron.Remote = nodeRequire("remote");

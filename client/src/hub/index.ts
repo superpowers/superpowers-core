@@ -1,5 +1,7 @@
-import * as async from "async";
+import "../window";
+import * as authentication from "../authentication";
 import newProjectDialog from "../dialogs/newProject";
+import * as async from "async";
 
 let TreeView = require("dnd-tree-view");
 
@@ -10,15 +12,9 @@ let data: {
 
 let ui: { projectsTreeView?: any } = {};
 let socket: SocketIOClient.Socket;
+let port = (window.location.port.length === 0) ? "80" : window.location.port;
 
-let port = window.location.port;
-if (port.length === 0) port = "80";
-
-export default function hub() {
-  let template = <any>document.getElementById("hub-template");
-  let clone = document.importNode(template.content, true);
-  document.body.appendChild(clone);
-
+function start() {
   document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
 
   ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"));
@@ -29,8 +25,9 @@ export default function hub() {
   document.querySelector(".projects-buttons .edit-description").addEventListener("click", onEditDescriptionClick);
 
   loadSystemsInfo(() => {
-    socket = SupClient.connect(null, { promptCredentials: true, reconnection: true });
+    socket = SupClient.connect(null, { reconnection: true });
 
+    socket.on("error", authentication.handleError);
     socket.on("connect", onConnected);
     socket.on("disconnect", onDisconnected);
   
@@ -38,6 +35,8 @@ export default function hub() {
     socket.on("setProperty:projects", onSetProjectProperty);
   });
 }
+
+start();
 
 interface SystemManifest {
   title: string;
@@ -140,12 +139,12 @@ function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
 }
 
 function onProjectActivate() {
-  let search = `?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
+  let href = `/project/?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
 
-  // When in NW.js, use location.replace to avoid creating an history item
+  // When in the app, use location.replace to avoid creating an history item
   // which could lead to accidentally navigating back by pressing Backspace
-  if (SupClient.isApp) window.location.replace(`${window.location.origin}/${search}`);
-  else window.location.search = search;
+  if (SupClient.isApp) window.location.replace(`${window.location.origin}${href}`);
+  else window.location.href = href;
 }
 
 let autoOpenProject = true;

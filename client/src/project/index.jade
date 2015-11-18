@@ -1,33 +1,50 @@
-.project
-  .sidebar
-    .project-management
-      .project-icon
-        button(title="Go to hub").go-to-hub
-      .project-name Loading...
-      .project-buttons
-        button(title="Export game",disabled).export
-        button(title="Debug game (F6)",disabled).debug
-        button(title="Run game (F5)",disabled).run
+doctype html
+html
+  head
+    title Superpowers — Project
+    link(rel="stylesheet",href="/styles/reset.css")
+    link(rel="stylesheet",href="/styles/perfectResize.css")
+    link(rel="stylesheet",href="/styles/treeView.css")
+    link(rel="stylesheet",href="/styles/dialogs.css")
+    link(rel="stylesheet",href="/project/index.css")
 
-    .entries-buttons
-      button(title="New asset (Ctrl+N)",disabled).new-asset
-      button(title="New folder (Ctrl+Shift+N)",disabled).new-folder
-      // button(disabled).open-entry.single.asset-only Open
-      button(title="Rename (F2)",disabled).rename-entry.single.edit
-      button(title="Duplicate (Ctrl+D)",disabled).duplicate-entry.single.asset-only.edit
-      button(title="Trash (Delete)",disabled).trash-entry.edit
-      button(title="Search (Ctrl+O)",disabled).search
-    .entries-tree-view
-      .connecting
-        div Connecting...
-    .tools
-      ul
-  .main
-    .top
-      .tabs-bar
-      .controls
-        button.toggle-notifications
-        button.minimize
-        button.maximize
-        button.close
-    .panes
+  body
+    .sidebar
+      .project-management
+        .project-icon
+          button(title="Go to hub").go-to-hub
+        .project-name Loading...
+        .project-buttons
+          button(title="Export game",disabled).export
+          button(title="Debug game (F6)",disabled).debug
+          button(title="Run game (F5)",disabled).run
+  
+      .entries-buttons
+        button(title="New asset (Ctrl+N)",disabled).new-asset
+        button(title="New folder (Ctrl+Shift+N)",disabled).new-folder
+        button(title="Rename (F2)",disabled).rename-entry.single.edit
+        button(title="Duplicate (Ctrl+D)",disabled).duplicate-entry.single.asset-only.edit
+        button(title="Trash (Delete)",disabled).trash-entry.edit
+        button(title="Search (Ctrl+O)",disabled).search
+      .entries-tree-view
+        .connecting
+          div Connecting...
+      .tools
+        ul
+    .main
+      .top
+        .tabs-bar
+        .controls
+          button.toggle-notifications
+          button.minimize
+          button.maximize
+          button.close
+      .panes
+
+    script.
+      // We want to apply this class before the first render
+      // to avoid having the window borders flashing
+      if (window.navigator.userAgent.indexOf("Electron") === -1) document.body.classList.add("browser");
+    script(src="/SupCore.js")
+    script(src="/SupClient.js")
+    script(src="/project/index.js")

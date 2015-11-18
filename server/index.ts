@@ -39,6 +39,8 @@ mainApp.use("/projects/:projectId/*", (req, res) => {
   res.sendFile(req.params[0], { root: `${projectPath}/public` });
 });
 
+mainApp.get("/", (req, res) => { res.redirect("/hub/") });
+
 let mainHttpServer = http.createServer(mainApp);
 mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EADDRINUSE") {
@@ -52,11 +54,11 @@ let io = socketio(mainHttpServer, { transports: ["websocket"] });
 // Build HTTP server
 let buildApp = express();
 
-function redirectToMainApp(req: express.Request, res: express.Response) {
-  res.redirect(`http://${req.hostname}:${config.mainPort}/?${querystring.stringify(req.query)}`);
+function redirectToHub(req: express.Request, res: express.Response) {
+  res.redirect(`http://${req.hostname}:${config.mainPort}/hub/`);
 }
 
-buildApp.get("/", redirectToMainApp);
+buildApp.get("/", redirectToHub);
 buildApp.use("/", express.static(`${__dirname}/../public`));
 
 buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {

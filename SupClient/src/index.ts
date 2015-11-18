@@ -1,10 +1,14 @@
 import * as io from "socket.io-client";
+import * as querystring from "querystring";
 
 import ProjectClient from "./ProjectClient"
 import setupHotkeys from "./setupHotkeys";
 import * as table from "./table";
 import * as dialogs from "./dialogs/index";
 export { ProjectClient, setupHotkeys, table, dialogs };
+
+export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
+export let query = querystring.parse(window.location.search.slice(1));
 
 // Refuses filesystem-unsafe characters
 // See http://superuser.com/q/358855
@@ -15,8 +19,6 @@ export const namePatternDescription = "The following characters cannot be used: 
 
 // Initialize empty system
 SupCore.system = new SupCore.System("");
-
-export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 
 // Component editors
 interface ComponentEditorObject {
@@ -54,7 +56,10 @@ export function registerSettingsEditorClass(name: string, plugin: SettingsEditor
 }
 
 // Plugins list
-export function connect(projectId: string, options: { reconnection: boolean; promptCredentials: boolean; } = { reconnection: false, promptCredentials: false }) {
+export function connect(projectId: string, options?: { reconnection?: boolean; }) {
+  if (options == null) options = {};
+  if (options.reconnection == null) options.reconnection = false;
+  
   let namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
   let supServerAuth = localStorage.getItem("supServerAuth");
@@ -66,37 +71,7 @@ export function connect(projectId: string, options: { reconnection: boolean; pro
     SupCore.system.name = config.systemName;
   });
 
-  if (options.promptCredentials) socket.on("error", onSocketError);
   return socket;
-}
-
-function onSocketError(error: string) {
-  document.body.innerHTML = "";
-  if (error === "invalidCredentials") {
-    promptServerPassword((serverPassword) => {
-      promptUsername((username) => {
-        setupAuth(serverPassword, username);
-      });
-    });
-  }
-  else if (error === "invalidUsername") {
-    promptUsername((username) => {
-      setupAuth("", username);
-    });
-  }
-}
-
-function promptServerPassword(callback: (password: string) => any) {
-  dialogs.prompt("Please enter the server password.", "", "", "Connect", { type: "password" }, callback);
-}
-
-function promptUsername(callback: (username: string) => any) {
-  dialogs.prompt("Please choose a username.", "", "", "Connect", { pattern: "[A-Za-z0-9_]{3,20}" }, callback);
-}
-
-function setupAuth(serverPassword: string, username: string) {
-  localStorage.setItem("supServerAuth", JSON.stringify({ serverPassword, username }));
-  window.location.reload();
 }
 
 export function onAssetTrashed() {

@@ -1,0 +1,55 @@
+body
+  display flex
+  border 1px solid #666
+
+body.browser
+  border none
+
+  .controls .minimize, .controls .maximize, .controls .close
+    display none
+
+.controls
+  display flex
+  align-items flex-start
+
+.controls button
+  width 30px
+  height 25px
+  border none
+  outline none
+  -webkit-app-region no-drag
+
+.controls .toggle-notifications
+  background url(/images/controls/notifications-enabled.svg)
+  &:hover
+    background url(/images/controls/notifications-enabled-hover.svg)
+  &:active
+    background url(/images/controls/notifications-enabled-active.svg)
+
+.controls .toggle-notifications.disabled
+  background url(/images/controls/notifications-disabled.svg)
+  &:hover
+    background url(/images/controls/notifications-disabled-hover.svg)
+  &:active
+    background url(/images/controls/notifications-disabled-active.svg)
+
+.controls .minimize
+  background url(/images/controls/minimize-window.svg)
+  &:hover
+    background url(/images/controls/minimize-window-hover.svg)
+  &:active
+    background url(/images/controls/minimize-window-active.svg)
+
+.controls .maximize
+  background url(/images/controls/maximize-window.svg)
+  &:hover
+    background url(/images/controls/maximize-window-hover.svg)
+  &:active
+    background url(/images/controls/maximize-window-active.svg)
+
+.controls .close
+  background url(/images/controls/close-window.svg)
+  &:hover
+    background url(/images/controls/close-window-hover.svg)
+  &:active
+    background url(/images/controls/close-window-active.svg)
