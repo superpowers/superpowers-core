@@ -15,6 +15,10 @@ html
       include project/index
 
   body
+    script.
+      // We want to apply this class before the first render
+      // to avoid having the window borders flashing
+      if (window.navigator.userAgent.indexOf("Electron") === -1) document.body.classList.add("browser");
     script(src="/SupCore.js")
     script(src="/SupClient.js")
     script(src="index.js")

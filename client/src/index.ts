@@ -6,8 +6,7 @@ let qs = require("querystring").parse(window.location.search.slice(1));
 if (qs.project != null) project(qs.project);
 else hub();
 
-if (!SupClient.isApp) document.body.classList.add("browser");
-else {
+if (SupClient.isApp) {
   let nodeRequire = require;
   let remote: GitHubElectron.Remote = nodeRequire("remote");
   let win = remote.getCurrentWindow();
