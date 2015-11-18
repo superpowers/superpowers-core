@@ -3,5 +3,9 @@
   "description": "Launcher for Superpowers, the HTML5 2D+3D game maker",
   "version": "1.0.0",
   "license": "ISC",
-  "main": "main.js"
+  "main": "main.js",
+  "repository": {
+    "type": "hg",
+    "url": "https://bitbucket.org/superpowers/superpowers"
+  },
 }
