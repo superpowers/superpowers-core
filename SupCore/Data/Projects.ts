@@ -12,15 +12,7 @@ export default class Projects extends ListById {
   }
   
   static sort(a: SupCore.Data.ProjectManifestPub, b: SupCore.Data.ProjectManifestPub) {
-    // FIXME: This fails in NW.js, we can enable it back
-    // once the switch to Electron is done.
-    // return a.name.localeCompare(b.name);
-
-    let aName = a.name.toLowerCase();
-    let bName = b.name.toLowerCase();
-    if (aName < bName) return -1;
-    if (aName > bName) return 1;
-    return 0;
+    return a.name.localeCompare(b.name);
   }
 
   pub: SupCore.Data.ProjectManifestPub[];

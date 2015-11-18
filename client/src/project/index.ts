@@ -57,9 +57,6 @@ export default function project(projectId: string) {
   let clone = document.importNode(template.content, true);
   document.body.appendChild(clone);
 
-  // Workaround for NW.js bug: https://github.com/nwjs/nw.js/issues/3360
-  if (navigator.platform === "MacIntel") (<any>document.querySelector(".tabs-bar")).style.webkitAppRegion = "no-drag";
-
   // Development mode
   if (localStorage.getItem("superpowers-dev-mode") != null) {
     let projectManagementDiv = <HTMLDivElement>document.querySelector(".project .project-management");
