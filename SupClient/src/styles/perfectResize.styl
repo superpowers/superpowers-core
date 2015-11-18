@@ -34,7 +34,10 @@
     cursor default
 
 html.handle-dragging
-  * { -moz-user-select: none; user-select: none; }
+  *
+    -webkit-user-select none
+    -moz-user-select none
+    user-select none
   iframe { pointer-events: none; }
 
   &.vertical * { cursor: ew-resize; }
