@@ -8,9 +8,8 @@ gulp.task("jade-build", function() { return gulp.src("./src/build.jade").pipe(ja
 
 // Stylus
 var stylus = require("gulp-stylus");
-var nib = require("nib");
-gulp.task("stylus-hub", function() { return gulp.src("./src/hub/index.styl").pipe(stylus({ use: [ nib() ], errors: true })).pipe(gulp.dest("../public/hub")); });
-gulp.task("stylus-project", function() { return gulp.src("./src/project/index.styl").pipe(stylus({ use: [ nib() ], errors: true })).pipe(gulp.dest("../public/project")); });
+gulp.task("stylus-hub", function() { return gulp.src("./src/hub/index.styl").pipe(stylus({ errors: true })).pipe(gulp.dest("../public/hub")); });
+gulp.task("stylus-project", function() { return gulp.src("./src/project/index.styl").pipe(stylus({ errors: true })).pipe(gulp.dest("../public/project")); });
 
 // TypeScript
 var ts = require("gulp-typescript");
