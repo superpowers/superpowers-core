@@ -1,3 +1,5 @@
+import "../window";
+
 let port = (window.location.port.length === 0) ? "80" : window.location.port;
 
 document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
