@@ -18,6 +18,7 @@ function start() {
   document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
 
   ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"));
+  ui.projectsTreeView.on("selectionChange", onProjectSelectionChange);
   ui.projectsTreeView.on("activate", onProjectActivate);
 
   document.querySelector(".projects-buttons .new-project").addEventListener("click", onNewProjectClick);
@@ -60,16 +61,18 @@ function onConnected() {
   socket.emit("sub", "projects", null, onProjectsReceived);
 
   const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
-  for (let i = 0; i < buttons.length; i++) buttons[i].disabled = false;
+  buttons[0].disabled = false;
+  let noSelection = ui.projectsTreeView.selectedNodes.length === 0;
+  for (let i = 1; i < buttons.length; i++) buttons[i].disabled = noSelection;
 }
 
 function onDisconnected() {
   data.projects = null;
 
-  const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
-  for (let i = 0; i < buttons.length; i++) buttons[i].disabled = true;
   ui.projectsTreeView.clearSelection();
   ui.projectsTreeView.treeRoot.innerHTML = "";
+  const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
+  for (let i = 0; i < buttons.length; i++) buttons[i].disabled = true;
 }
 
 function onProjectsReceived(err: string, projects: SupCore.Data.ProjectManifestPub[]) {
@@ -136,6 +139,13 @@ function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
   infoDiv.appendChild(descriptionDiv);
 
   return liElt;
+}
+
+function onProjectSelectionChange() {
+  const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
+  buttons[0].disabled = false;
+  let noSelection = ui.projectsTreeView.selectedNodes.length === 0;
+  for (let i = 1; i < buttons.length; i++) buttons[i].disabled = noSelection;
 }
 
 function onProjectActivate() {
