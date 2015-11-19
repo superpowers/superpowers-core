@@ -1,0 +1,22 @@
+button
+  background linear-gradient(#efefef, #e5e5e5)
+  padding 0.3em 0.6em
+  border 1px solid #999
+  border-radius 2px
+  box-shadow 0 0 1px 1px #fff inset
+  color #222
+  line-height 1
+
+button:not(:disabled):hover
+  border-color #888
+  
+button:active
+  background linear-gradient(#dadada, #e5e5e5)
+  border-color #aaa
+
+button:disabled
+  color #aaa
+
+.button-strip button:not(:last-child) { border-right: 0; border-radius: 0; }
+.button-strip button:first-child { border-radius: 2px 0 0 2px; }
+.button-strip button:last-child { border-radius: 0 2px 2px 0; }
