@@ -86,6 +86,8 @@ export default class RemoteHubClient extends BaseRemoteClient {
   }
 
   _onSetProjectProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
+    if (!this.errorIfCant("editProjects", callback)) return;
+
     let projectServer = this.server.serversById[id];
     if (projectServer == null) { callback("Invalid project id"); return; }
 
