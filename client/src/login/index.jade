@@ -2,12 +2,10 @@ doctype html
 html
   head
     meta(charset="utf-8")
-    title Hub — Superpowers 
+    title Login — Superpowers
     link(rel="stylesheet",href="/styles/reset.css")
-    link(rel="stylesheet",href="/styles/perfectResize.css")
-    link(rel="stylesheet",href="/styles/treeView.css")
-    link(rel="stylesheet",href="/styles/dialogs.css")
-    link(rel="stylesheet",href="/hub/index.css")
+    link(rel="stylesheet",href="/styles/properties.css")
+    link(rel="stylesheet",href="/login/index.css")
 
   body
     .server-header
@@ -17,12 +15,23 @@ html
         button.minimize
         button.maximize
         button.close
+    form.login
+      .welcome
+        | Welcome to this Superpowers server!
+    
+      table.properties
+        tr
+          th Server password
+          td
+            input.server-password(type="password",placeholder="Password",autofocus)
+        tr
+          th Username
+          td
+            input.username(type="text",placeholder="Your username",spellcheck="false")
 
-    .projects-buttons.button-strip
-      button(disabled).new-project New Project
-      button(disabled).rename-project Rename
-      button(disabled).edit-description Edit description
-    .projects-tree-view
+      .buttons
+        button.log-in Log in
+
     a(href="https://sparklinlabs.com/",target="_blank").server-footer
       | Superpowers — HTML5 2D+3D game maker
 
@@ -32,4 +41,4 @@ html
       if (window.navigator.userAgent.indexOf("Electron") === -1) document.body.classList.add("browser");
     script(src="/SupCore.js")
     script(src="/SupClient.js")
-    script(src="/hub/index.js")
+    script(src="/login/index.js")

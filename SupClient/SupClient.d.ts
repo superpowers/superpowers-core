@@ -6,6 +6,7 @@ declare namespace SupClient {
 
   let isApp: boolean;
   let query: { project: string, asset: string; };
+  let cookies: Cookies.CookiesStatic;
 
   interface ComponentEditorObject {
     destroy(): void;

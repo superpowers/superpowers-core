@@ -1,11 +1,12 @@
 import * as io from "socket.io-client";
 import * as querystring from "querystring";
+import * as cookies from "js-cookie";
 
 import ProjectClient from "./ProjectClient"
 import setupHotkeys from "./setupHotkeys";
 import * as table from "./table";
 import * as dialogs from "./dialogs/index";
-export { ProjectClient, setupHotkeys, table, dialogs };
+export { cookies, ProjectClient, setupHotkeys, table, dialogs };
 
 export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 export let query = querystring.parse(window.location.search.slice(1));
@@ -62,7 +63,7 @@ export function connect(projectId: string, options?: { reconnection?: boolean; }
   
   let namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
-  let supServerAuth = localStorage.getItem("supServerAuth");
+  let supServerAuth = cookies.get("supServerAuth");
   let socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
     { transports: [ "websocket" ], reconnection: options.reconnection, query: { supServerAuth } }
   );

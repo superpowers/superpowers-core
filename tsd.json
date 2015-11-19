@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "708609e0764daeb5eb64104af7aca50c520c4e6e"
+      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
     },
     "async/async.d.ts": {
       "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
@@ -15,7 +15,7 @@
       "commit": "caee0398cbc82b1bd2cc00843d911a664d498c25"
     },
     "express/express.d.ts": {
-      "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
+      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
     },
     "yargs/yargs.d.ts": {
       "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
@@ -46,6 +46,18 @@
     },
     "github-electron/github-electron-renderer.d.ts": {
       "commit": "708609e0764daeb5eb64104af7aca50c520c4e6e"
+    },
+    "cookie-parser/cookie-parser.d.ts": {
+      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+    },
+    "serve-static/serve-static.d.ts": {
+      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+    },
+    "mime/mime.d.ts": {
+      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+    },
+    "js-cookie/js-cookie.d.ts": {
+      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
     }
   }
 }

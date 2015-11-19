@@ -1,5 +1,4 @@
 import "../window";
-import * as authentication from "../authentication";
 import newProjectDialog from "../dialogs/newProject";
 import * as async from "async";
 
@@ -28,7 +27,7 @@ function start() {
   loadSystemsInfo(() => {
     socket = SupClient.connect(null, { reconnection: true });
 
-    socket.on("error", authentication.handleError);
+    socket.on("error", onConnectionError);
     socket.on("connect", onConnected);
     socket.on("disconnect", onDisconnected);
   
@@ -57,6 +56,10 @@ function loadSystemsInfo(callback: Function) {
 }
 
 // Network callbacks
+function onConnectionError() {
+  window.location.replace("/login");
+}
+
 function onConnected() {
   socket.emit("sub", "projects", null, onProjectsReceived);
 

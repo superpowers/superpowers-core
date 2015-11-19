@@ -1,5 +1,4 @@
 import "../window";
-import * as authentication from "../authentication";
 import newAssetDialog from "../dialogs/newAsset";
 import * as async from "async";
 
@@ -158,7 +157,7 @@ start();
 function connect() {
   socket = SupClient.connect(SupClient.query.project, { reconnection: true });
 
-  socket.on("error", authentication.handleError);
+  socket.on("error", onConnectionError);
   socket.on("disconnect", onDisconnected);
 
   socket.on("welcome", onWelcome);
@@ -244,6 +243,11 @@ function setupTool(toolName: string) {
 }
 
 // Network callbacks
+function onConnectionError() {
+  let redirect = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+  window.location.replace(`/login?redirect=${redirect}`);
+}
+
 function onDisconnected() {
   data = null;
   ui.entriesTreeView.clearSelection();

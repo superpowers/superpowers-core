@@ -5,6 +5,7 @@ import * as fs from "fs";
 import * as http from "http";
 import * as querystring from "querystring";
 import * as express from "express";
+import * as cookieParser from "cookie-parser";
 import * as socketio from "socket.io";
 
 import * as paths from "./paths";
@@ -33,13 +34,27 @@ let hub: ProjectHub = null;
 
 // Main HTTP server
 let mainApp = express();
+
+mainApp.use(cookieParser());
+
+function redirectIfNoAuth(req: express.Request, res: express.Response, next: Function) {
+  if (req.cookies["supServerAuth"] == null) {
+    res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl)}`);
+    return;
+  }
+
+  next();
+}
+
+mainApp.get("/", (req, res) => { res.redirect("/hub"); });
+mainApp.get("/hub", redirectIfNoAuth);
+mainApp.get("/project", redirectIfNoAuth);
+
 mainApp.use("/", express.static(`${__dirname}/../public`));
 mainApp.use("/projects/:projectId/*", (req, res) => {
   let projectPath = hub.serversById[req.params.projectId].projectPath;
   res.sendFile(req.params[0], { root: `${projectPath}/public` });
 });
-
-mainApp.get("/", (req, res) => { res.redirect("/hub/") });
 
 let mainHttpServer = http.createServer(mainApp);
 mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
