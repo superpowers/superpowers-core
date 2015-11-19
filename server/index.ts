@@ -3,7 +3,6 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as http from "http";
-import * as querystring from "querystring";
 import * as express from "express";
 import * as cookieParser from "cookie-parser";
 import * as socketio from "socket.io";
@@ -121,8 +120,6 @@ function onExit() {
     else SupCore.log("Exited cleanly.");
     process.exit();
   });
-  
-  process.exit;
 }
 
 process.on("SIGINT", onExit);
