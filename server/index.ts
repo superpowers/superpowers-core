@@ -31,6 +31,9 @@ function handle404(err: any, req: express.Request, res: express.Response, next: 
 
 let hub: ProjectHub = null;
 
+// Public version
+fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version }, null, 2));
+
 // Main HTTP server
 let mainApp = express();
 
