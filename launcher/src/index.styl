@@ -21,14 +21,17 @@ body
     border none
     border-right 1px solid rgba(0,0,0,0.2)
     text-transform uppercase
+    border-radius 0
+    box-shadow none
 
-    &.active
-      background #444
-      color #fff
-      font-weight bold
+  > button.active
+    background #444
+    color #fff
+    font-weight bold
+    box-shadow none
 
-    &:not(.active):hover
-      background #ccc
+  > button:not(.active):hover
+    background #ccc
 
 .panes
   flex 1
