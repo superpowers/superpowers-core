@@ -16,7 +16,7 @@ let port = (window.location.port.length === 0) ? "80" : window.location.port;
 function start() {
   document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
 
-  ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"));
+  ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"), { multipleSelection: false });
   ui.projectsTreeView.on("selectionChange", onProjectSelectionChange);
   ui.projectsTreeView.on("activate", onProjectActivate);
 
