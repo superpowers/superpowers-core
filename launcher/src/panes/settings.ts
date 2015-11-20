@@ -10,7 +10,7 @@ if (fs.existsSync(serverPaths.config)) {
   try {
     userConfig = JSON.parse(fs.readFileSync(serverPaths.config, { encoding: "utf8" }));
     schemas.validate(userConfig, "config");
-  } catch(e) {
+  } catch (e) {
     userConfig = {};
   }
 

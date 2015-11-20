@@ -1,5 +1,4 @@
 import * as _ from "lodash";
-import * as path from "path";
 import * as fs from "fs";
 import * as schemas from "./schemas";
 import * as paths from "./paths";

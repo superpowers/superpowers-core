@@ -24,30 +24,30 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     let pluginNamesByAuthor: { [author: string]: string[] } = {};
     for (let pluginAuthor of fs.readdirSync(pluginsPath)) {
       let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
-  
+
       pluginNamesByAuthor[pluginAuthor] = [];
       for (let pluginName of fs.readdirSync(pluginAuthorPath)) {
         if (shouldIgnorePlugin(pluginName)) continue;
         pluginNamesByAuthor[pluginAuthor].push(pluginName);
       }
     }
-  
+
     // First pass
     for (let pluginAuthor in pluginNamesByAuthor) {
       let pluginNames = pluginNamesByAuthor[pluginAuthor];
       let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
-  
+
       for (let pluginName of pluginNames) {
         let pluginPath = `${pluginAuthorPath}/${pluginName}`;
-  
+
         // Load scripting API module
         let apiModulePath = `${pluginPath}/api`;
         if (fs.existsSync(apiModulePath)) require(apiModulePath);
-  
+
         // Expose public stuff
         mainApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
         buildApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
-  
+
         // Ensure all public files exist
         for (let requiredFile of publicPluginFiles) {
           let requiredFilePath = `${pluginPath}/public/${requiredFile}.js`;
@@ -55,7 +55,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
         }
       }
     }
-    
+
     // Second pass, because data modules might depend on API modules
     let pluginsInfo: {
       list: string[],
@@ -67,11 +67,11 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
 
     for (let pluginAuthor in pluginNamesByAuthor) {
       let pluginNames = pluginNamesByAuthor[pluginAuthor];
-      let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`
-  
+      let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+
       for (let pluginName of pluginNames) {
         let pluginPath = `${pluginAuthorPath}/${pluginName}`;
-  
+
         // Load data module
         let dataModulePath = `${pluginPath}/data`;
         if (fs.existsSync(dataModulePath)) require(dataModulePath);

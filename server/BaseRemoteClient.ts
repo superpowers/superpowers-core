@@ -1,20 +1,17 @@
-import ProjectHub from "./ProjectHub";
-import ProjectServer from "./ProjectServer";
-
 export default class BaseRemoteClient {
   subscriptions: string[] = [];
 
   constructor(public server: BaseServer, public socket: SocketIO.Socket) {
     this.socket.on("error", (err: Error) => { SupCore.log((<any>err).stack); });
-    this.socket.on("disconnect", this._onDisconnect);
+    this.socket.on("disconnect", this.onDisconnect);
 
-    this.socket.on("sub", this._onSubscribe);
-    this.socket.on("unsub", this._onUnsubscribe);
+    this.socket.on("sub", this.onSubscribe);
+    this.socket.on("unsub", this.onUnsubscribe);
   }
 
   errorIfCant(action: string, callback: (error: string) => any) {
     if (!this.can(action)) {
-      if(callback != null) callback("Forbidden");
+      if (callback != null) callback("Forbidden");
       return false;
     }
 
@@ -30,18 +27,18 @@ export default class BaseRemoteClient {
   }
   */
 
-  _onDisconnect = () => {
+  private onDisconnect = () => {
     for (let subscription of this.subscriptions) {
-      let [ sub, endpoint, id ] = subscription.split(":");
+      let [ , endpoint, id ] = subscription.split(":");
       if (id == null) continue;
 
       (<SupCore.Data.Base.Dictionary>this.server.data[endpoint]).release(id, this);
     }
 
     this.server.removeRemoteClient(this.socket.id);
-  }
+  };
 
-  _onSubscribe = (endpoint: string, id: string, callback: (err: string, pubData: any) => any) => {
+  private onSubscribe = (endpoint: string, id: string, callback: (err: string, pubData: any) => any) => {
     let data = this.server.data[endpoint];
     if (data == null) { callback("No such endpoint", null); return; }
 
@@ -63,11 +60,11 @@ export default class BaseRemoteClient {
       this.subscriptions.push(roomName);
 
       callback(null, item.pub);
-      return
+      return;
     });
-  }
+  };
 
-  _onUnsubscribe = (endpoint: string, id: string) => {
+  private onUnsubscribe = (endpoint: string, id: string) => {
     let data = this.server.data[endpoint];
     if (data == null) return;
 
@@ -80,5 +77,5 @@ export default class BaseRemoteClient {
 
     this.socket.leave(roomName);
     this.subscriptions.splice(index, 1);
-  }
+  };
 }

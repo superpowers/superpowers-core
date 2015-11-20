@@ -6,7 +6,7 @@ export default function(socket: SocketIO.Socket, next: Function) {
   let auth: any;
   if (socket.handshake.query != null) {
     let authJSON = socket.handshake.query.supServerAuth;
-    try { auth = JSON.parse(authJSON); } catch(e) {}
+    try { auth = JSON.parse(authJSON); } catch (e) { /* Ignore */ }
   }
 
   if (auth != null && auth.serverPassword === config.password && typeof auth.username === "string" && usernameRegex.test(auth.username)) {

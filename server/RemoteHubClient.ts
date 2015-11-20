@@ -6,19 +6,21 @@ import * as paths from "./paths";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
+interface AddProjectCallback { (err: string, projectId?: string): any; };
+
 export default class RemoteHubClient extends BaseRemoteClient {
   constructor(public server: ProjectHub, socket: SocketIO.Socket) {
     super(server, socket);
 
     // Projects
-    this.socket.on("add:projects", this._onAddProject);
-    this.socket.on("setProperty:projects", this._onSetProjectProperty);
+    this.socket.on("add:projects", this.onAddProject);
+    this.socket.on("setProperty:projects", this.onSetProjectProperty);
   }
 
   // TODO: Implement roles and capabilities
   can(action: string) { return true; }
 
-  _onAddProject = (name: string, description: string, system: string, pngIcon: Buffer, callback: (err: string, projectId?: string) => any) => {
+  private onAddProject = (name: string, description: string, system: string, pngIcon: Buffer, callback: AddProjectCallback) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
     let manifest: SupCore.Data.ProjectManifestPub = {
@@ -36,7 +38,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     while(true) {
       try {
         fs.mkdirSync(path.join(paths.projects, projectFolder));
-      } catch(e) {
+      } catch (e) {
         projectFolder = `${originalProjectFolder}-${projectFolderNumber++}`;
         continue;
       }
@@ -68,7 +70,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
         let entriesJSON = JSON.stringify([], null, 2);
         fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
       };
-      
+
       let writeIcon = (callback: (err?: NodeJS.ErrnoException) => any) => {
         if (pngIcon == null) { callback(); return; }
         fs.writeFile(path.join(projectPath, "public/icon.png"), pngIcon, callback);
@@ -83,9 +85,9 @@ export default class RemoteHubClient extends BaseRemoteClient {
         callback(null, manifest.id);
       });
     });
-  }
+  };
 
-  _onSetProjectProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
+  private onSetProjectProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
     let projectServer = this.server.serversById[id];
@@ -98,5 +100,5 @@ export default class RemoteHubClient extends BaseRemoteClient {
       this.server.io.in("sub:projects").emit("setProperty:projects", id, key, value);
       callback(null);
     });
-  }
+  };
 }

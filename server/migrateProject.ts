@@ -5,7 +5,7 @@ import * as async from "async";
 export default function(server: ProjectServer, callback: (err: Error) => any) {
   let oldVersion = server.data.manifest.migratedFromFormatVersion;
   if (oldVersion == null) { callback(null); return; }
-  
+
   async.series([
     (cb) => { if (oldVersion < 1) migrateTo1(server, cb); else cb(); }
   ], callback);
@@ -37,9 +37,9 @@ function migrateTo1(server: ProjectServer, callback: (err: Error) => any) {
         }
 
         async.each(trashedAssetFolders, server.moveAssetFolderToTrash.bind(server), cb);
-      })
+      });
     },
-    
+
     // Delete internals.json and members.json
     (cb) => { fs.unlink(path.join(server.projectPath, "internals.json"), (err) => { cb(); }); },
     (cb) => { fs.unlink(path.join(server.projectPath, "members.json"), (err) => { cb(); }); }

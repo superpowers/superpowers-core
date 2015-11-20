@@ -10,6 +10,12 @@ import migrateProject from "./migrateProject";
 
 const saveDelay = 60;
 
+interface SaveCallback {
+  lastTime: number;
+  timeoutId: NodeJS.Timer;
+  callback: (callback: (err: Error) => any) => any;
+}
+
 export default class ProjectServer {
   io: SocketIO.Namespace;
   system: SupCore.System;
@@ -19,7 +25,7 @@ export default class ProjectServer {
   buildsPath: string;
   nextBuildId: number;
 
-  scheduledSaveCallbacks: { [name: string]: { lastTime: number, timeoutId: NodeJS.Timer, callback: (callback: (err: Error) => any) => any } } = {};
+  scheduledSaveCallbacks: { [name: string]: SaveCallback } = {};
   nextClientId = 0;
   clientsBySocketId: { [socketId: string]: RemoteProjectClient } = {};
 
@@ -33,17 +39,17 @@ export default class ProjectServer {
       assets: new SupCore.Data.Assets(this),
       rooms: new SupCore.Data.Rooms(this),
       resources: new SupCore.Data.Resources(this)
-    }
+    };
 
-    this.data.assets.on("itemLoad", this._onAssetLoaded);
-    this.data.rooms.on("itemLoad", this._onRoomLoaded);
-    this.data.resources.on("itemLoad", this._onResourceLoaded);
+    this.data.assets.on("itemLoad", this.onAssetLoaded);
+    this.data.rooms.on("itemLoad", this.onRoomLoaded);
+    this.data.resources.on("itemLoad", this.onResourceLoaded);
 
     let loadManifest = (callback: (err: Error) => any) => {
       let done = (data: any) => {
         try { this.data.manifest = new SupCore.Data.ProjectManifest(data); }
-        catch(err) { callback(err); return; }
-        this.data.manifest.on("change", this._onManifestChanged);
+        catch (err) { callback(err); return; }
+        this.data.manifest.on("change", this.onManifestChanged);
         if (this.data.manifest.migratedFromFormatVersion != null) this.data.manifest.emit("change");
 
         this.system = SupCore.systems[this.data.manifest.pub.system];
@@ -57,10 +63,10 @@ export default class ProjectServer {
 
         let manifestData: SupCore.Data.ProjectManifest;
         try { manifestData = JSON.parse(manifestJSON); }
-        catch(err) { callback(err); return; }
+        catch (err) { callback(err); return; }
 
         try { schemas.validate(manifestData, "projectManifest"); }
-        catch(err) { callback(err); return; }
+        catch (err) { callback(err); return; }
 
         done(manifestData);
       });
@@ -74,7 +80,7 @@ export default class ProjectServer {
 
         if (entryIds != null) {
           for (let entryId of entryIds) {
-            let entryBuildId = parseInt(entryId);
+            let entryBuildId = parseInt(entryId, 10);
             if (isNaN(entryBuildId)) continue;
             this.nextBuildId = Math.max(entryBuildId + 1, this.nextBuildId);
           }
@@ -90,13 +96,13 @@ export default class ProjectServer {
 
         let entriesData: any;
         try { entriesData = JSON.parse(entriesJSON); }
-        catch(err) { callback(err); return; }
+        catch (err) { callback(err); return; }
 
         try { schemas.validate(entriesData, "projectEntries"); }
-        catch(err) { callback(err); return; }
+        catch (err) { callback(err); return; }
 
         this.data.entries = new SupCore.Data.Entries(entriesData, this);
-        this.data.entries.on("change", this._onEntriesChanged);
+        this.data.entries.on("change", this.onEntriesChanged);
 
         callback(null);
       });
@@ -112,7 +118,7 @@ export default class ProjectServer {
       // Setup the project's namespace
       this.io = globalIO.of(`/project:${this.data.manifest.pub.id}`);
       this.io.use(authMiddleware);
-      this.io.on("connection", this._onAddSocket);
+      this.io.on("connection", this.onAddSocket);
       callback(null);
     };
 
@@ -138,12 +144,11 @@ export default class ProjectServer {
         this.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
           if (err != null) { cb(err); return; }
 
-          //resource.restore();
+          // resource.restore();
           this.data.resources.release(resourceName, null, { skipUnloadDelay: true });
           cb();
         });
       }, callback);
-      //});
     };
 
     async.series([ loadManifest, setupNextBuildId, loadEntries, migrate, serve, prepareAssets, prepareResources ], callback);
@@ -172,13 +177,13 @@ export default class ProjectServer {
   moveAssetFolderToTrash(trashedAssetFolder: string, callback: (err: Error) => any) {
     const assetsPath = path.join(this.projectPath, "assets");
     const trashedAssetsPath = path.join(this.projectPath, "trashedAssets");
-    
+
     fs.mkdir(trashedAssetsPath, (err) => {
       if (err != null && err.code !== "EEXIST") throw err;
-      
+
       let folderPath = path.join(assetsPath, trashedAssetFolder);
       let folderNumber = 0;
-  
+
       let renameSuccessful = false;
       async.until(() => renameSuccessful, (cb) => {
         let newFolderPath = path.join(trashedAssetsPath, trashedAssetFolder);
@@ -196,35 +201,59 @@ export default class ProjectServer {
     delete this.clientsBySocketId[socketId];
   }
 
-  _onAssetLoaded = (assetId: string, item: SupCore.Data.Base.Asset) => {
-    item.on("change", () => { this.scheduleAssetSave(assetId); });
-
-    item.on("setDiagnostic", (diagnosticId: string, type: string, data: any) => { this._setDiagnostic(assetId, diagnosticId, type, data); });
-    item.on("clearDiagnostic", (diagnosticId: string) => { this._clearDiagnostic(assetId, diagnosticId); });
-
-    item.on("addDependencies", (dependencyEntryIds: string[]) => { this._addDependencies(assetId, dependencyEntryIds); });
-    item.on("removeDependencies", (dependencyEntryIds: string[]) => { this._removeDependencies(assetId, dependencyEntryIds); });
-  };
-
-  _onRoomLoaded = (roomId: string, item: SupCore.Data.Room) => {
-    let roomPath = path.join(this.projectPath, `rooms/${roomId}`);
-    let saveCallback = item.save.bind(item, roomPath);
-    item.on("change", () => { this._scheduleSave(saveDelay, `rooms:${roomId}`, saveCallback); });
+  markMissingDependency(dependentAssetIds: string[], missingAssetId: string) {
+    for (let dependentAssetId of dependentAssetIds) {
+      let missingAssetIds = [ missingAssetId ];
+      let existingDiag = this.data.entries.diagnosticsByEntryId[dependentAssetId].byId["missingDependencies"];
+      if (existingDiag != null) { missingAssetIds = missingAssetIds.concat(existingDiag.data.missingAssetIds); };
+      this.setDiagnostic(dependentAssetId, "missingDependencies", "error", { missingAssetIds });
+    }
   }
 
-  _onResourceLoaded = (resourceId: string, item: SupCore.Data.Base.Resource) => {
-    let resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
-    let saveCallback = item.save.bind(item, resourcePath);
-    item.on("change", () => { this._scheduleSave(saveDelay, `resources:${resourceId}`, saveCallback); });
-    item.on("command", (cmd: string, ...callbackArgs: any[]) => { this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, cmd, ...callbackArgs); });
+  scheduleAssetSave = (id: string) => {
+    let item = this.data.assets.byId[id];
+    if (item == null) {
+      SupCore.log(`Tried to schedule an asset save for item with id ${id} but the asset is not loaded.`);
+      SupCore.log(JSON.stringify(this.data.entries.byId[id], null, 2));
+      SupCore.log((<any>new Error()).stack);
+      return;
+    }
+    let assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(id)}`);
+    let saveCallback = item.save.bind(item, assetPath);
+    this.scheduleSave(saveDelay, `assets:${id}`, saveCallback);
   };
 
-  _onAddSocket = (socket: SocketIO.Socket) => {
+  private onAssetLoaded = (assetId: string, item: SupCore.Data.Base.Asset) => {
+    item.on("change", () => { this.scheduleAssetSave(assetId); });
+
+    item.on("setDiagnostic", (diagnosticId: string, type: string, data: any) => { this.setDiagnostic(assetId, diagnosticId, type, data); });
+    item.on("clearDiagnostic", (diagnosticId: string) => { this.clearDiagnostic(assetId, diagnosticId); });
+
+    item.on("addDependencies", (dependencyEntryIds: string[]) => { this.addDependencies(assetId, dependencyEntryIds); });
+    item.on("removeDependencies", (dependencyEntryIds: string[]) => { this.removeDependencies(assetId, dependencyEntryIds); });
+  };
+
+  private onRoomLoaded = (roomId: string, item: SupCore.Data.Room) => {
+    let roomPath = path.join(this.projectPath, `rooms/${roomId}`);
+    let saveCallback = item.save.bind(item, roomPath);
+    item.on("change", () => { this.scheduleSave(saveDelay, `rooms:${roomId}`, saveCallback); });
+  };
+
+  private onResourceLoaded = (resourceId: string, item: SupCore.Data.Base.Resource) => {
+    let resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
+    let saveCallback = item.save.bind(item, resourcePath);
+    item.on("change", () => { this.scheduleSave(saveDelay, `resources:${resourceId}`, saveCallback); });
+    item.on("command", (cmd: string, ...callbackArgs: any[]) => {
+      this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, cmd, ...callbackArgs);
+    });
+  };
+
+  private onAddSocket = (socket: SocketIO.Socket) => {
     let client = new RemoteProjectClient(this, (this.nextClientId++).toString(), socket);
     this.clientsBySocketId[socket.id] = client;
   };
 
-  _scheduleSave = (minimumSecondsElapsed: number, callbackName: string, callback: (callback: (err: Error) => any) => any) => {
+  private scheduleSave = (minimumSecondsElapsed: number, callbackName: string, callback: (callback: (err: Error) => any) => any) => {
     // this.log(`Scheduling a save: ${callbackName}`);
 
     let scheduledCallback = this.scheduledSaveCallbacks[callbackName];
@@ -254,36 +283,23 @@ export default class ProjectServer {
     }
   };
 
-  scheduleAssetSave = (id: string) => {
-    let item = this.data.assets.byId[id];
-    if (item == null) {
-      SupCore.log(`Tried to schedule an asset save for item with id ${id} but the asset is not loaded.`);
-      SupCore.log(JSON.stringify(this.data.entries.byId[id], null, 2));
-      SupCore.log((<any>new Error()).stack);
-      return;
-    }
-    let assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(id)}`);
-    let saveCallback = item.save.bind(item, assetPath);
-    this._scheduleSave(saveDelay, `assets:${id}`, saveCallback);
-  }
+  private onManifestChanged = () => { this.scheduleSave(saveDelay, "manifest", this.saveManifest); };
+  private onEntriesChanged = () => { this.scheduleSave(saveDelay, "entries", this.saveEntries); };
 
-  _onManifestChanged = () => { this._scheduleSave(saveDelay, "manifest", this._saveManifest); };
-  _onEntriesChanged = () => { this._scheduleSave(saveDelay, "entries", this._saveEntries); };
-
-  _saveManifest = (callback: (err: Error) => any) => {
+  private saveManifest = (callback: (err: Error) => any) => {
     let manifestJSON = JSON.stringify(this.data.manifest.pub, null, 2);
     fs.writeFile(path.join(this.projectPath, "manifest.json"), manifestJSON, callback);
   };
 
-  _saveEntries = (callback: (err: Error) => any) => {
+  private saveEntries = (callback: (err: Error) => any) => {
     let entriesJSON = JSON.stringify(this.data.entries.getForStorage(), null, 2);
     fs.writeFile(path.join(this.projectPath, "newEntries.json"), entriesJSON, () => {
-      fs.rename(path.join(this.projectPath, "newEntries.json"), path.join(this.projectPath, "entries.json"), callback)
+      fs.rename(path.join(this.projectPath, "newEntries.json"), path.join(this.projectPath, "entries.json"), callback);
     });
   };
 
-  _setDiagnostic(assetId: string, diagnosticId: string, type: string, data: any) {
-    // console.log(`_setDiagnostic ${assetId} ${diagnosticId} ${type}`);
+  private setDiagnostic(assetId: string, diagnosticId: string, type: string, data: any) {
+    // console.log(`setDiagnostic ${assetId} ${diagnosticId} ${type}`);
     let diagnostics = this.data.entries.diagnosticsByEntryId[assetId];
 
     let newDiag = { id: diagnosticId, type, data };
@@ -301,8 +317,8 @@ export default class ProjectServer {
     });
   }
 
-  _clearDiagnostic(assetId: string, diagnosticId: string) {
-    // console.log(`_clearDiagnostic ${assetId} ${diagnosticId}`);
+  private clearDiagnostic(assetId: string, diagnosticId: string) {
+    // console.log(`clearDiagnostic ${assetId} ${diagnosticId}`);
     let diagnostics = this.data.entries.diagnosticsByEntryId[assetId];
 
     diagnostics.remove(diagnosticId, (err) => {
@@ -310,7 +326,7 @@ export default class ProjectServer {
     });
   }
 
-  _addDependencies(assetId: string, dependencyEntryIds: string[]) {
+  private addDependencies(assetId: string, dependencyEntryIds: string[]) {
     let addedDependencyEntryIds: string[] = [];
     let missingAssetIds: string[] = [];
 
@@ -333,7 +349,7 @@ export default class ProjectServer {
     if (missingAssetIds.length > 0) {
       let existingDiag = this.data.entries.diagnosticsByEntryId[assetId].byId["missingDependencies"];
       if (existingDiag != null) missingAssetIds = missingAssetIds.concat(existingDiag.data.missingAssetIds);
-      this._setDiagnostic(assetId, "missingDependencies", "error", { missingAssetIds });
+      this.setDiagnostic(assetId, "missingDependencies", "error", { missingAssetIds });
     }
 
     if (addedDependencyEntryIds.length > 0) {
@@ -341,7 +357,7 @@ export default class ProjectServer {
     }
   }
 
-  _removeDependencies(assetId: string, dependencyEntryIds: string[]) {
+  private removeDependencies(assetId: string, dependencyEntryIds: string[]) {
     let removedDependencyEntryIds: string[] = [];
     let missingAssetIds: string[] = [];
 
@@ -372,8 +388,8 @@ export default class ProjectServer {
           }
         }
 
-        if (existingDiag.data.missingAssetIds.length === 0) this._clearDiagnostic(assetId, "missingDependencies");
-        else this._setDiagnostic(assetId, "missingDependencies", "error", existingDiag.data);
+        if (existingDiag.data.missingAssetIds.length === 0) this.clearDiagnostic(assetId, "missingDependencies");
+        else this.setDiagnostic(assetId, "missingDependencies", "error", existingDiag.data);
       }
     }
 

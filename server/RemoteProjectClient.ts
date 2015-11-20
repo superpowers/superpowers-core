@@ -20,27 +20,27 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.socket.emit("welcome", this.id, { buildPort: config.buildPort, systemName: this.server.system.name });
 
     // Manifest
-    this.socket.on("setProperty:manifest", this._onSetManifestProperty);
+    this.socket.on("setProperty:manifest", this.onSetManifestProperty);
 
     // Entries
-    this.socket.on("add:entries", this._onAddEntry);
-    this.socket.on("duplicate:entries", this._onDuplicateEntry);
-    this.socket.on("move:entries", this._onMoveEntry);
-    this.socket.on("trash:entries", this._onTrashEntry);
-    this.socket.on("setProperty:entries", this._onSetEntryProperty);
+    this.socket.on("add:entries", this.onAddEntry);
+    this.socket.on("duplicate:entries", this.onDuplicateEntry);
+    this.socket.on("move:entries", this.onMoveEntry);
+    this.socket.on("trash:entries", this.onTrashEntry);
+    this.socket.on("setProperty:entries", this.onSetEntryProperty);
 
     // Assets
-    this.socket.on("edit:assets", this._onEditAsset);
+    this.socket.on("edit:assets", this.onEditAsset);
 
     // Resources
-    this.socket.on("edit:resources", this._onEditResource);
+    this.socket.on("edit:resources", this.onEditResource);
 
     // Rooms
-    this.socket.on("edit:rooms", this._onEditRoom);
+    this.socket.on("edit:rooms", this.onEditRoom);
 
     // Project
-    this.socket.on("vacuum:project", this._onVacuumProject);
-    this.socket.on("build:project", this._onBuildProject);
+    this.socket.on("vacuum:project", this.onVacuumProject);
+    this.socket.on("build:project", this.onBuildProject);
   }
 
   // TODO: Implement roles and capabilities
@@ -48,7 +48,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
   // Manifest
 
-  _onSetManifestProperty = (key: string, value: any, callback: (err: string, value: any) => any) => {
+  private onSetManifestProperty = (key: string, value: any, callback: (err: string, value: any) => any) => {
     this.server.data.manifest.setProperty(key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err, null); return; }
 
@@ -59,12 +59,11 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
   // Entries
 
-  
-  _onAddEntry = (name: string, type: string, options: any, callback: (err: string, newId?: string) => any) => {
+  private onAddEntry = (name: string, type: string, options: any, callback: (err: string, newId?: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
     name = name.trim();
-    if (name.length == 0) { callback("Entry name cannot be empty"); return; }
+    if (name.length === 0) { callback("Entry name cannot be empty"); return; }
     if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
     let entry: SupCore.Data.EntryNode = { id: null, name, type, diagnostics: [], dependentAssetIds: [] };
@@ -92,7 +91,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  _onDuplicateEntry = (newName: string, id: string, options: any, callback: (err: string, duplicatedId?: string) => any) => {
+  private onDuplicateEntry = (newName: string, id: string, options: any, callback: (err: string, duplicatedId?: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
     let entryToDuplicate = this.server.data.entries.byId[id];
@@ -127,13 +126,13 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
           this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
           callback(null, entry.id);
-          return
+          return;
         });
       });
     });
   };
 
-  _onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
+  private onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
     let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id, { includeId: false });
@@ -141,13 +140,13 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.server.data.entries.move(id, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
 
-      this._onEntryChangeFullPath(id, oldFullAssetPath);
+      this.onEntryChangeFullPath(id, oldFullAssetPath);
       this.server.io.in("sub:entries").emit("move:entries", id, parentId, actualIndex);
       callback(null);
     });
-  }
+  };
 
-  _onTrashEntry = (id: string, callback: (err: string) => any) => {
+  private onTrashEntry = (id: string, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
     let entry = this.server.data.entries.byId[id];
@@ -158,7 +157,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       // Clear all dependencies for this entry
       let dependentAssetIds = (entry != null) ? entry.dependentAssetIds : null;
 
-      let dependencies = this.server.data.entries.dependenciesByAssetId[id]
+      let dependencies = this.server.data.entries.dependenciesByAssetId[id];
       if (dependencies != null) {
         let removedDependencyEntryIds = <string[]>[];
         for (let depId of dependencies) {
@@ -199,14 +198,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         }
 
         // Generate diagnostics for any assets depending on this entry
-        if (dependentAssetIds != null) {
-          for (let dependentAssetId of dependentAssetIds) {
-            let missingAssetIds = [ id ];
-            let existingDiag = this.server.data.entries.diagnosticsByEntryId[dependentAssetId].byId["missingDependencies"];
-            if (existingDiag != null) { missingAssetIds = missingAssetIds.concat(existingDiag.data.missingAssetIds); };
-            this.server._setDiagnostic(dependentAssetId, "missingDependencies", "error", { missingAssetIds });
-          }
-        }
+        if (dependentAssetIds != null) this.server.markMissingDependency(dependentAssetIds, id);
 
         // Skip asset destruction & release if trashing a folder
         if (asset == null) { callback(null); return; }
@@ -230,7 +222,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  _onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
+  private onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
     if (key === "name" && value.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
@@ -239,16 +231,16 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.server.data.entries.setProperty(id, key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err); return; }
 
-      if (key === "name") this._onEntryChangeFullPath(id, oldFullAssetPath);
+      if (key === "name") this.onEntryChangeFullPath(id, oldFullAssetPath);
       this.server.io.in("sub:entries").emit("setProperty:entries", id, key, actualValue);
       callback(null);
     });
-  }
+  };
 
-  _onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string) => {
+  private onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string) => {
     let entry = this.server.data.entries.byId[assetId];
     if (entry.type == null) {
-      for (let child of entry.children) this._onEntryChangeFullPath(child.id, `${oldFullAssetPath}__${child.name}`);
+      for (let child of entry.children) this.onEntryChangeFullPath(child.id, `${oldFullAssetPath}__${child.name}`);
       return;
     }
 
@@ -268,12 +260,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     fs.rename(oldDirPath, dirPath, (err) => {
       if (mustScheduleSave) this.server.scheduleAssetSave(assetId);
     });
-  }
+  };
 
   // Assets
-  _onEditAsset = (id: string, command: string, ...args: any[]) => {
+  private onEditAsset = (id: string, command: string, ...args: any[]) => {
     let callback: (err: string, id?: string) => any = null;
-    if (typeof args[args.length-1] === "function") callback = args.pop();
+    if (typeof args[args.length - 1] === "function") callback = args.pop();
 
     if (!this.errorIfCant("editAssets", callback)) return;
 
@@ -303,9 +295,9 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   };
 
   // Resources
-  _onEditResource = (id: string, command: string, ...args: any[]) => {
+  private onEditResource = (id: string, command: string, ...args: any[]) => {
     let callback: (err: string, id?: string) => any = null;
-    if (typeof args[args.length-1] === "function") callback = args.pop();
+    if (typeof args[args.length - 1] === "function") callback = args.pop();
 
     if (!this.errorIfCant("editResources", callback)) return;
 
@@ -333,9 +325,9 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   };
 
   // Rooms
-  _onEditRoom = (id: string, command: string, ...args: any[]) => {
+  private onEditRoom = (id: string, command: string, ...args: any[]) => {
     let callback: (err: string, id?: string) => any = null;
-    if (typeof args[args.length-1] === "function") callback = args.pop();
+    if (typeof args[args.length - 1] === "function") callback = args.pop();
 
     if (!this.errorIfCant("editRooms", callback)) return;
 
@@ -356,10 +348,10 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         callback(null, (callbackArgs[0] != null) ? callbackArgs[0].id : null);
       });
     });
-  }
+  };
 
   // Project
-  _onBuildProject = (callback: (err: string, buildId?: string, files?: string[]) => any) => {
+  private onBuildProject = (callback: (err: string, buildId?: string, files?: string[]) => any) => {
     if (!this.errorIfCant("buildProject", callback)) return;
 
     // this.server.log("Building project...");
@@ -371,9 +363,9 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     let game = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
 
-    try { fs.mkdirSync(this.server.buildsPath); } catch(e) {}
+    try { fs.mkdirSync(this.server.buildsPath); } catch (e) { /* Ignore */ }
     try { fs.mkdirSync(buildPath); }
-    catch(err) { callback(`Could not create folder for build ${buildId}`); return; }
+    catch (err) { callback(`Could not create folder for build ${buildId}`); return; }
 
     fs.mkdirSync(`${buildPath}/assets`);
 
@@ -443,7 +435,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  _onVacuumProject = (callback: (err: string, deletedCount?: number) => any) => {
+  private onVacuumProject = (callback: (err: string, deletedCount?: number) => any) => {
     if (!this.errorIfCant("vacuumProject", callback)) return;
 
     const trashedAssetsPath = path.join(this.server.projectPath, "trashedAssets");
@@ -464,5 +456,5 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       }, () => { callback(null, removedFolderCount); });
     });
-  }
+  };
 }

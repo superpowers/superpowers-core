@@ -3,7 +3,7 @@
 
 interface BaseServer {
   data: any;
-  removeRemoteClient(socketId: string): void;
-
   io: SocketIO.Namespace;
+
+  removeRemoteClient(socketId: string): void;
 }
