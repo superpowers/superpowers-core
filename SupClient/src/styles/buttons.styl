@@ -20,3 +20,24 @@ button:disabled
 .button-strip button:not(:last-child) { border-right: 0; border-radius: 0; }
 .button-strip button:first-child { border-radius: 2px 0 0 2px; }
 .button-strip button:last-child { border-radius: 0 2px 2px 0; }
+
+.flat-button-strip
+  display flex
+  background rgba(0,0,0,0.05)
+  border-bottom 1px solid #acacac
+
+.flat-button-strip button
+  flex 1
+  height 35px
+  border none
+  box-shadow none
+  background-color transparent
+  background-position center center
+  background-repeat no-repeat
+
+  opacity 0.5
+  cursor pointer
+
+  &:hover { background-color: rgba(0,0,0,0.1); opacity: 1; }
+  &:active { background-color: #fff; }
+  &:disabled { opacity: 0.2; cursor: default; }
