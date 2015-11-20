@@ -5,9 +5,9 @@ export default class ComponentConfig extends Hash {
     super(pub, schema);
   }
 
-  restore() {}
+  restore() { /* Override */ }
 
-  destroy() {}
+  destroy() { /* Override */ }
 
   server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any) {
     this.setProperty(path, value, (err, actualValue) => {

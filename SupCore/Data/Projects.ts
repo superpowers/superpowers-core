@@ -9,8 +9,8 @@ export default class Projects extends ListById {
     description: { type: "string", maxLength: 300 },
     formatVersion: { type: "number?" },
     system: { type: "string" }
-  }
-  
+  };
+
   static sort(a: SupCore.Data.ProjectManifestPub, b: SupCore.Data.ProjectManifestPub) {
     return a.name.localeCompare(b.name);
   }

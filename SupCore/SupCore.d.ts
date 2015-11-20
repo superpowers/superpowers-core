@@ -2,19 +2,20 @@
 /// <reference path="./ProjectServer.d.ts" />
 
 declare namespace SupCore {
-  function log(message: string): void;
+  export function log(message: string): void;
 
   namespace Data {
-    function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;
-    function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;
+    export function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;
+    export function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;
 
     interface AssetClass { new(id: string, pub: any, server?: ProjectServer): Base.Asset; }
     interface ComponentConfigClass { new(pub: any, sceneAsset?: any): Base.ComponentConfig; create(): any; }
     interface ResourceClass { new(pub: any, server?: ProjectServer): Base.Resource; }
 
     class Projects extends Base.ListById {
-      pub: ProjectManifestPub[];
       static sort(a: ProjectManifestPub, b: ProjectManifestPub): number;
+
+      pub: ProjectManifestPub[];
       byId: { [id: string]: ProjectManifestPub; };
 
       constructor(pub: ProjectManifestPub[]);
@@ -29,19 +30,20 @@ declare namespace SupCore {
       formatVersion: number;
     }
     class ProjectManifest extends Base.Hash {
+      static currentFormatVersion: number;
+
       pub: ProjectManifestPub;
       migratedFromFormatVersion: number;
-      static currentFormatVersion: number;
 
       constructor(pub: ProjectManifestPub);
     }
-    
+
     interface DiagnosticsItem {
       id: string;
       type: string;
       data: any;
     }
-    
+
     class Diagnostics extends Base.ListById {
       constructor(pub: DiagnosticsItem[]);
     }
@@ -141,8 +143,8 @@ declare namespace SupCore {
         message: string; path?: string;
       }
 
-      function getRuleViolation(value: any, rule: Rule, create: boolean): Violation;
-      function formatRuleViolation(violation: Violation): string;
+      export function getRuleViolation(value: any, rule: Rule, create: boolean): Violation;
+      export function formatRuleViolation(violation: Violation): string;
 
       class Hash extends EventEmitter {
         pub: any;
@@ -297,7 +299,7 @@ declare namespace SupCore {
       tools: { [name: string]: string; };
     };
   }
-  
+
   interface SystemsInfo {
     list: string[];
   }
@@ -307,36 +309,36 @@ declare namespace SupCore {
     defs: string;
     exposeActorComponent?: { propertyName: string; className: string; };
   }
-  
+
   class SystemAPI {
     contexts: { [contextName: string]: { plugins: { [pluginName: string]: APIPlugin; } } };
 
     registerPlugin(contextName: string, pluginName: string, plugin: APIPlugin): void;
   }
-  
+
   class SystemData {
     assetClasses: { [assetName: string]: SupCore.Data.AssetClass; };
     componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; };
     resourceClasses: { [resourceName: string]: SupCore.Data.ResourceClass };
-  
+
     registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass): void;
     registerComponentConfigClass(name: string, configClass: SupCore.Data.ComponentConfigClass): void;
     // Register a plugin *resource* (see SupCore.Data.Resources), not just a resource class, hence the name
     registerResource(name: string, resourceClass: SupCore.Data.ResourceClass): void;
   }
-  
+
   class System {
     name: string;
     api: SystemAPI;
     data: SystemData;
-    
+
     constructor(name: string);
   }
 
   // All loaded systems (server-side only)
-  var systems: { [system: string]: System };
+  export let systems: { [system: string]: System };
   // The currently active system
-  var system: System;
+  export let system: System;
 
   class EventEmitter implements NodeJS.EventEmitter {
     static listenerCount(emitter: EventEmitter, event: string): number;

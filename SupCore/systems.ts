@@ -1,18 +1,18 @@
 class SystemAPI {
   contexts: { [contextName: string]: { plugins: { [pluginName: string]: SupCore.APIPlugin; } } } = {};
-  
+
   constructor(public system: System) {}
 
   registerPlugin(contextName: string, pluginName: string, plugin: SupCore.APIPlugin) {
     if (this.contexts[contextName] == null) this.contexts[contextName] = { plugins: {} };
-  
+
     if (this.contexts[contextName].plugins[pluginName] != null) console.error(`SystemAPI.registerPlugin: Tried to register two or more plugins named "${pluginName}" in context "${contextName}", system "${this.system.name}"`);
-  
+
     if (plugin.exposeActorComponent != null ) {
       if (plugin.exposeActorComponent.propertyName == null) console.error(`SystemAPI.registerPlugin: Missing actor component property name in plugin "${pluginName}" in context "${contextName}", system "${this.system.name}"`);
       if (plugin.exposeActorComponent.className == null) console.error(`SystemAPI.registerPlugin: Missing actor component class name in plugin "${pluginName}" in context "${contextName}", system "${this.system.name}"`);
     }
-  
+
     this.contexts[contextName].plugins[pluginName] = plugin;
   }
 }
@@ -21,7 +21,7 @@ class SystemData {
   assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
   componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; } = {};
   resourceClasses: { [resourceName: string]: SupCore.Data.ResourceClass; } = {};
-  
+
   constructor(public system: System) {}
 
   registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass) {
@@ -30,7 +30,7 @@ class SystemData {
       return;
     }
     this.assetClasses[name] = assetClass;
-    return
+    return;
   }
 
   registerComponentConfigClass(name: string, configClass: SupCore.Data.ComponentConfigClass) {

@@ -16,12 +16,12 @@ export default class Dictionary extends EventEmitter {
   acquire(id: string, owner: any, callback: (err: Error, item: any) => any) {
     if (this.refCountById[id] == null) this.refCountById[id] = 0;
     this.refCountById[id]++;
-    //console.log(`Acquiring ${id}: ${this.refCountById[id]} refs`);
+    // console.log(`Acquiring ${id}: ${this.refCountById[id]} refs`);
 
     // Cancel pending unload timeout if any
     let timeout = this.unloadTimeoutsById[id];
     if (timeout != null) {
-      //console.log(`Cancelling unload timeout for ${id}`);
+      // console.log(`Cancelling unload timeout for ${id}`);
       clearTimeout(timeout);
       delete this.unloadTimeoutsById[id];
     }
@@ -58,7 +58,7 @@ export default class Dictionary extends EventEmitter {
     }
 
     this.refCountById[id]--;
-    //console.log(`Releasing ${id}: ${this.refCountById[id]} refs left`);
+    // console.log(`Releasing ${id}: ${this.refCountById[id]} refs left`);
 
     if (this.refCountById[id] === 0) {
       delete this.refCountById[id];
@@ -72,7 +72,7 @@ export default class Dictionary extends EventEmitter {
   _load(id: string) { throw new Error("This method must be overridden by derived classes"); }
 
   _unload(id: string) {
-    //console.log(`Unloading ${id}`);
+    // console.log(`Unloading ${id}`);
     this.byId[id].unload();
     delete this.byId[id];
     delete this.unloadTimeoutsById[id];

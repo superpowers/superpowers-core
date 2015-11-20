@@ -17,7 +17,7 @@ export default class ProjectManifest extends Hash {
 
     super(pub, ProjectManifest.schema);
   }
-  
+
   static migrate(pub: SupCore.Data.ProjectManifestPub): number {
     if (pub.formatVersion === ProjectManifest.currentFormatVersion) return null;
     if (pub.formatVersion == null) pub.formatVersion = 0;
@@ -27,7 +27,7 @@ export default class ProjectManifest extends Hash {
     }
 
     let oldFormatVersion = pub.formatVersion;
-    
+
     if (oldFormatVersion === 0) {
       // Nothing to migrate here, the manifest itself didn't change
       // The on-disk project format did though, and will be updated

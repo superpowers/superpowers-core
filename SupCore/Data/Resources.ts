@@ -5,7 +5,7 @@ import * as path from "path";
 // They might be used for project-wide plugin-specific settings for instance
 export default class Resources extends SupData.Base.Dictionary {
   constructor(public server: ProjectServer) {
-    super()
+    super();
   }
 
   acquire(id: string, owner: any, callback: (err: Error, item: any) => any) {

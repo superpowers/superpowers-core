@@ -30,7 +30,7 @@ function start() {
     socket.on("error", onConnectionError);
     socket.on("connect", onConnected);
     socket.on("disconnect", onDisconnected);
-  
+
     socket.on("add:projects", onProjectAdded);
     socket.on("setProperty:projects", onSetProjectProperty);
   });
@@ -44,7 +44,7 @@ interface SystemManifest {
 
 function loadSystemsInfo(callback: Function) {
   data.systemsByProjectType = {};
-  
+
   window.fetch("/systems.json").then((response) => response.json()).then((systemsInfo: SupCore.SystemsInfo) => {
     async.each(systemsInfo.list, (systemName, cb) => {
       window.fetch(`/systems/${systemName}/manifest.json`).then((response) => response.json()).then((manifest: SystemManifest) => {

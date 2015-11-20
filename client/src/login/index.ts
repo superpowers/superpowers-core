@@ -13,7 +13,7 @@ let supServerAuth = SupClient.cookies.getJSON("supServerAuth");
 // NOTE: Superpowers used to store auth info in local storage
 if (supServerAuth == null) {
   let supServerAuthJSON = localStorage.getItem("supServerAuth");
-  if (supServerAuthJSON != null) supServerAuth = JSON.parse(supServerAuthJSON); 
+  if (supServerAuthJSON != null) supServerAuth = JSON.parse(supServerAuthJSON);
 }
 
 if (supServerAuth != null) {

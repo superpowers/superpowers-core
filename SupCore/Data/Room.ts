@@ -1,6 +1,6 @@
-import SupData = require("./index");
-import path = require("path");
-import fs = require("fs");
+import * as SupData from "./index";
+import * as path from "path";
+import * as fs from "fs";
 
 export default class Room extends SupData.Base.Hash {
   static schema = {
@@ -16,7 +16,7 @@ export default class Room extends SupData.Base.Hash {
         }
       }
     }
-  }
+  };
 
   users: SupData.RoomUsers;
 

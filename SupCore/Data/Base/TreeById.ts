@@ -30,7 +30,7 @@ export default class TreeById extends EventEmitter {
       // NOTE: Legacy stuff from Superpowers 0.4
       if (typeof node.id === "number") node.id = node.id.toString();
 
-      maxNodeId = Math.max(maxNodeId, parseInt(node.id));
+      maxNodeId = Math.max(maxNodeId, parseInt(node.id, 10));
       this.byId[node.id] = node;
       this.parentNodesById[node.id] = parentNode;
     });

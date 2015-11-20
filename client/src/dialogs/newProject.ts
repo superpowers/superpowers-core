@@ -20,8 +20,8 @@ callback: NewProjectCallback) {
 
   // Icon
   let iconFile: File = null;
-  
-  let iconInputElt = document.createElement("input")
+
+  let iconInputElt = document.createElement("input");
   iconInputElt.hidden = true;
   iconInputElt.type = "file";
   iconInputElt.accept = "image/png";
@@ -113,7 +113,7 @@ callback: NewProjectCallback) {
 
   let openLabelElt = document.createElement("label");
   openLabelElt.textContent = "Open after creation";
-  openLabelElt.setAttribute("for","auto-open-checkbox");
+  openLabelElt.setAttribute("for", "auto-open-checkbox");
   openLabelElt.style.flex = "1";
   openLabelElt.style.margin = "0";
   downElt.appendChild(openLabelElt);
@@ -164,7 +164,7 @@ callback: NewProjectCallback) {
   });
 
   typeSelectElt.addEventListener("keydown", (event) => {
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
       event.preventDefault();
 
       if (!formElt.checkValidity()) {
@@ -183,7 +183,7 @@ callback: NewProjectCallback) {
     }
 
     submit();
-  })
+  });
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);

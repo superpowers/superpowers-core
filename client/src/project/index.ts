@@ -45,12 +45,12 @@ if (SupClient.isApp) {
   remote = nodeRequire("remote");
   ipc = nodeRequire("ipc");
   shell = nodeRequire("shell");
-  BrowserWindow = remote.require('browser-window');
+  BrowserWindow = remote.require("browser-window");
 }
 
 function start() {
   if (SupClient.query.project == null) goToHub();
-  
+
   // Development mode
   if (localStorage.getItem("superpowers-dev-mode") != null) {
     let projectManagementDiv = <HTMLDivElement>document.querySelector(".project-management");
@@ -424,7 +424,7 @@ function onSetEntryProperty(id: string, key: string, value: any) {
       let walk = (entry: SupCore.Data.EntryNode) => {
         refreshAssetTabElement(entry);
         if (entry.children != null) for (let child of entry.children) walk(child);
-      }
+      };
 
       walk(data.entries.byId[id]);
       break;
@@ -501,13 +501,13 @@ function exportGame() {
 }
 
 if (SupClient.isApp) {
-  ipc.on("export-failed", (message: string) => { alert(message); })
+  ipc.on("export-failed", (message: string) => { alert(message); });
   ipc.on("export-succeed", (outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
-      let address = `${window.location.protocol}//${window.location.hostname}`
+      let address = `${window.location.protocol}//${window.location.hostname}`;
       ipc.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
     });
-  })
+  });
 }
 
 function showDevTools() {
@@ -811,8 +811,7 @@ function onOpenInNewWindowClick(event: any) {
     else window.open(address);
   } else {
     let name = event.target.parentElement.dataset.name;
-    let tool = data.toolsByName[name];
-    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${SupClient.query.project}`
+    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
     if (SupClient.isApp) ipc.send("new-standalone-window", address);
     else window.open(address);
   }
@@ -876,7 +875,7 @@ function createAssetTabElement(entry: SupCore.Data.EntryNode) {
   if (entry.type != null) {
     let iconElt = document.createElement("img");
     iconElt.classList.add("icon");
-    iconElt.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`
+    iconElt.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     tabElt.appendChild(iconElt);
   }
 
@@ -963,7 +962,7 @@ function onTabClose(tabElement: HTMLLIElement) {
   if (assetId != null) frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
   else {
     let toolName = tabElement.dataset["pane"];
-    if (toolName == "main") return;
+    if (toolName === "main") return;
 
     frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${toolName}']`);
   }

@@ -46,8 +46,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
   switch (ruleType) {
     case "boolean": {
       if (typeof value !== "boolean") return { message: "Expected boolean" };
-      break;
-    }
+    } break;
 
     case "number":
     case "integer": {
@@ -58,8 +57,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       if (rule.minExcluded != null && value <= rule.minExcluded) return { message: `Value (${value}) is less than minimum value (${rule.min})` };
       if (rule.max != null && value > rule.max) return { message: `Value (${value}) is greater than maximum value (${rule.max})` };
       if (rule.maxExcluded != null && value >= rule.maxExcluded) return { message: `Value (${value}) is greater than maximum value (${rule.max})` };
-      break;
-    }
+    } break;
 
     case "string": {
       if (typeof value !== "string") return { message: "Expected string" };
@@ -67,16 +65,14 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       if (rule.length != null && value.length !== rule.length) return { message: `String should have length of ${rule.length}, got ${value.length}` };
       if (rule.minLength != null && value.length < rule.minLength) return { message: `String length (${value.length}) is less than minimum length (${rule.minLength})` };
       if (rule.maxLength != null && value.length > rule.maxLength) return { message: `String length (${value.length}) is greater than maximum length (${rule.maxLength})` };
-      break;
-    }
+    } break;
 
     case "enum": {
       if (typeof value !== "string") return { message: "Expected string for enum" };
 
       let items = <string[]>rule.items;
       if (items.indexOf(value) === -1) return { message: `Invalid enum value: ${value}` };
-      break;
-    }
+    } break;
 
     case "hash": {
       if (value == null || typeof value !== "object") return { message: "Expected hash" };
@@ -108,7 +104,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
           let violation = getRuleViolation(propertyValue, propertyRule, true);
           if (violation != null) {
             let violationPath = (violation.path != null) ? `${key}.${violation.path}` : key;
-            return { message: violation.message, path: violationPath }
+            return { message: violation.message, path: violationPath };
           }
           missingKeys.splice(missingKeys.indexOf(key), 1);
         }
@@ -121,8 +117,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
         if (missingKeyRuleType[missingKeyRuleType.length - 1] !== "?") actualMissingKeys.push(missingKey);
       }
       if (actualMissingKeys.length > 0) return { message: `Missing hash keys: ${actualMissingKeys.join(", ") }` };
-      break;
-    }
+    } break;
 
     case "array": {
       if (!Array.isArray(value)) return { message: "Expected array" };
@@ -141,13 +136,11 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
           }
         }
       }
-      break;
-    }
+    } break;
 
     case "any": {
       // No validation at all
-      break;
-    }
+    } break;
 
     default: {
       console.warn(`getRuleViolation - Unhandled rule type: ${ruleType}`);

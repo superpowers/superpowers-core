@@ -5,7 +5,7 @@
 
 declare var io: SocketIOClientStatic;
 
-declare module 'socket.io-client' {
+declare module "socket.io-client" {
     export = io;
 }
 
@@ -19,7 +19,7 @@ interface SocketIOClientStatic {
     Manager: SocketIOClient.ManagerStatic;
 }
 
-declare module SocketIOClient {
+declare namespace SocketIOClient {
     interface Socket {
         on(event: string, fn: Function): Socket;
         once(event: string, fn: Function): Socket;

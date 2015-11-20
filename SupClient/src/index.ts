@@ -2,7 +2,7 @@ import * as io from "socket.io-client";
 import * as querystring from "querystring";
 import * as cookies from "js-cookie";
 
-import ProjectClient from "./ProjectClient"
+import ProjectClient from "./ProjectClient";
 import setupHotkeys from "./setupHotkeys";
 import * as table from "./table";
 import * as dialogs from "./dialogs/index";
@@ -13,8 +13,8 @@ export let query = querystring.parse(window.location.search.slice(1));
 
 // Refuses filesystem-unsafe characters
 // See http://superuser.com/q/358855
-//export const namePattern = "[^\\/:*?\"<>|\[\]&]+";
 // FIXME: escape character "\" seems to not work properly ?
+// export const namePattern = "[^\\/:*?\"<>|\[\]&]+";
 export const namePattern = "[^/:*?\"<>|]+";
 export const namePatternDescription = "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].";
 
@@ -60,7 +60,7 @@ export function registerSettingsEditorClass(name: string, plugin: SettingsEditor
 export function connect(projectId: string, options?: { reconnection?: boolean; }) {
   if (options == null) options = {};
   if (options.reconnection == null) options.reconnection = false;
-  
+
   let namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
   let supServerAuth = cookies.get("supServerAuth");
@@ -118,7 +118,7 @@ export function getTreeViewInsertionPoint(treeView: any) {
         parentId = selectedElt.parentElement.previousSibling.dataset.id;
       }
 
-      index = 1
+      index = 1;
       while (selectedElt.previousSibling != null) {
         selectedElt = selectedElt.previousSibling;
         if (selectedElt.tagName === "LI") index++;
@@ -139,8 +139,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
     case "inside": {
       parentNode = treeById.byId[targetEntryId];
       index = parentNode.children.length;
-      break;
-    }
+    } break;
     case "above":
     case "below": {
       let targetNode = treeById.byId[targetEntryId];
@@ -149,8 +148,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
       index = (parentNode != null) ? parentNode.children.indexOf(targetNode) : treeById.pub.indexOf(targetNode);
 
       if (dropInfo.where === "below") index++;
-      break;
-    }
+    } break;
   }
 
   if (parentNode != null) parentId = parentNode.id;
@@ -161,7 +159,7 @@ export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.
   let targetEntryId = dropInfo.target.dataset.id;
   let targetNode = listById.byId[targetEntryId];
 
-  let index = listById.pub.indexOf(targetNode)
+  let index = listById.pub.indexOf(targetNode);
   if (!reversed && dropInfo.where === "below") index++;
   if ( reversed && dropInfo.where === "above") index++;
   return index;

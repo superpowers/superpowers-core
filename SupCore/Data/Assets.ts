@@ -1,7 +1,6 @@
 import * as SupData from "./index";
 import * as fs from "fs";
 import * as path from "path";
-import * as async from "async";
 
 export default class Assets extends SupData.Base.Dictionary {
   constructor(public server: ProjectServer) {
@@ -34,7 +33,7 @@ export default class Assets extends SupData.Base.Dictionary {
           asset.load(dirPath);
         });
       }
-    })
+    });
     return asset;
   }
 }

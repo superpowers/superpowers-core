@@ -42,7 +42,7 @@ callback: (name: string, type: string, open: boolean) => any) {
 
   let openLabelElt = document.createElement("label");
   openLabelElt.textContent = "Open after creation";
-  openLabelElt.setAttribute("for","auto-open-checkbox");
+  openLabelElt.setAttribute("for", "auto-open-checkbox");
   openLabelElt.style.flex = "1";
   openLabelElt.style.margin = "0";
   downElt.appendChild(openLabelElt);
@@ -84,7 +84,7 @@ callback: (name: string, type: string, open: boolean) => any) {
   });
 
   typeSelectElt.addEventListener("keydown", (event) => {
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
       event.preventDefault();
 
       if (!formElt.checkValidity()) {
@@ -103,7 +103,7 @@ callback: (name: string, type: string, open: boolean) => any) {
     }
 
     submit();
-  })
+  });
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);

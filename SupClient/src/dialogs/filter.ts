@@ -1,5 +1,6 @@
 /// <reference path="./fuzzy.d.ts" />
-import fuzzy = require("fuzzy");
+
+import * as fuzzy from "fuzzy";
 
 export default function filter(list: string[], placeholder: string, callback: (value: string) => any) {
   let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
@@ -20,7 +21,7 @@ export default function filter(list: string[], placeholder: string, callback: (v
     selectedIndex = index;
     labelElts[index].className = "selected";
     labelParentElt.scrollTop = (index - 3) * 20;
-  }
+  };
 
   let noSlashesList: string[] = [];
   for (let text of list){
@@ -77,7 +78,7 @@ export default function filter(list: string[], placeholder: string, callback: (v
       labelElts.length = 0;
       selectedIndex = null;
     }
-  }
+  };
 
   let onKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 38) {
@@ -110,7 +111,7 @@ export default function filter(list: string[], placeholder: string, callback: (v
       document.removeEventListener("keyup", onKeyUp, true);
       if (callback != null) callback(null);
     }
-  }
+  };
 
   document.addEventListener("keydown", onKeyDown, true);
   document.addEventListener("keyup", onKeyUp, true);

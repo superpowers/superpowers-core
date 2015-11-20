@@ -3,7 +3,7 @@
     "indent": [ true, "spaces" ],
     "eofline": true,
     "semicolon": true,
-    "max-line-length": [ true, 140 ],
+    "max-line-length": [ true, 200 ],
     "class-name": true,
     "variable-name": true,
     "comment-format": [ true, "check-space", "check-upercase" ],
@@ -37,7 +37,6 @@
     
     "member-access": false,
     "member-ordering": [ true,
-      "public-before-private",
       "static-before-instance"
     ]
   }

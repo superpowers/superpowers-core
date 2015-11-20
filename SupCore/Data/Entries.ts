@@ -17,7 +17,7 @@ export default class Entries extends SupData.Base.TreeById {
     type: { type: "string?" },
     diagnostics: { type: "array?" },
     dependentAssetIds: { type: "array", items: { type: "string" } }
-  }
+  };
 
   pub: EntryNode[];
   byId: { [id: string]: EntryNode };
@@ -49,7 +49,7 @@ export default class Entries extends SupData.Base.TreeById {
       node.name = SupData.ensureUniqueName(node.id, node.name, siblings);
 
       if (node.type != null) {
-        let diagnostics = new SupData.Diagnostics(node.diagnostics)
+        let diagnostics = new SupData.Diagnostics(node.diagnostics);
         this.diagnosticsByEntryId[node.id] = diagnostics;
         node.diagnostics = diagnostics.pub;
       }
@@ -115,7 +115,7 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   getStoragePathFromId(id: string, options = { includeId: true }) {
-    let fullStoragePath = this.getPathFromId(id).replace(new RegExp("/","g"), "__");
+    let fullStoragePath = this.getPathFromId(id).replace(new RegExp("/", "g"), "__");
     if (options.includeId) fullStoragePath = `${id}-${fullStoragePath}`;
     return fullStoragePath;
   }

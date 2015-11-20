@@ -11,17 +11,17 @@ export default class Asset extends Hash {
 
   init(options: any, callback: Function) { this.setup(); callback(); }
 
-  setup() {}
+  setup() { /* Override */ }
 
-  restore() {}
+  restore() { /* Override */ }
 
   destroy(callback: Function) { callback(); }
 
   load(assetPath: string) {
-    fs.readFile(path.join(assetPath, "asset.json"), { encoding: "utf8" },(err, json) => {
+    fs.readFile(path.join(assetPath, "asset.json"), { encoding: "utf8" }, (err, json) => {
       if (err != null) throw err;
 
-      let pub = JSON.parse(json)
+      let pub = JSON.parse(json);
       this._onLoaded(assetPath, pub);
     });
   }
@@ -46,8 +46,8 @@ export default class Asset extends Hash {
 
   migrate(assetPath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); };
 
-  client_load() {}
-  client_unload() {}
+  client_load() { /* Override */ }
+  client_unload() { /* Override */ }
 
   save(assetPath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);

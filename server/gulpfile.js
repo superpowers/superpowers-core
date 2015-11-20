@@ -1,16 +1,14 @@
-var fs = require("fs");
 var gulp = require("gulp");
 
 // TypeScript
 var ts = require("gulp-typescript");
-var tslint = require("gulp-tslint");
 var tsProject = ts.createProject("./tsconfig.json");
-var tslintConfig = JSON.parse(fs.readFileSync("../tslint.json", { encoding: "utf8" }));
+var tslint = require("gulp-tslint");
 
 gulp.task("typescript", function() {
   var tsResult = tsProject.src()
-    .pipe(tslint({ tslint: require("tslint"), configuration: tslintConfig }))
-    .pipe(tslint.report("prose", { emitError: false, reportLimit: 20 }))
+    .pipe(tslint({ tslint: require("tslint") }))
+    .pipe(tslint.report("prose", { emitError: false }))
     .pipe(ts(tsProject));
   return tsResult.js.pipe(gulp.dest("./"));
 });

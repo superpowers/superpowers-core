@@ -6,7 +6,8 @@ interface SelectCallback {
   (value: string): void;
 }
 
-export default function select(label: string, choices: { [value: string]: string }, validationLabel: string, options: SelectOptions|SelectCallback, callback?: SelectCallback) {
+export default function select(label: string, choices: { [value: string]: string; },
+validationLabel: string, options: SelectOptions|SelectCallback, callback?: SelectCallback) {
   if (callback == null && typeof options === "function") {
     callback = <SelectCallback>options;
     options = {};
@@ -83,7 +84,7 @@ export default function select(label: string, choices: { [value: string]: string
     }
 
     submit();
-  })
+  });
 
   function onKeyDown(event: KeyboardEvent) { if (event.keyCode === 27) { event.preventDefault(); closeDialog(); } }
   document.addEventListener("keydown", onKeyDown);

@@ -71,7 +71,8 @@ export function appendTextAreaField(parent: HTMLElement, value: string) {
   return textarea;
 }
 
-export function appendNumberField(parent: HTMLElement, value: number|string, min?: number|string, max?: number|string, step?: number|string) {
+export function appendNumberField(parent: HTMLElement, value: number|string,
+min?: number|string, max?: number|string, step?: number|string) {
   let input = createInput("number", parent);
   input.value = <any>value;
   if (min != null) input.min = <any>min;
@@ -81,7 +82,8 @@ export function appendNumberField(parent: HTMLElement, value: number|string, min
   return input;
 }
 
-export function appendNumberFields(parent: HTMLElement, values: (number|string)[], min?: number|string, max?: number|string, step?: number|string) {
+export function appendNumberFields(parent: HTMLElement, values: (number|string)[],
+min?: number|string, max?: number|string, step?: number|string) {
   let inputsParent = <any>document.createElement("div");
   inputsParent.classList.add("inputs");
   parent.appendChild(inputsParent);
@@ -98,7 +100,7 @@ export function appendBooleanField(parent: HTMLElement, value: boolean) {
   return input;
 }
 
-export function appendSelectBox(parent: HTMLElement, options: { [value: string]: string; }, initialValue="") {
+export function appendSelectBox(parent: HTMLElement, options: { [value: string]: string; }, initialValue = "") {
   let selectInput = document.createElement("select");
   parent.appendChild(selectInput);
   for (let value in options) appendSelectOption(selectInput, value, options[value]);

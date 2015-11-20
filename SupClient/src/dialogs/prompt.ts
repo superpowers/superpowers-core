@@ -9,7 +9,8 @@ interface PromptCallback {
   (value: string): void;
 }
 
-export default function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string, options: PromptOptions|PromptCallback, callback?: PromptCallback) {
+export default function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
+options: PromptOptions|PromptCallback, callback?: PromptCallback) {
   if (callback == null && typeof options === "function") {
     callback = <PromptCallback>options;
     options = {};

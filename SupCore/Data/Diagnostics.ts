@@ -5,7 +5,7 @@ export default class Diagnostics extends ListById {
     id: { type: "string" },
     type: { type: "string" },
     data: { type: "any" }
-  }
+  };
 
   constructor(pub: SupCore.Data.DiagnosticsItem[]) {
     super(pub, Diagnostics.schema);
