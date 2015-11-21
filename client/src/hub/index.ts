@@ -21,6 +21,8 @@ function start() {
   ui.projectsTreeView.on("activate", onProjectActivate);
 
   document.querySelector(".projects-buttons .new-project").addEventListener("click", onNewProjectClick);
+  document.querySelector(".projects-buttons .open-project").addEventListener("click", onProjectActivate);
+  if ("ontouchstart" in window) (document.querySelector(".projects-buttons .open-project") as HTMLButtonElement).hidden = false;
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
 
   loadSystemsInfo(() => {
