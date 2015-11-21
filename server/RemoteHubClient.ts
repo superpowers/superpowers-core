@@ -6,6 +6,12 @@ import * as paths from "./paths";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
+interface ProjectDetails {
+  name: string;
+  description: string;
+  system: string;
+  icon: Buffer;
+}
 interface AddProjectCallback { (err: string, projectId?: string): any; };
 
 export default class RemoteHubClient extends BaseRemoteClient {
@@ -14,20 +20,20 @@ export default class RemoteHubClient extends BaseRemoteClient {
 
     // Projects
     this.socket.on("add:projects", this.onAddProject);
-    this.socket.on("setProperty:projects", this.onSetProjectProperty);
+    this.socket.on("edit:projects", this.onEditProject);
   }
 
   // TODO: Implement roles and capabilities
   can(action: string) { return true; }
 
-  private onAddProject = (name: string, description: string, system: string, pngIcon: Buffer, callback: AddProjectCallback) => {
+  private onAddProject = (details: ProjectDetails, callback: AddProjectCallback) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
     let manifest: SupCore.Data.ProjectManifestPub = {
       id: null,
-      name,
-      description,
-      system,
+      name: details.name,
+      description: details.description,
+      system: details.system,
       formatVersion: SupCore.Data.ProjectManifest.currentFormatVersion
     };
 
@@ -71,14 +77,9 @@ export default class RemoteHubClient extends BaseRemoteClient {
         fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
       };
 
-      let writeIcon = (callback: (err?: NodeJS.ErrnoException) => any) => {
-        if (pngIcon == null) { callback(); return; }
-        fs.writeFile(path.join(projectPath, "public/icon.png"), pngIcon, callback);
-      };
-
       let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, callback); };
 
-      async.series([ writeManifest, writeEntries, writeIcon, loadProject ], (err) => {
+      async.series([ writeManifest, writeEntries, this.writeIcon.bind(this, projectPath, details.icon), loadProject ], (err) => {
         if (err != null) { SupCore.log(`Error while creating project:\n${err}`); return; }
 
         this.server.io.in("sub:projects").emit("add:projects", manifest, actualIndex);
@@ -87,18 +88,58 @@ export default class RemoteHubClient extends BaseRemoteClient {
     });
   };
 
-  private onSetProjectProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
+  private writeIcon = (projectPath: string, icon: Buffer, callback: (err?: NodeJS.ErrnoException) => any) => {
+    if (icon == null) { callback(); return; }
+    fs.writeFile(path.join(projectPath, "public/icon.png"), icon, callback);
+  };
+
+  private onEditProject = (projectId: string, details: ProjectDetails, callback: (err: string) => any) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
-    let projectServer = this.server.serversById[id];
+    let projectServer = this.server.serversById[projectId];
     if (projectServer == null) { callback("Invalid project id"); return; }
 
-    projectServer.data.manifest.setProperty(key, value, (err, value) => {
-      if (err != null) { callback(err); return; }
+    async.series([
 
-      projectServer.io.in("sub:manifest").emit("setProperty:manifest", key, value);
-      this.server.io.in("sub:projects").emit("setProperty:projects", id, key, value);
-      callback(null);
+      (cb) => {
+        if (details.name == null) { cb(); return; }
+
+        projectServer.data.manifest.setProperty("name", details.name, (err, value) => {
+          if (err != null) { cb(new Error(err)); return; }
+
+          projectServer.io.in("sub:manifest").emit("setProperty:manifest", "name", details.name);
+          this.server.io.in("sub:projects").emit("setProperty:projects", projectId, "name", details.name);
+          cb();
+        });
+      },
+
+      (cb) => {
+        if (details.description == null) { cb(); return; }
+
+        projectServer.data.manifest.setProperty("description", details.description, (err, value) => {
+          if (err != null) { cb(new Error(err)); return; }
+
+          projectServer.io.in("sub:manifest").emit("setProperty:manifest", "description", details.description);
+          this.server.io.in("sub:projects").emit("setProperty:projects", projectId, "description", details.description);
+          cb();
+        });
+      },
+
+      (cb) => {
+        if (details.icon == null) { cb(); return; }
+
+        this.writeIcon(projectServer.projectPath, details.icon, (err) => {
+          if (err != null) { cb(new Error("Failed to save icon")); return; }
+
+          projectServer.io.in("sub:manifest").emit("updateIcon:manifest");
+          this.server.io.in("sub:projects").emit("updateIcon:projects", projectId);
+          cb();
+        });
+      }
+
+    ], (err) => {
+      if (err != null) callback(err.message);
+      else callback(null);
     });
   };
 }

@@ -36,8 +36,6 @@
     "no-require-imports": true,
     
     "member-access": false,
-    "member-ordering": [ true,
-      "static-before-instance"
-    ]
+    "member-ordering": [ true ]
   }
 }

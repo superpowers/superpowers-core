@@ -1,16 +1,30 @@
-interface NewProjectCallback {
-  (project: { type: string; name: string, description: string; system: string; icon: File; }, open: boolean): any;
+interface ExistingProject {
+  id: string;
+  name: string;
+  description: string;
+  system: string;
 }
 
-export default function newProjectDialog(typeLabels: { [value: string]: string }, open: boolean,
-callback: NewProjectCallback) {
+interface NewProjectCallback {
+  (project: {
+    name: string;
+    description: string;
+    system: string;
+    icon: File;
+  }, open: boolean): any;
+}
+
+export default function newProjectDialog(systemLabels: { [value: string]: string; },
+options: { autoOpen?: boolean, existingProject?: ExistingProject }, callback: NewProjectCallback) {
+  if (options == null) options = {};
+  if (options.autoOpen == null) options.autoOpen = true;
 
   let dialogElt = document.createElement("div"); dialogElt.className = "dialog";
   let formElt = document.createElement("form"); dialogElt.appendChild(formElt);
 
   // Prompt name
   let labelElt = document.createElement("label");
-  labelElt.textContent = "Enter a name and select a type for the new project.";
+  labelElt.textContent = (options.existingProject == null) ? "Enter a name and select a type for the new project." : "Edit the project's details.";
   formElt.appendChild(labelElt);
 
   let containerElt = document.createElement("div");
@@ -42,7 +56,8 @@ callback: NewProjectCallback) {
   iconButtonElt.addEventListener("click", () => iconInputElt.click());
 
   let iconElt = new Image();
-  iconElt.src = "/images/default-project-icon.png";
+  if (options.existingProject == null) iconElt.src = "/images/default-project-icon.png";
+  else iconElt.src = `/projects/${options.existingProject.id}/icon.png`;
   iconElt.draggable = false;
   iconElt.style.width = "72px";
   iconElt.style.height = "72px";
@@ -54,7 +69,8 @@ callback: NewProjectCallback) {
   iconInputElt.addEventListener("change", (event) => {
     if (iconInputElt.files.length === 0) {
       iconFile = null;
-      iconElt.src = "/images/default-project-icon.png";
+      if (options.existingProject == null) iconElt.src = "/images/default-project-icon.png";
+      else iconElt.src = `/projects/${options.existingProject.id}/icon.png`;
     } else {
       iconFile = iconInputElt.files[0];
       let reader = new FileReader();
@@ -85,18 +101,26 @@ callback: NewProjectCallback) {
   descriptionInputElt.style.flex = "1";
   (<any>descriptionInputElt.style).resize = "none";
   descriptionInputElt.placeholder = "Description (optional)";
+  descriptionInputElt.addEventListener("keypress", (event) => {
+    if (event.keyCode === 13 /* Return */) {
+      event.preventDefault();
+      submit();
+    }
+  });
   textContainerElt.appendChild(descriptionInputElt);
 
-  // Type
-  let typeSelectElt = document.createElement("select");
-  for (let typeName in typeLabels) {
-    let optionElt = document.createElement("option");
-    optionElt.textContent = typeName;
-    optionElt.value = typeLabels[typeName];
-    typeSelectElt.appendChild(optionElt);
+  // System
+  let systemSelectElt = document.createElement("select");
+  if (options.existingProject == null) {
+    for (let systemName in systemLabels) {
+      let optionElt = document.createElement("option");
+      optionElt.textContent = systemName;
+      optionElt.value = systemLabels[systemName];
+      systemSelectElt.appendChild(optionElt);
+    }
+    systemSelectElt.size = 5;
+    formElt.appendChild(systemSelectElt);
   }
-  typeSelectElt.size = 5;
-  formElt.appendChild(typeSelectElt);
 
   // Auto-open checkbox
   let downElt = document.createElement("div");
@@ -105,21 +129,24 @@ callback: NewProjectCallback) {
   formElt.appendChild(downElt);
 
   let openCheckboxElt = document.createElement("input");
-  openCheckboxElt.id = "auto-open-checkbox";
-  openCheckboxElt.type = "checkbox";
-  openCheckboxElt.checked = open;
-  openCheckboxElt.style.margin = "0 0.5em 0 0";
-  downElt.appendChild(openCheckboxElt);
+  if (options.existingProject == null) {
+    openCheckboxElt.id = "auto-open-checkbox";
+    openCheckboxElt.type = "checkbox";
+    openCheckboxElt.checked = options.autoOpen;
+    openCheckboxElt.style.margin = "0 0.5em 0 0";
+    downElt.appendChild(openCheckboxElt);
 
-  let openLabelElt = document.createElement("label");
-  openLabelElt.textContent = "Open after creation";
-  openLabelElt.setAttribute("for", "auto-open-checkbox");
-  openLabelElt.style.flex = "1";
-  openLabelElt.style.margin = "0";
-  downElt.appendChild(openLabelElt);
+    let openLabelElt = document.createElement("label");
+    openLabelElt.textContent = "Open after creation";
+    openLabelElt.setAttribute("for", "auto-open-checkbox");
+    openLabelElt.style.flex = "1";
+    openLabelElt.style.margin = "0";
+    downElt.appendChild(openLabelElt);
+  }
 
   // Buttons
   let buttonsElt = document.createElement("div");
+  if (options.existingProject != null) buttonsElt.style.flex = "1";
   buttonsElt.className = "buttons";
   downElt.appendChild(buttonsElt);
 
@@ -130,7 +157,7 @@ callback: NewProjectCallback) {
   cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); closeDialog(); });
 
   let validateButtonElt = document.createElement("button");
-  validateButtonElt.textContent = "Create";
+  validateButtonElt.textContent = options.existingProject == null ? "Create" : "Update";
   validateButtonElt.className = "validate-button";
 
   if (navigator.platform === "Win32") {
@@ -141,16 +168,22 @@ callback: NewProjectCallback) {
     buttonsElt.appendChild(validateButtonElt);
   }
 
+  // Existing project
+  if (options.existingProject != null) {
+    nameInputElt.value = options.existingProject.name;
+    descriptionInputElt.value = options.existingProject.description;
+    systemSelectElt.value = options.existingProject.system;
+  }
+
   // Validation and cancellation
   function submit() {
     document.body.removeChild(dialogElt);
     document.removeEventListener("keydown", onKeyDown);
     if (callback != null) {
       let project = {
-        type: typeSelectElt.value,
         name: nameInputElt.value,
         description: descriptionInputElt.value,
-        system: typeSelectElt.value,
+        system: systemSelectElt.value,
         icon: iconFile
       };
       callback(project, openCheckboxElt.checked);
@@ -163,7 +196,7 @@ callback: NewProjectCallback) {
     submit();
   });
 
-  typeSelectElt.addEventListener("keydown", (event) => {
+  systemSelectElt.addEventListener("keydown", (event) => {
     if (event.keyCode === 13) {
       event.preventDefault();
 
@@ -176,7 +209,7 @@ callback: NewProjectCallback) {
     }
   });
 
-  typeSelectElt.addEventListener("dblclick", (event) => {
+  systemSelectElt.addEventListener("dblclick", (event) => {
     if (!formElt.checkValidity()) {
       validateButtonElt.click();
       return;

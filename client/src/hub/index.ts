@@ -1,5 +1,5 @@
 import "../window";
-import newProjectDialog from "../dialogs/newProject";
+import createOrEditProjectDialog from "../dialogs/createOrEditProject";
 import * as async from "async";
 
 let TreeView = require("dnd-tree-view");
@@ -21,8 +21,7 @@ function start() {
   ui.projectsTreeView.on("activate", onProjectActivate);
 
   document.querySelector(".projects-buttons .new-project").addEventListener("click", onNewProjectClick);
-  document.querySelector(".projects-buttons .rename-project").addEventListener("click", onRenameProjectClick);
-  document.querySelector(".projects-buttons .edit-description").addEventListener("click", onEditDescriptionClick);
+  document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
 
   loadSystemsInfo(() => {
     socket = SupClient.connect(null, { reconnection: true });
@@ -33,6 +32,7 @@ function start() {
 
     socket.on("add:projects", onProjectAdded);
     socket.on("setProperty:projects", onSetProjectProperty);
+    socket.on("updateIcon:projects", onUpdateProjectIcon);
   });
 }
 
@@ -112,20 +112,20 @@ function onSetProjectProperty(id: string, key: string, value: any) {
   }
 }
 
+function onUpdateProjectIcon(id: string) {
+  let projectElt = ui.projectsTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  let iconElt = projectElt.querySelector("img") as HTMLImageElement;
+  iconElt.src = `/projects/${id}/icon.png?${Date.now()}`;
+}
+
 // User interface
 function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
   let liElt = document.createElement("li");
   liElt.dataset["id"] = manifest.id;
 
-  let icon = new Image();
-  icon.src = `/projects/${manifest.id}/icon.png`;
-
-  function onIconError() {
-    icon.src = "/images/default-project-icon.png";
-    icon.removeEventListener("error", onIconError);
-  }
-  icon.addEventListener("error", onIconError);
-  liElt.appendChild(icon);
+  let iconElt = new Image();
+  iconElt.src = `/projects/${manifest.id}/icon.png`;
+  liElt.appendChild(iconElt);
 
   let infoDiv = document.createElement("div");
   infoDiv.className = "info";
@@ -162,11 +162,11 @@ function onProjectActivate() {
 
 let autoOpenProject = true;
 function onNewProjectClick() {
-  newProjectDialog(data.systemsByProjectType, autoOpenProject, (project, open) => {
+  createOrEditProjectDialog(data.systemsByProjectType, { autoOpen: autoOpenProject }, (project, open) => {
     if (project == null) return;
     autoOpenProject = open;
 
-    socket.emit("add:projects", project.name, project.description, project.system, project.icon, onProjectAddedAck);
+    socket.emit("add:projects", project, onProjectAddedAck);
   });
 }
 
@@ -182,31 +182,19 @@ function onProjectAddedAck(err: string, id: string) {
   if (autoOpenProject) onProjectActivate();
 }
 
-function onRenameProjectClick() {
+function onEditProjectClick() {
   if (ui.projectsTreeView.selectedNodes.length !== 1) return;
 
   let selectedNode = ui.projectsTreeView.selectedNodes[0];
-  let project = data.projects.byId[selectedNode.dataset.id];
+  let existingProject = data.projects.byId[selectedNode.dataset.id];
 
-  SupClient.dialogs.prompt("Enter a new name for the project.", null, project.name, "Rename", (newName) => {
-    if (newName == null || newName === project.name) return;
+  createOrEditProjectDialog(data.systemsByProjectType, { existingProject }, (editedProject) => {
+    if (editedProject == null) return;
 
-    socket.emit("setProperty:projects", project.id, "name", newName, (err: string) => {
-      if (err != null) { alert(err); return; }
-    });
-  });
-}
+    delete editedProject.system;
+    if (editedProject.icon == null) delete editedProject.icon;
 
-function onEditDescriptionClick() {
-  if (ui.projectsTreeView.selectedNodes.length !== 1) return;
-
-  let selectedNode = ui.projectsTreeView.selectedNodes[0];
-  let project = data.projects.byId[selectedNode.dataset.id];
-
-  SupClient.dialogs.prompt("Enter a new description for the project.", null, project.description, "Update", { required: false }, (newDescription) => {
-    if (newDescription == null || newDescription === project.description) return;
-
-    socket.emit("setProperty:projects", project.id, "description", newDescription, (err: string) => {
+    socket.emit("edit:projects", existingProject.id, editedProject, (err: string) => {
       if (err != null) { alert(err); return; }
     });
   });

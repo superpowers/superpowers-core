@@ -162,6 +162,7 @@ function connect() {
 
   socket.on("welcome", onWelcome);
   socket.on("setProperty:manifest", onSetManifestProperty);
+  socket.on("updateIcon:manifest", onUpdateProjectIcon);
 
   socket.on("add:entries", onEntryAdded);
   socket.on("move:entries", onEntryMoved);
@@ -324,6 +325,10 @@ function onSetManifestProperty(key: string, value: any) {
       document.querySelector(".project-name").textContent = value;
       break;
   }
+}
+
+function onUpdateProjectIcon() {
+  // TODO: Update favicon?
 }
 
 function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: number) {
