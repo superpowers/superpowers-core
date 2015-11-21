@@ -2,7 +2,9 @@ import "../window";
 import createOrEditProjectDialog from "../dialogs/createOrEditProject";
 import * as async from "async";
 
+/* tslint:disable */
 let TreeView = require("dnd-tree-view");
+/* tslint:enable */
 
 let data: {
   projects: SupCore.Data.Projects;

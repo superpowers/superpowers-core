@@ -3,9 +3,11 @@ import newAssetDialog from "../dialogs/newAsset";
 import * as async from "async";
 
 let nodeRequire = require;
+/* tslint:disable */
 let TreeView = require("dnd-tree-view");
 let PerfectResize = require("perfect-resize");
 let TabStrip = require("tab-strip");
+/* tslint:enable */
 
 let socket: SocketIOClient.Socket;
 
@@ -40,7 +42,9 @@ let ui: {
 let remote: GitHubElectron.Remote;
 let ipc: GitHubElectron.InProcess;
 let shell: GitHubElectron.Shell;
-let BrowserWindow: any;
+/* tslint:disable:variable-name */
+let BrowserWindow: typeof GitHubElectron.BrowserWindow;
+/* tslint:enable:variable-name */
 if (SupClient.isApp) {
   remote = nodeRequire("remote");
   ipc = nodeRequire("ipc");
