@@ -82,24 +82,25 @@ body
   .tree
     position absolute
 
-    li
-      color #444
+.entries-tree-view .tree, .find-asset-dialog .tree
+  li
+    color #444
 
-      > img
-        width 24px
-        height 24px
+    > img
+      width 24px
+      height 24px
 
-      &.group
-        color #666
+    &.group
+      color #666
 
-      &:not(.selected):hover
-        background #e0e0e0
+    &:not(.selected):hover
+      background #e0e0e0
 
-      &.group > .toggle
-        opacity 0.5
-        background url(/images/treeView/group-open-dark.svg) center no-repeat
-      &.group.collapsed > .toggle
-        background-image url(/images/treeView/group-closed-dark.svg)
+    &.group > .toggle
+      opacity 0.5
+      background url(/images/treeView/group-open-dark.svg) center no-repeat
+    &.group.collapsed > .toggle
+      background-image url(/images/treeView/group-closed-dark.svg)
 
   .name
     white-space pre
@@ -114,6 +115,21 @@ body
       background rgba(0,0,0,0.2)
       color rgba(0,0,0,0.8)
       font-size 80%
+
+.find-asset-dialog
+  form
+    width 600px
+
+  input[type=search]
+    height 28px
+
+  .assets-tree-view
+    border 1px solid #aaa
+    overflow-y auto
+    height 300px
+
+  .assets-tree-view .tree
+    padding 0
 
 .open-in-new-window
   cursor pointer

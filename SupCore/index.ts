@@ -1,6 +1,8 @@
 /// <reference path="../typings/tsd.d.ts" />
 
+/* tslint:disable:no-unused-variable */
 import * as Data from "./Data";
+/* tslint:enable:no-unused-variable */
 export { Data };
 
 export * from "./systems";

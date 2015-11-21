@@ -1,5 +1,5 @@
 import "../window";
-import createOrEditProjectDialog from "../dialogs/createOrEditProject";
+import CreateOrEditProjectDialog from "../dialogs/CreateOrEditProjectDialog";
 import * as async from "async";
 
 /* tslint:disable */
@@ -74,6 +74,8 @@ function onConnected() {
 }
 
 function onDisconnected() {
+  SupClient.dialogs.cancelDialogIfAny();
+
   data.projects = null;
 
   ui.projectsTreeView.clearSelection();
@@ -166,7 +168,9 @@ function onProjectActivate() {
 
 let autoOpenProject = true;
 function onNewProjectClick() {
-  createOrEditProjectDialog(data.systemsByProjectType, { autoOpen: autoOpenProject }, (project, open) => {
+  /* tslint:disable:no-unused-expression */
+  new CreateOrEditProjectDialog(data.systemsByProjectType, { autoOpen: autoOpenProject }, (project, open) => {
+    /* tslint:enable:no-unused-expression */
     if (project == null) return;
     autoOpenProject = open;
 
@@ -192,7 +196,9 @@ function onEditProjectClick() {
   let selectedNode = ui.projectsTreeView.selectedNodes[0];
   let existingProject = data.projects.byId[selectedNode.dataset.id];
 
-  createOrEditProjectDialog(data.systemsByProjectType, { existingProject }, (editedProject) => {
+  /* tslint:disable:no-unused-expression */
+  new CreateOrEditProjectDialog(data.systemsByProjectType, { existingProject }, (editedProject) => {
+    /* tslint:enable:no-unused-expression */
     if (editedProject == null) return;
 
     delete editedProject.system;

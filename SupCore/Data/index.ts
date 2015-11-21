@@ -1,4 +1,5 @@
-﻿import * as Base from "./Base";
+﻿/* tslint:disable:no-unused-variable */
+import * as Base from "./Base";
 
 import Projects from "./Projects";
 
@@ -12,6 +13,7 @@ import Resources from "./Resources";
 import Rooms from "./Rooms";
 import Room from "./Room";
 import RoomUsers from "./RoomUsers";
+/* tslint:enable:no-unused-variable */
 
 export {
   Base,

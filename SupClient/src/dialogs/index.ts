@@ -1,8 +1,12 @@
 /* tslint:disable:no-unused-variable */
-import prompt from "./prompt";
-import confirm from "./confirm";
-import info from "./info";
-import select from "./select";
-import filter from "./filter";
+import BaseDialog from "./BaseDialog";
+import PromptDialog from "./PromptDialog";
+import ConfirmDialog from "./ConfirmDialog";
+import InfoDialog from "./InfoDialog";
+import SelectDialog from "./SelectDialog";
 /* tslint:enable:no-unused-variable */
-export { prompt, confirm, info, select, filter };
+export { BaseDialog, PromptDialog, ConfirmDialog, InfoDialog, SelectDialog };
+
+export function cancelDialogIfAny() {
+  if (BaseDialog.activeDialog != null) BaseDialog.activeDialog.cancel();
+}

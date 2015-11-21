@@ -1,5 +1,6 @@
 import "../window";
-import newAssetDialog from "../dialogs/newAsset";
+import CreateAssetDialog from "../dialogs/CreateAssetDialog";
+import FindAssetDialog from "../dialogs/FindAssetDialog";
 import * as async from "async";
 
 let nodeRequire = require;
@@ -254,6 +255,8 @@ function onConnectionError() {
 }
 
 function onDisconnected() {
+  SupClient.dialogs.cancelDialogIfAny();
+
   data = null;
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
@@ -265,7 +268,7 @@ function onDisconnected() {
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = true;
-  (<HTMLDivElement>document.querySelector(".connecting")).style.display = "";
+  (<HTMLDivElement>document.querySelector(".connecting")).hidden = false;
 }
 
 function onWelcome(clientId: number, config: { buildPort: number; systemName: string; }) {
@@ -300,7 +303,7 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
 
-  (<HTMLDivElement>document.querySelector(".connecting")).style.display = "none";
+  (<HTMLDivElement>document.querySelector(".connecting")).hidden = true;
 
   if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .export")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = false;
@@ -686,14 +689,11 @@ function onClickToggleNotifications(event: any) {
 function onSearchEntryDialog() {
   if (data == null) return;
 
-  let entries: string[] = [];
-  data.entries.walk((node: SupCore.Data.EntryNode) => {
-    if (node.type != null) entries.push(data.entries.getPathFromId(node.id));
-  });
-
-  SupClient.dialogs.filter(entries, "Asset Name", (entryPath) => {
-    if (entryPath == null) return;
-    openEntry(SupClient.findEntryByPath(data.entries.pub, entryPath).id);
+  /* tslint:disable:no-unused-expression */
+  new FindAssetDialog(data.entries, data.editorsByAssetType, (entryId) => {
+    /* tslint:enable:no-unused-expression */
+    if (entryId == null) return;
+    openEntry(entryId);
   });
 }
 
@@ -751,7 +751,9 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
 }
 
 function onNewAssetClick() {
-  newAssetDialog(data.assetTypesByTitle, autoOpenAsset, (name, type, open) => {
+  /* tslint:disable:no-unused-expression */
+  new CreateAssetDialog(data.assetTypesByTitle, autoOpenAsset, (name, type, open) => {
+    /* tslint:enable:no-unused-expression */
     if (name == null) return;
     if (name === "") name = data.editorsByAssetType[type].title;
 
@@ -761,7 +763,17 @@ function onNewAssetClick() {
 }
 
 function onNewFolderClick() {
-  SupClient.dialogs.prompt("Enter a name for the new folder.", "Enter a name", "Folder", "Create", { pattern: SupClient.namePattern, title: SupClient.namePatternDescription }, (name) => {
+  let options = {
+    placeholder: "Enter a name",
+    initialValue: "Folder",
+    validationLabel: "Create",
+    pattern: SupClient.namePattern,
+    title: SupClient.namePatternDescription
+  };
+
+  /* tslint:disable:no-unused-expression */
+  new SupClient.dialogs.PromptDialog("Enter a name for the new folder.", options, (name) => {
+    /* tslint:enable:no-unused-expression */
     if (name == null) return;
 
     socket.emit("add:entries", name, null, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
@@ -776,7 +788,9 @@ function onTrashEntryClick() {
   function checkNextEntry() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
-      SupClient.dialogs.confirm("Are you sure you want to trash the selected entries?", "Trash", (confirm) => {
+      /* tslint:disable:no-unused-expression */
+      new SupClient.dialogs.ConfirmDialog("Are you sure you want to trash the selected entries?", "Trash", (confirm) => {
+        /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
         function trashEntry(entry: SupCore.Data.EntryNode) {
@@ -803,7 +817,9 @@ function onTrashEntryClick() {
     if (entry.dependentAssetIds != null && entry.dependentAssetIds.length > 0) {
       let dependentAssetNames: string[] = [];
       for (let usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
-      SupClient.dialogs.info(`${entry.name} is used in ${dependentAssetNames.join(", ")}.`, "Close", () => { checkNextEntry(); });
+      /* tslint:disable:no-unused-expression */
+      new SupClient.dialogs.InfoDialog(`${entry.name} is used in ${dependentAssetNames.join(", ")}.`, "Close", () => { checkNextEntry(); });
+      /* tslint:enable:no-unused-expression */
     } else checkNextEntry();
   }
 
@@ -815,12 +831,16 @@ function onOpenInNewWindowClick(event: any) {
   let id = event.target.parentElement.dataset.id;
   if (id != null) {
     let entry = data.entries.byId[id];
-    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${entry.id}`;
+    let address = `${window.location.origin}/systems/${data.systemName}` +
+    `/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
+    `?project=${SupClient.query.project}&asset=${entry.id}`;
     if (SupClient.isApp) ipc.send("new-standalone-window", address);
     else window.open(address);
   } else {
     let name = event.target.parentElement.dataset.name;
-    let address = `${(<any>window.location).origin}/systems/${data.systemName}/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
+    let address = `${window.location.origin}/systems/${data.systemName}` +
+    `/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/` +
+    `?project=${SupClient.query.project}`;
     if (SupClient.isApp) ipc.send("new-standalone-window", address);
     else window.open(address);
   }
@@ -832,7 +852,16 @@ function onRenameEntryClick() {
   let selectedNode = ui.entriesTreeView.selectedNodes[0];
   let entry = data.entries.byId[selectedNode.dataset.id];
 
-  SupClient.dialogs.prompt("Enter a new name for the asset.", null, entry.name, "Rename", { pattern: SupClient.namePattern, title: SupClient.namePatternDescription }, (newName) => {
+  let options = {
+    initialValue: entry.name,
+    validationLabel: "Rename",
+    pattern: SupClient.namePattern,
+    title: SupClient.namePatternDescription
+  };
+
+  /* tslint:disable:no-unused-expression */
+  new SupClient.dialogs.PromptDialog("Enter a new name for the asset.", options, (newName) => {
+    /* tslint:enable:no-unused-expression */
     if (newName == null || newName === entry.name) return;
 
     socket.emit("setProperty:entries", entry.id, "name", newName, (err: string) => {
@@ -848,7 +877,16 @@ function onDuplicateEntryClick() {
   let entry = data.entries.byId[selectedNode.dataset.id];
   if (entry.type == null) return;
 
-  SupClient.dialogs.prompt("Enter a name for the new asset.", null, entry.name, "Duplicate", { pattern: SupClient.namePattern, title: SupClient.namePatternDescription }, (newName) => {
+  let options = {
+    initialValue: entry.name,
+    validationLabel: "Duplicate",
+    pattern: SupClient.namePattern,
+    title: SupClient.namePatternDescription
+  };
+
+  /* tslint:disable:no-unused-expression */
+  new SupClient.dialogs.PromptDialog("Enter a name for the new asset.", options, (newName) => {
+    /* tslint:enable:no-unused-expression */
     if (newName == null) return;
 
     socket.emit("duplicate:entries", newName, entry.id, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);

@@ -65,20 +65,41 @@ declare namespace SupClient {
   namespace dialogs {
     interface PromptOptions {
       type?: string;
+      initialValue?: string;
+      placeholder?: string;
       pattern?: string;
       title?: string;
       required?: boolean;
+      validationLabel?: string;
     }
 
-    export function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
-      options: PromptOptions|((value: string) => any), callback: (value: string) => any): void;
-    export function prompt(label: string, placeholder: string, initialValue: string, validationLabel: string,
-      callback: (value: string) => any): void;
-    export function confirm(label: string, validationLabel: string, callback: (value: boolean) => any): void;
-    export function info(label: string, validationLabel: string, callback: () => any): void;
-    export function select(label: string, choices: { [value: string]: string; },
-    validationLabel: string, options: { size?: number; }, callback: (value: string) => any): void;
-    export function filter(list: string[], placeholder: string, callback: (value: string) => any): void;
+    interface SelectOptions {
+      size?: number;
+    }
+
+    export abstract class BaseDialog {
+      protected dialogElt: HTMLDivElement;
+      protected formElt: HTMLFormElement;
+      protected validateButtonElt: HTMLButtonElement;
+
+      protected submit(): boolean;
+      protected cancel(): void;
+    }
+
+    export function cancelDialogIfAny(): void;
+
+    export class PromptDialog {
+      constructor(label: string, options?: PromptOptions, callback?: (value: string) => any);
+    }
+    export class ConfirmDialog {
+      constructor(label: string, validationLabel: string, callback: (confirmed: boolean) => any);
+    }
+    export class InfoDialog {
+      constructor(label: string, validationLabel: string, callback: () => any);
+    }
+    export class SelectDialog {
+      constructor(label: string, choices: { [value: string]: string; }, validationLabel: string, options: SelectOptions, callback: (value: string) => any);
+    }
   }
 
   class ProjectClient {

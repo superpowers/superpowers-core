@@ -1,4 +1,6 @@
+/* tslint:disable */
 let TreeView = require("dnd-tree-view");
+/* tslint:enable */
 import * as dialogs from "../../../SupClient/src/dialogs/index";
 import * as config from "../config";
 
@@ -38,10 +40,14 @@ function createServerElement(entry: { name: string; address: string; }) {
 }
 
 function onAddServerClick() {
-  dialogs.prompt("Enter a name for the server.", "Enter a name", null, "Add server", (name: string) => {
+  /* tslint:disable:no-unused-expression */
+  new dialogs.PromptDialog("Enter a name for the server.", { placeholder: "Enter a name", validationLabel: "Add server" }, (name: string) => {
+    /* tslint:enable:no-unused-expression */
     if (name == null) return;
 
-    dialogs.prompt("Enter the server address.", null, "127.0.0.1", "Add server", (address: string) => {
+    /* tslint:disable:no-unused-expression */
+    new dialogs.PromptDialog("Enter the server address.", { initialValue: "127.0.0.1", validationLabel: "Add server" }, (address: string) => {
+      /* tslint:enable:no-unused-expression */
       if (address == null) return;
 
       let liElt = createServerElement({ name, address });
@@ -55,7 +61,9 @@ function onRenameServerClick() {
 
   let node = serversTreeView.selectedNodes[0];
 
-  dialogs.prompt("Enter a new name for the server.", null, node.dataset.name, "Rename", (name: string) => {
+  /* tslint:disable:no-unused-expression */
+  new dialogs.PromptDialog("Enter a new name for the server.", { initialValue: node.dataset.name, validationLabel: "Rename" }, (name: string) => {
+    /* tslint:enable:no-unused-expression */
     if (name == null) return;
     node.dataset.name = name;
     node.querySelector(".name").textContent = name;
@@ -67,7 +75,9 @@ function onEditAddressClick() {
 
   let node = serversTreeView.selectedNodes[0];
 
-  dialogs.prompt("Enter the new server address.", null, node.dataset.address, "Update", (address: string) => {
+  /* tslint:disable:no-unused-expression */
+  new dialogs.PromptDialog("Enter the new server address.", { initialValue: node.dataset.address, validationLabel: "Update" }, (address: string) => {
+    /* tslint:enable:no-unused-expression */
     if (address == null) return;
     node.dataset.address = address;
     node.querySelector(".address").textContent = address;
@@ -79,8 +89,10 @@ function onRemoveAddressClick() {
 
   let node = serversTreeView.selectedNodes[0];
 
-  dialogs.confirm(`Do you want to delete the server ${node.dataset.name}?`, "Delete", (confirm: boolean) => {
-    if (!confirm) return;
+  /* tslint:disable:no-unused-expression */
+  new dialogs.ConfirmDialog(`Do you want to delete the server ${node.dataset.name}?`, "Delete", (confirmed: boolean) => {
+    /* tslint:enable:no-unused-expression */
+    if (!confirmed) return;
 
     node.parentElement.removeChild(node);
  });
