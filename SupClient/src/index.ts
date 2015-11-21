@@ -3,9 +3,11 @@ import * as querystring from "querystring";
 import * as cookies from "js-cookie";
 
 import ProjectClient from "./ProjectClient";
+/* tslint:disable:no-unused-variable */
 import setupHotkeys from "./setupHotkeys";
 import * as table from "./table";
 import * as dialogs from "./dialogs/index";
+/* tslint:enable:no-unused-variable */
 export { cookies, ProjectClient, setupHotkeys, table, dialogs };
 
 export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
