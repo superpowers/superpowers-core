@@ -17,16 +17,25 @@ gulp.task("stylus", function() {
 
 // TypeScript - Main
 var ts = require("gulp-typescript");
-var mainTsProject = ts.createProject("./tsconfig.json");
+var tsMainProject = ts.createProject("./tsconfig.json");
+var tslint = require("gulp-tslint");
+
 gulp.task("typescript-main", function() {
-  var tsResult = mainTsProject.src().pipe(ts(mainTsProject));
+  var tsResult = tsMainProject.src()
+    .pipe(tslint({ tslint: require("tslint") }))
+    .pipe(tslint.report("prose", { emitError: false }))
+    .pipe(ts(tsMainProject));
   return tsResult.js.pipe(gulp.dest("./"));
 });
 
-// Typescript - Renderer
-var tsProject = ts.createProject("./src/tsconfig.json");
+// TypeScript - Renderer
+var tsRendererProject = ts.createProject("./src/tsconfig.json");
+
 gulp.task("typescript-renderer", function() {
-  var tsResult = tsProject.src().pipe(ts(tsProject));
+  var tsResult = tsRendererProject.src()
+    .pipe(tslint({ tslint: require("tslint") }))
+    .pipe(tslint.report("prose", { emitError: false }))
+    .pipe(ts(tsRendererProject));
   return tsResult.js.pipe(gulp.dest("./src"));
 });
 

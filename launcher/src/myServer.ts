@@ -1,10 +1,7 @@
 import * as config from "./config";
 
-let remote: GitHubElectron.Remote = nodeRequire("remote");
-let currentWindow = remote.getCurrentWindow();
-
 let path = nodeRequire("path");
-let child_process = nodeRequire("child_process");
+let childProcess = nodeRequire("child_process");
 
 let myServerElt = document.querySelector(".my-server");
 
@@ -34,15 +31,12 @@ function startServer() {
   startStopServerButton.textContent = "Stop";
 
   let serverPath = path.join(path.resolve(path.dirname(nodeProcess.mainModule.filename)), "../../server/index.js");
-  serverProcess = child_process.fork(serverPath, { silent: true });
+  serverProcess = childProcess.fork(serverPath, { silent: true });
   serverProcess.on("exit", () => {
-    console.log("server closed");
     serverProcess = null;
     startStopServerButton.disabled = false;
     startStopServerButton.textContent = "Start";
     myServerTextarea.value += "\n";
-
-    //if (config.hasRequestedClose) currentWindow.close();
   });
 
   serverProcess.on("message", (msg: string) => {

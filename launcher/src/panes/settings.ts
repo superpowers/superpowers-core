@@ -32,10 +32,10 @@ passwordInput.value = config.password;
 maxRecentBuildsInput.value = config.maxRecentBuilds.toString();
 
 document.querySelector("button.save-settings").addEventListener("click", (event) => {
-  config.mainPort = parseInt(mainPortInput.value);
-  config.buildPort = parseInt(buildPortInput.value);
+  config.mainPort = parseInt(mainPortInput.value, 10);
+  config.buildPort = parseInt(buildPortInput.value, 10);
   config.password = passwordInput.value;
-  config.maxRecentBuilds = parseInt(maxRecentBuildsInput.value);
+  config.maxRecentBuilds = parseInt(maxRecentBuildsInput.value, 10);
 
   fs.writeFileSync(serverPaths.config, JSON.stringify(config, null, 2));
 });

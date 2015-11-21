@@ -11,7 +11,7 @@ import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
 import * as http from "http";
-let mkdirp = require("mkdirp");
+import * as mkdirp from "mkdirp";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -20,7 +20,7 @@ let mainWindow: GitHubElectron.BrowserWindow;
 app.on("window-all-closed", function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform != "darwin") app.quit();
+  if (process.platform !== "darwin") app.quit();
 });
 
 app.on("ready", function() {
@@ -47,7 +47,7 @@ ipc.on("new-server-window", (event: Event, address: string) => {
 
   serverWindowsById[serverWindow.id] = { window: serverWindow, address };
 
-  serverWindow.on("closed", () => { delete serverWindowsById[serverWindow.id]; })
+  serverWindow.on("closed", () => { delete serverWindowsById[serverWindow.id]; });
   serverWindow.loadUrl(`${__dirname}/public/connectionStatus.html`);
 
   function onServerWindowLoaded(event: Event) {
@@ -56,7 +56,7 @@ ipc.on("new-server-window", (event: Event, address: string) => {
     connect(serverWindowsById[serverWindow.id]);
   }
   serverWindow.webContents.addListener("did-finish-load", onServerWindowLoaded);
-})
+});
 
 function connect(serverWindow: ServerWindow) {
   serverWindow.window.loadUrl(`http://${serverWindow.address}`);
@@ -93,7 +93,7 @@ ipc.on("new-standalone-window", (event: Event, address: string) => {
 
   standaloneWindowById[standaloneWindow.id] = standaloneWindow;
 
-  standaloneWindow.on("closed", () => { delete standaloneWindowById[standaloneWindow.id]; })
+  standaloneWindow.on("closed", () => { delete standaloneWindowById[standaloneWindow.id]; });
   standaloneWindow.loadUrl(address);
 });
 
@@ -111,12 +111,12 @@ ipc.on("request-export", (event: { sender: any }) => {
 
     event.sender.send("export-succeed", outputFolder);
   });
-})
+});
 
 interface ExportData {
-  projectId: string, buildId: string,
-  address: string, mainPort: string, buildPort: string,
-  outputFolder: string, files: string[]
+  projectId: string; buildId: string;
+  address: string; mainPort: string; buildPort: string;
+  outputFolder: string; files: string[];
 }
 ipc.on("export", (event: { sender: any }, data: ExportData) => {
   let exportWindow: GitHubElectron.BrowserWindow = new BrowserWindow({
@@ -176,5 +176,5 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
     });
   };
   exportWindow.webContents.addListener("did-finish-load", doExport);
-})
+});
 

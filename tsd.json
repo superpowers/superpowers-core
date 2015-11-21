@@ -58,6 +58,9 @@
     },
     "js-cookie/js-cookie.d.ts": {
       "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+    },
+    "mkdirp/mkdirp.d.ts": {
+      "commit": "16134c168d021351acb1673ee9659644fc58c424"
     }
   }
 }
