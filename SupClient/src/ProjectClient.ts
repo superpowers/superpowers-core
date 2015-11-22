@@ -67,15 +67,6 @@ export default class ProjectClient {
     }
   }
 
-  sub(assetId: string, assetType: string, subscriber: AssetSubscriber) {
-    console.warn("ProjectClient.sub has been deprecated and will be removed soon. Please use ProjectClient.subAsset instead.");
-    this.subAsset(assetId, assetType, subscriber);
-  }
-  unsub(assetId: string, subscriber: AssetSubscriber) {
-    console.warn("ProjectClient.unsub has been deprecated and will be removed soon. Please use ProjectClient.unsubAsset instead.");
-    this.unsubAsset(assetId, subscriber);
-  }
-
   subAsset(assetId: string, assetType: string, subscriber: AssetSubscriber) {
     let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) {
