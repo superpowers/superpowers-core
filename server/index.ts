@@ -79,6 +79,10 @@ function redirectToHub(req: express.Request, res: express.Response) {
 }
 
 buildApp.get("/", redirectToHub);
+buildApp.get("/systems/:systemName/SupCore.js", (req, res) => {
+  res.sendFile("SupCore.js", { root: `${__dirname}/../public` });
+});
+
 buildApp.use("/", express.static(`${__dirname}/../public`));
 
 buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
