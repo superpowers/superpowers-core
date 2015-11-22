@@ -222,7 +222,8 @@ declare namespace SupCore {
         server: ProjectServer;
 
         constructor(id: string, pub: any, schema: Schema, server: ProjectServer);
-        // OVERRIDE: Make sure to call super(callback). Called when creating a new asset
+
+        // OVERRIDE: Make sure to call super.init(callback). Called when creating a new asset
         init(options: any, callback: Function): void;
 
         // OVERRIDE: Called when creating/loading an asset

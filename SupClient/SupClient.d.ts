@@ -6,7 +6,7 @@ declare namespace SupClient {
   export const namePatternDescription: string;
 
   export let isApp: boolean;
-  export let query: { project: string, asset: string; };
+  export let query: { project: string, asset: string; [key: string]: string; };
   export let cookies: Cookies.CookiesStatic;
 
   interface ComponentEditorObject {
@@ -114,7 +114,7 @@ declare namespace SupClient {
     resourcesById: {[resourceId: string]: any};
     subscribersByResourceId: {[assetId: string]: ResourceSubscriber[]};
 
-    constructor(socket: SocketIOClient.Socket, options?: {subEntries: boolean});
+    constructor(socket: SocketIOClient.Socket, options?: { subEntries: boolean; });
 
     subEntries(subscriber: EntriesSubscriber): void;
     unsubEntries(subscriber: EntriesSubscriber): void;
