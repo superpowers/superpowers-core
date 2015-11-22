@@ -1016,7 +1016,7 @@ function onTabClose(tabElement: HTMLLIElement) {
 
   if (tabElement.classList.contains("active")) {
     let activeTabElement = (tabElement.nextSibling != null) ? tabElement.nextSibling : tabElement.previousSibling;
-    onTabActivate(activeTabElement);
+    if (activeTabElement != null) onTabActivate(activeTabElement);
   }
 
   tabElement.parentElement.removeChild(tabElement);
