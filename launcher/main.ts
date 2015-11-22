@@ -138,15 +138,25 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
     exportWindow.setProgressBar(0);
     let progress = 0;
     let progressMax = data.files.length;
+    let buildPath = `/builds/${data.projectId}/${data.buildId}`;
+    let systemsPath = "/systems/";
 
     async.eachLimit(data.files, 10, (file: string, cb: (err: Error) => any) => {
-      let buildPath = `/builds/${data.projectId}/${data.buildId}`;
 
       let outputFilename = file;
       if (_.startsWith(outputFilename, buildPath)) {
+        // Project build files are served on the build port
         outputFilename = outputFilename.substr(buildPath.length);
         file = `${data.address}:${data.buildPort}${file}`;
-      } else file = `${data.address}:${data.mainPort}${file}`;
+      } else {
+        // Other files are served on the main port
+        file = `${data.address}:${data.mainPort}${file}`;
+
+        if (_.startsWith(outputFilename, systemsPath)) {
+          // Output system files at the root
+          outputFilename = outputFilename.substr(outputFilename.indexOf("/", systemsPath.length));
+        }
+      }
       outputFilename = outputFilename.replace(/\//g, path.sep);
 
       let outputPath = `${data.outputFolder}${outputFilename}`;
