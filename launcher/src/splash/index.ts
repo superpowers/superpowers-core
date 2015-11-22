@@ -1,7 +1,9 @@
-export {};
-
 let shell: GitHubElectron.Shell = nodeRequire("shell");
+
+/* tslint:disable */
+// Must use require rather than fs so that it gets browserified
 let packageInfo = require("../../../package.json");
+/* tslint:enable */
 
 let splash = <HTMLDivElement>document.querySelector(".splash");
 
