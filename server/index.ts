@@ -55,7 +55,10 @@ mainApp.get("/project", redirectIfNoAuth);
 mainApp.use("/", express.static(`${__dirname}/../public`));
 mainApp.use("/projects/:projectId/*", (req, res) => {
   let projectPath = hub.serversById[req.params.projectId].projectPath;
-  res.sendFile(req.params[0], { root: `${projectPath}/public` });
+
+  res.sendFile(req.params[0], { root: `${projectPath}/public` }, (err) => {
+    if (req.params[0] === "icon.png") res.sendFile("/images/default-project-icon.png", { root: `${__dirname}/../public` });
+  });
 });
 
 let mainHttpServer = http.createServer(mainApp);
