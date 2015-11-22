@@ -361,7 +361,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     let buildPath = `${this.server.buildsPath}/${buildId}`;
 
-    let game = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
+    let exportedProject = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
 
     try { fs.mkdirSync(this.server.buildsPath); } catch (e) { /* Ignore */ }
     try { fs.mkdirSync(buildPath); }
@@ -402,9 +402,9 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       }, (err) => {
         if (err != null) { callback("Could not export all resources"); return; }
 
-        let json = JSON.stringify(game, null, 2);
-        fs.writeFile(`${buildPath}/game.json`, json, { encoding: "utf8" }, (err) => {
-          if (err != null) { callback("Could not save game.json"); return; }
+        let json = JSON.stringify(exportedProject, null, 2);
+        fs.writeFile(`${buildPath}/project.json`, json, { encoding: "utf8" }, (err) => {
+          if (err != null) { callback("Could not save project.json"); return; }
 
           // this.server.log(`Done generating build ${buildId}...`);
 
