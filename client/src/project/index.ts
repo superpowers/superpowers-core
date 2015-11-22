@@ -93,11 +93,11 @@ function start() {
 
   // Project info
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
-  document.querySelector(".project-buttons .run").addEventListener("click", () => { runGame(); });
-  document.querySelector(".project-buttons .export").addEventListener("click", () => { exportGame(); });
-  document.querySelector(".project-buttons .debug").addEventListener("click", () => { runGame({ debug: true }); });
+  document.querySelector(".project-buttons .run").addEventListener("click", () => { runProject(); });
+  document.querySelector(".project-buttons .publish").addEventListener("click", () => { publishProject(); });
+  document.querySelector(".project-buttons .debug").addEventListener("click", () => { runProject({ debug: true }); });
   if (!SupClient.isApp) {
-    (<HTMLButtonElement>document.querySelector(".project-buttons .export")).title = "Export game (only works from the Superpowers app for technical reasons)";
+    (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).title = "Publish project (only works from the Superpowers app for technical reasons)";
     (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).style.display = "none";
   }
 
@@ -264,7 +264,7 @@ function onDisconnected() {
 
   (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .export")).disabled = true;
+  (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = true;
@@ -305,7 +305,7 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
 
   (<HTMLDivElement>document.querySelector(".connecting")).hidden = true;
 
-  if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .export")).disabled = false;
+  if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = false;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = false;
@@ -481,18 +481,18 @@ function onDependenciesRemoved(id: string, depIds: string[]) {
 // User interface
 function goToHub() { window.location.replace("/"); }
 
-let gameWindow: GitHubElectron.BrowserWindow;
-function runGame(options: { debug: boolean; } = { debug: false }) {
+let runWindow: GitHubElectron.BrowserWindow;
+function runProject(options: { debug: boolean; } = { debug: false }) {
   if (SupClient.isApp) {
-    if (gameWindow != null) gameWindow.destroy();
-    gameWindow = new BrowserWindow({
+    if (runWindow != null) runWindow.destroy();
+    runWindow = new BrowserWindow({
       title: "Superpowers", icon: `${window.location.origin}/images/icon.png`,
       width: 1000, height: 600,
       "min-width": 800, "min-height": 480,
       "auto-hide-menu-bar": true
     });
-    gameWindow.on("closed", () => { gameWindow = null; });
-    gameWindow.loadUrl(`${window.location.origin}/build.html`);
+    runWindow.on("closed", () => { runWindow = null; });
+    runWindow.loadUrl(`${window.location.origin}/build.html`);
   } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
@@ -502,13 +502,13 @@ function runGame(options: { debug: boolean; } = { debug: false }) {
     if (options.debug) url += "&debug";
 
     if (SupClient.isApp) {
-      if (gameWindow != null) gameWindow.loadUrl(url);
+      if (runWindow != null) runWindow.loadUrl(url);
     } else window.open(url, `player_${SupClient.query.project}`);
   });
 }
 
 
-function exportGame() {
+function publishProject() {
   if (SupClient.isApp) ipc.send("request-export");
 }
 
@@ -665,8 +665,8 @@ function onMessageHotKey(action: string) {
     case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
     case "previousTab":  onActivatePreviousTab(); break;
     case "nextTab":      onActivateNextTab(); break;
-    case "run":          runGame(); break;
-    case "debug":        runGame({ debug: true }); break;
+    case "run":          runProject(); break;
+    case "debug":        runProject({ debug: true }); break;
     case "devtools":     showDevTools(); break;
   }
 }
