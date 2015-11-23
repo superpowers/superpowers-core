@@ -5,6 +5,7 @@ import * as async from "async";
 import * as readdirRecursive from "recursive-readdir";
 
 function shouldIgnorePlugin(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
+// FIXME: Let each system specify the required files? or just assume plugins will do their job
 let publicPluginFiles = [ "data", "components", "componentEditors", "settingsEditors", "api", "runtime" ];
 let systemsPath = path.resolve(`${__dirname}/../systems`);
 
@@ -95,24 +96,20 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     // Build files
     let buildFiles: string[] = buildFilesBySystem[systemName] = [ "/SupCore.js" ];
 
-    async.eachSeries(pluginsInfo.list, (plugin, cb) => {
-      let pluginPublicPath = `${systemPath}/plugins/${plugin}/public`;
-      readdirRecursive(pluginPublicPath, (err, entries) => {
-        for (let entry of entries) {
-          let relativePath = path.relative(pluginPublicPath, entry);
-          buildFiles.push(`/systems/${systemName}/plugins/${plugin}/${relativePath}`);
-        }
-        cb();
-      });
-    }, () => {
-      readdirRecursive(`${systemPath}/public`, (err, entries) => {
-        for (let entry of entries) {
-          let relativePath = path.relative(`${systemPath}/public`, entry);
-          buildFiles.push(`/systems/${systemName}/${relativePath}`);
-        }
+    for (let plugin of pluginsInfo.list) {
+      // FIXME: Let each plugin or system specify the files that should be exported
+      buildFiles.push(`/systems/${systemName}/plugins/${plugin}/api.js`);
+      buildFiles.push(`/systems/${systemName}/plugins/${plugin}/components.js`);
+      buildFiles.push(`/systems/${systemName}/plugins/${plugin}/runtime.js`);
+    }
 
-        cb();
-      });
+    readdirRecursive(`${systemPath}/public`, (err, entries) => {
+      for (let entry of entries) {
+        let relativePath = path.relative(`${systemPath}/public`, entry);
+        buildFiles.push(`/systems/${systemName}/${relativePath}`);
+      }
+
+      cb();
     });
   }, () => {
     let systemsInfo: SupCore.SystemsInfo = { list: Object.keys(SupCore.systems) };
