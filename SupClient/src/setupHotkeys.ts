@@ -18,30 +18,30 @@ export default function() {
 
     if (event.keyCode === 8 /* Backspace */) isBackspaceDown = true;
 
-    if (event.keyCode === 78 && (event.ctrlKey || event.metaKey)) { // CTRL-N
+    if (event.keyCode === 78 && (event.ctrlKey || event.metaKey)) { // Ctrl+N
       event.preventDefault();
       if (event.shiftKey) sendMessage("newFolder");
       else sendMessage("newAsset");
     }
 
-    if ((event.keyCode === 79 || event.keyCode === 80) && (event.ctrlKey || event.metaKey)) { // CTRL-O or CTRL-P
+    if ((event.keyCode === 79 || event.keyCode === 80) && (event.ctrlKey || event.metaKey)) { // Ctrl+O or Ctrl+P
       event.preventDefault(); sendMessage("searchEntry");
     }
 
-    if (event.keyCode === 87 && (event.ctrlKey || event.metaKey)) { // CTRL-W
+    if (event.keyCode === 87 && (event.ctrlKey || event.metaKey)) { // Ctrl+W
       event.preventDefault(); sendMessage("closeTab");
     }
 
-    if (event.keyCode === 9 && event.ctrlKey) { // CTRL-TAB
+    if (event.keyCode === 9 && event.ctrlKey) { // Ctrl+TAB
       event.preventDefault();
       if (event.shiftKey) sendMessage("previousTab");
       else sendMessage("nextTab");
     }
 
-    if (event.keyCode === 116 || (event.keyCode === 80 && event.metaKey)) { // F5 || Cmd-P
+    if (event.keyCode === 116 || (event.keyCode === 80 && event.metaKey)) { // F5 || Cmd+P
       event.preventDefault(); sendMessage("run");
     }
-    if (event.keyCode === 117 || (event.keyCode === 80 && event.metaKey && event.shiftKey)) { // F6 or Cmd-Shift-P
+    if (event.keyCode === 117 || (event.keyCode === 80 && event.metaKey && event.shiftKey)) { // F6 or Cmd+Shift-P
       event.preventDefault(); sendMessage("debug");
     }
 
