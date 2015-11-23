@@ -47,12 +47,8 @@ readdirRecursive(sourceRootPath, function(err, files) {
     fs.writeFileSync(targetPath, fs.readFileSync(file));
   }
 
-  fs.renameSync(targetRootPath + "/app/launcher/public/package.json", targetRootPath + "/package.json");
-
-  var launcherPackage = fs.readFileSync(targetRootPath + "/package.json", { encoding: "utf8" });
-  launcherPackage = launcherPackage.replace("index.html", "app/launcher/public/index.html");
-  launcherPackage = launcherPackage.replace("node-main.js", "app/launcher/public/node-main.js");
-  launcherPackage = launcherPackage.replace("icon.png", "app/launcher/public/icon.png");
-
+  var launcherPackage = fs.readFileSync(targetRootPath + "/app/launcher/package.json", { encoding: "utf8" });
+  launcherPackage = launcherPackage.replace("main.js", "app/launcher/main.js");
   fs.writeFileSync(targetRootPath + "/package.json", launcherPackage, { encoding: "utf8" });
+  fs.unlinkSync(targetRootPath + "/app/launcher/package.json");
 });
