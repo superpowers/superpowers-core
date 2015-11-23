@@ -23,7 +23,6 @@
     "gulp-typescript": "2.9.2",
     "gulp-util": "^3.0.3",
     "tslint": "^3.0.0",
-    "typescript": "1.6.2",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^3.4.0"
   },
@@ -46,6 +45,7 @@
     "tab-strip": "^1.1.0",
     "tv4": "^1.1.9",
     "typedarray-to-buffer": "^3.0.1",
+    "typescript": "1.6.2",
     "yargs": "^3.6.0"
   }
 }
