@@ -72,7 +72,12 @@ function connect(serverWindow: ServerWindow) {
     serverWindow.window.webContents.removeListener("did-finish-load", onServerLoaded);
     serverWindow.window.webContents.removeListener("did-fail-load", onServerFailed);
 
-    serverWindow.window.loadUrl(`${__dirname}/public/connectionStatus.html`);
+    // NOTE: As of Electron v0.35.1, if we don't wrap the call to loadUrl
+    // in a callback, the app closes unexpectedly most of the time.
+    setTimeout(() => {
+      serverWindow.window.loadUrl(`${__dirname}/public/connectionStatus.html`);
+    }, 0);
+
     serverWindow.window.webContents.addListener("did-finish-load", onConnectionFailed);
 
     function onConnectionFailed() {
