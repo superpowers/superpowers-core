@@ -35,55 +35,52 @@ app.on("ready", function() {
   mainWindow.on("closed", function() { mainWindow = null; });
 });
 
-interface ServerWindow { window: GitHubElectron.BrowserWindow; address: string; }
-let serverWindowsById: { [id: string]: ServerWindow } = {};
+interface OpenServer { window: GitHubElectron.BrowserWindow; address: string; }
+let openServersById: { [id: string]: OpenServer } = {};
 ipc.on("new-server-window", (event: Event, address: string) => {
-  let serverWindow = new BrowserWindow({
-    title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
-    width: 1000, height: 600,
-    "min-width": 800, "min-height": 480,
-    "auto-hide-menu-bar": true, frame: false
-  });
+  let openServer = {
+    window: new BrowserWindow({
+      title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
+      width: 1000, height: 600,
+      "min-width": 800, "min-height": 480,
+      "auto-hide-menu-bar": true, frame: false
+    }),
+    address
+  };
+  openServersById[openServer.window.id] = openServer;
 
-  serverWindowsById[serverWindow.id] = { window: serverWindow, address };
+  openServer.window.on("closed", () => { delete openServersById[openServer.window.id]; });
 
-  serverWindow.on("closed", () => { delete serverWindowsById[serverWindow.id]; });
-  serverWindow.loadUrl(`${__dirname}/public/connectionStatus.html`);
+  let status = `Connecting to ${openServer.address}...`;
+  openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
 
-  serverWindow.webContents.addListener("did-finish-load", onServerWindowLoaded);
+  openServer.window.webContents.addListener("did-finish-load", onServerWindowLoaded);
   function onServerWindowLoaded(event: Event) {
-    serverWindow.webContents.removeListener("did-finish-load", onServerWindowLoaded);
-    serverWindow.webContents.send("connecting", address);
-    connect(serverWindowsById[serverWindow.id]);
+    openServer.window.webContents.removeListener("did-finish-load", onServerWindowLoaded);
+    connect(openServersById[openServer.window.id]);
   }
 });
 
-function connect(serverWindow: ServerWindow) {
-  serverWindow.window.loadUrl(`http://${serverWindow.address}`);
-  serverWindow.window.webContents.addListener("did-finish-load", onServerLoaded);
-  serverWindow.window.webContents.addListener("did-fail-load", onServerFailed);
+function connect(openServer: OpenServer) {
+  openServer.window.loadUrl(`http://${openServer.address}`);
+  openServer.window.webContents.addListener("did-finish-load", onServerLoaded);
+  openServer.window.webContents.addListener("did-fail-load", onServerFailed);
 
   function onServerLoaded(event: Event) {
-    serverWindow.window.webContents.removeListener("did-finish-load", onServerLoaded);
-    serverWindow.window.webContents.removeListener("did-fail-load", onServerFailed);
+    openServer.window.webContents.removeListener("did-finish-load", onServerLoaded);
+    openServer.window.webContents.removeListener("did-fail-load", onServerFailed);
   }
 
   function onServerFailed(event: Event) {
-    serverWindow.window.webContents.removeListener("did-finish-load", onServerLoaded);
-    serverWindow.window.webContents.removeListener("did-fail-load", onServerFailed);
+    openServer.window.webContents.removeListener("did-finish-load", onServerLoaded);
+    openServer.window.webContents.removeListener("did-fail-load", onServerFailed);
 
     // NOTE: As of Electron v0.35.1, if we don't wrap the call to loadUrl
     // in a callback, the app closes unexpectedly most of the time.
     setTimeout(() => {
-      serverWindow.window.loadUrl(`${__dirname}/public/connectionStatus.html`);
+      let status = `Could not connect to ${openServer.address}`;
+      openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
     }, 0);
-
-    serverWindow.window.webContents.addListener("did-finish-load", onConnectionFailed);
-
-    function onConnectionFailed() {
-      serverWindow.window.webContents.removeListener("did-finish-load", onConnectionFailed);
-      serverWindow.window.webContents.send("connection-failed", serverWindow.address);
-    }
   }
 }
 
@@ -102,7 +99,7 @@ ipc.on("new-standalone-window", (event: Event, address: string) => {
   standaloneWindow.loadUrl(address);
 });
 
-ipc.on("reconnect", (event: Event, id: string) => { connect(serverWindowsById[id]); });
+ipc.on("reconnect", (event: Event, id: string) => { connect(openServersById[id]); });
 
 ipc.on("request-export", (event: { sender: any }) => {
   dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {
