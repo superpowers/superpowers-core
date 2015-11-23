@@ -8,6 +8,7 @@ let TreeView = require("dnd-tree-view");
 
 let data: {
   projects: SupCore.Data.Projects;
+  systemTitlesByName: { [name: string]: string; }
   systemsByProjectType: { [title: string]: string; }
 } = {} as any;
 
@@ -47,11 +48,13 @@ interface SystemManifest {
 }
 
 function loadSystemsInfo(callback: Function) {
+  data.systemTitlesByName = {};
   data.systemsByProjectType = {};
 
   window.fetch("/systems.json").then((response) => response.json()).then((systemsInfo: SupCore.SystemsInfo) => {
     async.each(systemsInfo.list, (systemName, cb) => {
       window.fetch(`/systems/${systemName}/manifest.json`).then((response) => response.json()).then((manifest: SystemManifest) => {
+        data.systemTitlesByName[systemName] = manifest.title;
         data.systemsByProjectType[`${manifest.title} project`] = systemName;
         cb();
       });
@@ -137,19 +140,28 @@ function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
   iconElt.src = `/projects/${manifest.id}/icon.png`;
   liElt.appendChild(iconElt);
 
-  let infoDiv = document.createElement("div");
-  infoDiv.className = "info";
-  liElt.appendChild(infoDiv);
+  let infoElt = document.createElement("div");
+  infoElt.className = "info";
+  liElt.appendChild(infoElt);
 
-  let nameDiv = document.createElement("div");
-  nameDiv.className = "name";
-  nameDiv.textContent = manifest.name;
-  infoDiv.appendChild(nameDiv);
+  let nameElt = document.createElement("div");
+  nameElt.className = "name";
+  nameElt.textContent = manifest.name;
+  infoElt.appendChild(nameElt);
 
-  let descriptionDiv = document.createElement("div");
-  descriptionDiv.className = "description";
-  descriptionDiv.textContent = manifest.description;
-  infoDiv.appendChild(descriptionDiv);
+  let detailsElt = document.createElement("div");
+  detailsElt.className = "details";
+  infoElt.appendChild(detailsElt);
+
+  let descriptionElt = document.createElement("span");
+  descriptionElt.className = "description";
+  descriptionElt.textContent = manifest.description;
+  detailsElt.appendChild(descriptionElt);
+
+  let projectTypeSpan = document.createElement("span");
+  projectTypeSpan.className = "project-type";
+  projectTypeSpan.textContent = data.systemTitlesByName[manifest.system];
+  detailsElt.appendChild(projectTypeSpan);
 
   return liElt;
 }

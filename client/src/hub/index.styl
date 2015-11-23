@@ -37,6 +37,9 @@ body
     font-size 1.5em
     line-height 1.25
 
+  ol.tree li.item span, ol.tree li.group span
+    padding 0
+
   ol.tree li
     display flex
     white-space nowrap
@@ -59,9 +62,17 @@ body
       overflow hidden
       text-overflow ellipsis
 
-  .name
-    font-weight bold
+  .name {
+    font-weight: bold;
+  }
 
-  .description
-    color #888
-    font-size 0.7em
+  .details {
+    font-size: 0.7em;
+    .description { color: rgba(0, 0, 0, 0.8); }
+    .project-type { color: rgba(0, 0, 0, 0.5); visibility: hidden; }
+    .description:not(:empty) + .project-type:before { content: " — "; }
+  }
+
+  ol.tree li:hover {
+    .project-type { visibility: visible; }
+  }
