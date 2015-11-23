@@ -16,7 +16,7 @@ import ProjectHub from "./ProjectHub";
 // Globals
 (<any>global).SupCore = SupCore;
 
-let { version } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
+let { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
 SupCore.log(`Server v${version} starting...`);
 
 process.on("uncaughtException", (err: Error) => {
@@ -32,7 +32,7 @@ function handle404(err: any, req: express.Request, res: express.Response, next: 
 let hub: ProjectHub = null;
 
 // Public version
-fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version }, null, 2));
+fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion }, null, 2));
 
 // Main HTTP server
 let mainApp = express();

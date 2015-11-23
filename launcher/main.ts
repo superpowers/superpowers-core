@@ -13,6 +13,8 @@ import * as path from "path";
 import * as http from "http";
 import * as mkdirp from "mkdirp";
 
+let { superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow: GitHubElectron.BrowserWindow;
@@ -62,9 +64,37 @@ ipc.on("new-server-window", (event: Event, address: string) => {
 });
 
 function connect(openServer: OpenServer) {
-  openServer.window.loadUrl(`http://${openServer.address}`);
-  openServer.window.webContents.addListener("did-finish-load", onServerLoaded);
-  openServer.window.webContents.addListener("did-fail-load", onServerFailed);
+  http.get(`http://${openServer.address}/superpowers.json`, (res) => {
+    let content = "";
+    res.on("data", (chunk: string) => {
+      content += chunk;
+    });
+
+    res.on("end", () => {
+      let serverInfo: { version: string; appApiVersion: number; } = null;
+      if (res.statusCode === 200) {
+        try { serverInfo = JSON.parse(content); } catch (err) { /* Ignore */ }
+      }
+
+      if (serverInfo == null) {
+        showError(`The server at ${openServer.address} doesn't seem to be running Superpowers.`);
+        return;
+      }
+
+      if (serverInfo.appApiVersion !== appApiVersion) {
+        showError(`The server at ${openServer.address} runs an incompatible version of Superpowers ` +
+        `(got app API version ${serverInfo.appApiVersion}, expected ${appApiVersion}).`);
+        return;
+      }
+
+      openServer.window.loadUrl(`http://${openServer.address}`);
+      openServer.window.webContents.addListener("did-finish-load", onServerLoaded);
+      openServer.window.webContents.addListener("did-fail-load", onServerFailed);
+    });
+  })
+  .on("error", (err: Error) => {
+    showError(`Could not connect to ${openServer.address} (${err.message}).`);
+  });
 
   function onServerLoaded(event: Event) {
     openServer.window.webContents.removeListener("did-finish-load", onServerLoaded);
@@ -75,11 +105,14 @@ function connect(openServer: OpenServer) {
     openServer.window.webContents.removeListener("did-finish-load", onServerLoaded);
     openServer.window.webContents.removeListener("did-fail-load", onServerFailed);
 
+    showError(`Could not connect to ${openServer.address}.`);
+  }
+
+  function showError(error: string) {
     // NOTE: As of Electron v0.35.1, if we don't wrap the call to loadUrl
     // in a callback, the app closes unexpectedly most of the time.
     setTimeout(() => {
-      let status = `Could not connect to ${openServer.address}`;
-      openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
+      openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(error)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
     }, 0);
   }
 }

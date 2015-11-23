@@ -8,6 +8,10 @@
     "type": "hg",
     "url": "https://bitbucket.org/superpowers/superpowers"
   },
+  "superpowers": {
+    "electronVersion": "0.35.1",
+    "appApiVersion": 1
+  },
   "devDependencies": {
     "brfs": "^1.4.0",
     "browserify": "^8.1.3",
