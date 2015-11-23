@@ -1,11 +1,14 @@
 var path = require("path");
 var fs = require("fs");
+var getBuildPaths = require("./getBuildPaths");
+
+var rootPath = path.resolve(__dirname + "/..");
 
 var systemsDirectoryExists = false;
-try { if (fs.statSync(__dirname + "/../systems").isDirectory) systemsDirectoryExists = true; } catch(err) {}
+try { if (fs.statSync(rootPath + "/systems").isDirectory) systemsDirectoryExists = true; } catch(err) {}
 
 var oldSystemDirectoryExists = false;
-try { if (fs.statSync(__dirname + "/../system").isDirectory) oldSystemDirectoryExists = true; } catch(err) {}
+try { if (fs.statSync(rootPath + "/system").isDirectory) oldSystemDirectoryExists = true; } catch(err) {}
 
 if (!systemsDirectoryExists && oldSystemDirectoryExists) {
   console.log("IMPORTANT: Superpowers now supports multiple systems, many things have moved.");
@@ -20,47 +23,12 @@ if (!systemsDirectoryExists && oldSystemDirectoryExists) {
 var async = require("async");
 var child_process = require("child_process");
 
-function shouldIgnoreFolder(folderName) { return folderName.indexOf(".") !== -1 || folderName === "node_modules" || folderName === "public"; }
-
 function log(message) {
   var text = new Date().toISOString() + " - " + message;
   console.log(text);
 }
 
-// Core and system
-var rootPath = path.resolve(__dirname + "/..");
-
-var buildPaths = [
-  rootPath,
-  rootPath + "/SupCore",
-  rootPath + "/SupClient",
-  rootPath + "/server",
-  rootPath + "/client",
-  rootPath + "/launcher",
-];
-
-// Systems and plugins
-var systemsPath = rootPath + "/systems";
-fs.readdirSync(systemsPath).forEach(function(systemName) {
-  if (shouldIgnoreFolder(systemName)) return;
-
-  var systemPath = systemsPath + "/" + systemName;
-  fs.readdirSync(systemPath).forEach(function(systemFolder) {
-    if (shouldIgnoreFolder(systemFolder) || systemFolder === "plugins") return;
-    buildPaths.push(systemPath + "/" + systemFolder);
-  });
-
-  var systemPluginsPath = systemPath + "/plugins";
-  fs.readdirSync(systemPluginsPath).forEach(function(pluginAuthor) {
-    if (shouldIgnoreFolder(pluginAuthor)) return;
-
-    var pluginAuthorPath = systemPluginsPath + "/" + pluginAuthor;
-    fs.readdirSync(pluginAuthorPath).forEach(function(pluginName) {
-      if (shouldIgnoreFolder(pluginName)) return;
-      buildPaths.push(pluginAuthorPath + "/" + pluginName);
-    });
-  });
-});
+var buildPaths = getBuildPaths(rootPath);
 
 // Filter
 if (process.argv.length > 2) {

@@ -1,8 +1,11 @@
 var fs = require("fs");
 var path = require("path");
+var getBuildPaths = require("./getBuildPaths");
 var readdirRecursive = require("recursive-readdir");
 var mkdirp = require("mkdirp");
+var async = require("async");
 var _ = require("lodash");
+var child_process = require("child_process");
 
 var sourceRootPath = path.resolve(__dirname + "/..");
 var packageInfo = require(sourceRootPath + "/package.json");
@@ -47,8 +50,22 @@ readdirRecursive(sourceRootPath, function(err, files) {
     fs.writeFileSync(targetPath, fs.readFileSync(file));
   }
 
-  var launcherPackage = fs.readFileSync(targetRootPath + "/app/launcher/package.json", { encoding: "utf8" });
-  launcherPackage = launcherPackage.replace("main.js", "app/launcher/main.js");
-  fs.writeFileSync(targetRootPath + "/package.json", launcherPackage, { encoding: "utf8" });
-  fs.unlinkSync(targetRootPath + "/app/launcher/package.json");
+  var buildPaths = getBuildPaths(targetRootPath + "/app");
+  var execSuffix = process.platform == "win32";
+
+  async.eachSeries(buildPaths, function(buildPath, cb) {
+    if (!fs.existsSync(buildPath + "/package.json")) { cb(); return; }
+    var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
+    var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "prune", "--production" ], spawnOptions);
+
+    npm.on("close", function(status) {
+      if (status !== 0) console.error("[" + buildPath + "] npm exited with status code " + status);
+      cb();
+    });
+  }, function() {
+    var launcherPackage = fs.readFileSync(targetRootPath + "/app/launcher/package.json", { encoding: "utf8" });
+    launcherPackage = launcherPackage.replace("main.js", "app/launcher/main.js");
+    fs.writeFileSync(targetRootPath + "/package.json", launcherPackage, { encoding: "utf8" });
+    fs.unlinkSync(targetRootPath + "/app/launcher/package.json");
+  });
 });
