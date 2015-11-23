@@ -50,12 +50,12 @@ ipc.on("new-server-window", (event: Event, address: string) => {
   serverWindow.on("closed", () => { delete serverWindowsById[serverWindow.id]; });
   serverWindow.loadUrl(`${__dirname}/public/connectionStatus.html`);
 
+  serverWindow.webContents.addListener("did-finish-load", onServerWindowLoaded);
   function onServerWindowLoaded(event: Event) {
     serverWindow.webContents.removeListener("did-finish-load", onServerWindowLoaded);
     serverWindow.webContents.send("connecting", address);
     connect(serverWindowsById[serverWindow.id]);
   }
-  serverWindow.webContents.addListener("did-finish-load", onServerWindowLoaded);
 });
 
 function connect(serverWindow: ServerWindow) {
@@ -82,7 +82,7 @@ function connect(serverWindow: ServerWindow) {
   }
 }
 
-let standaloneWindowById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
+let standaloneWindowsById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
 ipc.on("new-standalone-window", (event: Event, address: string) => {
   let standaloneWindow = new BrowserWindow({
     title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
@@ -91,13 +91,13 @@ ipc.on("new-standalone-window", (event: Event, address: string) => {
     "auto-hide-menu-bar": true
   });
 
-  standaloneWindowById[standaloneWindow.id] = standaloneWindow;
+  standaloneWindowsById[standaloneWindow.id] = standaloneWindow;
 
-  standaloneWindow.on("closed", () => { delete standaloneWindowById[standaloneWindow.id]; });
+  standaloneWindow.on("closed", () => { delete standaloneWindowsById[standaloneWindow.id]; });
   standaloneWindow.loadUrl(address);
 });
 
-ipc.on("connecting", (event: Event, id: string) => { connect(serverWindowsById[id]); });
+ipc.on("reconnect", (event: Event, id: string) => { connect(serverWindowsById[id]); });
 
 ipc.on("request-export", (event: { sender: any }) => {
   dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {

@@ -38,7 +38,6 @@ html
       document.querySelector(".controls .minimize").addEventListener("click", function() { currentWindow.minimize(); });
       document.querySelector(".controls .close").addEventListener("click", function() { currentWindow.close(); });
 
-      // var address;
       ipc.on("connecting", function(address) {
         document.querySelector(".status").textContent = "Connecting to " + address + "...";
       });
@@ -50,9 +49,9 @@ html
         var reloadButton = document.querySelector(".reload");
         reloadButton.hidden = false;
         reloadButton.addEventListener("click", function() {
-          statusElt.textContent = "Connecting to " + address + "..."
+          statusElt.textContent = "Connecting to " + address + "...";
           reloadButton.hidden = true;
-          ipc.send("connecting", currentWindow.id);
+          ipc.send("reconnect", currentWindow.id);
         });
       });
 
