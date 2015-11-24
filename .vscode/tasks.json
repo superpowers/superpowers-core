@@ -82,6 +82,13 @@
       ]
     },
     {
+      "taskName": "documentation",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/documentation/"
+      ]
+    },
+    {
       "taskName": "font",
       "args": [
         "--cwd",
@@ -128,6 +135,13 @@
       "args": [
         "--cwd",
         "./systems/supGame/plugins/sparklinlabs/projectSettings/"
+      ]
+    },
+    {
+      "taskName": "settings",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/settings/"
       ]
     },
     {
