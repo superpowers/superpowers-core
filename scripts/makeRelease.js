@@ -9,10 +9,15 @@ var child_process = require("child_process");
 
 var sourceRootPath = path.resolve(__dirname + "/..");
 var packageInfo = require(sourceRootPath + "/package.json");
-var targetRootPath = __dirname + "/../../releases/" + packageInfo.version + "/content";
+var targetRootPath = path.resolve(__dirname + "/../../releases/" + packageInfo.version + "/content");
+
+function log(message) {
+  var text = new Date().toISOString() + " - " + message;
+  console.log(text);
+}
 
 try { mkdirp(targetRootPath); }
-catch (error) { console.log("Could not create superpowers-" + packageInfo.version + " folder"); process.exit(1); }
+catch (error) { log("Could not create superpowers-" + packageInfo.version + " folder"); process.exit(1); }
 
 function shouldDistribute(file) {
   file = file.substring(sourceRootPath.length + 1).replace(/\\/g, "/");
@@ -37,8 +42,10 @@ function shouldDistribute(file) {
   return true;
 };
 
+log("Copying all files to " + targetRootPath + "...");
+
 readdirRecursive(sourceRootPath, function(err, files) {
-  if (err != null) { console.log(err); return; }
+  if (err != null) { log(err); return; }
 
   files = _.filter(files, shouldDistribute);
 
@@ -53,6 +60,8 @@ readdirRecursive(sourceRootPath, function(err, files) {
   var buildPaths = getBuildPaths(targetRootPath + "/app");
   var execSuffix = process.platform == "win32";
 
+  log("Pruning development-only packages from exported folders...");
+
   async.eachSeries(buildPaths, function(buildPath, cb) {
     if (!fs.existsSync(buildPath + "/package.json")) { cb(); return; }
     var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
@@ -63,9 +72,11 @@ readdirRecursive(sourceRootPath, function(err, files) {
       cb();
     });
   }, function() {
+    log("Updating the launcher's package.json and moving it to the root...");
     var launcherPackage = fs.readFileSync(targetRootPath + "/app/launcher/package.json", { encoding: "utf8" });
     launcherPackage = launcherPackage.replace("main.js", "app/launcher/main.js");
     fs.writeFileSync(targetRootPath + "/package.json", launcherPackage, { encoding: "utf8" });
     fs.unlinkSync(targetRootPath + "/app/launcher/package.json");
+    log("Release complete: " + targetRootPath);
   });
 });
