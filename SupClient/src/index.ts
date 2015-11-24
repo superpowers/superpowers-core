@@ -21,39 +21,17 @@ export const namePatternDescription = "The following characters cannot be used: 
 // Initialize empty system
 SupCore.system = new SupCore.System("");
 
-// Component editors
-interface ComponentEditorObject {
-  destroy(): void;
-  config_setProperty(path: string, value: any): void;
-}
+export let activePluginPath: string;
+export let plugins: { [context: string]: { [name: string]: { path: string; content: any; } } } = {};
+export function registerPlugin(context: string, name: string, content: any) {
+  if (plugins[context] == null) plugins[context] = {};
 
-interface ComponentEditorClass {
-  new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): ComponentEditorObject;
-}
-
-export let componentEditorClasses: { [name: string]: ComponentEditorClass } = {};
-export function registerComponentEditorClass(name: string, plugin: ComponentEditorClass) {
-  if (componentEditorClasses[name] != null) {
-    console.error(`SupClient.registerComponentEditorClass: Tried to register two or more classes named "${name}"`);
+  if (plugins[context][name] != null) {
+    console.error(`SupClient.registerPlugin: Tried to register two or more plugins named "${name}"`);
     return;
   }
 
-  componentEditorClasses[name] = plugin;
-};
-
-// Settings editors
-interface SettingsEditorClass {
-  new(container: HTMLDivElement, projectClient: ProjectClient): {};
-}
-
-export let settingsEditorClasses: { [name: string]: SettingsEditorClass } = {};
-export function registerSettingsEditorClass(name: string, plugin: SettingsEditorClass) {
-  if (settingsEditorClasses[name] != null) {
-    console.error(`SupClient.registerSettingsEditorClass: Tried to register two or more classes named "${name}"`);
-    return;
-  }
-
-  settingsEditorClasses[name] = plugin;
+  plugins[context][name] = { path: activePluginPath, content };
 }
 
 // Plugins list

@@ -9,21 +9,9 @@ declare namespace SupClient {
   export let query: { project: string, asset: string; [key: string]: string; };
   export let cookies: Cookies.CookiesStatic;
 
-  interface ComponentEditorObject {
-    destroy(): void;
-    config_setProperty(path: string, value: any): void;
-  }
-  interface ComponentEditorClass {
-    new(tbody: HTMLTableSectionElement, config: any, projectClient: ProjectClient, editConfig: Function): ComponentEditorObject;
-  }
-  export let componentEditorClasses: { [name: string]: ComponentEditorClass };
-  export function registerComponentEditorClass(name: string, plugin: ComponentEditorClass): void;
-
-  interface SettingsEditorClass {
-    new (container: HTMLDivElement, projectClient: ProjectClient): {};
-  }
-  export let settingsEditorClasses: { [name: string]: SettingsEditorClass };
-  export function registerSettingsEditorClass(name: string, plugin: SettingsEditorClass): void;
+  export let activePluginPath: string;
+  export let plugins: { [context: string]: { [name: string]: { path: string; content: any; } } };
+  export function registerPlugin(context: string, name: string, plugin: any): void;
 
   export function connect(projectId: string, options?: { reconnection: boolean; }): SocketIOClient.Socket;
   export function onAssetTrashed(): void;
