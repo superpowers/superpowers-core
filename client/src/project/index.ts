@@ -509,12 +509,12 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
 
 
 function publishProject() {
-  if (SupClient.isApp) ipc.send("request-export");
+  if (SupClient.isApp) ipc.send("choose-export-folder");
 }
 
 if (SupClient.isApp) {
-  ipc.on("export-failed", (message: string) => { alert(message); });
-  ipc.on("export-succeed", (outputFolder: string) => {
+  ipc.on("export-folder-failed", (message: string) => { alert(message); });
+  ipc.on("export-folder-success", (outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
       let address = `${window.location.protocol}//${window.location.hostname}`;
       ipc.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });

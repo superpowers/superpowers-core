@@ -40,7 +40,7 @@ html
       var querystring = require("querystring");
       var query = querystring.parse(window.location.search.slice(1));
 
-      var statusElt =  document.querySelector(".status");
+      var statusElt = document.querySelector(".status");
       statusElt.textContent = query.status;
 
       var reloadButton = document.querySelector(".reload");

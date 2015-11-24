@@ -96,6 +96,7 @@ function connect(openServer: OpenServer) {
   })
   .on("error", (err: Error) => {
     showError(`Could not connect to ${openServer.address} (${err.message}).`);
+    // TODO: Add help link!
   });
 
   function onServerLoaded(event: Event) {
@@ -108,6 +109,7 @@ function connect(openServer: OpenServer) {
     openServer.window.webContents.removeListener("did-fail-load", onServerFailed);
 
     showError(`Could not connect to ${openServer.address}.`);
+    // TODO: Add help link!
   }
 
   function showError(error: string) {
@@ -136,17 +138,17 @@ ipc.on("new-standalone-window", (event: Event, address: string) => {
 
 ipc.on("reconnect", (event: Event, id: string) => { connect(openServersById[id]); });
 
-ipc.on("request-export", (event: { sender: any }) => {
+ipc.on("choose-export-folder", (event: { sender: any }) => {
   dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {
     if (directory == null) return;
 
     let outputFolder = directory[0];
     let isFolderEmpty = false;
     try { isFolderEmpty = fs.readdirSync(outputFolder).length === 0; }
-    catch (e) { event.sender.send("export-failed", `Error while checking if folder was empty: ${e.message}`); return; }
-    if (!isFolderEmpty) { event.sender.send("export-failed", "Output folder must be empty."); return; }
+    catch (e) { event.sender.send("export-folder-failed", `Error while checking if folder was empty: ${e.message}`); return; }
+    if (!isFolderEmpty) { event.sender.send("export-folder-failed", "Output folder must be empty."); return; }
 
-    event.sender.send("export-succeed", outputFolder);
+    event.sender.send("export-folder-success", outputFolder);
   });
 });
 
@@ -167,10 +169,7 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
 
   let doExport = () => {
     exportWindow.webContents.removeListener("did-finish-load", doExport);
-    exportWindow.webContents.executeJavaScript(`
-    document.title = "Superpowers — Exporting...";
-    document.querySelector(".status").textContent = "Exporting...";
-    `);
+    exportWindow.webContents.send("setText", { title: "Superpowers — Exporting...", text: "Exporting..." });
 
     exportWindow.setProgressBar(0);
     let progress = 0;
@@ -197,9 +196,7 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
       outputFilename = outputFilename.replace(/\//g, path.sep);
 
       let outputPath = `${data.outputFolder}${outputFilename}`;
-      exportWindow.webContents.executeJavaScript(`
-      document.querySelector(".status").textContent = "${outputPath}";
-      `);
+      exportWindow.webContents.send("setText", { text: outputPath });
 
       http.get(file, (response) => {
         mkdirp(path.dirname(outputPath), (err: Error) => {
@@ -215,11 +212,7 @@ ipc.on("export", (event: { sender: any }, data: ExportData) => {
     } , (err: Error) => {
       exportWindow.setProgressBar(-1);
       if (err != null) { alert(err); return; }
-      // TODO: Add link to open in file browser
-      exportWindow.webContents.executeJavaScript(`
-      document.title = "Superpowers — Exported";
-      document.querySelector(".status").textContent = "Exported to ${data.outputFolder}";
-      `);
+      exportWindow.webContents.send("setText", { title: "Superpowers — Exported", text: "Exported to ", showItemInFolder: { text: data.outputFolder, target: data.outputFolder } } );
     });
   };
   exportWindow.webContents.addListener("did-finish-load", doExport);
