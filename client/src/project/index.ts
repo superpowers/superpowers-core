@@ -46,11 +46,18 @@ let shell: GitHubElectron.Shell;
 /* tslint:disable:variable-name */
 let BrowserWindow: typeof GitHubElectron.BrowserWindow;
 /* tslint:enable:variable-name */
+
+let runWindow: GitHubElectron.BrowserWindow;
+
 if (SupClient.isApp) {
   remote = nodeRequire("remote");
   ipc = nodeRequire("ipc");
   shell = nodeRequire("shell");
   BrowserWindow = remote.require("browser-window");
+
+  remote.getCurrentWindow().on("close", () => {
+    if (runWindow != null) runWindow.removeListener("closed", onCloseRunWindow);
+  });
 }
 
 function start() {
@@ -96,9 +103,12 @@ function start() {
   document.querySelector(".project-buttons .run").addEventListener("click", () => { runProject(); });
   document.querySelector(".project-buttons .publish").addEventListener("click", () => { publishProject(); });
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runProject({ debug: true }); });
+  document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
+
   if (!SupClient.isApp) {
     (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).title = "Publish project (only works from the Superpowers app for technical reasons)";
-    (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).style.display = "none";
+    (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).hidden = true;
+    (<HTMLButtonElement>document.querySelector(".project-buttons .stop")).hidden = true;
   }
 
   // Entries tree view
@@ -264,6 +274,7 @@ function onDisconnected() {
 
   (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = true;
+  (<HTMLButtonElement>document.querySelector(".project-buttons .stop")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = true;
   (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = true;
@@ -481,18 +492,23 @@ function onDependenciesRemoved(id: string, depIds: string[]) {
 // User interface
 function goToHub() { window.location.replace("/"); }
 
-let runWindow: GitHubElectron.BrowserWindow;
 function runProject(options: { debug: boolean; } = { debug: false }) {
   if (SupClient.isApp) {
-    if (runWindow != null) runWindow.destroy();
-    runWindow = new BrowserWindow({
-      title: "Superpowers", icon: `${window.location.origin}/images/icon.png`,
-      width: 1000, height: 600,
-      "min-width": 800, "min-height": 480,
-      "auto-hide-menu-bar": true
-    });
-    runWindow.on("closed", () => { runWindow = null; });
+    if (runWindow == null) {
+      runWindow = new BrowserWindow({
+        title: "Superpowers", icon: `${window.location.origin}/images/icon.png`,
+        width: 1000, height: 600,
+        "min-width": 800, "min-height": 480
+      });
+      runWindow.setMenuBarVisibility(false);
+      runWindow.on("closed", onCloseRunWindow);
+
+      (document.querySelector(".project-buttons") as HTMLDivElement).classList.toggle("running", true);
+    }
     runWindow.loadUrl(`${window.location.origin}/build.html`);
+    runWindow.focus();
+
+    (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = false;
   } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
@@ -507,6 +523,17 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
   });
 }
 
+function onCloseRunWindow() {
+  runWindow = null;
+  (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;
+}
+
+function stopProject() {
+  runWindow.destroy();
+  runWindow = null;
+
+  (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;
+}
 
 function publishProject() {
   if (SupClient.isApp) ipc.send("choose-export-folder");
