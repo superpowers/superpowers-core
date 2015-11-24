@@ -21,76 +21,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     buildApp.use(`/systems/${systemName}`, express.static(`${systemPath}/public`));
 
     // Load plugins
-    let pluginsPath = `${systemPath}/plugins`;
-    let pluginNamesByAuthor: { [author: string]: string[] } = {};
-    for (let pluginAuthor of fs.readdirSync(pluginsPath)) {
-      let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
-
-      pluginNamesByAuthor[pluginAuthor] = [];
-      for (let pluginName of fs.readdirSync(pluginAuthorPath)) {
-        if (shouldIgnorePlugin(pluginName)) continue;
-        pluginNamesByAuthor[pluginAuthor].push(pluginName);
-      }
-    }
-
-    // First pass
-    for (let pluginAuthor in pluginNamesByAuthor) {
-      let pluginNames = pluginNamesByAuthor[pluginAuthor];
-      let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
-
-      for (let pluginName of pluginNames) {
-        let pluginPath = `${pluginAuthorPath}/${pluginName}`;
-
-        // Load scripting API module
-        let apiModulePath = `${pluginPath}/api`;
-        if (fs.existsSync(apiModulePath)) require(apiModulePath);
-
-        // Expose public stuff
-        mainApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
-        buildApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
-
-        // Ensure all public files exist
-        for (let requiredFile of publicPluginFiles) {
-          let requiredFilePath = `${pluginPath}/public/${requiredFile}.js`;
-          if (!fs.existsSync(requiredFilePath)) fs.closeSync(fs.openSync(requiredFilePath, "w"));
-        }
-      }
-    }
-
-    // Second pass, because data modules might depend on API modules
-    let pluginsInfo: {
-      list: string[],
-      paths: {
-        editors: { [assetType: string]: string; },
-        tools: { [name: string]: string; }
-      }
-    } = { list: [], paths: { editors: {}, tools: {} } };
-
-    for (let pluginAuthor in pluginNamesByAuthor) {
-      let pluginNames = pluginNamesByAuthor[pluginAuthor];
-      let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
-
-      for (let pluginName of pluginNames) {
-        let pluginPath = `${pluginAuthorPath}/${pluginName}`;
-
-        // Load data module
-        let dataModulePath = `${pluginPath}/data`;
-        if (fs.existsSync(dataModulePath)) require(dataModulePath);
-
-        // Collect plugin info
-        pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);
-        if (fs.existsSync(`${pluginPath}/editors`)) {
-          for (let editorName of fs.readdirSync(`${pluginPath}/editors`)) {
-            if (SupCore.system.data.assetClasses[editorName] != null) {
-              pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
-            } else {
-              pluginsInfo.paths.tools[editorName] = `${pluginAuthor}/${pluginName}`;
-            }
-          }
-        }
-      }
-    }
-
+    let pluginsInfo = loadPlugins(systemName, `${systemPath}/plugins`, mainApp, buildApp);
     fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo, null, 2));
 
     // Build files
@@ -118,4 +49,75 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     SupCore.system = null;
     callback();
   });
+}
+
+function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.Express, buildApp: express.Express): SupCore.PluginsInfo {
+  let pluginNamesByAuthor: { [author: string]: string[] } = {};
+  let pluginsInfo: SupCore.PluginsInfo = { list: [], paths: { editors: {}, tools: {} } };
+
+  let pluginsFolder: string[];
+  try { pluginsFolder = fs.readdirSync(pluginsPath); } catch (err) { /* Ignore */ }
+  if (pluginsFolder == null) return pluginsInfo;
+
+  for (let pluginAuthor of pluginsFolder) {
+    let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+
+    pluginNamesByAuthor[pluginAuthor] = [];
+    for (let pluginName of fs.readdirSync(pluginAuthorPath)) {
+      if (shouldIgnorePlugin(pluginName)) continue;
+      pluginNamesByAuthor[pluginAuthor].push(pluginName);
+    }
+  }
+
+  // First pass
+  for (let pluginAuthor in pluginNamesByAuthor) {
+    let pluginNames = pluginNamesByAuthor[pluginAuthor];
+    let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+
+    for (let pluginName of pluginNames) {
+      let pluginPath = `${pluginAuthorPath}/${pluginName}`;
+
+      // Load scripting API module
+      let apiModulePath = `${pluginPath}/api`;
+      if (fs.existsSync(apiModulePath)) require(apiModulePath);
+
+      // Expose public stuff
+      mainApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+      buildApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+
+      // Ensure all public files exist
+      for (let requiredFile of publicPluginFiles) {
+        let requiredFilePath = `${pluginPath}/public/${requiredFile}.js`;
+        if (!fs.existsSync(requiredFilePath)) fs.closeSync(fs.openSync(requiredFilePath, "w"));
+      }
+    }
+  }
+
+  // Second pass, because data modules might depend on API modules
+  for (let pluginAuthor in pluginNamesByAuthor) {
+    let pluginNames = pluginNamesByAuthor[pluginAuthor];
+    let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+
+    for (let pluginName of pluginNames) {
+      let pluginPath = `${pluginAuthorPath}/${pluginName}`;
+
+      // Load data module
+      let dataModulePath = `${pluginPath}/data`;
+      if (fs.existsSync(dataModulePath)) require(dataModulePath);
+
+      // Collect plugin info
+      pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);
+      if (fs.existsSync(`${pluginPath}/editors`)) {
+        for (let editorName of fs.readdirSync(`${pluginPath}/editors`)) {
+          if (SupCore.system.data.assetClasses[editorName] != null) {
+            pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
+          } else {
+            pluginsInfo.paths.tools[editorName] = `${pluginAuthor}/${pluginName}`;
+          }
+        }
+      }
+    }
+  }
+
+  return pluginsInfo;
 }
