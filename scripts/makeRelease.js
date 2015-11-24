@@ -8,8 +8,8 @@ var _ = require("lodash");
 var child_process = require("child_process");
 
 var sourceRootPath = path.resolve(__dirname + "/..");
-var packageInfo = require(sourceRootPath + "/package.json");
-var targetRootPath = path.resolve(__dirname + "/../../releases/" + packageInfo.version + "/content");
+var rootPackage = require(sourceRootPath + "/package.json");
+var targetRootPath = path.resolve(__dirname + "/../../releases/" + rootPackage.version + "/content");
 
 function log(message) {
   var text = new Date().toISOString() + " - " + message;
@@ -17,7 +17,7 @@ function log(message) {
 }
 
 try { mkdirp(targetRootPath); }
-catch (error) { log("Could not create superpowers-" + packageInfo.version + " folder"); process.exit(1); }
+catch (error) { log("Could not create " + targetRootPath); process.exit(1); }
 
 function shouldDistribute(file) {
   file = file.substring(sourceRootPath.length + 1).replace(/\\/g, "/");
@@ -52,12 +52,12 @@ readdirRecursive(sourceRootPath, function(err, files) {
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
     var relativeFile = file.substring(sourceRootPath.length + 1);
-    var targetPath = targetRootPath + "/app/" + relativeFile;
+    var targetPath = targetRootPath + "/" + relativeFile;
     mkdirp.sync(path.dirname(targetPath));
     fs.writeFileSync(targetPath, fs.readFileSync(file));
   }
 
-  var buildPaths = getBuildPaths(targetRootPath + "/app");
+  var buildPaths = getBuildPaths(targetRootPath);
   var execSuffix = process.platform == "win32";
 
   log("Pruning development-only packages from exported folders...");
@@ -72,11 +72,15 @@ readdirRecursive(sourceRootPath, function(err, files) {
       cb();
     });
   }, function() {
-    log("Updating the launcher's package.json and moving it to the root...");
-    var launcherPackage = fs.readFileSync(targetRootPath + "/app/launcher/package.json", { encoding: "utf8" });
-    launcherPackage = launcherPackage.replace("main.js", "app/launcher/main.js");
-    fs.writeFileSync(targetRootPath + "/package.json", launcherPackage, { encoding: "utf8" });
-    fs.unlinkSync(targetRootPath + "/app/launcher/package.json");
+    log("Updating package.json to start the launcher...");
+    rootPackage.name = "superpowers-launcher";
+    rootPackage.main =  "launcher/main.js";
+    delete rootPackage.devDependencies;
+    fs.writeFileSync(targetRootPath + "/package.json", JSON.stringify(rootPackage, null, 2), { encoding: "utf8" });
+
+    // Remove the launcher's own package.json
+    fs.unlinkSync(targetRootPath + "/launcher/package.json");
+
     log("Release complete: " + targetRootPath);
   });
 });
