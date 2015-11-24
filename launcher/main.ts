@@ -29,8 +29,9 @@ app.on("ready", function() {
   mainWindow = new BrowserWindow({
     title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
     width: 800, height: 480,
-    "auto-hide-menu-bar": true, frame: false, resizable: false
+    frame: false, resizable: false
   });
+  mainWindow.setMenuBarVisibility(false);
 
   mainWindow.loadUrl(`${__dirname}/public/index.html`);
 
@@ -45,10 +46,11 @@ ipc.on("new-server-window", (event: Event, address: string) => {
       title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
       width: 1000, height: 600,
       "min-width": 800, "min-height": 480,
-      "auto-hide-menu-bar": true, frame: false
+      frame: false
     }),
     address
   };
+  openServer.window.setMenuBarVisibility(false);
   openServersById[openServer.window.id] = openServer;
 
   openServer.window.on("closed", () => { delete openServersById[openServer.window.id]; });
@@ -154,13 +156,13 @@ interface ExportData {
   outputFolder: string; files: string[];
 }
 ipc.on("export", (event: { sender: any }, data: ExportData) => {
-  let exportWindow: GitHubElectron.BrowserWindow = new BrowserWindow({
+  let exportWindow = new BrowserWindow({
     title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
     width: 1000, height: 600,
     "min-width": 800, "min-height": 480,
-    "auto-hide-menu-bar": true,
     "node-integration": true
   });
+  exportWindow.setMenuBarVisibility(false);
   exportWindow.loadUrl(`${data.address}:${data.mainPort}/build.html`);
 
   let doExport = () => {
