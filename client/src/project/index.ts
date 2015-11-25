@@ -55,7 +55,7 @@ if (SupClient.isApp) {
   shell = nodeRequire("shell");
   BrowserWindow = remote.require("browser-window");
 
-  remote.getCurrentWindow().on("close", () => {
+  window.addEventListener("beforeunload", () => {
     if (runWindow != null) runWindow.removeListener("closed", onCloseRunWindow);
   });
 }
