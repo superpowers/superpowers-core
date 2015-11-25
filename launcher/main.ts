@@ -38,7 +38,7 @@ app.on("ready", function() {
   mainWindow.on("closed", function() { mainWindow = null; });
 });
 
-interface OpenServer { window: GitHubElectron.BrowserWindow; address: string; }
+interface OpenServer { window: GitHubElectron.BrowserWindow; address: string; closed: boolean; }
 let openServersById: { [id: string]: OpenServer } = {};
 ipc.on("new-server-window", (event: Event, address: string) => {
   let openServer = {
@@ -48,12 +48,17 @@ ipc.on("new-server-window", (event: Event, address: string) => {
       "min-width": 800, "min-height": 480,
       frame: false
     }),
-    address
+    address,
+    closed: false
   };
   openServer.window.setMenuBarVisibility(false);
   openServersById[openServer.window.id] = openServer;
 
-  openServer.window.on("closed", () => { delete openServersById[openServer.window.id]; });
+  openServer.window.on("close", () => {
+    openServer.closed = true;
+    openServer.window.webContents.removeAllListeners();
+    delete openServersById[openServer.window.id];
+  });
 
   let status = `Connecting to ${openServer.address}...`;
   openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
@@ -116,6 +121,7 @@ function connect(openServer: OpenServer) {
     // NOTE: As of Electron v0.35.1, if we don't wrap the call to loadUrl
     // in a callback, the app closes unexpectedly most of the time.
     setTimeout(() => {
+      if (openServer.closed) return;
       openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(error)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
     }, 0);
   }
