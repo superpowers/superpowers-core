@@ -33,7 +33,7 @@ app.on("ready", function() {
   });
   mainWindow.setMenuBarVisibility(false);
 
-  mainWindow.loadUrl(`${__dirname}/public/index.html`);
+  mainWindow.loadUrl(`file://${__dirname}/public/index.html`);
 
   mainWindow.on("closed", function() { mainWindow = null; });
 });
@@ -61,7 +61,7 @@ ipc.on("new-server-window", (event: Event, address: string) => {
   });
 
   let status = `Connecting to ${openServer.address}...`;
-  openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
+  openServer.window.loadUrl(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
 
   openServer.window.webContents.addListener("did-finish-load", onServerWindowLoaded);
   function onServerWindowLoaded(event: Event) {
@@ -122,7 +122,7 @@ function connect(openServer: OpenServer) {
     // in a callback, the app closes unexpectedly most of the time.
     setTimeout(() => {
       if (openServer.closed) return;
-      openServer.window.loadUrl(`${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(error)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
+      openServer.window.loadUrl(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(error)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
     }, 0);
   }
 }
