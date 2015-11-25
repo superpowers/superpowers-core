@@ -23,7 +23,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
       optionElt.value = typeLabels[typeName];
       this.typeSelectElt.appendChild(optionElt);
     }
-    this.typeSelectElt.size = 5;
+    this.typeSelectElt.size = 12;
     this.formElt.appendChild(this.typeSelectElt);
 
     // Name

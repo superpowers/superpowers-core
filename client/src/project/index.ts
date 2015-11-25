@@ -196,12 +196,20 @@ function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback
   async.each(Object.keys(editorPaths), (assetType, cb) => {
     let pluginPath = editorPaths[assetType];
     window.fetch(`${pluginsRoot}/${pluginPath}/editors/${assetType}/manifest.json`).then((response) => response.json()).then((manifest: EditorManifest) => {
+      manifest.pluginPath = pluginPath;
       data.editorsByAssetType[assetType] = manifest;
-      data.editorsByAssetType[assetType].pluginPath = pluginPath;
-      data.assetTypesByTitle[manifest.title] = assetType;
       cb();
     });
-  }, () => { callback(); });
+  }, () => {
+    let assetTypes = Object.keys(data.editorsByAssetType);
+    assetTypes.sort((a, b) => data.editorsByAssetType[a].title.localeCompare(data.editorsByAssetType[b].title));
+
+    for (let assetType of assetTypes) {
+      let manifest = data.editorsByAssetType[assetType];
+      data.assetTypesByTitle[manifest.title] = assetType;
+    }
+    callback();
+  });
 }
 
 function setupTools(toolPaths: { [name: string]: string; }, callback: Function) {
@@ -218,7 +226,11 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
     });
   }, () => {
     ui.toolsElt.innerHTML = "";
-    for (let toolName in data.toolsByName) setupTool(toolName);
+
+    let toolNames = Object.keys(data.toolsByName);
+    toolNames.sort((a, b) => data.toolsByName[a].title.localeCompare(data.toolsByName[b].title));
+
+    for (let toolName of toolNames) setupTool(toolName);
     callback();
   });
 }
