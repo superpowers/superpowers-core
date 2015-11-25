@@ -42,7 +42,6 @@ let ui: {
 
 let remote: GitHubElectron.Remote;
 let ipc: GitHubElectron.InProcess;
-let shell: GitHubElectron.Shell;
 /* tslint:disable:variable-name */
 let BrowserWindow: typeof GitHubElectron.BrowserWindow;
 /* tslint:enable:variable-name */
@@ -52,7 +51,6 @@ let runWindow: GitHubElectron.BrowserWindow;
 if (SupClient.isApp) {
   remote = nodeRequire("remote");
   ipc = nodeRequire("ipc");
-  shell = nodeRequire("shell");
   BrowserWindow = remote.require("browser-window");
 
   window.addEventListener("beforeunload", () => {
@@ -642,7 +640,6 @@ function onMessage(event: any) {
     case "hotkey": onMessageHotKey(event.data.content); break;
     case "openEntry": openEntry(event.data.id, event.data.options); break;
     case "openTool": openTool(event.data.name, event.data.options); break;
-    case "openLink": shell.openExternal(event.data.content); break;
     case "error": onWindowDevError(); break;
   }
 }
