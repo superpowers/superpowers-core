@@ -37,6 +37,7 @@ function shouldDistribute(file) {
   if (_.startsWith(file, "node_modules/gulp")) return false;
   if (_.startsWith(file, "launcher/src")) return false;
   if (_.startsWith(file, "bin")) return false;
+  if (_.startsWith(file, "workbench")) return false;
   if (_.startsWith(file, "builds") || _.startsWith(file, "projects")) return false;
   if (file === "config.json") return false;
   return true;
