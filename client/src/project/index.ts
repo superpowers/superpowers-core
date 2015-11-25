@@ -496,7 +496,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
   if (SupClient.isApp) {
     if (runWindow == null) {
       runWindow = new BrowserWindow({
-        title: "Superpowers", icon: `${window.location.origin}/images/icon.png`,
+        title: "Superpowers", icon: `public/images/icon.png`,
         width: 1000, height: 600,
         "min-width": 800, "min-height": 480
       });
