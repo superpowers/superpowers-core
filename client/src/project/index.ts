@@ -40,18 +40,16 @@ let ui: {
   toolsElt?: HTMLUListElement;
 } = {};
 
-let remote: GitHubElectron.Remote;
-let ipc: GitHubElectron.InProcess;
-/* tslint:disable:variable-name */
-let BrowserWindow: typeof GitHubElectron.BrowserWindow;
-/* tslint:enable:variable-name */
+// FIXME: Use propertype when Electron typings have been updated
+let electron: {
+  remote: GitHubElectron.Remote;
+  ipcRenderer: GitHubElectron.InProcess;
+};
 
 let runWindow: GitHubElectron.BrowserWindow;
 
 if (SupClient.isApp) {
-  remote = nodeRequire("remote");
-  ipc = nodeRequire("ipc");
-  BrowserWindow = remote.require("browser-window");
+  electron = nodeRequire("electron");
 
   window.addEventListener("beforeunload", () => {
     if (runWindow != null) runWindow.removeListener("closed", onCloseRunWindow);
@@ -493,7 +491,7 @@ function goToHub() { window.location.replace("/"); }
 function runProject(options: { debug: boolean; } = { debug: false }) {
   if (SupClient.isApp) {
     if (runWindow == null) {
-      runWindow = new BrowserWindow({
+      runWindow = new ((electron.remote as any).BrowserWindow as typeof GitHubElectron.BrowserWindow)({
         title: "Superpowers", icon: `public/images/icon.png`,
         width: 1000, height: 600,
         "min-width": 800, "min-height": 480
@@ -534,21 +532,21 @@ function stopProject() {
 }
 
 function publishProject() {
-  if (SupClient.isApp) ipc.send("choose-export-folder");
+  if (SupClient.isApp) electron.ipcRenderer.send("choose-export-folder");
 }
 
 if (SupClient.isApp) {
-  ipc.on("export-folder-failed", (message: string) => { alert(message); });
-  ipc.on("export-folder-success", (outputFolder: string) => {
+  electron.ipcRenderer.on("export-folder-failed", (message: string) => { alert(message); });
+  electron.ipcRenderer.on("export-folder-success", (outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
       let address = `${window.location.protocol}//${window.location.hostname}`;
-      ipc.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
+      electron.ipcRenderer.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
     });
   });
 }
 
 function showDevTools() {
-  if (remote != null) remote.getCurrentWindow().toggleDevTools();
+  if (electron != null) electron.remote.getCurrentWindow().toggleDevTools();
 }
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
@@ -858,14 +856,14 @@ function onOpenInNewWindowClick(event: any) {
     let address = `${window.location.origin}/systems/${data.systemName}` +
     `/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
     `?project=${SupClient.query.project}&asset=${entry.id}`;
-    if (SupClient.isApp) ipc.send("new-standalone-window", address);
+    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address);
     else window.open(address);
   } else {
     let name = event.target.parentElement.dataset.name;
     let address = `${window.location.origin}/systems/${data.systemName}` +
     `/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/` +
     `?project=${SupClient.query.project}`;
-    if (SupClient.isApp) ipc.send("new-standalone-window", address);
+    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address);
     else window.open(address);
   }
 }
