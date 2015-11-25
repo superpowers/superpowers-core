@@ -24,24 +24,26 @@ html
       a.link(href="#")
     
     script.
-      var electron = require("electron");
-      var statusElt = document.querySelector(".status");
-      var linkElt = document.querySelector(".link");
-      var linkTarget = null;
-      
-      linkElt.addEventListener("click", function(event) {
-        event.preventDefault();
-        if (linkTarget != null) electron.shell.showItemInFolder(linkTarget);
-      });
-
-      electron.ipcRenderer.on("setText", function(event, data) {
-        if (data.title != null) document.title = data.title;
-        statusElt.textContent = data.text;
-        if (data.showItemInFolder != null) {
-          linkElt.textContent = data.showItemInFolder.text;
-          linkTarget = data.showItemInFolder.target;
-        } else {
-          linkElt.textContent = "";
-          linkTarget = null;
-        }
-      });
+      if (window.navigator.userAgent.indexOf("Electron") !== -1) {
+        var electron = require("electron");
+        var statusElt = document.querySelector(".status");
+        var linkElt = document.querySelector(".link");
+        var linkTarget = null;
+        
+        linkElt.addEventListener("click", function(event) {
+          event.preventDefault();
+          if (linkTarget != null) electron.shell.showItemInFolder(linkTarget);
+        });
+  
+        electron.ipcRenderer.on("setText", function(event, data) {
+          if (data.title != null) document.title = data.title;
+          statusElt.textContent = data.text;
+          if (data.showItemInFolder != null) {
+            linkElt.textContent = data.showItemInFolder.text;
+            linkTarget = data.showItemInFolder.target;
+          } else {
+            linkElt.textContent = "";
+            linkTarget = null;
+          }
+        });
+      }
