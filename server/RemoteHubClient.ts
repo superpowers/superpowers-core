@@ -52,45 +52,48 @@ export default class RemoteHubClient extends BaseRemoteClient {
     }
 
     let projectPath = path.join(paths.projects, projectFolder);
-    fs.mkdirSync(path.join(projectPath, "public"));
-    fs.mkdirSync(path.join(projectPath, "assets"));
-    fs.mkdirSync(path.join(projectPath, "trashedAssets"));
-    fs.mkdirSync(path.join(projectPath, "rooms"));
-    fs.mkdirSync(path.join(projectPath, "resources"));
+    async.each(["public", "assets", "trashedAssets", "rooms", "resources"], (folder, cb) => {
+      fs.mkdir(path.join(projectPath, folder), cb);
+    }, (err) => {
+      if (err != null) { callback(`The project could not be created, folders creation has failed: ${err.message}`); return; }
 
-    let sortedIndex = 0;
-    for (let item of this.server.data.projects.pub) {
-      if (SupCore.Data.Projects.sort(manifest, item) < 0) break;
-      sortedIndex++;
-    }
+      let sortedIndex = 0;
+      for (let item of this.server.data.projects.pub) {
+        if (SupCore.Data.Projects.sort(manifest, item) < 0) break;
+        sortedIndex++;
+      }
 
-    this.server.data.projects.add(manifest, sortedIndex, (err: string, actualIndex: number) => {
-      if (err != null) { callback(err); return; }
+      this.server.data.projects.add(manifest, sortedIndex, (err: string, actualIndex: number) => {
+        if (err != null) { callback(err); return; }
 
-      let writeManifest = (callback: (err?: NodeJS.ErrnoException) => any) => {
-        let manifestJSON = JSON.stringify(manifest, null, 2);
-        fs.writeFile(path.join(projectPath, "manifest.json"), manifestJSON, { encoding: "utf8" }, callback);
-      };
+        let writeManifest = (callback: (err?: NodeJS.ErrnoException) => any) => {
+          let manifestJSON = JSON.stringify(manifest, null, 2);
+          fs.writeFile(path.join(projectPath, "manifest.json"), manifestJSON, { encoding: "utf8" }, callback);
+        };
 
-      let writeEntries = (callback: (err?: NodeJS.ErrnoException) => any) => {
-        let entriesJSON = JSON.stringify([], null, 2);
-        fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
-      };
+        let writeEntries = (callback: (err?: NodeJS.ErrnoException) => any) => {
+          let entriesJSON = JSON.stringify([], null, 2);
+          fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
+        };
 
-      let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, callback); };
+        let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, callback); };
 
-      async.series([ writeManifest, writeEntries, this.writeIcon.bind(this, projectPath, details.icon), loadProject ], (err) => {
-        if (err != null) { SupCore.log(`Error while creating project:\n${err}`); return; }
+        async.series([ writeManifest, writeEntries, this.writeIcon.bind(this, projectPath, details.icon), loadProject ], (err) => {
+          if (err != null) { SupCore.log(`Error while creating project:\n${err}`); return; }
 
-        this.server.io.in("sub:projects").emit("add:projects", manifest, actualIndex);
-        callback(null, manifest.id);
+          this.server.io.in("sub:projects").emit("add:projects", manifest, actualIndex);
+          callback(null, manifest.id);
+        });
       });
     });
   };
 
   private writeIcon = (projectPath: string, icon: Buffer, callback: (err?: NodeJS.ErrnoException) => any) => {
     if (icon == null) { callback(); return; }
-    fs.writeFile(path.join(projectPath, "public/icon.png"), icon, callback);
+    fs.mkdir(path.join(projectPath, "public"), (err) => {
+      if (err != null && err.code !== "EEXIST") { callback(err); return; }
+      fs.writeFile(path.join(projectPath, "public/icon.png"), icon, callback);
+    });
   };
 
   private onEditProject = (projectId: string, details: ProjectDetails, callback: (err: string) => any) => {

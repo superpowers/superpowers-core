@@ -13,7 +13,6 @@ export default function(server: ProjectServer, callback: (err: Error) => any) {
 
 function migrateTo1(server: ProjectServer, callback: (err: Error) => any) {
   const assetsPath = path.join(server.projectPath, "assets");
-  const trashedAssetsPath = path.join(server.projectPath, "trashedAssets");
 
   async.series([
     // Delete ArcadePhysics2DSettingsResource, removed in Superpowers v0.13
@@ -22,7 +21,6 @@ function migrateTo1(server: ProjectServer, callback: (err: Error) => any) {
     (cb) => { fs.rmdir(path.join(server.projectPath, "resources/arcadePhysics2DSettings"), (err) => { cb(); }); },
 
     // Move trashed assets to "trashedAssets" folder
-    (cb) => { fs.mkdir(trashedAssetsPath, (err) => { cb(); }); },
     (cb) => {
       fs.readdir(assetsPath, (err, assetFolders) => {
         if (err != null) throw err;
