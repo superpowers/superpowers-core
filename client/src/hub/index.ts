@@ -1,5 +1,5 @@
 import "../window";
-import CreateOrEditProjectDialog from "../dialogs/CreateOrEditProjectDialog";
+import CreateOrEditProjectDialog, { SystemsData } from "../dialogs/CreateOrEditProjectDialog";
 import * as async from "async";
 
 /* tslint:disable */
@@ -8,8 +8,7 @@ let TreeView = require("dnd-tree-view");
 
 let data: {
   projects: SupCore.Data.Projects;
-  systemTitlesByName: { [name: string]: string; }
-  systemsByProjectType: { [title: string]: string; }
+  systemsByName: SystemsData;
 } = {} as any;
 
 let ui: { projectsTreeView?: any } = {};
@@ -48,15 +47,15 @@ interface SystemManifest {
 }
 
 function loadSystemsInfo(callback: Function) {
-  data.systemTitlesByName = {};
-  data.systemsByProjectType = {};
+  data.systemsByName = {};
 
   window.fetch("/systems.json").then((response) => response.json()).then((systemsInfo: SupCore.SystemsInfo) => {
     async.each(systemsInfo.list, (systemName, cb) => {
       window.fetch(`/systems/${systemName}/manifest.json`).then((response) => response.json()).then((manifest: SystemManifest) => {
-        data.systemTitlesByName[systemName] = manifest.title;
-        data.systemsByProjectType[`${manifest.title} project`] = systemName;
-        cb();
+        window.fetch(`/systems/${systemName}/templates.json`).then((response) => response.json()).then((templatesByName) => {
+          data.systemsByName[systemName] = { title: manifest.title, templatesByName };
+          cb();
+        });
       });
     }, () => { callback(); });
   });
@@ -160,7 +159,7 @@ function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
 
   let projectTypeSpan = document.createElement("span");
   projectTypeSpan.className = "project-type";
-  projectTypeSpan.textContent = data.systemTitlesByName[manifest.system];
+  projectTypeSpan.textContent = data.systemsByName[manifest.system].title;
   detailsElt.appendChild(projectTypeSpan);
 
   return liElt;
@@ -185,7 +184,7 @@ function onProjectActivate() {
 let autoOpenProject = true;
 function onNewProjectClick() {
   /* tslint:disable:no-unused-expression */
-  new CreateOrEditProjectDialog(data.systemsByProjectType, { autoOpen: autoOpenProject }, (project, open) => {
+  new CreateOrEditProjectDialog(data.systemsByName, { autoOpen: autoOpenProject }, (project, open) => {
     /* tslint:enable:no-unused-expression */
     if (project == null) return;
     autoOpenProject = open;
@@ -213,7 +212,7 @@ function onEditProjectClick() {
   let existingProject = data.projects.byId[selectedNode.dataset.id];
 
   /* tslint:disable:no-unused-expression */
-  new CreateOrEditProjectDialog(data.systemsByProjectType, { existingProject }, (editedProject) => {
+  new CreateOrEditProjectDialog(data.systemsByName, { existingProject }, (editedProject) => {
     /* tslint:enable:no-unused-expression */
     if (editedProject == null) return;
 

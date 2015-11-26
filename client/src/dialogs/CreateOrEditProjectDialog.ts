@@ -14,20 +14,33 @@ interface NewProjectCallback {
   }, open: boolean): any;
 }
 
+export interface SystemsData {
+  [value: string]: {
+    title: string;
+    templatesByName: { [name: string]: { title: string; description: string; } };
+  };
+}
+
 export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDialog {
+  private systemsByName: SystemsData;
+
   private nameInputElt: HTMLInputElement;
   private descriptionInputElt: HTMLTextAreaElement;
   private iconInputElt: HTMLInputElement;
   private systemSelectElt: HTMLSelectElement;
+  private templateSelectElt: HTMLSelectElement;
+  private templateDescriptionElt: HTMLInputElement;
   private iconFile: File = null;
   private iconElt: HTMLImageElement;
 
   private existingProject: ExistingProject;
   private openCheckboxElt: HTMLInputElement;
 
-  constructor(systemLabels: { [value: string]: string; },
+  constructor(systemsByName: SystemsData,
   options: { autoOpen?: boolean, existingProject?: ExistingProject }, private callback: NewProjectCallback) {
     super();
+
+    this.systemsByName = systemsByName;
 
     if (options == null) options = {};
     if (options.autoOpen == null) options.autoOpen = true;
@@ -99,27 +112,47 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     this.descriptionInputElt.addEventListener("keypress", this.onFieldKeyDown);
     textContainerElt.appendChild(this.descriptionInputElt);
 
-    // System
-    this.systemSelectElt = document.createElement("select");
+    // Down
+    let downElt = document.createElement("div");
+    downElt.style.display = "flex";
+    downElt.style.alignItems = "center";
+
     if (options.existingProject == null) {
-      for (let systemName in systemLabels) {
+      // System
+      this.systemSelectElt = document.createElement("select");
+      for (let systemName in systemsByName) {
         let optionElt = document.createElement("option");
-        optionElt.textContent = systemName;
-        optionElt.value = systemLabels[systemName];
+        optionElt.value = systemName;
+        optionElt.textContent = systemsByName[systemName].title;
         this.systemSelectElt.appendChild(optionElt);
       }
       this.systemSelectElt.size = 5;
       this.formElt.appendChild(this.systemSelectElt);
-    }
 
-    // Auto-open checkbox
-    let downElt = document.createElement("div");
-    downElt.style.display = "flex";
-    downElt.style.alignItems = "center";
-    this.formElt.appendChild(downElt);
+      // Template
+      let templateRowElt = document.createElement("div");
+      templateRowElt.style.display = "flex";
+      this.formElt.appendChild(templateRowElt);
 
-    this.openCheckboxElt = document.createElement("input");
-    if (options.existingProject == null) {
+      let templateLabelElt = document.createElement("label");
+      templateLabelElt.style.marginRight = "0.5em";
+      templateLabelElt.style.marginTop = "0.2em";
+      templateLabelElt.textContent = "Template";
+      templateRowElt.appendChild(templateLabelElt);
+
+      this.templateSelectElt = document.createElement("select");
+      this.templateSelectElt.style.flex = "1";
+      templateRowElt.appendChild(this.templateSelectElt);
+      this.addTemplateOption("empty", "Empty");
+
+      this.templateDescriptionElt = document.createElement("input");
+      this.templateDescriptionElt.readOnly = true;
+      this.formElt.appendChild(this.templateDescriptionElt);
+
+      this.onSystemChange();
+
+      // Auto-open checkbox
+      this.openCheckboxElt = document.createElement("input");
       this.openCheckboxElt.id = "auto-open-checkbox";
       this.openCheckboxElt.type = "checkbox";
       this.openCheckboxElt.checked = options.autoOpen;
@@ -133,6 +166,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       openLabelElt.style.margin = "0";
       downElt.appendChild(openLabelElt);
     }
+
+    this.formElt.appendChild(downElt);
 
     // Buttons
     let buttonsElt = document.createElement("div");
@@ -162,11 +197,15 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     if (options.existingProject != null) {
       this.nameInputElt.value = options.existingProject.name;
       this.descriptionInputElt.value = options.existingProject.description;
-      this.systemSelectElt.value = options.existingProject.system;
-    }
+    } else {
+      this.systemSelectElt.addEventListener("change", this.onSystemChange);
+      this.systemSelectElt.addEventListener("keydown", this.onFieldKeyDown);
+      this.systemSelectElt.addEventListener("dblclick", () => { this.submit(); });
 
-    this.systemSelectElt.addEventListener("keydown", this.onFieldKeyDown);
-    this.systemSelectElt.addEventListener("dblclick", () => { this.submit(); });
+      this.templateSelectElt.addEventListener("change", this.onTemplateChange);
+      this.templateSelectElt.addEventListener("keydown", this.onFieldKeyDown);
+      this.templateSelectElt.addEventListener("dblclick", () => { this.submit(); });
+    }
 
     this.nameInputElt.focus();
   }
@@ -177,7 +216,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     let project = {
       name: this.nameInputElt.value,
       description: this.descriptionInputElt.value,
-      system: this.systemSelectElt.value,
+      system: this.systemSelectElt != null ? this.systemSelectElt.value : null,
+      template: this.templateSelectElt != null ? this.templateSelectElt.value : null,
       icon: this.iconFile
     };
 
@@ -198,9 +238,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     } else {
       this.iconFile = this.iconInputElt.files[0];
       let reader = new FileReader();
-      reader.addEventListener("load", (event) => {
-        this.iconElt.src = (<any>event.target).result;
-      });
+      reader.addEventListener("load", (event) => { this.iconElt.src = (<any>event.target).result; });
       reader.readAsDataURL(this.iconFile);
     }
   };
@@ -210,5 +248,29 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       event.preventDefault();
       this.submit();
     }
+  };
+
+  private addTemplateOption(name: string, title: string) {
+    let optionElt = document.createElement("option");
+    optionElt.value = name;
+    optionElt.textContent = title;
+    this.templateSelectElt.appendChild(optionElt);
+  }
+
+  private onSystemChange = () => {
+    while (this.templateSelectElt.children.length > 1) {
+      let childElt = this.templateSelectElt.children[1];
+      childElt.parentElement.removeChild(childElt);
+    }
+
+    let templatesByName = this.systemsByName[this.systemSelectElt.value].templatesByName;
+    for (let templateName in templatesByName)
+      this.addTemplateOption(templateName, templatesByName[templateName].title);
+    this.onTemplateChange();
+  };
+
+  private onTemplateChange = () => {
+    let template = this.systemsByName[this.systemSelectElt.value].templatesByName[this.templateSelectElt.value];
+    this.templateDescriptionElt.value = template != null ? template.description : "An empty template to start fresh";
   };
 }
