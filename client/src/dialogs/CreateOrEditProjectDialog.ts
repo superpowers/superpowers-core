@@ -217,7 +217,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       name: this.nameInputElt.value,
       description: this.descriptionInputElt.value,
       system: this.systemSelectElt != null ? this.systemSelectElt.value : null,
-      template: this.templateSelectElt != null ? this.templateSelectElt.value : null,
+      template: this.templateSelectElt != null && this.templateSelectElt.value !== "empty" ? this.templateSelectElt.value : null,
       icon: this.iconFile
     };
 
