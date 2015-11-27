@@ -19,36 +19,38 @@ function log(message) {
 try { mkdirp(targetRootPath); }
 catch (error) { log("Could not create " + targetRootPath); process.exit(1); }
 
-function shouldDistribute(file) {
+var templateRegex = /^systems\/.*\/templates\//;
+
+function shouldIgnore(file) {
   file = file.substring(sourceRootPath.length + 1).replace(/\\/g, "/");
-  if (file[0] === "." || file.indexOf("/.") !== -1) return false;
-  if (_.endsWith(file, "gulpfile.js") || _.endsWith(file, "tsconfig.json")) return false;
-  if (_.endsWith(file, "launcher.cmd")) return false;
-  if (_.endsWith(file, ".orig")) return false;
-  if (_.endsWith(file, ".jade")) return false;
-  if (_.endsWith(file, ".styl")) return false;
-  if (_.endsWith(file, ".ts") && file.indexOf("typings/") === -1 && file.indexOf("node_modules/") === -1) return false;
-  if (_.startsWith(file, "client")) return false;
-  if (_.startsWith(file, "scripts")) return false;
-  if (_.startsWith(file, "node_modules/browserify")) return false;
-  if (_.startsWith(file, "node_modules/brfs")) return false;
-  if (_.startsWith(file, "node_modules/vinyl-source-stream")) return false;
-  if (_.startsWith(file, "node_modules/watchify")) return false;
-  if (_.startsWith(file, "node_modules/gulp")) return false;
-  if (_.startsWith(file, "launcher/src")) return false;
-  if (_.startsWith(file, "bin")) return false;
-  if (_.startsWith(file, "workbench")) return false;
-  if (_.startsWith(file, "builds") || _.startsWith(file, "projects")) return false;
-  if (file === "config.json") return false;
-  return true;
+  if (file[0] === "." || file.indexOf("/.") !== -1) return true;
+  if (_.endsWith(file, ".orig")) return true;
+
+  if (templateRegex.test(file)) { console.log(file); return false; }
+  if (_.endsWith(file, "gulpfile.js") || _.endsWith(file, "tsconfig.json")) return true;
+  if (_.endsWith(file, "launcher.cmd")) return true;
+  if (_.endsWith(file, ".jade")) return true;
+  if (_.endsWith(file, ".styl")) return true;
+  if (_.endsWith(file, ".ts") && file.indexOf("typings/") === -1 && file.indexOf("node_modules/") === -1) return true;
+  if (_.startsWith(file, "client")) return true;
+  if (_.startsWith(file, "scripts")) return true;
+  if (_.startsWith(file, "node_modules/browserify")) return true;
+  if (_.startsWith(file, "node_modules/brfs")) return true;
+  if (_.startsWith(file, "node_modules/vinyl-source-stream")) return true;
+  if (_.startsWith(file, "node_modules/watchify")) return true;
+  if (_.startsWith(file, "node_modules/gulp")) return true;
+  if (_.startsWith(file, "launcher/src")) return true;
+  if (_.startsWith(file, "bin")) return true;
+  if (_.startsWith(file, "workbench")) return true;
+  if (_.startsWith(file, "builds") || _.startsWith(file, "projects")) return true;
+  if (file === "config.json") return true;
+  return false;
 };
 
 log("Copying all files to " + targetRootPath + "...");
 
-readdirRecursive(sourceRootPath, function(err, files) {
+readdirRecursive(sourceRootPath, [ shouldIgnore ], function(err, files) {
   if (err != null) { log(err); return; }
-
-  files = _.filter(files, shouldDistribute);
 
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
