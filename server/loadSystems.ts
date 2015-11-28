@@ -118,8 +118,8 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
 
       // Collect plugin info
       pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);
-      if (fs.existsSync(`${pluginPath}/editors`)) {
-        for (let editorName of fs.readdirSync(`${pluginPath}/editors`)) {
+      if (fs.existsSync(`${pluginPath}/public/editors`)) {
+        for (let editorName of fs.readdirSync(`${pluginPath}/public/editors`)) {
           if (SupCore.system.data.assetClasses[editorName] != null) {
             pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
           } else {
