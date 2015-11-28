@@ -33,8 +33,17 @@ function startServer() {
   let serverPath = path.join(path.resolve(path.dirname(nodeProcess.mainModule.filename)), "../../server/index.js");
 
   let serverEnv: { [key: string]: string; } = {};
-  for (let key in nodeProcess.env) serverEnv[key] = nodeProcess.env[key];
+
+  // NOTE: It would be nice to simply copy all environment variables
+  // but somehow, this prevents Electron 0.35.1 from starting the server
+  // for (let key in nodeProcess.env) serverEnv[key] = nodeProcess.env[key];
+
+  // So instead, we'll just copy the environment variables we definitely need
   serverEnv["ATOM_SHELL_INTERNAL_RUN_AS_NODE"] = "1";
+  if (nodeProcess.env["NODE_ENV"] != null) serverEnv["NODE_ENV"] = nodeProcess.env["NODE_ENV"];
+  if (nodeProcess.env["APPDATA"] != null) serverEnv["APPDATA"] = nodeProcess.env["APPDATA"];
+  if (nodeProcess.env["HOME"] != null) serverEnv["HOME"] = nodeProcess.env["HOME"];
+  if (nodeProcess.env["XDG_DATA_HOME"] != null) serverEnv["XDG_DATA_HOME"] = nodeProcess.env["XDG_DATA_HOME"];
 
   serverProcess = childProcess.fork(serverPath, { silent: true, env: serverEnv });
   serverProcess.on("exit", () => {
