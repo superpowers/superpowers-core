@@ -31,7 +31,12 @@ function startServer() {
   startStopServerButton.textContent = "Stop";
 
   let serverPath = path.join(path.resolve(path.dirname(nodeProcess.mainModule.filename)), "../../server/index.js");
-  serverProcess = childProcess.fork(serverPath, { silent: true, env: { "ATOM_SHELL_INTERNAL_RUN_AS_NODE": 1 } });
+
+  let serverEnv: { [key: string]: string; } = {};
+  for (let key of nodeProcess.env) serverEnv[key] = nodeProcess.env[key];
+  serverEnv["ATOM_SHELL_INTERNAL_RUN_AS_NODE"] = "1";
+
+  serverProcess = childProcess.fork(serverPath, { silent: true, env: serverEnv });
   serverProcess.on("exit", () => {
     serverProcess = null;
     startStopServerButton.disabled = false;

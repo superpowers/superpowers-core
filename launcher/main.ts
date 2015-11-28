@@ -32,9 +32,7 @@ app.on("ready", function() {
     frame: false, resizable: false
   });
   mainWindow.setMenuBarVisibility(false);
-
   mainWindow.loadUrl(`file://${__dirname}/public/index.html`);
-
   mainWindow.on("closed", function() { mainWindow = null; });
 });
 
