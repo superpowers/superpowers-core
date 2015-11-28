@@ -27,8 +27,9 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
   private nameInputElt: HTMLInputElement;
   private descriptionInputElt: HTMLTextAreaElement;
   private iconInputElt: HTMLInputElement;
-  private systemSelectElt: HTMLSelectElement;
-  private templateSelectElt: HTMLSelectElement;
+
+  private projectType: { systemName: string; templateName: string; };
+  private projectTypeSelectElt: HTMLSelectElement;
   private templateDescriptionElt: HTMLInputElement;
   private iconFile: File = null;
   private iconElt: HTMLImageElement;
@@ -118,38 +119,38 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     downElt.style.alignItems = "center";
 
     if (options.existingProject == null) {
-      // System
-      this.systemSelectElt = document.createElement("select");
+      // Project type
+      this.projectTypeSelectElt = document.createElement("select");
       for (let systemName in systemsByName) {
-        let optionElt = document.createElement("option");
-        optionElt.value = systemName;
-        optionElt.textContent = systemsByName[systemName].title;
-        this.systemSelectElt.appendChild(optionElt);
+        let systemInfo = systemsByName[systemName];
+
+        let optGroupElt = document.createElement("optgroup");
+        optGroupElt.label = systemInfo.title;
+        this.projectTypeSelectElt.appendChild(optGroupElt);
+
+        let emptyOptionElt = document.createElement("option");
+        emptyOptionElt.value = `${systemName}.empty`;
+        emptyOptionElt.textContent = "Empty project";
+        optGroupElt.appendChild(emptyOptionElt);
+
+        for (let templateName in systemInfo.templatesByName) {
+          let optionElt = document.createElement("option");
+          optionElt.value = `${systemName}.${templateName}`;
+          optionElt.textContent = systemInfo.templatesByName[templateName].title;
+          optGroupElt.appendChild(optionElt);
+        }
       }
-      this.systemSelectElt.size = 5;
-      this.formElt.appendChild(this.systemSelectElt);
+      this.formElt.appendChild(this.projectTypeSelectElt);
 
-      // Template
-      let templateRowElt = document.createElement("div");
-      templateRowElt.style.display = "flex";
-      this.formElt.appendChild(templateRowElt);
-
-      let templateLabelElt = document.createElement("label");
-      templateLabelElt.style.marginRight = "0.5em";
-      templateLabelElt.style.marginTop = "0.2em";
-      templateLabelElt.textContent = "Template";
-      templateRowElt.appendChild(templateLabelElt);
-
-      this.templateSelectElt = document.createElement("select");
-      this.templateSelectElt.style.flex = "1";
-      templateRowElt.appendChild(this.templateSelectElt);
-      this.addTemplateOption("empty", "Empty");
-
+      // Template description
       this.templateDescriptionElt = document.createElement("input");
       this.templateDescriptionElt.readOnly = true;
+      this.templateDescriptionElt.style.backgroundColor = "#eee";
+      this.templateDescriptionElt.style.border = "1px solid #ccc";
+      this.templateDescriptionElt.style.padding = "0.5em";
+      this.templateDescriptionElt.style.color = "#444";
       this.formElt.appendChild(this.templateDescriptionElt);
-
-      this.onSystemChange();
+      this.onProjectTypeChange();
 
       // Auto-open checkbox
       this.openCheckboxElt = document.createElement("input");
@@ -198,13 +199,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       this.nameInputElt.value = options.existingProject.name;
       this.descriptionInputElt.value = options.existingProject.description;
     } else {
-      this.systemSelectElt.addEventListener("change", this.onSystemChange);
-      this.systemSelectElt.addEventListener("keydown", this.onFieldKeyDown);
-      this.systemSelectElt.addEventListener("dblclick", () => { this.submit(); });
-
-      this.templateSelectElt.addEventListener("change", this.onTemplateChange);
-      this.templateSelectElt.addEventListener("keydown", this.onFieldKeyDown);
-      this.templateSelectElt.addEventListener("dblclick", () => { this.submit(); });
+      this.projectTypeSelectElt.addEventListener("change", this.onProjectTypeChange);
+      this.projectTypeSelectElt.addEventListener("keydown", this.onFieldKeyDown);
     }
 
     this.nameInputElt.focus();
@@ -213,11 +209,15 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
   submit() {
     if (!super.submit()) return false;
 
+    let systemName: string = null;
+    let templateName: string = null;
+    if (this.projectTypeSelectElt != null) [ systemName, templateName ] = this.projectTypeSelectElt.value.split(".");
+
     let project = {
       name: this.nameInputElt.value,
       description: this.descriptionInputElt.value,
-      system: this.systemSelectElt != null ? this.systemSelectElt.value : null,
-      template: this.templateSelectElt != null && this.templateSelectElt.value !== "empty" ? this.templateSelectElt.value : null,
+      system: systemName,
+      template: templateName !== "empty" ? templateName : null,
       icon: this.iconFile
     };
 
@@ -250,27 +250,34 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     }
   };
 
-  private addTemplateOption(name: string, title: string) {
-    let optionElt = document.createElement("option");
-    optionElt.value = name;
-    optionElt.textContent = title;
-    this.templateSelectElt.appendChild(optionElt);
-  }
-
-  private onSystemChange = () => {
-    while (this.templateSelectElt.children.length > 1) {
-      let childElt = this.templateSelectElt.children[1];
-      childElt.parentElement.removeChild(childElt);
+  private onProjectTypeChange = () => {
+    if (this.projectType != null) {
+      let path = `${this.projectType.systemName}.${this.projectType.templateName}`;
+      let oldOptionElt = this.projectTypeSelectElt.querySelector(`option[value="${path}"]`);
+      let oldTemplate = this.getTemplate(this.projectType.systemName, this.projectType.templateName);
+      oldOptionElt.textContent =  oldTemplate.title;
     }
 
-    let templatesByName = this.systemsByName[this.systemSelectElt.value].templatesByName;
-    for (let templateName in templatesByName)
-      this.addTemplateOption(templateName, templatesByName[templateName].title);
-    this.onTemplateChange();
+    let [ systemName, templateName ] = this.projectTypeSelectElt.value.split(".");
+    this.projectType = { systemName, templateName };
+
+    let template = this.getTemplate(systemName, templateName);
+    this.projectTypeSelectElt.querySelector("option:checked").textContent = `${this.systemsByName[systemName].title} — ${template.title}`;
+    this.templateDescriptionElt.value = template.description;
   };
 
-  private onTemplateChange = () => {
-    let template = this.systemsByName[this.systemSelectElt.value].templatesByName[this.templateSelectElt.value];
-    this.templateDescriptionElt.value = template != null ? template.description : "An empty template to start fresh";
-  };
+  private getTemplate(systemName: string, templateName: string) {
+    let system = this.systemsByName[systemName];
+
+    let template: { title: string; description: string; };
+    if (templateName !== "empty") template = system.templatesByName[templateName];
+    else {
+      template = {
+        title: "Empty project",
+        description: "An empty project to start from scratch"
+      };
+    }
+
+    return template;
+  }
 }
