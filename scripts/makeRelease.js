@@ -26,7 +26,7 @@ function shouldIgnore(file) {
   if (file[0] === "." || file.indexOf("/.") !== -1) return true;
   if (_.endsWith(file, ".orig")) return true;
 
-  if (templateRegex.test(file)) { console.log(file); return false; }
+  if (templateRegex.test(file)) return false;
   if (_.endsWith(file, "gulpfile.js") || _.endsWith(file, "tsconfig.json")) return true;
   if (_.endsWith(file, "launcher.cmd")) return true;
   if (_.endsWith(file, ".jade")) return true;
