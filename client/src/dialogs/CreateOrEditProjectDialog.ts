@@ -17,6 +17,7 @@ interface NewProjectCallback {
 export interface SystemsData {
   [value: string]: {
     title: string;
+    description: string;
     templatesByName: { [name: string]: { title: string; description: string; } };
   };
 }
@@ -30,7 +31,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
 
   private projectType: { systemName: string; templateName: string; };
   private projectTypeSelectElt: HTMLSelectElement;
-  private templateDescriptionElt: HTMLInputElement;
+  private systemDescriptionElt: HTMLDivElement;
+  private templateDescriptionElt: HTMLDivElement;
   private iconFile: File = null;
   private iconElt: HTMLImageElement;
 
@@ -143,13 +145,22 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       this.formElt.appendChild(this.projectTypeSelectElt);
 
       // Template description
-      this.templateDescriptionElt = document.createElement("input");
-      this.templateDescriptionElt.readOnly = true;
-      this.templateDescriptionElt.style.backgroundColor = "#eee";
-      this.templateDescriptionElt.style.border = "1px solid #ccc";
-      this.templateDescriptionElt.style.padding = "0.5em";
-      this.templateDescriptionElt.style.color = "#444";
-      this.formElt.appendChild(this.templateDescriptionElt);
+      let descriptionContainerElt = document.createElement("div");
+      descriptionContainerElt.style.backgroundColor = "#eee";
+      descriptionContainerElt.style.border = "1px solid #ccc";
+      descriptionContainerElt.style.padding = "0.5em";
+      descriptionContainerElt.style.color = "#444";
+      descriptionContainerElt.style.marginBottom = "0.5em";
+
+      this.templateDescriptionElt = document.createElement("div");
+      this.templateDescriptionElt.className = "template-description";
+      descriptionContainerElt.appendChild(this.templateDescriptionElt);
+
+      this.systemDescriptionElt = document.createElement("div");
+      this.systemDescriptionElt.className = "system-description";
+      descriptionContainerElt.appendChild(this.systemDescriptionElt);
+
+      this.formElt.appendChild(descriptionContainerElt);
       this.onProjectTypeChange();
 
       // Auto-open checkbox
@@ -261,9 +272,15 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     let [ systemName, templateName ] = this.projectTypeSelectElt.value.split(".");
     this.projectType = { systemName, templateName };
 
+    let system = this.systemsByName[systemName];
     let template = this.getTemplate(systemName, templateName);
-    this.projectTypeSelectElt.querySelector("option:checked").textContent = `${this.systemsByName[systemName].title} — ${template.title}`;
-    this.templateDescriptionElt.value = template.description;
+    this.projectTypeSelectElt.querySelector("option:checked").textContent = `${system.title} — ${template.title}`;
+    this.templateDescriptionElt.textContent = template.description;
+
+    this.systemDescriptionElt.textContent = system.description;
+    if (system.description.length === 0 && template.description.length === 0) {
+      this.systemDescriptionElt.textContent = "(No description provided)";
+    }
   };
 
   private getTemplate(systemName: string, templateName: string) {
@@ -274,7 +291,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     else {
       template = {
         title: "Empty project",
-        description: "An empty project to start from scratch"
+        description: "An empty project to start from scratch."
       };
     }
 

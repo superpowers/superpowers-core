@@ -44,6 +44,7 @@ start();
 
 interface SystemManifest {
   title: string;
+  description: string;
 }
 
 function loadSystemsInfo(callback: Function) {
@@ -53,7 +54,11 @@ function loadSystemsInfo(callback: Function) {
     async.each(systemsInfo.list, (systemName, cb) => {
       window.fetch(`/systems/${systemName}/manifest.json`).then((response) => response.json()).then((manifest: SystemManifest) => {
         window.fetch(`/systems/${systemName}/templates.json`).then((response) => response.json()).then((templatesByName) => {
-          data.systemsByName[systemName] = { title: manifest.title, templatesByName };
+          data.systemsByName[systemName] = {
+            title: manifest.title,
+            description: (manifest.description != null) ? manifest.description : "",
+            templatesByName
+          };
           cb();
         });
       });
