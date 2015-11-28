@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
+import * as SupCore from "../SupCore";
 
 import * as yargs from "yargs";
 
@@ -17,13 +18,16 @@ if (argv["data-path"] != null) {
     switch (process.platform) {
       case "win32":
         if (process.env.APPDATA != null) userData = path.join(process.env.APPDATA, "Superpowers");
+        else SupCore.log("Warning: Could not find APPDATA environment variable.");
         break;
       case "darwin":
         if (process.env.HOME != null) userData = path.join(process.env.HOME, "Library", "Superpowers");
+        else SupCore.log("Warning: Could not find HOME environment variable.");
         break;
       default:
         if (process.env.XDG_DATA_HOME != null) userData = path.join(process.env.XDG_DATA_HOME, "Superpowers");
         else if (process.env.HOME != null) userData = path.join(process.env.HOME, ".local/share", "Superpowers");
+        else SupCore.log("Warning: Could not find neither XDG_DATA_HOME nor HOME environment variables.");
     }
   }
 }
