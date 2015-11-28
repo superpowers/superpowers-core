@@ -548,8 +548,8 @@ function publishProject() {
 }
 
 if (SupClient.isApp) {
-  electron.ipcRenderer.on("export-folder-failed", (message: string) => { alert(message); });
-  electron.ipcRenderer.on("export-folder-success", (outputFolder: string) => {
+  electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => { alert(message); });
+  electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
       let address = `${window.location.protocol}//${window.location.hostname}`;
       electron.ipcRenderer.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
