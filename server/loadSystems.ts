@@ -122,12 +122,20 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       // Collect plugin info
       pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);
       if (fs.existsSync(`${pluginPath}/public/editors`)) {
-        for (let editorName of fs.readdirSync(`${pluginPath}/public/editors`)) {
+        let editors = fs.readdirSync(`${pluginPath}/public/editors`);
+        for (let editorName of editors) {
           if (SupCore.system.data.assetClasses[editorName] != null) {
             pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
           } else {
             pluginsInfo.paths.tools[editorName] = `${pluginAuthor}/${pluginName}`;
           }
+
+          let editorPath = `/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`;
+          mainApp.get(editorPath, (req, res) => {
+            let language = req.cookies["language"];
+            res.redirect(`index.${language}.html`);
+          });
+          mainApp.get(`${editorPath}/index.*`, (req, res) => { res.redirect(`index.en.html`); });
         }
       }
     }
