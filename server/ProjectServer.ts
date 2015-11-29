@@ -90,6 +90,18 @@ export default class ProjectServer {
       });
     };
 
+    let ensureRequiredFoldersExist = (callback: (err: Error) => any) => {
+      // These folders might not exist if the project was checked out from source control
+      // But we assume they do when saving resources or rooms, so let's recreate them.
+      let folders = [ "resources", "rooms" ];
+      async.each(folders, (folder, cb) => {
+        fs.mkdir(path.join(this.projectPath, folder), (err) => {
+          if (err != null && err.code !== "EEXIST") { cb(err); return; }
+          cb();
+        });
+      }, callback);
+    };
+
     let loadEntries = (callback: (err: Error) => any) => {
       fs.readFile(path.join(this.projectPath, "entries.json"), { encoding: "utf8" }, (err, entriesJSON) => {
         if (err != null) { callback(err); return; }
@@ -151,7 +163,12 @@ export default class ProjectServer {
       }, callback);
     };
 
-    async.series([ loadManifest, setupNextBuildId, loadEntries, migrate, serve, prepareAssets, prepareResources ], callback);
+    async.series([
+      loadManifest, setupNextBuildId,
+      ensureRequiredFoldersExist,
+      loadEntries, migrate, serve,
+      prepareAssets, prepareResources
+    ], callback);
   }
 
   log(message: string) {
