@@ -33,9 +33,11 @@ export default class Resource extends Hash {
   _onLoaded(resourcePath: string, pub: any, justCreated: boolean) {
     if (justCreated) {
       this.pub = pub;
-      this.save(resourcePath, (err) => {
-        this.setup();
-        this.emit("load");
+      fs.mkdir(path.join(resourcePath), (err) => {
+        this.save(resourcePath, (err) => {
+          this.setup();
+          this.emit("load");
+        });
       });
       return;
     }
@@ -43,9 +45,11 @@ export default class Resource extends Hash {
     this.migrate(resourcePath, pub, (hasMigrated) => {
       if (hasMigrated) {
         this.pub = pub;
-        this.save(resourcePath, (err) => {
-          this.setup();
-          this.emit("load");
+        fs.mkdir(path.join(resourcePath), (err) => {
+          this.save(resourcePath, (err) => {
+            this.setup();
+            this.emit("load");
+          });
         });
       } else {
         this.pub = pub;
@@ -61,11 +65,7 @@ export default class Resource extends Hash {
 
   save(resourcePath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);
-
-    fs.mkdir(path.join(resourcePath), (err) => {
-      if (err != null && err.code !== "EEXIST") { callback(err); return; }
-      fs.writeFile(path.join(resourcePath, "resource.json"), json, { encoding: "utf8" }, callback);
-    });
+    fs.writeFile(path.join(resourcePath, "resource.json"), json, { encoding: "utf8" }, callback);
   }
 
   server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any) {
