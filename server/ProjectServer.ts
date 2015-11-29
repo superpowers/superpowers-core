@@ -144,7 +144,7 @@ export default class ProjectServer {
         this.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
           if (err != null) { cb(err); return; }
 
-          // resource.restore();
+          resource.restore();
           this.data.resources.release(resourceName, null, { skipUnloadDelay: true });
           cb();
         });
@@ -243,6 +243,10 @@ export default class ProjectServer {
     let resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
     let saveCallback = item.save.bind(item, resourcePath);
     item.on("change", () => { this.scheduleSave(saveDelay, `resources:${resourceId}`, saveCallback); });
+
+    item.on("setAssetBadge", (assetId: string, badgeId: string, type: string, data: any) => { this.setBadge(assetId, badgeId, type, data); });
+    item.on("clearAssetBadge", (assetId: string, badgeId: string) => { this.clearBadge(assetId, badgeId); });
+
     item.on("command", (cmd: string, ...callbackArgs: any[]) => {
       this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, cmd, ...callbackArgs);
     });

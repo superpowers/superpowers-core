@@ -263,6 +263,10 @@ declare namespace SupCore {
         // OVERRIDE: Called when creating/loading a resource
         setup(): void;
 
+        // OVERRIDE: Called when loading a project
+        // Check for any error/warning/info and this.emit("setAssetBadge", ...) as required
+        restore(): void;
+
         load(resourcePath: string): void;
         _onLoaded(resourcePath: string, pub: any): void;
         unload(): void;

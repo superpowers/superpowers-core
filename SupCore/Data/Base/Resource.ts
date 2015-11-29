@@ -13,6 +13,8 @@ export default class Resource extends Hash {
 
   setup() { /* Override */ }
 
+  restore() { /* Override */ }
+
   load(resourcePath: string) {
     fs.readFile(path.join(resourcePath, "resource.json"), { encoding: "utf8" }, (err, json) => {
       if (err != null) {
