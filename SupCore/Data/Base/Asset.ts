@@ -54,6 +54,11 @@ export default class Asset extends Hash {
     fs.writeFile(path.join(assetPath, "asset.json"), json, { encoding: "utf8" }, callback);
   }
 
+  publish(buildPath: string, callback: (err: Error) => any) {
+    let folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(this.id)}`;
+    fs.mkdir(folderPath, (err) => { this.save(folderPath, callback); });
+  }
+
   server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any) {
     this.setProperty(path, value, (err, actualValue) => {
       if (err != null) { callback(err); return; }

@@ -17,7 +17,7 @@ export default class Resources extends SupData.Base.Dictionary {
   _load(id: string) {
     let resourceClass = this.server.system.data.resourceClasses[id];
 
-    let resource = new resourceClass(null, this.server);
+    let resource = new resourceClass(id, null, this.server);
     resource.load(path.join(this.server.projectPath, `resources/${id}`));
 
     return resource;

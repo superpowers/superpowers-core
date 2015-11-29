@@ -29,7 +29,7 @@ class SystemAPI {
 class SystemData {
   assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
   componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; } = {};
-  resourceClasses: { [resourceName: string]: SupCore.Data.ResourceClass; } = {};
+  resourceClasses: { [resourceId: string]: SupCore.Data.ResourceClass; } = {};
 
   constructor(public system: System) {}
 
@@ -50,12 +50,12 @@ class SystemData {
     this.componentConfigClasses[name] = configClass;
   }
 
-  registerResource(name: string, resourceClass: SupCore.Data.ResourceClass) {
-    if (this.resourceClasses[name] != null) {
-      console.log(`SystemData.registerResource: Tried to register two or more plugin resources named "${name}" in system "${this.system.name}"`);
+  registerResource(id: string, resourceClass: SupCore.Data.ResourceClass) {
+    if (this.resourceClasses[id] != null) {
+      console.log(`SystemData.registerResource: Tried to register two or more plugin resources named "${id}" in system "${this.system.name}"`);
       return;
     }
-    this.resourceClasses[name] = resourceClass;
+    this.resourceClasses[id] = resourceClass;
   }
 }
 

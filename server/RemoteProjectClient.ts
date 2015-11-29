@@ -375,13 +375,10 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
 
     async.each(assetIdsToExport, (assetId, cb) => {
-      let folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(assetId)}`;
-      fs.mkdir(folderPath, (err) => {
-        this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.Data.Base.Asset) => {
-          asset.save(folderPath, (err) => {
-            this.server.data.assets.release(assetId, null);
-            cb();
-          });
+      this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.Data.Base.Asset) => {
+        asset.publish(buildPath, (err) => {
+          this.server.data.assets.release(assetId, null);
+          cb();
         });
       });
     }, (err) => {
@@ -389,14 +386,11 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       fs.mkdirSync(`${buildPath}/resources`);
 
-      async.each(Object.keys(this.server.system.data.resourceClasses), (resourceName, cb) => {
-        let folderPath = `${buildPath}/resources/${resourceName}`;
-        fs.mkdir(folderPath, (err) => {
-          this.server.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
-            resource.save(folderPath, (err) => {
-              this.server.data.resources.release(resourceName, null);
-              cb();
-            });
+      async.each(Object.keys(this.server.system.data.resourceClasses), (resourceId, cb) => {
+        this.server.data.resources.acquire(resourceId, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
+          resource.publish(buildPath, (err) => {
+            this.server.data.resources.release(resourceId, null);
+            cb();
           });
         });
       }, (err) => {

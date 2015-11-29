@@ -4,7 +4,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 export default class Resource extends Hash {
-  constructor(pub: any, schema: any, public server: ProjectServer) {
+  constructor(public id: string, pub: any, schema: any, public server: ProjectServer) {
     super(pub, schema);
     if (server == null) this.setup();
   }
@@ -66,6 +66,11 @@ export default class Resource extends Hash {
   save(resourcePath: string, callback: (err: Error) => any) {
     let json = JSON.stringify(this.pub, null, 2);
     fs.writeFile(path.join(resourcePath, "resource.json"), json, { encoding: "utf8" }, callback);
+  }
+
+  publish(buildPath: string, callback: (err: Error) => any) {
+    let folderPath = `${buildPath}/resources/${this.id}`;
+    fs.mkdir(folderPath, (err) => { this.save(folderPath, callback); });
   }
 
   server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any) {

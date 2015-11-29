@@ -10,7 +10,7 @@ declare namespace SupCore {
 
     interface AssetClass { new(id: string, pub: any, server?: ProjectServer): Base.Asset; }
     interface ComponentConfigClass { new(pub: any, sceneAsset?: any): Base.ComponentConfig; create(): any; }
-    interface ResourceClass { new(pub: any, server?: ProjectServer): Base.Resource; }
+    interface ResourceClass { new(id: string, pub: any, server?: ProjectServer): Base.Resource; }
 
     class Projects extends Base.ListById {
       static sort(a: ProjectManifestPub, b: ProjectManifestPub): number;
@@ -248,6 +248,7 @@ declare namespace SupCore {
         client_unload(): void;
 
         save(assetPath: string, callback: (err: Error) => any): void;
+        publish(buildPath: string, callback: (err: Error) => any): void;
 
         server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any): void;
       }
@@ -255,7 +256,7 @@ declare namespace SupCore {
       class Resource extends Hash {
         server: ProjectServer;
 
-        constructor(pub: any, schema: Schema, server: ProjectServer);
+        constructor(id: string, pub: any, schema: Schema, server: ProjectServer);
 
         // OVERRIDE: Make sure to call super(callback). Called when creating a new resource
         init(callback: Function): void;
@@ -271,7 +272,10 @@ declare namespace SupCore {
         _onLoaded(resourcePath: string, pub: any): void;
         unload(): void;
         migrate(resourcePath: string, pub: any, callback: (hasMigrated: boolean) => void): void;
+
         save(resourcePath: string, callback: (err: Error) => any): void;
+        publish(buildPath: string, callback: (err: Error) => any): void;
+
         server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
       }
 
@@ -324,12 +328,12 @@ declare namespace SupCore {
   class SystemData {
     assetClasses: { [assetName: string]: SupCore.Data.AssetClass; };
     componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; };
-    resourceClasses: { [resourceName: string]: SupCore.Data.ResourceClass };
+    resourceClasses: { [resourceId: string]: SupCore.Data.ResourceClass };
 
     registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass): void;
     registerComponentConfigClass(name: string, configClass: SupCore.Data.ComponentConfigClass): void;
     // Register a plugin *resource* (see SupCore.Data.Resources), not just a resource class, hence the name
-    registerResource(name: string, resourceClass: SupCore.Data.ResourceClass): void;
+    registerResource(id: string, resourceClass: SupCore.Data.ResourceClass): void;
   }
 
   class System {

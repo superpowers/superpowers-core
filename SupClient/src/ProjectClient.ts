@@ -176,7 +176,7 @@ export default class ProjectClient {
     if (subscribers == null) return;
 
     let resource: SupCore.Data.Base.Resource = null;
-    if (resourceData != null) resource = this.resourcesById[resourceId] = new SupCore.system.data.resourceClasses[resourceId](resourceData);
+    if (resourceData != null) resource = this.resourcesById[resourceId] = new SupCore.system.data.resourceClasses[resourceId](resourceId, resourceData);
 
     for (let subscriber of subscribers) { subscriber.onResourceReceived(resourceId, resource); }
   };

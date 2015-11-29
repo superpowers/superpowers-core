@@ -140,12 +140,12 @@ export default class ProjectServer {
     };
 
     let prepareResources = (callback: (err: Error) => any) => {
-      async.each(Object.keys(this.system.data.resourceClasses), (resourceName, cb) => {
-        this.data.resources.acquire(resourceName, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
+      async.each(Object.keys(this.system.data.resourceClasses), (resourceId, cb) => {
+        this.data.resources.acquire(resourceId, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
           if (err != null) { cb(err); return; }
 
           resource.restore();
-          this.data.resources.release(resourceName, null, { skipUnloadDelay: true });
+          this.data.resources.release(resourceId, null, { skipUnloadDelay: true });
           cb();
         });
       }, callback);
