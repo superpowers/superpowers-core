@@ -48,6 +48,9 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     readdirRecursive(`${systemPath}/public`, (err, entries) => {
       for (let entry of entries) {
         let relativePath = path.relative(`${systemPath}/public`, entry);
+        if (relativePath === "manifest.json") continue;
+        if (relativePath === "templates.json") continue;
+
         buildFiles.push(`/systems/${systemName}/${relativePath}`);
       }
 
