@@ -7,7 +7,7 @@ interface EntryNode {
   [name: string]: any;
 
   type?: string;
-  diagnostics?: SupCore.Data.DiagnosticsItem[];
+  badges?: SupCore.Data.BadgeItem[];
   dependentAssetIds?: any[];
 }
 
@@ -15,14 +15,14 @@ export default class Entries extends SupData.Base.TreeById {
   static schema = {
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     type: { type: "string?" },
-    diagnostics: { type: "array?" },
+    badges: { type: "array?" },
     dependentAssetIds: { type: "array", items: { type: "string" } }
   };
 
   pub: EntryNode[];
   byId: { [id: string]: EntryNode };
 
-  diagnosticsByEntryId: { [key: string]: SupData.Diagnostics } = {};
+  badgesByEntryId: { [key: string]: SupData.Badges } = {};
   dependenciesByAssetId: any = {};
 
   constructor(pub: EntryNode[], public server?: ProjectServer) {
@@ -31,8 +31,8 @@ export default class Entries extends SupData.Base.TreeById {
     this.walk((node: EntryNode, parentNode: EntryNode) => {
       if (node.type == null) return;
 
-      if (node.diagnostics == null) node.diagnostics = [];
-      this.diagnosticsByEntryId[node.id] = new SupData.Diagnostics(node.diagnostics);
+      if (node.badges == null) node.badges = [];
+      this.badgesByEntryId[node.id] = new SupData.Badges(node.badges);
       if (node.dependentAssetIds == null) node.dependentAssetIds = [];
     });
   }
@@ -49,9 +49,9 @@ export default class Entries extends SupData.Base.TreeById {
       node.name = SupData.ensureUniqueName(node.id, node.name, siblings);
 
       if (node.type != null) {
-        let diagnostics = new SupData.Diagnostics(node.diagnostics);
-        this.diagnosticsByEntryId[node.id] = diagnostics;
-        node.diagnostics = diagnostics.pub;
+        let badges = new SupData.Badges(node.badges);
+        this.badgesByEntryId[node.id] = badges;
+        node.badges = badges.pub;
       }
       else node.children = [];
 
@@ -61,7 +61,7 @@ export default class Entries extends SupData.Base.TreeById {
 
   client_add(node: EntryNode, parentId: string, index: number) {
     super.client_add(node, parentId, index);
-    this.diagnosticsByEntryId[node.id] = new SupData.Diagnostics(node.diagnostics);
+    this.badgesByEntryId[node.id] = new SupData.Badges(node.badges);
   }
 
   move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any) {

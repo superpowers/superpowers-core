@@ -4,7 +4,7 @@ import * as Base from "./Base";
 import Projects from "./Projects";
 
 import ProjectManifest from "./ProjectManifest";
-import Diagnostics from "./Diagnostics";
+import Badges from "./Badges";
 import Entries from "./Entries";
 
 import Assets from "./Assets";
@@ -17,7 +17,7 @@ import RoomUsers from "./RoomUsers";
 
 export {
   Base,
-  Projects, ProjectManifest, Diagnostics, Entries,
+  Projects, ProjectManifest, Badges, Entries,
   Assets, Resources, Rooms, Room, RoomUsers
 };
 

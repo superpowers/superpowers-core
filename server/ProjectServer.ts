@@ -123,7 +123,7 @@ export default class ProjectServer {
     };
 
     // prepareAssets() and prepareResources() is called after serve()
-    // because diagnostics rely on this.io being setup
+    // because badges rely on this.io being setup
     let prepareAssets = (callback: (err: Error) => any) => {
       async.each(Object.keys(this.data.entries.byId), (assetId, cb) => {
         // Ignore folders
@@ -204,9 +204,9 @@ export default class ProjectServer {
   markMissingDependency(dependentAssetIds: string[], missingAssetId: string) {
     for (let dependentAssetId of dependentAssetIds) {
       let missingAssetIds = [ missingAssetId ];
-      let existingDiag = this.data.entries.diagnosticsByEntryId[dependentAssetId].byId["missingDependencies"];
-      if (existingDiag != null) { missingAssetIds = missingAssetIds.concat(existingDiag.data.missingAssetIds); };
-      this.setDiagnostic(dependentAssetId, "missingDependencies", "error", { missingAssetIds });
+      let existingBadge = this.data.entries.badgesByEntryId[dependentAssetId].byId["missingDependencies"];
+      if (existingBadge != null) { missingAssetIds = missingAssetIds.concat(existingBadge.data.missingAssetIds); };
+      this.setBadge(dependentAssetId, "missingDependencies", "error", { missingAssetIds });
     }
   }
 
@@ -226,8 +226,8 @@ export default class ProjectServer {
   private onAssetLoaded = (assetId: string, item: SupCore.Data.Base.Asset) => {
     item.on("change", () => { this.scheduleAssetSave(assetId); });
 
-    item.on("setDiagnostic", (diagnosticId: string, type: string, data: any) => { this.setDiagnostic(assetId, diagnosticId, type, data); });
-    item.on("clearDiagnostic", (diagnosticId: string) => { this.clearDiagnostic(assetId, diagnosticId); });
+    item.on("setBadge", (badgeId: string, type: string, data: any) => { this.setBadge(assetId, badgeId, type, data); });
+    item.on("clearBadge", (badgeId: string) => { this.clearBadge(assetId, badgeId); });
 
     item.on("addDependencies", (dependencyEntryIds: string[]) => { this.addDependencies(assetId, dependencyEntryIds); });
     item.on("removeDependencies", (dependencyEntryIds: string[]) => { this.removeDependencies(assetId, dependencyEntryIds); });
@@ -298,31 +298,31 @@ export default class ProjectServer {
     });
   };
 
-  private setDiagnostic(assetId: string, diagnosticId: string, type: string, data: any) {
-    // console.log(`setDiagnostic ${assetId} ${diagnosticId} ${type}`);
-    let diagnostics = this.data.entries.diagnosticsByEntryId[assetId];
+  private setBadge(assetId: string, badgeId: string, type: string, data: any) {
+    // console.log(`setBadge ${assetId} ${badgeId} ${type}`);
+    let badges = this.data.entries.badgesByEntryId[assetId];
 
-    let newDiag = { id: diagnosticId, type, data };
+    let newBadge = { id: badgeId, type, data };
 
-    let existingDiag = diagnostics.byId[diagnosticId];
-    if (existingDiag != null) {
-      existingDiag.type = type;
-      existingDiag.data = data;
-      this.io.in("sub:entries").emit("set:diagnostics", assetId, newDiag);
+    let existingBadge = badges.byId[badgeId];
+    if (existingBadge != null) {
+      existingBadge.type = type;
+      existingBadge.data = data;
+      this.io.in("sub:entries").emit("set:badges", assetId, newBadge);
       return;
     }
 
-    diagnostics.add(newDiag, null, (err) => {
-      this.io.in("sub:entries").emit("set:diagnostics", assetId, newDiag);
+    badges.add(newBadge, null, (err) => {
+      this.io.in("sub:entries").emit("set:badges", assetId, newBadge);
     });
   }
 
-  private clearDiagnostic(assetId: string, diagnosticId: string) {
-    // console.log(`clearDiagnostic ${assetId} ${diagnosticId}`);
-    let diagnostics = this.data.entries.diagnosticsByEntryId[assetId];
+  private clearBadge(assetId: string, badgeId: string) {
+    // console.log(`clearBadge ${assetId} ${badgeId}`);
+    let badges = this.data.entries.badgesByEntryId[assetId];
 
-    diagnostics.remove(diagnosticId, (err) => {
-      this.io.in("sub:entries").emit("clear:diagnostics", assetId, diagnosticId);
+    badges.remove(badgeId, (err) => {
+      this.io.in("sub:entries").emit("clear:badges", assetId, badgeId);
     });
   }
 
@@ -347,9 +347,9 @@ export default class ProjectServer {
     }
 
     if (missingAssetIds.length > 0) {
-      let existingDiag = this.data.entries.diagnosticsByEntryId[assetId].byId["missingDependencies"];
-      if (existingDiag != null) missingAssetIds = missingAssetIds.concat(existingDiag.data.missingAssetIds);
-      this.setDiagnostic(assetId, "missingDependencies", "error", { missingAssetIds });
+      let existingBadge = this.data.entries.badgesByEntryId[assetId].byId["missingDependencies"];
+      if (existingBadge != null) missingAssetIds = missingAssetIds.concat(existingBadge.data.missingAssetIds);
+      this.setBadge(assetId, "missingDependencies", "error", { missingAssetIds });
     }
 
     if (addedDependencyEntryIds.length > 0) {
@@ -379,17 +379,17 @@ export default class ProjectServer {
     }
 
     if (missingAssetIds.length > 0) {
-      let existingDiag = this.data.entries.diagnosticsByEntryId[assetId].byId["missingDependencies"];
-      if (existingDiag != null) {
+      let existingBadge = this.data.entries.badgesByEntryId[assetId].byId["missingDependencies"];
+      if (existingBadge != null) {
         for (let missingAssetId of missingAssetIds) {
-          let index = existingDiag.data.missingAssetIds.indexOf(missingAssetId);
+          let index = existingBadge.data.missingAssetIds.indexOf(missingAssetId);
           if (index !== -1) {
-            existingDiag.data.missingAssetIds.splice(index, 1);
+            existingBadge.data.missingAssetIds.splice(index, 1);
           }
         }
 
-        if (existingDiag.data.missingAssetIds.length === 0) this.clearDiagnostic(assetId, "missingDependencies");
-        else this.setDiagnostic(assetId, "missingDependencies", "error", existingDiag.data);
+        if (existingBadge.data.missingAssetIds.length === 0) this.clearBadge(assetId, "missingDependencies");
+        else this.setBadge(assetId, "missingDependencies", "error", existingBadge.data);
       }
     }
 

@@ -38,14 +38,14 @@ declare namespace SupCore {
       constructor(pub: ProjectManifestPub);
     }
 
-    interface DiagnosticsItem {
+    interface BadgeItem {
       id: string;
       type: string;
       data: any;
     }
 
-    class Diagnostics extends Base.ListById {
-      constructor(pub: DiagnosticsItem[]);
+    class Badges extends Base.ListById {
+      constructor(pub: BadgeItem[]);
     }
 
     interface EntryNode {
@@ -55,14 +55,14 @@ declare namespace SupCore {
       [name: string]: any;
 
       type?: string;
-      diagnostics?: DiagnosticsItem[];
+      badges?: BadgeItem[];
       dependentAssetIds?: any[];
     }
     class Entries extends Base.TreeById {
       pub: EntryNode[];
       byId: { [id: string]: EntryNode };
 
-      diagnosticsByEntryId: { [key: string]: Diagnostics };
+      badgesByEntryId: { [key: string]: Badges };
       dependenciesByAssetId: any;
 
       constructor(pub: EntryNode[], server?: ProjectServer);
@@ -230,7 +230,7 @@ declare namespace SupCore {
         setup(): void;
 
         // OVERRIDE: Called when loading a project
-        // Check for any error/warning/info and this.emit("setDiagnostic", ...) as required
+        // Check for any error/warning/info and this.emit("setBadge", ...) as required
         // Also if the asset depends on others, this.emit("addDependencies", ...) with a list of entry IDs
         restore(): void;
 
@@ -275,7 +275,7 @@ declare namespace SupCore {
         constructor(pub: any, schema: any);
 
         // OVERRIDE: Called when loading a scene
-        // Check for any error/warning/info and this.emit("setDiagnostic", ...) as required
+        // Check for any error/warning/info and this.emit("setBadge", ...) as required
         // Also if the component depends on assets, this.emit("addDependencies", ...) with a list of entry IDs
         restore(): void;
 

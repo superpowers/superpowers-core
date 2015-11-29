@@ -66,7 +66,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (name.length === 0) { callback("Entry name cannot be empty"); return; }
     if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
-    let entry: SupCore.Data.EntryNode = { id: null, name, type, diagnostics: [], dependentAssetIds: [] };
+    let entry: SupCore.Data.EntryNode = { id: null, name, type, badges: [], dependentAssetIds: [] };
     if (options == null) options = {};
 
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
@@ -100,7 +100,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     let entry: SupCore.Data.EntryNode = {
       id: null, name: newName, type: entryToDuplicate.type,
-      diagnostics: _.cloneDeep(entryToDuplicate.diagnostics),
+      badges: _.cloneDeep(entryToDuplicate.badges),
       dependentAssetIds: []
     };
 
@@ -197,7 +197,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
         }
 
-        // Generate diagnostics for any assets depending on this entry
+        // Generate badges for any assets depending on this entry
         if (dependentAssetIds != null) this.server.markMissingDependency(dependentAssetIds, id);
 
         // Skip asset destruction & release if trashing a folder

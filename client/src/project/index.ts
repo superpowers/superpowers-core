@@ -180,8 +180,8 @@ function connect() {
   socket.on("trash:entries", onEntryTrashed);
   socket.on("setProperty:entries", onSetEntryProperty);
 
-  socket.on("set:diagnostics", onDiagnosticSet);
-  socket.on("clear:diagnostics", onDiagnosticCleared);
+  socket.on("set:badges", onBadgeSet);
+  socket.on("clear:badges", onBadgeCleared);
 
   socket.on("add:dependencies", onDependenciesAdded);
   socket.on("remove:dependencies", onDependenciesRemoved);
@@ -462,28 +462,28 @@ function onSetEntryProperty(id: string, key: string, value: any) {
   }
 }
 
-function onDiagnosticSet(id: string, newDiag: SupCore.Data.DiagnosticsItem) {
-  let diagnostics = data.entries.diagnosticsByEntryId[id];
+function onBadgeSet(id: string, newBadge: SupCore.Data.BadgeItem) {
+  let badges = data.entries.badgesByEntryId[id];
 
-  let existingDiag = diagnostics.byId[newDiag.id];
-  if (existingDiag != null) {
-    existingDiag.type = newDiag.type;
-    existingDiag.data = newDiag.data;
-  } else diagnostics.client_add(newDiag, null);
+  let existingBadge = badges.byId[newBadge.id];
+  if (existingBadge != null) {
+    existingBadge.type = newBadge.type;
+    existingBadge.data = newBadge.data;
+  } else badges.client_add(newBadge, null);
 
-  let diagnosticsElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .diagnostics`);
-  let diagSpan = document.createElement("span");
-  diagSpan.className = newDiag.id;
-  diagSpan.textContent = newDiag.id;
-  diagnosticsElt.appendChild(diagSpan);
+  let badgesElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges`);
+  let badgeSpan = document.createElement("span");
+  badgeSpan.className = newBadge.id;
+  badgeSpan.textContent = newBadge.id;
+  badgesElt.appendChild(badgeSpan);
 }
 
-function onDiagnosticCleared(id: string, diagId: string) {
-  let diagnostics = data.entries.diagnosticsByEntryId[id];
-  diagnostics.client_remove(diagId);
+function onBadgeCleared(id: string, badgeId: string) {
+  let badges = data.entries.badgesByEntryId[id];
+  badges.client_remove(badgeId);
 
-  let diagElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .diagnostics .${diagId}`);
-  diagElt.parentElement.removeChild(diagElt);
+  let badgeElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges .${badgeId}`);
+  badgeElt.parentElement.removeChild(badgeElt);
 }
 
 function onDependenciesAdded(id: string, depIds: string[]) {
@@ -586,16 +586,16 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
       if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
     });
 
-    let diagnosticsSpan = document.createElement("span");
-    diagnosticsSpan.className = "diagnostics";
+    let badgesSpan = document.createElement("span");
+    badgesSpan.className = "badges";
 
-    for (let diag of entry.diagnostics) {
-      let diagSpan = document.createElement("span");
-      diagSpan.className = diag.id;
-      diagSpan.textContent = diag.id;
-      diagnosticsSpan.appendChild(diagSpan);
+    for (let badge of entry.badges) {
+      let badgeSpan = document.createElement("span");
+      badgeSpan.className = badge.id;
+      badgeSpan.textContent = badge.id;
+      badgesSpan.appendChild(badgeSpan);
     }
-    liElt.appendChild(diagnosticsSpan);
+    liElt.appendChild(badgesSpan);
   } else {
     let childrenElt = document.createElement("span");
     childrenElt.className = "children";
