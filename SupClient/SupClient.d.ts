@@ -45,7 +45,7 @@ declare namespace SupClient {
     export function appendBooleanField(parentCell: HTMLElement, value: boolean): HTMLInputElement;
     export function appendSelectBox(parentCell: HTMLElement, options: { [value: string]: string; },
     initialValue?: string): HTMLSelectElement;
-    export function appendSelectOption(parentCell: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
+    export function appendSelectOption(parent: HTMLSelectElement, value: string, label: string): HTMLOptionElement;
     export function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
     export function appendAssetField(parent: HTMLElement, value: string): { textField: HTMLInputElement; buttonElt: HTMLButtonElement; };
   }
