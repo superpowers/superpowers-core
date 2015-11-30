@@ -16,7 +16,7 @@ gulp.task("typescript", function() {
 // Stylus
 var stylus = require("gulp-stylus");
 gulp.task("stylus", function() {
-  return gulp.src("./src/styles/*.styl").pipe(stylus({ errors: true })).pipe(gulp.dest("../public/styles"));
+  return gulp.src("./src/styles/*.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public/styles"));
 });
 
 // Browserify

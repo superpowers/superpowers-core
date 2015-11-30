@@ -9,9 +9,9 @@ gulp.task("jade-build", function() { return gulp.src("./src/build.jade").pipe(ja
 
 // Stylus
 var stylus = require("gulp-stylus");
-gulp.task("stylus-login", function() { return gulp.src("./src/login/index.styl").pipe(stylus({ errors: true })).pipe(gulp.dest("../public/login")); });
-gulp.task("stylus-hub", function() { return gulp.src("./src/hub/index.styl").pipe(stylus({ errors: true })).pipe(gulp.dest("../public/hub")); });
-gulp.task("stylus-project", function() { return gulp.src("./src/project/index.styl").pipe(stylus({ errors: true })).pipe(gulp.dest("../public/project")); });
+gulp.task("stylus-login", function() { return gulp.src("./src/login/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public/login")); });
+gulp.task("stylus-hub", function() { return gulp.src("./src/hub/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public/hub")); });
+gulp.task("stylus-project", function() { return gulp.src("./src/project/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public/project")); });
 
 // TypeScript
 var ts = require("gulp-typescript");

@@ -12,7 +12,7 @@ gulp.task("jade", function() {
 // Stylus
 var stylus = require("gulp-stylus");
 gulp.task("stylus", function() {
-  return gulp.src("./src/index.styl").pipe(stylus({ errors: true })).pipe(gulp.dest("./public"));
+  return gulp.src("./src/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("./public"));
 });
 
 // TypeScript - Main
