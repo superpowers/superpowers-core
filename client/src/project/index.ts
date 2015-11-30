@@ -15,7 +15,7 @@ let socket: SocketIOClient.Socket;
 interface EditorManifest {
   title: string;
   // assetType: string; <- for asset editors, soon
-  pinned: boolean;
+  pinned?: boolean;
   pluginPath: string;
 }
 
@@ -195,9 +195,15 @@ function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback
 
   async.each(Object.keys(editorPaths), (assetType, cb) => {
     let pluginPath = editorPaths[assetType];
-    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${assetType}/manifest.json`).then((response) => response.json()).then((manifest: EditorManifest) => {
+    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${assetType}/manifest.json`)
+    .then((response) => response.json())
+    .then((manifest: EditorManifest) => {
       manifest.pluginPath = pluginPath;
       data.editorsByAssetType[assetType] = manifest;
+      cb();
+    })
+    .catch((error) => {
+      data.editorsByAssetType[assetType] = { title: assetType, pluginPath };
       cb();
     });
   }, () => {
@@ -219,9 +225,15 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
 
   async.each(Object.keys(toolPaths), (toolName, cb) => {
     let pluginPath = toolPaths[toolName];
-    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`).then((response) => response.json()).then((manifest: EditorManifest) => {
+    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`)
+    .then((response) => response.json())
+    .then((manifest: EditorManifest) => {
       data.toolsByName[toolName] = manifest;
       data.toolsByName[toolName].pluginPath = pluginPath;
+      cb();
+    })
+    .catch((error) => {
+      data.toolsByName[toolName] = { title: toolName, pinned: false, pluginPath };
       cb();
     });
   }, () => {
