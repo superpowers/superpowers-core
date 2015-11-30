@@ -92,7 +92,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       let pluginPath = `${pluginAuthorPath}/${pluginName}`;
 
       // Load scripting API module
-      let apiModulePath = `${pluginPath}/api`;
+      let apiModulePath = `${pluginPath}/api/index.js`;
       if (fs.existsSync(apiModulePath)) require(apiModulePath);
 
       // Expose public stuff
@@ -100,6 +100,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       buildApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
 
       // Ensure all public files exist
+      try { fs.mkdirSync(`${pluginPath}/public`); } catch (err) { /* Ignore */ }
       for (let requiredFile of publicPluginFiles) {
         let requiredFilePath = `${pluginPath}/public/${requiredFile}.js`;
         if (!fs.existsSync(requiredFilePath)) fs.closeSync(fs.openSync(requiredFilePath, "w"));
@@ -116,7 +117,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       let pluginPath = `${pluginAuthorPath}/${pluginName}`;
 
       // Load data module
-      let dataModulePath = `${pluginPath}/data`;
+      let dataModulePath = `${pluginPath}/data/index.js`;
       if (fs.existsSync(dataModulePath)) require(dataModulePath);
 
       // Collect plugin info
