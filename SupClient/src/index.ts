@@ -7,8 +7,9 @@ import ProjectClient from "./ProjectClient";
 import setupHotkeys from "./setupHotkeys";
 import * as table from "./table";
 import * as dialogs from "./dialogs/index";
+import * as i18n from "./i18n";
 /* tslint:enable:no-unused-variable */
-export { cookies, ProjectClient, setupHotkeys, table, dialogs };
+export { cookies, ProjectClient, setupHotkeys, table, dialogs, i18n };
 
 export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 export let query = querystring.parse(window.location.search.slice(1));
@@ -17,16 +18,6 @@ export let query = querystring.parse(window.location.search.slice(1));
 // See http://superuser.com/q/358855
 export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
 export const namePatternDescription = "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].";
-
-// Initialize preferred language
-if (cookies.get("language") == null) {
-  let language = window.navigator.language;
-  let separatorIndex = language.indexOf("-");
-  if (separatorIndex !== -1) language = language.slice(0, separatorIndex);
-  
-  cookies.set("language", language);
-  console.log(language);
-}
 
 // Initialize empty system
 SupCore.system = new SupCore.System("");

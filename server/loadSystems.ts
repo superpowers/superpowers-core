@@ -108,11 +108,11 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
   }
 
   // Second pass, because data modules might depend on API modules
-  for (let pluginAuthor in pluginNamesByAuthor) {
+  Object.keys(pluginNamesByAuthor).forEach((pluginAuthor) => {
     let pluginNames = pluginNamesByAuthor[pluginAuthor];
     let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
 
-    for (let pluginName of pluginNames) {
+    pluginNames.forEach((pluginName) => {
       let pluginPath = `${pluginAuthorPath}/${pluginName}`;
 
       // Load data module
@@ -123,23 +123,25 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);
       if (fs.existsSync(`${pluginPath}/public/editors`)) {
         let editors = fs.readdirSync(`${pluginPath}/public/editors`);
-        for (let editorName of editors) {
+        editors.forEach((editorName) => {
           if (SupCore.system.data.assetClasses[editorName] != null) {
             pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
           } else {
             pluginsInfo.paths.tools[editorName] = `${pluginAuthor}/${pluginName}`;
           }
 
-          let editorPath = `/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`;
-          mainApp.get(editorPath, (req, res) => {
+          mainApp.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
             let language = req.cookies["language"];
-            res.redirect(`index.${language}.html`);
+            let editorPath = path.join(pluginPath, "public/editors", editorName);
+            fs.exists(path.join(editorPath, `index.${language}.html`), (exists) => {
+              if (exists) res.sendFile(path.join(editorPath, `index.${language}.html`));
+              else res.sendFile(path.join(editorPath, `index.en.html`));
+            });
           });
-          mainApp.get(`${editorPath}/index.*`, (req, res) => { res.redirect(`index.en.html`); });
-        }
+        });
       }
-    }
-  }
+    });
+  });
 
   return pluginsInfo;
 }

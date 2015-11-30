@@ -90,6 +90,11 @@ declare namespace SupClient {
     }
   }
 
+  namespace i18n {
+    export function load(fileName: string, callback: Function): void;
+    export function t(key: string): string;
+  }
+
   class ProjectClient {
     socket: SocketIOClient.Socket;
 
