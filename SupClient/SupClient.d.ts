@@ -117,23 +117,23 @@ declare namespace SupClient {
     subResource(resourceId: string, subscriber: ResourceSubscriber): void;
     unsubResource(resourceId: string, subscriber: ResourceSubscriber): void;
   }
-}
 
-interface EntriesSubscriber {
-  onEntriesReceived(entries: SupCore.Data.Entries): void;
-  onEntryAdded(entry: any, parentId: string, index: number): void;
-  onEntryMoved(id: string, parentId: string, index: number): void;
-  onSetEntryProperty(id: string, key: string, value: any): void;
-  onEntryTrashed(id: string): void;
-}
+  interface EntriesSubscriber {
+    onEntriesReceived(entries: SupCore.Data.Entries): void;
+    onEntryAdded(entry: any, parentId: string, index: number): void;
+    onEntryMoved(id: string, parentId: string, index: number): void;
+    onSetEntryProperty(id: string, key: string, value: any): void;
+    onEntryTrashed(id: string): void;
+  }
 
-interface AssetSubscriber {
-  onAssetReceived(assetId: string, asset: any): void;
-  onAssetEdited(assetId: string, command: string, ...args: any[]): void;
-  onAssetTrashed(assetId: string): void;
-}
+  interface AssetSubscriber {
+    onAssetReceived(assetId: string, asset: any): void;
+    onAssetEdited(assetId: string, command: string, ...args: any[]): void;
+    onAssetTrashed(assetId: string): void;
+  }
 
-interface ResourceSubscriber {
-  onResourceReceived(resourceId: string, resource: any): void;
-  onResourceEdited(resourceId: string, command: string, ...args: any[]): void;
+  interface ResourceSubscriber {
+    onResourceReceived(resourceId: string, resource: any): void;
+    onResourceEdited(resourceId: string, command: string, ...args: any[]): void;
+  }
 }
