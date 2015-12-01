@@ -18,13 +18,20 @@ html
         button.maximize
         button.close
 
-    .projects-buttons.button-strip
-      button(disabled).new-project New Project
-      button(disabled,hidden).open-project Open project
-      button(disabled).edit-project Edit details
+    .projects-header
+      .projects-buttons.button-strip
+        button(disabled).new-project New Project
+        button(disabled,hidden).open-project Open project
+        button(disabled).edit-project Edit details
+
+      .language-container
+        span Language
+        select.language
+
     .projects-tree-view
       .connecting
         div Connecting...
+
     a(href="https://sparklinlabs.com/",target="_blank").server-footer
       | Superpowers — HTML5 2D+3D game maker
 

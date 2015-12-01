@@ -2,6 +2,10 @@ import * as cookies from "js-cookie";
 import * as path from "path";
 import * as _ from "lodash";
 
+export let languages: { [value: string]: string} = {
+  "en": "English",
+  "fr": "Français"
+}
 // Initialize preferred language
 let language: string = cookies.get("language");
 if (language == null) {
@@ -9,6 +13,7 @@ if (language == null) {
   let separatorIndex = language.indexOf("-");
   if (separatorIndex !== -1) language = language.slice(0, separatorIndex);
 
+  if (languages[language] == null) language = "en";
   cookies.set("language", language);
 }
 
