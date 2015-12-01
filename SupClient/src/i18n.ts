@@ -5,7 +5,8 @@ import * as _ from "lodash";
 export let languages: { [value: string]: string} = {
   "en": "English",
   "fr": "Français"
-}
+};
+
 // Initialize preferred language
 let language: string = cookies.get("language");
 if (language == null) {
@@ -17,26 +18,21 @@ if (language == null) {
   cookies.set("language", language);
 }
 
-interface Locals {
-  [key: string]: Locals|string;
-}
-interface LocalsByContext {
-  [context: string]: Locals;
-}
-
 interface File {
   root: string;
   name: string;
 }
+interface I18nValue { [key: string]: I18nValue|string; }
+interface I18nContext { [context: string]: I18nValue; }
 
-let defaultLocalsByContext: LocalsByContext = {};
-let localsByContext: LocalsByContext = {};
+let i18nFallbackContexts: I18nContext = {};
+let i18nContexts: I18nContext = {};
 
 export function load(files: File[], callback: Function) {
   let filesToLoad = 0;
   let allFilesRequested = false;
 
-  let loadFile = (language: string, file: File, root: LocalsByContext) => {
+  let loadFile = (language: string, file: File, root: I18nContext) => {
     filesToLoad += 1;
 
     let filePath = path.join(file.root, `locales/${language}`, `${file.name}.json`);
@@ -59,32 +55,32 @@ export function load(files: File[], callback: Function) {
   };
 
   for (let file of files) {
-    loadFile(language, file, localsByContext);
-    if (language !== "en") loadFile("en", file, defaultLocalsByContext);
+    loadFile(language, file, i18nContexts);
+    if (language !== "en") loadFile("en", file, i18nFallbackContexts);
   }
   allFilesRequested = true;
 }
 
 export function t(key: string) {
-  let [context, keys] = key.split(":");
+  let [ context, keys ] = key.split(":");
   let keyParts = keys.split(".");
 
-  let locals: any = localsByContext[context];
-  if (locals == null) return defaultT(key);
+  let locals: any = i18nContexts[context];
+  if (locals == null) return fallbackT(key);
 
   for (let keyPart of keyParts) {
     locals = locals[keyPart];
-    if (locals == null) return defaultT(key);
+    if (locals == null) return fallbackT(key);
   }
 
   return locals;
 }
 
-function defaultT(key: string) {
-  let [context, keys] = key.split(":");
+function fallbackT(key: string) {
+  let [ context, keys ] = key.split(":");
   let keyParts = keys.split(".");
 
-  let locals: any = defaultLocalsByContext[context];
+  let locals: any = i18nFallbackContexts[context];
   if (locals == null) return key;
 
   for (let keyPart of keyParts) {
