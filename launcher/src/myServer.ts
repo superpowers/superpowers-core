@@ -1,4 +1,5 @@
 import * as config from "./config";
+import * as dummy_childProcess from "child_process";
 
 let path = nodeRequire("path");
 let childProcess = nodeRequire("child_process");
@@ -6,7 +7,7 @@ let childProcess = nodeRequire("child_process");
 let myServerElt = document.querySelector(".my-server");
 
 let myServerTextarea = <HTMLTextAreaElement>myServerElt.querySelector("textarea");
-export let serverProcess: any = null;
+export let serverProcess: dummy_childProcess.ChildProcess = null;
 
 let autoStartServerCheckbox = <HTMLInputElement>document.getElementById("auto-start-server");
 autoStartServerCheckbox.checked = config.autoStartServer;

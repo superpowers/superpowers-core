@@ -65,7 +65,7 @@ let mainHttpServer = http.createServer(mainApp);
 mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EADDRINUSE") {
     SupCore.log(`Could not start the server: another application is already listening on port ${config.mainPort}.`);
-    process.exit();
+    process.exit(1);
   } else throw(err);
 });
 
@@ -128,7 +128,7 @@ function onExit() {
   hub.saveAll((err: Error) => {
     if (err != null) SupCore.log(`Error while exiting:\n${(<any>err).stack}`);
     else SupCore.log("Exited cleanly.");
-    process.exit();
+    process.exit(0);
   });
 }
 
