@@ -36,7 +36,6 @@ export function load(files: File[], callback: Function) {
     filesToLoad += 1;
 
     let filePath = path.join(file.root, `locales/${language}`, `${file.name}.json`);
-    console.log(filePath);
 
     window.fetch(filePath).then((response) => {
       if (response.status === 404) {
