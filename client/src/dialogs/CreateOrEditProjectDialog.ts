@@ -232,7 +232,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       icon: this.iconFile
     };
 
-    this.callback(project, this.openCheckboxElt.checked);
+    this.callback(project, (this.openCheckboxElt != null) ? this.openCheckboxElt.checked : null);
     return true;
   }
 
