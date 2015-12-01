@@ -28,12 +28,12 @@ function start() {
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
 
   let selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
-  let availableLanguageValues = Object.keys(SupClient.i18n.languages);
+  let availableLanguageValues = Object.keys(SupCore.languages);
   availableLanguageValues.sort();
   for (let languageValue of availableLanguageValues) {
     let optionElt = document.createElement("option");
     optionElt.value = languageValue;
-    optionElt.textContent = SupClient.i18n.languages[languageValue];
+    optionElt.textContent = SupCore.languages[languageValue];
     selectLanguageElt.appendChild(optionElt);
   }
   selectLanguageElt.value = SupClient.cookies.get("language");

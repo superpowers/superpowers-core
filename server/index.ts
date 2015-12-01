@@ -38,6 +38,14 @@ fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ ver
 let mainApp = express();
 
 mainApp.use(cookieParser());
+mainApp.use((req, res, next) => {
+  if (req.cookies["language"] == null) {
+    let language = req.header("Accept-Language").split(",")[0].split("-")[0];
+    if (SupCore.languages[language] == null) language = "en";
+    res.cookie("language", language);
+  }
+  next();
+});
 
 function redirectIfNoAuth(req: express.Request, res: express.Response, next: Function) {
   if (req.cookies["supServerAuth"] == null) {

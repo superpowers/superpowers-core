@@ -2,22 +2,6 @@ import * as cookies from "js-cookie";
 import * as path from "path";
 import * as _ from "lodash";
 
-export let languages: { [value: string]: string} = {
-  "en": "English",
-  "fr": "Français"
-};
-
-// Initialize preferred language
-let language: string = cookies.get("language");
-if (language == null) {
-  language = window.navigator.language;
-  let separatorIndex = language.indexOf("-");
-  if (separatorIndex !== -1) language = language.slice(0, separatorIndex);
-
-  if (languages[language] == null) language = "en";
-  cookies.set("language", language);
-}
-
 interface File {
   root: string;
   name: string;
@@ -25,6 +9,7 @@ interface File {
 interface I18nValue { [key: string]: I18nValue|string; }
 interface I18nContext { [context: string]: I18nValue; }
 
+let language = cookies.get("language");
 let i18nFallbackContexts: I18nContext = {};
 let i18nContexts: I18nContext = {};
 

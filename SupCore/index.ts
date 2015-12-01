@@ -15,3 +15,8 @@ export function log(message: string): void {
   if (process != null && process.send != null) process.send(text);
   return;
 }
+
+export let languages: { [value: string]: string; } = {
+  "en": "English",
+  "fr": "Français"
+};
