@@ -56,7 +56,7 @@ function start() {
   });
 }
 
-start();
+SupClient.i18n.load([ { root: "/", name: "hub" }], () => { start(); });
 
 interface SystemManifest {
   title: string;

@@ -42,7 +42,7 @@ export default class PromptDialog extends BaseDialog {
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = "Cancel";
+    cancelButtonElt.textContent = SupClient.i18n.t("supClient:cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 

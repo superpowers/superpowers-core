@@ -20,17 +20,17 @@ html
 
     .projects-header
       .projects-buttons.button-strip
-        button(disabled).new-project New Project
-        button(disabled,hidden).open-project Open project
-        button(disabled).edit-project Edit details
+        button(disabled).new-project=t("hub:newProject.title")
+        button(disabled,hidden).open-project=t("hub:openProject")
+        button(disabled).edit-project=t("hub:editDetails.title")
 
       .language-container
-        span Language
+        span=t("hub:language")
         select.language
 
     .projects-tree-view
       .connecting
-        div Connecting...
+        div=t("hub:connecting")
 
     a(href="https://sparklinlabs.com/",target="_blank").server-footer
       | Superpowers — HTML5 2D+3D game maker

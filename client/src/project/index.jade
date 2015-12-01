@@ -13,23 +13,23 @@ html
       .project-management
         .project-icon
           button(title="Go to hub").go-to-hub
-        .project-name Loading...
+        .project-name=t("project:header.loading")
         .project-buttons
-          button(title="Publish project",disabled).publish
-          button(title="Stop project",disabled).stop
-          button(title="Debug project (F6)",disabled).debug
-          button(title="Run project (F5)",disabled).run
+          button(title=t("project:header.publish"),disabled).publish
+          button(title=t("project:header.stop"),disabled).stop
+          button(title=t("project:header.debug"),disabled).debug
+          button(title=t("project:header.run"),disabled).run
 
       .entries-buttons.flat-button-strip
-        button(title="New asset (Ctrl+N)",disabled).new-asset
-        button(title="New folder (Ctrl+Shift+N)",disabled).new-folder
-        button(title="Rename (F2)",disabled).rename-entry.single.edit
-        button(title="Duplicate (Ctrl+D)",disabled).duplicate-entry.single.asset-only.edit
-        button(title="Trash (Delete)",disabled).trash-entry.edit
-        button(title="Search (Ctrl+O)",disabled).search
+        button(title=t("project:treeView.newAsset.title"),disabled).new-asset
+        button(title=t("project:treeView.newFolder.title"),disabled).new-folder
+        button(title=t("project:treeView.rename.title"),disabled).rename-entry.single.edit
+        button(title=t("project:treeView.duplicate.title"),disabled).duplicate-entry.single.asset-only.edit
+        button(title=t("project:treeView.trash.title"),disabled).trash-entry.edit
+        button(title=t("project:treeView.search.title"),disabled).search
       .entries-tree-view
         .connecting
-          div Connecting...
+          divt("project:treeView.connecting")
       .tools
         ul
     .main

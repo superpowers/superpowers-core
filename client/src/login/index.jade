@@ -16,21 +16,20 @@ html
         button.maximize
         button.close
     form.login
-      .welcome
-        | Welcome to this Superpowers server!
+      .welcome=t("login:welcome")
     
       table.properties
         tr
-          th Server password
+          th=t("login:password")
           td
             input.server-password(type="password",placeholder="Password",autofocus)
         tr
-          th Username
+          th=t("login:username")
           td
             input.username(type="text",placeholder="Your username",spellcheck="false")
 
       .buttons
-        button.log-in Log in
+        button.log-in=t("login:logIn")
 
     a(href="https://sparklinlabs.com/",target="_blank").server-footer
       | Superpowers — HTML5 2D+3D game maker

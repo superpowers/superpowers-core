@@ -12,6 +12,7 @@ interface I18nContext { [context: string]: I18nValue; }
 let language = cookies.get("language");
 let i18nFallbackContexts: I18nContext = {};
 let i18nContexts: I18nContext = {};
+let supClientLocalesLoaded = false;
 
 export function load(files: File[], callback: Function) {
   let filesToLoad = 0;
@@ -21,7 +22,6 @@ export function load(files: File[], callback: Function) {
     filesToLoad += 1;
 
     let filePath = path.join(file.root, `locales/${language}`, `${file.name}.json`);
-
     window.fetch(filePath).then((response) => {
       if (response.status === 404) {
         filesToLoad -= 1;
@@ -38,6 +38,11 @@ export function load(files: File[], callback: Function) {
     });
   };
 
+  if (!supClientLocalesLoaded) {
+    files.unshift({ root: "/", name: "supClient" });
+    supClientLocalesLoaded = true;
+  }
+
   for (let file of files) {
     loadFile(language, file, i18nContexts);
     if (language !== "en") loadFile("en", file, i18nFallbackContexts);
@@ -45,22 +50,22 @@ export function load(files: File[], callback: Function) {
   allFilesRequested = true;
 }
 
-export function t(key: string) {
+export function t(key: string, variables: { [key: string]: string } = {}) {
   let [ context, keys ] = key.split(":");
   let keyParts = keys.split(".");
 
   let locals: any = i18nContexts[context];
-  if (locals == null) return fallbackT(key);
+  if (locals == null) return fallbackT(key, variables);
 
   for (let keyPart of keyParts) {
     locals = locals[keyPart];
-    if (locals == null) return fallbackT(key);
+    if (locals == null) return fallbackT(key, variables);
   }
 
-  return locals;
+  return insertVariables(locals, variables);
 }
 
-function fallbackT(key: string) {
+function fallbackT(key: string, variables: { [key: string]: string } = {}) {
   let [ context, keys ] = key.split(":");
   let keyParts = keys.split(".");
 
@@ -71,6 +76,22 @@ function fallbackT(key: string) {
     locals = locals[keyPart];
     if (locals == null) return key;
   }
+
+  return insertVariables(locals, variables);
+}
+
+function insertVariables(locals: string, variables: { [key: string]: string }) {
+  let index = 0;
+  do {
+    index = locals.indexOf("${", index);
+    if (index !== -1) {
+      let endIndex = locals.indexOf("}", index);
+      let key = locals.slice(index + 2, endIndex);
+      let value = variables[key] != null ? variables[key] : `"${key}" is missing`
+      locals = locals.slice(0, index) + value + locals.slice(endIndex + 1);
+      index += 1;
+    }
+  } while (index !== -1);
 
   return locals;
 }

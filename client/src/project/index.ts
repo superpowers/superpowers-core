@@ -102,7 +102,7 @@ function start() {
   document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
 
   if (!SupClient.isApp) {
-    (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).title = "Publish project (only works from the Superpowers app for technical reasons)";
+    (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).title = SupClient.i18n.t("project:header.publishDisabled");
     (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).hidden = true;
     (<HTMLButtonElement>document.querySelector(".project-buttons .stop")).hidden = true;
   }
@@ -121,7 +121,7 @@ function start() {
 
   ui.openInNewWindowButton = document.createElement("button");
   ui.openInNewWindowButton.className = "open-in-new-window";
-  ui.openInNewWindowButton.title = "Open in new window";
+  ui.openInNewWindowButton.title = SupClient.i18n.t("project:treeView.openInNewWindow");
   ui.openInNewWindowButton.addEventListener("click", onOpenInNewWindowClick);
 
   // Tab strip
@@ -147,10 +147,10 @@ function start() {
 
   if (localStorage.getItem("superpowers-disable-notifications") != null) {
     toggleNotificationsButton.classList.add("disabled");
-    toggleNotificationsButton.title = "Click to enable notifications";
+    toggleNotificationsButton.title = SupClient.i18n.t("project:notifications.enable");
   } else {
     toggleNotificationsButton.classList.remove("disabled");
-    toggleNotificationsButton.title = "Click to disable notifications";
+    toggleNotificationsButton.title = SupClient.i18n.t("project:notifications.disable");
   }
 
   // Panes and tools
@@ -163,7 +163,7 @@ function start() {
   connect();
 }
 
-start();
+SupClient.i18n.load([{ root: "/", name: "project" }], () => { start(); });
 
 function connect() {
   socket = SupClient.connect(SupClient.query.project, { reconnection: true });
@@ -681,8 +681,8 @@ function onMessageChat(message: string) {
   if (localStorage.getItem("superpowers-disable-notifications") != null) return;
 
   function doNotification() {
-    let notification = new (<any>window).Notification(`New chat message in "${data.manifest.pub.name}" project`,
-      { icon: "/images/icon.png", body: message });
+    let title = SupClient.i18n.t("project:header.notifications.new", { projectName: data.manifest.pub.name });
+    let notification = new (<any>window).Notification(title, { icon: "/images/icon.png", body: message });
 
     let closeTimeoutId = setTimeout(() => { notification.close(); }, 5000);
 
@@ -724,11 +724,11 @@ function onClickToggleNotifications(event: any) {
   if (!disableNotifications) {
     localStorage.removeItem("superpowers-disable-notifications");
     event.target.classList.remove("disabled");
-    event.target.title = "Click to disable notifications";
+    event.target.title = SupClient.i18n.t("project:header.notifications.disable");
   } else {
     localStorage.setItem("superpowers-disable-notifications", "true");
     event.target.classList.add("disabled");
-    event.target.title = "Click to enable notifications";
+    event.target.title = SupClient.i18n.t("project:header.notifications.enable");
   }
 }
 

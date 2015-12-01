@@ -22,7 +22,7 @@ export interface SystemsData {
   };
 }
 
-export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDialog {
+export default class newProjectDialog extends SupClient.dialogs.BaseDialog {
   private systemsByName: SystemsData;
 
   private nameInputElt: HTMLInputElement;
@@ -51,7 +51,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
 
     // Prompt name
     let labelElt = document.createElement("label");
-    labelElt.textContent = (this.existingProject == null) ? "Enter a name and select a type for the new project." : "Edit the project's details.";
+    if (this.existingProject == null) labelElt.textContent = SupClient.i18n.t("hub:newProject.prompt");
+    else labelElt.textContent = SupClient.i18n.t("hub:editDetails.prompt");
     this.formElt.appendChild(labelElt);
 
     let containerElt = document.createElement("div");
@@ -102,7 +103,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     // Name
     this.nameInputElt = document.createElement("input");
     this.nameInputElt.required = true;
-    this.nameInputElt.placeholder = "Project name";
+    this.nameInputElt.placeholder = SupClient.i18n.t("hub:newProject.namePlaceholder");
     this.nameInputElt.pattern = SupClient.namePattern;
     this.nameInputElt.title = SupClient.namePatternDescription;
     textContainerElt.appendChild(this.nameInputElt);
@@ -111,7 +112,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     this.descriptionInputElt = document.createElement("textarea");
     this.descriptionInputElt.style.flex = "1";
     (<any>this.descriptionInputElt.style).resize = "none";
-    this.descriptionInputElt.placeholder = "Description (optional)";
+    this.descriptionInputElt.placeholder = SupClient.i18n.t("hub:newProject.descriptionPlaceholder");
     this.descriptionInputElt.addEventListener("keypress", this.onFieldKeyDown);
     textContainerElt.appendChild(this.descriptionInputElt);
 
@@ -132,7 +133,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
 
         let emptyOptionElt = document.createElement("option");
         emptyOptionElt.value = `${systemName}.empty`;
-        emptyOptionElt.textContent = "Empty project";
+        emptyOptionElt.textContent = SupClient.i18n.t("hub:newProject.emptyProject");
         optGroupElt.appendChild(emptyOptionElt);
 
         for (let templateName in systemInfo.templatesByName) {
@@ -172,7 +173,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       downElt.appendChild(this.openCheckboxElt);
 
       let openLabelElt = document.createElement("label");
-      openLabelElt.textContent = "Open after creation";
+      openLabelElt.textContent = SupClient.i18n.t("hub:newProject.autoOpen");
       openLabelElt.setAttribute("for", "auto-open-checkbox");
       openLabelElt.style.flex = "1";
       openLabelElt.style.margin = "0";
@@ -189,12 +190,13 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = "Cancel";
+    cancelButtonElt.textContent = SupClient.i18n.t("supClient:cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
     this.validateButtonElt = document.createElement("button");
-    this.validateButtonElt.textContent = options.existingProject == null ? "Create" : "Update";
+    if (options.existingProject == null) this.validateButtonElt.textContent = SupClient.i18n.t("hub:newProject.validate");
+    else this.validateButtonElt.textContent = SupClient.i18n.t("hub:editDetails.validate");
     this.validateButtonElt.className = "validate-button";
 
     if (navigator.platform === "Win32") {
@@ -290,8 +292,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     if (templateName !== "empty") template = system.templatesByName[templateName];
     else {
       template = {
-        title: "Empty project",
-        description: "An empty project to start from scratch."
+        title: SupClient.i18n.t("hub:newProject.emptyProject.title"),
+        description: SupClient.i18n.t("hub:newProject.emptyProject.description")
       };
     }
 
