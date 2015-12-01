@@ -91,7 +91,12 @@ declare namespace SupClient {
   }
 
   namespace i18n {
-    export function load(fileName: string, callback: Function): void;
+    export interface File {
+      root: string;
+      name: string;
+    }
+
+    export function load(files: File[], callback: Function): void;
     export function t(key: string): string;
   }
 

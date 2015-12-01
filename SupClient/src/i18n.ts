@@ -1,5 +1,6 @@
 import * as cookies from "js-cookie";
 import * as path from "path";
+import * as _ from "lodash";
 
 // Initialize preferred language
 let language: string = cookies.get("language");
@@ -18,26 +19,44 @@ interface LocalsByContext {
   [context: string]: Locals;
 }
 
+interface File {
+  root: string;
+  name: string;
+}
+
 let defaultLocalsByContext: LocalsByContext = {};
 let localsByContext: LocalsByContext = {};
 
-export function load(fileName: string, callback: Function) {
+export function load(files: File[], callback: Function) {
   let filesToLoad = 0;
   let allFilesRequested = false;
-  
-  let loadFile = (language: string, fileName: string, root: LocalsByContext) => {
+
+  let loadFile = (language: string, file: File, root: LocalsByContext) => {
     filesToLoad += 1;
-    let filePath = path.join(window.location.pathname, `../../locales/${language}/${fileName}.json`);
-    window.fetch(filePath).then((response) => response.json()).then((data) => {
-      root[fileName] = data;
 
-      filesToLoad -= 1;
-      if (filesToLoad === 0 && allFilesRequested) callback();
+    let filePath = path.join(file.root, `locales/${language}`, `${file.name}.json`);
+    console.log(filePath);
+
+    window.fetch(filePath).then((response) => {
+      if (response.status === 404) {
+        filesToLoad -= 1;
+        if (filesToLoad === 0 && allFilesRequested) callback();
+      } else {
+        response.json().then((data) => {
+          if (root[file.name] == null) root[file.name] = data;
+          else root[file.name] = _.merge(root[file.name], data) as any;
+
+          filesToLoad -= 1;
+          if (filesToLoad === 0 && allFilesRequested) callback();
+        });
+      }
     });
-  }
+  };
 
-  loadFile(language, fileName, localsByContext);
-  if (language !== "en") loadFile("en", fileName, defaultLocalsByContext);
+  for (let file of files) {
+    loadFile(language, file, localsByContext);
+    if (language !== "en") loadFile("en", file, defaultLocalsByContext);
+  }
   allFilesRequested = true;
 }
 
