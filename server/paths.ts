@@ -41,3 +41,7 @@ SupCore.log(`Using data from ${userData}.`);
 try { fs.mkdirSync(userData); } catch (err) { if (err.code !== "EEXIST") throw err; }
 try { fs.mkdirSync(projects); } catch (err) { if (err.code !== "EEXIST") throw err; }
 try { fs.mkdirSync(builds); } catch (err) { if (err.code !== "EEXIST") throw err; }
+
+export function getHtml(language: string) {
+  return language === "en" ? "index.html" : `index.${language}.html`;
+}

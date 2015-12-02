@@ -41,7 +41,7 @@ locales.forEach(function(locale) {
   var localsByContext = loadLocales(locale);
 
   gulp.task("jade-" + locale, function() {
-    return gulp.src("./src/**/index.jade")
+    var result = gulp.src("./src/**/index.jade")
       .pipe(jade({ locals: { t: function(path) {
           var parts = path.split(":");
           var local = localsByContext[parts[0]];
@@ -54,9 +54,10 @@ locales.forEach(function(locale) {
           }
           return local;
         }}
-       }))
-      .pipe(rename({ extname: "." + locale + ".html" }))
-      .pipe(gulp.dest("../public"));
+      }));
+
+    if (locale !== "en") result.pipe(rename({ extname: "." + locale + ".html" }))
+    return result.pipe(gulp.dest("../public"));
   });
   tasks.push("jade-" + locale);
 })

@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as express from "express";
 import * as async from "async";
 import * as readdirRecursive from "recursive-readdir";
+import { getHtml } from "./paths";
 
 function shouldIgnorePlugin(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 // FIXME: Let each system specify the required files? or just assume plugins will do their job
@@ -95,10 +96,6 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       let apiModulePath = `${pluginPath}/api/index.js`;
       if (fs.existsSync(apiModulePath)) require(apiModulePath);
 
-      // Expose public stuff
-      mainApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
-      buildApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
-
       // Ensure all public files exist
       try { fs.mkdirSync(`${pluginPath}/public`); } catch (err) { /* Ignore */ }
       for (let requiredFile of publicPluginFiles) {
@@ -134,13 +131,18 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
           mainApp.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
             let language = req.cookies["language"];
             let editorPath = path.join(pluginPath, "public/editors", editorName);
-            fs.exists(path.join(editorPath, `index.${language}.html`), (exists) => {
-              if (exists) res.sendFile(path.join(editorPath, `index.${language}.html`));
-              else res.sendFile(path.join(editorPath, `index.en.html`));
+            let html = getHtml(language);
+            fs.exists(path.join(editorPath, html), (exists) => {
+              if (exists) res.sendFile(path.join(editorPath, html));
+              else res.sendFile(path.join(editorPath, `index.html`));
             });
           });
         });
       }
+
+      // Expose public stuff
+      mainApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+      buildApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
     });
   });
 
