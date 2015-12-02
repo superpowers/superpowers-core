@@ -23,7 +23,7 @@
     "gulp-tslint": "^3.6.0",
     "gulp-typescript": "2.9.2",
     "gulp-util": "^3.0.3",
-    "tslint": "^3.0.0",
+    "tslint": "~3.0.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^3.4.0"
   },
