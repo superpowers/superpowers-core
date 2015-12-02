@@ -15,6 +15,8 @@ let i18nContexts: I18nContext = {};
 let supClientLocalesLoaded = false;
 
 export function load(files: File[], callback: Function) {
+  if (language === "none") { callback(); return; }
+
   if (!supClientLocalesLoaded) {
     files.unshift({ root: "/", name: "supClient" });
     supClientLocalesLoaded = true;
@@ -43,11 +45,13 @@ export function load(files: File[], callback: Function) {
 
   for (let file of files) {
     loadFile(language, file, i18nContexts);
-    if (language !== "en") loadFile("en", file, i18nFallbackContexts);
+    if (language !== "en" && language !== "none") loadFile("en", file, i18nFallbackContexts);
   }
 }
 
 export function t(key: string, variables: { [key: string]: string } = {}) {
+  if (language === "none") return key;
+
   let [ context, keys ] = key.split(":");
   let keyParts = keys.split(".");
 

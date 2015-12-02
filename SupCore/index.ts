@@ -17,6 +17,7 @@ export function log(message: string): void {
 }
 
 export let languages: { [value: string]: string; } = {
+  "none": "None",
   "en": "English",
   "fr": "Français"
 };

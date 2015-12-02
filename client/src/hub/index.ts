@@ -31,6 +31,8 @@ function start() {
   let availableLanguageValues = Object.keys(SupCore.languages);
   availableLanguageValues.sort();
   for (let languageValue of availableLanguageValues) {
+    if (languageValue === "none" && localStorage.getItem("superpowers-dev-mode") == null) continue;
+
     let optionElt = document.createElement("option");
     optionElt.value = languageValue;
     optionElt.textContent = SupCore.languages[languageValue];

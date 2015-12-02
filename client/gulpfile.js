@@ -62,6 +62,14 @@ locales.forEach(function(locale) {
   tasks.push("jade-" + locale);
 })
 
+gulp.task("jade-none", function() {
+  return gulp.src("./src/**/index.jade")
+    .pipe(jade({ locals: { t: function(path) { return path; } } }))
+    .pipe(rename({ extname: ".none.html" }))
+    .pipe(gulp.dest("../public"));
+});
+tasks.push("jade-none");
+
 gulp.task("jade-build", function() { return gulp.src("./src/build.jade").pipe(jade()).pipe(gulp.dest("../public")); });
 tasks.push("jade-build");
 
