@@ -1,3 +1,5 @@
+/// <reference path="../../SupClient.d.ts" />
+
 /* tslint:disable:no-unused-variable */
 import BaseDialog from "./BaseDialog";
 import PromptDialog from "./PromptDialog";
