@@ -93,6 +93,7 @@ declare namespace SupClient {
     export interface File {
       root: string;
       name: string;
+      context?: string;
     }
 
     export function load(files: File[], callback: Function): void;

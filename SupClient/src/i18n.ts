@@ -5,6 +5,7 @@ import * as _ from "lodash";
 interface File {
   root: string;
   name: string;
+  context?: string;
 }
 interface I18nValue { [key: string]: I18nValue|string; }
 interface I18nContext { [context: string]: I18nValue; }
@@ -33,8 +34,9 @@ export function load(files: File[], callback: Function) {
         if (filesToLoad === 0) callback();
       } else {
         response.json().then((data) => {
-          if (root[file.name] == null) root[file.name] = data;
-          else root[file.name] = _.merge(root[file.name], data) as any;
+          let context = file.context != null ? file.context : file.name;
+          if (root[context] == null) root[context] = data;
+          else root[context] = _.merge(root[context], data) as any;
 
           filesToLoad -= 1;
           if (filesToLoad === 0) callback();
