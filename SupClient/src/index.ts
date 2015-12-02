@@ -17,7 +17,6 @@ export let query = querystring.parse(window.location.search.slice(1));
 // Refuses filesystem-unsafe characters
 // See http://superuser.com/q/358855
 export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
-export const namePatternDescription = "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].";
 
 // Initialize empty system
 SupCore.system = new SupCore.System("");

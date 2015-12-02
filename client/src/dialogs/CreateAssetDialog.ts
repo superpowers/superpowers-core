@@ -12,7 +12,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
 
     // Prompt name
     let labelElt = document.createElement("label");
-    labelElt.textContent = "Select the type and enter a name for the new asset.";
+    labelElt.textContent = SupClient.i18n.t("project:treeView.newAsset.prompt");
     this.formElt.appendChild(labelElt);
 
     // Type
@@ -28,9 +28,9 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
 
     // Name
     this.nameInputElt = document.createElement("input");
-    this.nameInputElt.placeholder = "Asset name (optional)";
+    this.nameInputElt.placeholder = SupClient.i18n.t("project:treeView.newAsset.placeholder");
     this.nameInputElt.pattern = SupClient.namePattern;
-    this.nameInputElt.title = SupClient.namePatternDescription;
+    this.nameInputElt.title = SupClient.i18n.t("supClient:namePatternDescription");
     this.formElt.appendChild(this.nameInputElt);
 
     // Auto-open checkbox
@@ -47,7 +47,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     downElt.appendChild(this.openCheckboxElt);
 
     let openLabelElt = document.createElement("label");
-    openLabelElt.textContent = "Open after creation";
+    openLabelElt.textContent = SupClient.i18n.t("project:treeView.newAsset.openAfterCreation");
     openLabelElt.setAttribute("for", "auto-open-checkbox");
     openLabelElt.style.flex = "1";
     openLabelElt.style.margin = "0";
@@ -60,12 +60,12 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = "Cancel";
+    cancelButtonElt.textContent = SupClient.i18n.t("supClient:cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
     this.validateButtonElt = document.createElement("button");
-    this.validateButtonElt.textContent = "Create";
+    this.validateButtonElt.textContent = SupClient.i18n.t("project:treeView.newAsset.validate");
     this.validateButtonElt.className = "validate-button";
 
     if (navigator.platform === "Win32") {

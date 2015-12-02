@@ -3,7 +3,6 @@
 
 declare namespace SupClient {
   export const namePattern: string;
-  export const namePatternDescription: string;
 
   export let isApp: boolean;
   export let query: { project: string, asset: string; [key: string]: string; };

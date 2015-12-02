@@ -105,7 +105,7 @@ export default class newProjectDialog extends SupClient.dialogs.BaseDialog {
     this.nameInputElt.required = true;
     this.nameInputElt.placeholder = SupClient.i18n.t("hub:newProject.namePlaceholder");
     this.nameInputElt.pattern = SupClient.namePattern;
-    this.nameInputElt.title = SupClient.namePatternDescription;
+    this.nameInputElt.title = SupClient.i18n.t("supClient:namePatternDescription");
     textContainerElt.appendChild(this.nameInputElt);
 
     // Description

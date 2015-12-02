@@ -163,7 +163,7 @@ function start() {
   connect();
 }
 
-SupClient.i18n.load([{ root: "/", name: "project" }], () => { start(); });
+SupClient.i18n.load([{ root: "/", name: "project" }], start);
 
 function connect() {
   socket = SupClient.connect(SupClient.query.project, { reconnection: true });
@@ -810,15 +810,15 @@ function onNewAssetClick() {
 
 function onNewFolderClick() {
   let options = {
-    placeholder: "Enter a name",
-    initialValue: "Folder",
-    validationLabel: "Create",
+    placeholder: SupClient.i18n.t("project:treeView.newFolder.placeholder"),
+    initialValue: SupClient.i18n.t("project:treeView.newFolder.initialValue"),
+    validationLabel: SupClient.i18n.t("project:treeView.newFolder.validate"),
     pattern: SupClient.namePattern,
-    title: SupClient.namePatternDescription
+    title: SupClient.i18n.t("supClient:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog("Enter a name for the new folder.", options, (name) => {
+  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.newFolder.prompt"), options, (name) => {
     /* tslint:enable:no-unused-expression */
     if (name == null) return;
 
@@ -835,7 +835,7 @@ function onTrashEntryClick() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
       /* tslint:disable:no-unused-expression */
-      new SupClient.dialogs.ConfirmDialog("Are you sure you want to trash the selected entries?", "Trash", (confirm) => {
+      new SupClient.dialogs.ConfirmDialog(SupClient.i18n.t("project:treeView.trash.prompt"), SupClient.i18n.t("project:treeView.trash.validate"), (confirm) => {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
@@ -864,7 +864,11 @@ function onTrashEntryClick() {
       let dependentAssetNames: string[] = [];
       for (let usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
       /* tslint:disable:no-unused-expression */
-      new SupClient.dialogs.InfoDialog(`${entry.name} is used in ${dependentAssetNames.join(", ")}.`, "Close", () => { checkNextEntry(); });
+      let promptString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency.prompt", {
+        entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
+      });
+      let validateString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency.validate");
+      new SupClient.dialogs.InfoDialog(promptString, validateString, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
     } else checkNextEntry();
   }
@@ -900,13 +904,13 @@ function onRenameEntryClick() {
 
   let options = {
     initialValue: entry.name,
-    validationLabel: "Rename",
+    validationLabel: SupClient.i18n.t("project:treeView.rename.validate"),
     pattern: SupClient.namePattern,
-    title: SupClient.namePatternDescription
+    title: SupClient.i18n.t("supClient:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog("Enter a new name for the asset.", options, (newName) => {
+  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.rename.prompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null || newName === entry.name) return;
 
@@ -925,13 +929,13 @@ function onDuplicateEntryClick() {
 
   let options = {
     initialValue: entry.name,
-    validationLabel: "Duplicate",
+    validationLabel: SupClient.i18n.t("project:treeView.duplicate.validate"),
     pattern: SupClient.namePattern,
-    title: SupClient.namePatternDescription
+    title: SupClient.i18n.t("supClient:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog("Enter a name for the new asset.", options, (newName) => {
+  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicate.prompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null) return;
 
