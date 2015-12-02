@@ -137,6 +137,15 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       }
 
       // Expose public stuff
+      mainApp.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/locales/*.json`, (req, res) => {
+        let localeFile = req.path.split("/locales/")[1];
+        let localePath = path.join(pluginPath, "public/locales", localeFile);
+        fs.exists(localePath, (exists) => {
+          if (exists) res.sendFile(localePath);
+          else res.send("{}");
+        });
+      });
+
       mainApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
       buildApp.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
     });
