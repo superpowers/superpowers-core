@@ -84,7 +84,7 @@ function insertVariables(locals: string, variables: { [key: string]: string }) {
     if (index !== -1) {
       let endIndex = locals.indexOf("}", index);
       let key = locals.slice(index + 2, endIndex);
-      let value = variables[key] != null ? variables[key] : `"${key}" is missing`
+      let value = variables[key] != null ? variables[key] : `"${key}" is missing`;
       locals = locals.slice(0, index) + value + locals.slice(endIndex + 1);
       index += 1;
     }

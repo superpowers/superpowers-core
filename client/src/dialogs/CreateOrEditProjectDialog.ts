@@ -22,7 +22,7 @@ export interface SystemsData {
   };
 }
 
-export default class newProjectDialog extends SupClient.dialogs.BaseDialog {
+export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDialog {
   private systemsByName: SystemsData;
 
   private nameInputElt: HTMLInputElement;
