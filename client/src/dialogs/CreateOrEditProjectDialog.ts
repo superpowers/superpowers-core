@@ -15,11 +15,7 @@ interface NewProjectCallback {
 }
 
 export interface SystemsData {
-  [value: string]: {
-    title: string;
-    description: string;
-    templatesByName: { [name: string]: { title: string; description: string; } };
-  };
+  [value: string]: string[];
 }
 
 export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDialog {
@@ -128,7 +124,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
         let systemInfo = systemsByName[systemName];
 
         let optGroupElt = document.createElement("optgroup");
-        optGroupElt.label = systemInfo.title;
+        optGroupElt.label = SupClient.i18n.t(`system-${systemName}:title`);
         this.projectTypeSelectElt.appendChild(optGroupElt);
 
         let emptyOptionElt = document.createElement("option");
@@ -136,10 +132,10 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
         emptyOptionElt.textContent = SupClient.i18n.t("hub:newProject.emptyProject.title");
         optGroupElt.appendChild(emptyOptionElt);
 
-        for (let templateName in systemInfo.templatesByName) {
+        for (let templateName of systemInfo) {
           let optionElt = document.createElement("option");
           optionElt.value = `${systemName}.${templateName}`;
-          optionElt.textContent = systemInfo.templatesByName[templateName].title;
+          optionElt.textContent = SupClient.i18n.t(`${systemName}-${templateName}:title`);
           optGroupElt.appendChild(optionElt);
         }
       }
@@ -274,29 +270,30 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     let [ systemName, templateName ] = this.projectTypeSelectElt.value.split(".");
     this.projectType = { systemName, templateName };
 
-    let system = this.systemsByName[systemName];
     let template = this.getTemplate(systemName, templateName);
-    this.projectTypeSelectElt.querySelector("option:checked").textContent = `${system.title} — ${template.title}`;
+    let systemTitle = SupClient.i18n.t(`system-${systemName}:title`);
+    this.projectTypeSelectElt.querySelector("option:checked").textContent = `${systemTitle} — ${template.title}`;
     this.templateDescriptionElt.textContent = template.description;
 
-    this.systemDescriptionElt.textContent = system.description;
-    if (system.description.length === 0 && template.description.length === 0) {
+    let systemDescription = SupClient.i18n.t(`system-${systemName}:description`);
+    this.systemDescriptionElt.textContent = systemDescription;
+
+    if (systemDescription.length === 0 && template.description.length === 0) {
       this.systemDescriptionElt.textContent = "(No description provided)";
     }
   };
 
   private getTemplate(systemName: string, templateName: string) {
-    let system = this.systemsByName[systemName];
-
-    let template: { title: string; description: string; };
-    if (templateName !== "empty") template = system.templatesByName[templateName];
-    else {
-      template = {
-        title: SupClient.i18n.t("hub:newProject.emptyProject.title"),
-        description: SupClient.i18n.t("hub:newProject.emptyProject.description")
-      };
+    let title: string;
+    let description: string;
+    if (templateName !== "empty") {
+      title = SupClient.i18n.t(`${systemName}-${templateName}:title`);
+      description = SupClient.i18n.t(`${systemName}-${templateName}:description`);
+    } else {
+      title = SupClient.i18n.t("hub:newProject.emptyProject.title");
+      description = SupClient.i18n.t("hub:newProject.emptyProject.description");
     }
 
-    return template;
+    return { title, description };
   }
 }

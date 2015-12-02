@@ -33,7 +33,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     let formatVersion = SupCore.Data.ProjectManifest.currentFormatVersion;
     let templatePath: string;
     if (details.template != null) {
-      templatePath = path.join(paths.userData, `/systems/${details.system}/templates/${details.template}`);
+      templatePath = path.join(paths.userData, `/systems/${details.system}/public/templates/${details.template}`);
       formatVersion = JSON.parse(fs.readFileSync(path.join(templatePath, `manifest.json`), { encoding: "utf8" })).formatVersion;
     }
 
@@ -77,6 +77,8 @@ export default class RemoteHubClient extends BaseRemoteClient {
             fs.readdir(path.join(templatePath, currentPath), (err, files) => {
               if (err != null) { callback(err); return; }
               async.each(files, (file, callback) => {
+                if (file === "locales") { callback(null); return; }
+
                 fs.lstat(path.join(templatePath, currentPath, file), (err, stats) => {
                   if (err != null) { callback(err); return; }
 

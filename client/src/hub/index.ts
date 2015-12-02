@@ -45,20 +45,19 @@ function start() {
     window.location.reload();
   });
 
-  loadSystemsInfo(() => {
-    socket = SupClient.connect(null, { reconnection: true });
+  socket = SupClient.connect(null, { reconnection: true });
 
-    socket.on("error", onConnectionError);
-    socket.on("connect", onConnected);
-    socket.on("disconnect", onDisconnected);
+  socket.on("error", onConnectionError);
+  socket.on("connect", onConnected);
+  socket.on("disconnect", onDisconnected);
 
-    socket.on("add:projects", onProjectAdded);
-    socket.on("setProperty:projects", onSetProjectProperty);
-    socket.on("updateIcon:projects", onUpdateProjectIcon);
-  });
+  socket.on("add:projects", onProjectAdded);
+  socket.on("setProperty:projects", onSetProjectProperty);
+  socket.on("updateIcon:projects", onUpdateProjectIcon);
 }
 
-SupClient.i18n.load([ { root: "/", name: "hub" }], () => { start(); });
+let i18nFiles: SupClient.i18n.File[] = [ { root: "/", name: "hub" } ]
+loadSystemsInfo(() => { SupClient.i18n.load(i18nFiles, start); })
 
 interface SystemManifest {
   title: string;
@@ -70,15 +69,18 @@ function loadSystemsInfo(callback: Function) {
 
   window.fetch("/systems.json").then((response) => response.json()).then((systemsInfo: SupCore.SystemsInfo) => {
     async.each(systemsInfo.list, (systemName, cb) => {
-      window.fetch(`/systems/${systemName}/manifest.json`).then((response) => response.json()).then((manifest: SystemManifest) => {
-        window.fetch(`/systems/${systemName}/templates.json`).then((response) => response.json()).then((templatesByName) => {
-          data.systemsByName[systemName] = {
-            title: manifest.title,
-            description: (manifest.description != null) ? manifest.description : "",
-            templatesByName
-          };
-          cb();
-        });
+      i18nFiles.push({ root: `/systems/${systemName}`, name: "system", context: `system-${systemName}` });
+      window.fetch(`/systems/${systemName}/templates.json`).then((response) => response.json()).then((templatesList: string[]) => {
+        for (let templateName of templatesList) {
+          i18nFiles.push({
+            root: `/systems/${systemName}/templates/${templateName}`,
+            name: "template",
+            context: `${systemName}-${templateName}`
+          });
+        }
+
+        data.systemsByName[systemName] = templatesList;
+        cb();
       });
     }, () => { callback(); });
   });
@@ -182,7 +184,7 @@ function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
 
   let projectTypeSpan = document.createElement("span");
   projectTypeSpan.className = "project-type";
-  projectTypeSpan.textContent = data.systemsByName[manifest.system].title;
+  projectTypeSpan.textContent = SupClient.i18n.t(`system-${manifest.system}:title`);
   detailsElt.appendChild(projectTypeSpan);
 
   return liElt;

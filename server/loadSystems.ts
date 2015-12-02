@@ -22,15 +22,11 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     buildApp.use(`/systems/${systemName}`, express.static(`${systemPath}/public`));
 
     // Write templates list
-    let templatesInfo: { [name: string]: { title: string; description: string; } } = {};
-    if (fs.existsSync(`${systemPath}/templates`)) {
-      let templateNames = fs.readdirSync(`${systemPath}/templates`);
-      for (let templateName of templateNames) {
-        let templateManifest = JSON.parse(fs.readFileSync(`${systemPath}/templates/${templateName}/manifest.json`, { encoding: "utf8" }));
-        templatesInfo[templateName] = { title: templateManifest.name, description: templateManifest.description };
-      }
-    }
-    fs.writeFileSync(`${systemPath}/public/templates.json`, JSON.stringify(templatesInfo, null, 2));
+    let templatesList: string[] = [];
+    let templatesFolder = `${systemPath}/public/templates`;
+    if (fs.existsSync(templatesFolder))
+      templatesList = fs.readdirSync(templatesFolder);
+    fs.writeFileSync(`${systemPath}/public/templates.json`, JSON.stringify(templatesList, null, 2));
 
     // Load plugins
     let pluginsInfo = loadPlugins(systemName, `${systemPath}/plugins`, mainApp, buildApp);
