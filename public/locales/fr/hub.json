@@ -1,0 +1,22 @@
+{
+  "newProject": {
+    "title": "Nouveau projet",
+    "prompt": "Entrez le nom et choississez le type du nouveau projet.",
+    "namePlaceholder": "Nom du projet",
+    "descriptionPlaceholder": "Description (optionelle)",
+    "emptyProject": {
+      "title": "Projet vide",
+      "description": "Un projet vide pour partir de 0."
+    },
+    "autoOpen": "Ouvrir après création",
+    "validate": "Créer"
+  },
+  "editDetails": {
+    "title": "Editer les informations",
+    "prompt": "Editer les informations du projet.",
+    "validate": "Mettre à jour"
+  },
+  "openProject": "Ouvrir le projet",
+  "language": "Langue",
+  "connecting": "Connection en cours..."
+}

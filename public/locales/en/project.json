@@ -1,0 +1,57 @@
+{
+  "header": {
+    "goToHub": "Go to hub",
+    "loading": "Loading...",
+    "publish": "Publish project",
+    "publishDisabled": "Publish project (only works from the Superpowers app for technical reasons)",
+    "stop": "Stop project",
+    "debug": "Debug project (F6)",
+    "run": "Run project (F5)",
+    "notifications": {
+      "enable": "Click to enable notifications",
+      "disable": "Click to disable notifications",
+      "new": "New chat message in -${projectName}- project"
+    }
+  },
+  "treeView": {
+    "connecting": "Connecting...",
+    "openInNewWindow": "Open in new window",
+    "newAsset": {
+      "title": "New asset (Ctrl+N)",
+      "prompt": "Select the type and enter a name for the new asset.",
+      "placeholder": "Asset name (optional)",
+      "openAfterCreation": "Open after creation",
+      "validate": "Create"
+    },
+    "newFolder": {
+      "title": "New folder (Ctrl+Shift+N)",
+      "prompt": "Enter a name for the new folder.",
+      "placeholder": "Enter a name",
+      "initialValue": "Folder",
+      "validate": "Create"
+    },
+    "rename": {
+      "title": "Rename (F2)",
+      "prompt": "Enter a new name for the asset.",
+      "validate": "Rename"
+    },
+    "duplicate": {
+      "title": "Duplicate (Ctrl+D)",
+      "prompt": "Enter a name for the new asset.",
+      "validate": "Duplicate"
+    },
+    "trash": {
+      "title": "Trash (Delete)",
+      "prompt": "Are you sure you want to trash the selected entries?",
+      "validate": "Trash",
+      "warnBrokenDependency": {
+        "prompt": "${entryName} is used in ${dependentEntryNames}.",
+        "validate": "Close"
+      }
+    },
+    "search": {
+      "title": "Search (Ctrl+O)",
+      "placeholder": "Search for assets"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "newProject": {
+    "title": "New project",
+    "prompt": "Enter a name and select a type for the new project.",
+    "namePlaceholder": "Project name",
+    "descriptionPlaceholder": "Description (optional)",
+    "emptyProject": {
+      "title": "Empty project",
+      "description": "An empty project to start from scratch."
+    },
+    "autoOpen": "Open after creation",
+    "validate": "Create"
+  },
+  "editDetails": {
+    "title": "Edit details",
+    "prompt": "Edit the project's details.",
+    "validate": "Update"
+  },
+  "openProject": "Open project",
+  "language": "Language",
+  "connecting": "Connecting..."
+}

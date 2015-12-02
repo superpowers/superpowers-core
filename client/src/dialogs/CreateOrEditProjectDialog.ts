@@ -133,7 +133,7 @@ export default class newProjectDialog extends SupClient.dialogs.BaseDialog {
 
         let emptyOptionElt = document.createElement("option");
         emptyOptionElt.value = `${systemName}.empty`;
-        emptyOptionElt.textContent = SupClient.i18n.t("hub:newProject.emptyProject");
+        emptyOptionElt.textContent = SupClient.i18n.t("hub:newProject.emptyProject.title");
         optGroupElt.appendChild(emptyOptionElt);
 
         for (let templateName in systemInfo.templatesByName) {
