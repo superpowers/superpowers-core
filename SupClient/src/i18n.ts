@@ -15,39 +15,36 @@ let i18nContexts: I18nContext = {};
 let supClientLocalesLoaded = false;
 
 export function load(files: File[], callback: Function) {
-  let filesToLoad = 0;
-  let allFilesRequested = false;
+  if (!supClientLocalesLoaded) {
+    files.unshift({ root: "/", name: "supClient" });
+    supClientLocalesLoaded = true;
+  }
+
+  let filesToLoad = files.length;
+  if (language !== "en") filesToLoad *= 2;
 
   let loadFile = (language: string, file: File, root: I18nContext) => {
-    filesToLoad += 1;
-
     let filePath = path.join(file.root, `locales/${language}`, `${file.name}.json`);
     window.fetch(filePath).then((response) => {
       if (response.status === 404) {
         filesToLoad -= 1;
-        if (filesToLoad === 0 && allFilesRequested) callback();
+        if (filesToLoad === 0) callback();
       } else {
         response.json().then((data) => {
           if (root[file.name] == null) root[file.name] = data;
           else root[file.name] = _.merge(root[file.name], data) as any;
 
           filesToLoad -= 1;
-          if (filesToLoad === 0 && allFilesRequested) callback();
+          if (filesToLoad === 0) callback();
         });
       }
     });
   };
 
-  if (!supClientLocalesLoaded) {
-    files.unshift({ root: "/", name: "supClient" });
-    supClientLocalesLoaded = true;
-  }
-
   for (let file of files) {
     loadFile(language, file, i18nContexts);
     if (language !== "en") loadFile("en", file, i18nFallbackContexts);
   }
-  allFilesRequested = true;
 }
 
 export function t(key: string, variables: { [key: string]: string } = {}) {

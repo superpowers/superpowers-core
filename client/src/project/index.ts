@@ -147,10 +147,10 @@ function start() {
 
   if (localStorage.getItem("superpowers-disable-notifications") != null) {
     toggleNotificationsButton.classList.add("disabled");
-    toggleNotificationsButton.title = SupClient.i18n.t("project:notifications.enable");
+    toggleNotificationsButton.title = SupClient.i18n.t("project:header.notifications.enable");
   } else {
     toggleNotificationsButton.classList.remove("disabled");
-    toggleNotificationsButton.title = SupClient.i18n.t("project:notifications.disable");
+    toggleNotificationsButton.title = SupClient.i18n.t("project:header.notifications.disable");
   }
 
   // Panes and tools
