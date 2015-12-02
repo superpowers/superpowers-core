@@ -7,10 +7,11 @@ server/**.js
 client/**.js
 launcher/src/**.js
 launcher/main.js
+workbench/
 syntax: regexp
 ^systems/
 ^projects/
 ^builds/
-^public/
+^public/(?!locales)
 ^launcher/public/
 ^config.json
