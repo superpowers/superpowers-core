@@ -13,7 +13,6 @@ let TabStrip = require("tab-strip");
 let socket: SocketIOClient.Socket;
 
 interface EditorManifest {
-  title: string;
   // assetType: string; <- for asset editors, soon
   pinned?: boolean;
   pluginPath: string;
@@ -187,35 +186,35 @@ function connect() {
   socket.on("remove:dependencies", onDependenciesRemoved);
 }
 
+function loadPluginLocales(pluginsPaths: string[], cb: Function) {
+  let localeFiles: SupClient.i18n.File[] = [];
+  let pluginsRoot = `/systems/${data.systemName}/plugins`;
+  for (let pluginPath of pluginsPaths)
+    localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "plugin", context: pluginPath });
+
+  SupClient.i18n.load(localeFiles, cb);
+}
+
 function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback: Function) {
   data.editorsByAssetType = {};
   data.assetTypesByTitle = {};
 
-  let pluginsRoot = `/systems/${data.systemName}/plugins`;
+  for (let assetType in editorPaths)
+    data.editorsByAssetType[assetType] = { pluginPath: editorPaths[assetType] };
 
-  async.each(Object.keys(editorPaths), (assetType, cb) => {
-    let pluginPath = editorPaths[assetType];
-    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${assetType}/manifest.json`)
-    .then((response) => response.json())
-    .then((manifest: EditorManifest) => {
-      manifest.pluginPath = pluginPath;
-      data.editorsByAssetType[assetType] = manifest;
-      cb();
-    })
-    .catch((error) => {
-      data.editorsByAssetType[assetType] = { title: assetType, pluginPath };
-      cb();
-    });
-  }, () => {
-    let assetTypes = Object.keys(data.editorsByAssetType);
-    assetTypes.sort((a, b) => data.editorsByAssetType[a].title.localeCompare(data.editorsByAssetType[b].title));
-
-    for (let assetType of assetTypes) {
-      let manifest = data.editorsByAssetType[assetType];
-      data.assetTypesByTitle[manifest.title] = assetType;
-    }
-    callback();
+  let assetTypes = Object.keys(data.editorsByAssetType);
+  assetTypes.sort((a, b) => {
+    let titleA = SupClient.i18n.t(`${data.editorsByAssetType[a].pluginPath}:editors.${a}.title`);
+    let titleB = SupClient.i18n.t(`${data.editorsByAssetType[b].pluginPath}:editors.${b}.title`);
+    return titleA.localeCompare(titleB);
   });
+
+  for (let assetType of assetTypes) {
+    let manifest = data.editorsByAssetType[assetType];
+    let title = SupClient.i18n.t(`${manifest.pluginPath}:editors.${assetType}.title`);
+    data.assetTypesByTitle[title] = assetType;
+  }
+  callback();
 }
 
 function setupTools(toolPaths: { [name: string]: string; }, callback: Function) {
@@ -225,6 +224,7 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
 
   async.each(Object.keys(toolPaths), (toolName, cb) => {
     let pluginPath = toolPaths[toolName];
+
     window.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`)
     .then((response) => response.json())
     .then((manifest: EditorManifest) => {
@@ -233,14 +233,18 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
       cb();
     })
     .catch((error) => {
-      data.toolsByName[toolName] = { title: toolName, pinned: false, pluginPath };
+      data.toolsByName[toolName] = { pinned: false, pluginPath };
       cb();
     });
   }, () => {
     ui.toolsElt.innerHTML = "";
 
     let toolNames = Object.keys(data.toolsByName);
-    toolNames.sort((a, b) => data.toolsByName[a].title.localeCompare(data.toolsByName[b].title));
+    toolNames.sort((a, b) => {
+      let titleA = SupClient.i18n.t(`${data.toolsByName[a].pluginPath}:editors.${a}.title`);
+      let titleB = SupClient.i18n.t(`${data.toolsByName[b].pluginPath}:editors.${b}.title`);
+      return titleA.localeCompare(titleB);
+    });
 
     for (let toolName of toolNames) setupTool(toolName);
     callback();
@@ -267,7 +271,7 @@ function setupTool(toolName: string) {
 
   let nameSpanElt = document.createElement("span");
   nameSpanElt.className = "name";
-  nameSpanElt.textContent = tool.title;
+  nameSpanElt.textContent = SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`);
   containerElt.appendChild(nameSpanElt);
 
   toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
@@ -309,14 +313,15 @@ function onWelcome(clientId: number, config: { buildPort: number; systemName: st
   };
 
   window.fetch(`/systems/${data.systemName}/plugins.json`).then((response) => response.json()).then((pluginsInfo: SupCore.PluginsInfo) => {
-
-    async.parallel([
-      (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
-      (cb: Function) => { setupTools(pluginsInfo.paths.tools, cb); }
-    ], (err) => {
-      if (err) throw err;
-      socket.emit("sub", "manifest", null, onManifestReceived);
-      socket.emit("sub", "entries", null, onEntriesReceived);
+    loadPluginLocales(pluginsInfo.list, () => {
+      async.parallel([
+        (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
+        (cb: Function) => { setupTools(pluginsInfo.paths.tools, cb); }
+      ], (err) => {
+        if (err) throw err;
+        socket.emit("sub", "manifest", null, onManifestReceived);
+        socket.emit("sub", "entries", null, onEntriesReceived);
+      });
     });
   });
 }
@@ -801,7 +806,8 @@ function onNewAssetClick() {
   new CreateAssetDialog(data.assetTypesByTitle, autoOpenAsset, (name, type, open) => {
     /* tslint:enable:no-unused-expression */
     if (name == null) return;
-    if (name === "") name = data.editorsByAssetType[type].title;
+    if (name === "")
+      name = SupClient.i18n.t(`${data.editorsByAssetType[type].pluginPath}:editors.${type}.title`);
 
     autoOpenAsset = open;
     socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
@@ -1016,7 +1022,7 @@ function createToolTabElement(toolName: string, tool: EditorManifest) {
     let tabLabelName = document.createElement("div");
     tabLabelName.classList.add("name");
     tabLabel.appendChild(tabLabelName);
-    tabLabelName.textContent = tool.title;
+    tabLabelName.textContent = SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`);
 
     let closeButton = document.createElement("button");
     closeButton.classList.add("close");
