@@ -19,7 +19,7 @@ function loadLocales(locale) {
   if (defaultLocals != null) {
     function checkRecursively(defaultRoot, root, key, path) {
       if (root[key] == undefined) {
-        console.log("Missing key in " + locale + " translation: " + path + "." + key)
+        console.log("Missing key in " + locale + " translation: " + path)
         root[key] = defaultRoot[key];
 
       } else if (typeof defaultRoot[key] === "object") {
