@@ -162,7 +162,7 @@ function start() {
   connect();
 }
 
-SupClient.i18n.load([{ root: "/", name: "project" }], start);
+SupClient.i18n.load([{ root: "/", name: "project" }, { root: "/", name: "badges" }], start);
 
 function connect() {
   socket = SupClient.connect(SupClient.query.project, { reconnection: true });
@@ -189,8 +189,10 @@ function connect() {
 function loadPluginLocales(pluginsPaths: string[], cb: Function) {
   let localeFiles: SupClient.i18n.File[] = [];
   let pluginsRoot = `/systems/${data.systemName}/plugins`;
-  for (let pluginPath of pluginsPaths)
+  for (let pluginPath of pluginsPaths) {
     localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "plugin", context: pluginPath });
+    localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "badges" });
+  }
 
   SupClient.i18n.load(localeFiles, cb);
 }
@@ -491,7 +493,7 @@ function onBadgeSet(id: string, newBadge: SupCore.Data.BadgeItem) {
   let badgesElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges`);
   let badgeSpan = document.createElement("span");
   badgeSpan.className = newBadge.id;
-  badgeSpan.textContent = newBadge.id;
+  badgeSpan.textContent = SupClient.i18n.t(`badges:${newBadge.id}`);
   badgesElt.appendChild(badgeSpan);
 }
 
@@ -609,7 +611,7 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
     for (let badge of entry.badges) {
       let badgeSpan = document.createElement("span");
       badgeSpan.className = badge.id;
-      badgeSpan.textContent = badge.id;
+      badgeSpan.textContent = SupClient.i18n.t(`badges:${badge.id}`);
       badgesSpan.appendChild(badgeSpan);
     }
     liElt.appendChild(badgesSpan);

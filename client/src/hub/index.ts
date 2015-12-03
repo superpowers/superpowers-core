@@ -56,8 +56,8 @@ function start() {
   socket.on("updateIcon:projects", onUpdateProjectIcon);
 }
 
-let i18nFiles: SupClient.i18n.File[] = [ { root: "/", name: "hub" } ]
-loadSystemsInfo(() => { SupClient.i18n.load(i18nFiles, start); })
+let i18nFiles: SupClient.i18n.File[] = [ { root: "/", name: "hub" } ];
+loadSystemsInfo(() => { SupClient.i18n.load(i18nFiles, start); });
 
 interface SystemManifest {
   title: string;
