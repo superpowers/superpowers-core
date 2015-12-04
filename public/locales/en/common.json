@@ -2,6 +2,6 @@
   "cancel": "Cancel",
   "open": "Open",
   "namePatternDescription": "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].",
-  "downlaod": "Download",
+  "download": "Download",
   "upload": "Upload"
 }
