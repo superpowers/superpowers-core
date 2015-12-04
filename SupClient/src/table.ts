@@ -142,7 +142,7 @@ export function appendAssetField(parent: HTMLElement, value: string) {
   let textField = appendTextField(assetParent, value);
 
   let buttonElt = document.createElement("button");
-  buttonElt.textContent = SupClient.i18n.t("supClient:open");
+  buttonElt.textContent = SupClient.i18n.t("common:open");
   assetParent.appendChild(buttonElt);
 
   return { textField, buttonElt };

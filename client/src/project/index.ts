@@ -822,7 +822,7 @@ function onNewFolderClick() {
     initialValue: SupClient.i18n.t("project:treeView.newFolder.initialValue"),
     validationLabel: SupClient.i18n.t("project:treeView.newFolder.validate"),
     pattern: SupClient.namePattern,
-    title: SupClient.i18n.t("supClient:namePatternDescription")
+    title: SupClient.i18n.t("common:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */
@@ -914,7 +914,7 @@ function onRenameEntryClick() {
     initialValue: entry.name,
     validationLabel: SupClient.i18n.t("project:treeView.rename.validate"),
     pattern: SupClient.namePattern,
-    title: SupClient.i18n.t("supClient:namePatternDescription")
+    title: SupClient.i18n.t("common:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */
@@ -939,7 +939,7 @@ function onDuplicateEntryClick() {
     initialValue: entry.name,
     validationLabel: SupClient.i18n.t("project:treeView.duplicate.validate"),
     pattern: SupClient.namePattern,
-    title: SupClient.i18n.t("supClient:namePatternDescription")
+    title: SupClient.i18n.t("common:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */

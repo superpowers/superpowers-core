@@ -30,7 +30,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     this.nameInputElt = document.createElement("input");
     this.nameInputElt.placeholder = SupClient.i18n.t("project:treeView.newAsset.placeholder");
     this.nameInputElt.pattern = SupClient.namePattern;
-    this.nameInputElt.title = SupClient.i18n.t("supClient:namePatternDescription");
+    this.nameInputElt.title = SupClient.i18n.t("common:namePatternDescription");
     this.formElt.appendChild(this.nameInputElt);
 
     // Auto-open checkbox
@@ -60,7 +60,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = SupClient.i18n.t("supClient:cancel");
+    cancelButtonElt.textContent = SupClient.i18n.t("common:cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 

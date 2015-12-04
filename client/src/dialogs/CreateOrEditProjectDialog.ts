@@ -101,7 +101,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     this.nameInputElt.required = true;
     this.nameInputElt.placeholder = SupClient.i18n.t("hub:newProject.namePlaceholder");
     this.nameInputElt.pattern = SupClient.namePattern;
-    this.nameInputElt.title = SupClient.i18n.t("supClient:namePatternDescription");
+    this.nameInputElt.title = SupClient.i18n.t("common:namePatternDescription");
     textContainerElt.appendChild(this.nameInputElt);
 
     // Description
@@ -186,7 +186,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = SupClient.i18n.t("supClient:cancel");
+    cancelButtonElt.textContent = SupClient.i18n.t("common:cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 

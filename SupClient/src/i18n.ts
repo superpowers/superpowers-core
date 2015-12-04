@@ -13,14 +13,14 @@ interface I18nContext { [context: string]: I18nValue; }
 let language = cookies.get("language");
 let i18nFallbackContexts: I18nContext = {};
 let i18nContexts: I18nContext = {};
-let supClientLocalesLoaded = false;
+let commonLocalesLoaded = false;
 
 export function load(files: File[], callback: Function) {
   if (language === "none") { callback(); return; }
 
-  if (!supClientLocalesLoaded) {
-    files.unshift({ root: "/", name: "supClient" });
-    supClientLocalesLoaded = true;
+  if (!commonLocalesLoaded) {
+    files.unshift({ root: "/", name: "common" });
+    commonLocalesLoaded = true;
   }
 
   let filesToLoad = files.length;
