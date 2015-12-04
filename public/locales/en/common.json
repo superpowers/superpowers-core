@@ -1,5 +1,7 @@
 {
   "cancel": "Cancel",
   "open": "Open",
-  "namePatternDescription": "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ]."
+  "namePatternDescription": "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].",
+  "downlaod": "Download",
+  "upload": "Upload"
 }
