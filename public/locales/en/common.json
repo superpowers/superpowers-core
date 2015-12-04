@@ -1,7 +1,15 @@
 {
-  "cancel": "Cancel",
-  "open": "Open",
   "namePatternDescription": "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].",
-  "download": "Download",
-  "upload": "Upload"
+  "none": "(None)",
+  
+  "actions": {
+    "cancel": "Cancel",
+    "skip": "Skip",
+    "open": "Open",
+    "download": "Download",
+    "upload": "Upload",
+    "rename": "Rename",
+    "delete": "Delete",
+    "duplicate": "Duplicate"
+  }
 }

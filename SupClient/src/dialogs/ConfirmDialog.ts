@@ -15,7 +15,7 @@ export default class ConfirmDialog extends BaseDialog {
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = SupClient.i18n.t("common:cancel");
+    cancelButtonElt.textContent = SupClient.i18n.t("common:actions.cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
