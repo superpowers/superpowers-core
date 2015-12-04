@@ -24,13 +24,13 @@ function loadLocales(locale) {
 
       } else if (typeof defaultRoot[key] === "object") {
         var keys = Object.keys(defaultRoot[key]);
-        for (var i = 0 ; i < keys.length; i++) {
+        for (var i = 0; i < keys.length; i++) {
           checkRecursively(defaultRoot[key], root[key], keys[i], path + "." + keys[i]);
         }
       }
     }
     var keys = Object.keys(defaultLocals);
-    for (var i = 0 ; i < keys.length; i++)
+    for (var i = 0; i < keys.length; i++)
       checkRecursively(defaultLocals, localsByContext, keys[i], keys[i]);
   }
   return localsByContext;
