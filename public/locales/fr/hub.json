@@ -12,8 +12,8 @@
     "validate": "Créer"
   },
   "editDetails": {
-    "title": "Editer les informations",
-    "prompt": "Editer les informations du projet.",
+    "title": "Éditer les informations",
+    "prompt": "Éditez les informations du projet.",
     "validate": "Mettre à jour"
   },
   "openProject": "Ouvrir le projet",
