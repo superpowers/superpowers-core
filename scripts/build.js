@@ -50,28 +50,59 @@ async.eachSeries(buildPaths, function(buildPath, callback) {
 
   var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
 
-  async.series([
+  async.waterfall([
 
-    function(cb) {
-      if (!fs.existsSync(buildPath + "/package.json")) { cb(); return; }
+    function (cb) {
+      if (!fs.existsSync(buildPath + "/package.json")) { cb(null, null); return; }
+      var packageJSON = require(buildPath + "/package.json");
+      cb(null, packageJSON);
+    },
+
+    function(packageJSON, cb) {
+      // Skip if the package doesn't need to be installed
+      if (packageJSON == null || packageJSON.dependencies == null && packageJSON.devDependencies == null) {
+        if (packageJSON == null || packageJSON.scripts == null ||
+        (packageJSON.scripts.preinstall == null &&
+        packageJSON.scripts.install == null &&
+        packageJSON.scripts.postinstall == null)) {
+          cb(null, packageJSON);
+          return;
+        }
+      }
 
       var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "install" ], spawnOptions);
 
       npm.on("close", function(status) {
-        if (status !== 0) errors.push("[" + buildPath + "] npm exited with status code " + status);
-        cb();
+        if (status !== 0) errors.push("[" + buildPath + "] `npm install` exited with status code " + status);
+        cb(null, packageJSON);
       });
     },
 
-    function(cb) {
-      if (!fs.existsSync(buildPath + "/gulpfile.js")) { cb(); return; }
+    function(packageJSON, cb) {
+      // Check if the package has a build script
+      if (buildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
+        var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "run", "build" ], spawnOptions);
+  
+        npm.on("close", function(status) {
+          if (status !== 0) errors.push("[" + buildPath + "] `npm run build` exited with status code " + status);
+          cb();
+        });
+        return;
+      }
 
-      var gulp = child_process.spawn("gulp" + (execSuffix ? ".cmd" : ""), [], spawnOptions);
+      // Check if the package has a gulpfile instead
+      if (fs.existsSync(buildPath + "/gulpfile.js")) {
+        var gulp = child_process.spawn("gulp" + (execSuffix ? ".cmd" : ""), [], spawnOptions);
 
-      gulp.on("close", function(status) {
-        if (status !== 0) errors.push("[" + buildPath + "] gulp exited with status code " + status);
-        cb();
-      });
+        gulp.on("close", function(status) {
+          if (status !== 0) errors.push("[" + buildPath + "] gulp exited with status code " + status);
+          cb();
+        });
+        return;
+      }
+
+      cb();
+      return;
     }
 
   ], callback);

@@ -8,6 +8,9 @@
     "type": "hg",
     "url": "https://bitbucket.org/superpowers/superpowers"
   },
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
   "superpowers": {
     "electronVersion": "0.35.1",
     "appApiVersion": 1
