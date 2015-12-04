@@ -75,6 +75,13 @@
       ]
     },
     {
+      "taskName": "cannonjs",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/cannonjs/"
+      ]
+    },
+    {
       "taskName": "cubicModel",
       "args": [
         "--cwd",
@@ -86,6 +93,13 @@
       "args": [
         "--cwd",
         "./systems/supGame/plugins/sparklinlabs/documentation/"
+      ]
+    },
+    {
+      "taskName": "eventEmitter",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/eventEmitter/"
       ]
     },
     {
@@ -138,10 +152,10 @@
       ]
     },
     {
-      "taskName": "settings",
+      "taskName": "rngjs",
       "args": [
         "--cwd",
-        "./systems/supGame/plugins/sparklinlabs/settings/"
+        "./systems/supGame/plugins/sparklinlabs/rngjs/"
       ]
     },
     {
@@ -152,6 +166,13 @@
       ]
     },
     {
+      "taskName": "settings",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/settings/"
+      ]
+    },
+    {
       "taskName": "shader",
       "args": [
         "--cwd",
@@ -159,10 +180,10 @@
       ]
     },
     {
-      "taskName": "sprite",
+      "taskName": "socketio",
       "args": [
         "--cwd",
-        "./systems/supGame/plugins/sparklinlabs/sprite/"
+        "./systems/supGame/plugins/sparklinlabs/socketio/"
       ]
     },
     {
@@ -170,6 +191,13 @@
       "args": [
         "--cwd",
         "./systems/supGame/plugins/sparklinlabs/sound/"
+      ]
+    },
+    {
+      "taskName": "sprite",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/sprite/"
       ]
     },
     {
@@ -184,6 +212,20 @@
       "args": [
         "--cwd",
         "./systems/supGame/plugins/sparklinlabs/tileMap/"
+      ]
+    },
+    {
+      "taskName": "transformHelpers",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/transformHelpers/"
+      ]
+    },
+    {
+      "taskName": "tweenjs",
+      "args": [
+        "--cwd",
+        "./systems/supGame/plugins/sparklinlabs/tweenjs/"
       ]
     },
     {
