@@ -8,6 +8,7 @@ interface PromptOptions {
    title?: string;
    required?: boolean;
    validationLabel?: string;
+   cancelLabel?: string;
 }
 
 interface PromptCallback {
@@ -42,7 +43,7 @@ export default class PromptDialog extends BaseDialog {
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = SupClient.i18n.t("common:cancel");
+    cancelButtonElt.textContent = (options.cancelLabel != null) ? options.cancelLabel : SupClient.i18n.t("common:cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 

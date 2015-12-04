@@ -58,6 +58,7 @@ declare namespace SupClient {
       title?: string;
       required?: boolean;
       validationLabel?: string;
+      cancelLabel?: string;
     }
 
     interface SelectOptions {
