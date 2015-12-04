@@ -26,8 +26,8 @@ export default class SelectDialog extends BaseDialog {
     this.selectElt = document.createElement("select");
     for (let choiceName in choices) {
       let optionElt = document.createElement("option");
-      optionElt.textContent = choiceName;
-      optionElt.value = choices[choiceName];
+      optionElt.value = choiceName;
+      optionElt.textContent = choices[choiceName];
       this.selectElt.appendChild(optionElt);
     }
 
