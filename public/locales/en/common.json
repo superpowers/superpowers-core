@@ -13,5 +13,10 @@
     "delete": "Delete",
     "duplicate": "Duplicate",
     "search": "Search"
+  },
+  
+  "states": { 
+    "disabled": "Disabled",
+    "enabled": "Enabled"
   }
 }
