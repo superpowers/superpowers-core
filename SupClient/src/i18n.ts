@@ -28,19 +28,17 @@ export function load(files: File[], callback: Function) {
 
   let loadFile = (language: string, file: File, root: I18nContext) => {
     let filePath = path.join(file.root, `locales/${language}`, `${file.name}.json`);
-    window.fetch(filePath).then((response) => {
-      if (response.status === 404) {
+    SupClient.fetch(filePath, "json", (err, response) => {
+      if (err != null) {
         filesToLoad -= 1;
         if (filesToLoad === 0) callback();
       } else {
-        response.json().then((data) => {
-          let context = file.context != null ? file.context : file.name;
-          if (root[context] == null) root[context] = data;
-          else root[context] = _.merge(root[context], data) as any;
+        let context = file.context != null ? file.context : file.name;
+        if (root[context] == null) root[context] = response;
+        else root[context] = _.merge(root[context], response) as any;
 
-          filesToLoad -= 1;
-          if (filesToLoad === 0) callback();
-        });
+        filesToLoad -= 1;
+        if (filesToLoad === 0) callback();
       }
     });
   };

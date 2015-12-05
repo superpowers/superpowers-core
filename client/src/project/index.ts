@@ -227,15 +227,15 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
   async.each(Object.keys(toolPaths), (toolName, cb) => {
     let pluginPath = toolPaths[toolName];
 
-    window.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`)
-    .then((response) => response.json())
-    .then((manifest: EditorManifest) => {
+    SupClient.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`, "json", (err: Error, manifest: EditorManifest) => {
+      if (err != null) {
+        data.toolsByName[toolName] = { pinned: false, pluginPath };
+        cb();
+        return;
+      }
+
       data.toolsByName[toolName] = manifest;
       data.toolsByName[toolName].pluginPath = pluginPath;
-      cb();
-    })
-    .catch((error) => {
-      data.toolsByName[toolName] = { pinned: false, pluginPath };
       cb();
     });
   }, () => {
@@ -314,7 +314,7 @@ function onWelcome(clientId: number, config: { buildPort: number; systemName: st
     systemName: config.systemName
   };
 
-  window.fetch(`/systems/${data.systemName}/plugins.json`).then((response) => response.json()).then((pluginsInfo: SupCore.PluginsInfo) => {
+  SupClient.fetch(`/systems/${data.systemName}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
     loadPluginLocales(pluginsInfo.list, () => {
       async.parallel([
         (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },

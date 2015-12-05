@@ -32,9 +32,6 @@
     "recursive-readdir/recursive-readdir.d.ts": {
       "commit": "7acdb48f24afc060260818c5937f471d73331807"
     },
-    "whatwg-fetch/whatwg-fetch.d.ts": {
-      "commit": "c2c22c3b953fe9730d4802022d5e0d18d083909e"
-    },
     "es6-promise/es6-promise.d.ts": {
       "commit": "c2c22c3b953fe9730d4802022d5e0d18d083909e"
     },

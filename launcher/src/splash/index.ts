@@ -1,3 +1,5 @@
+import supFetch from "../../../SupClient/src/fetch";
+
 let shell: GitHubElectron.Shell = nodeRequire("shell");
 
 /* tslint:disable */
@@ -22,10 +24,16 @@ splash.addEventListener("click", (event) => {
 document.querySelector(".splash .version").textContent = `v${packageInfo.version}`;
 let updateStatus = <HTMLDivElement>document.querySelector(".splash .update-status");
 
-window.fetch("http://sparklinlabs.com/releases.json").then((response) => response.json(), (response) => { updateStatus.textContent = "Failed to check for updates."; })
-  .then((releases) => {
-    let lastVersion = releases[0].version;
-    if (lastVersion === packageInfo.version) updateStatus.textContent = "";
-    else
-      updateStatus.innerHTML = `UPDATE: v${lastVersion} is available. <a href="https://sparklinlabs.com/account" target="_blank">Download it now</a>.`;
+supFetch("http://sparklinlabs.com/releases.json", "json", (err, releases) => {
+  if (err != null) {
+    updateStatus.textContent = "Failed to check for updates.";
+    return;
+  }
+
+  let lastVersion = releases[0].version;
+  if (lastVersion === packageInfo.version) updateStatus.textContent = "";
+  else {
+    updateStatus.innerHTML = `UPDATE: v${lastVersion} is available. ` +
+    `<a href="https://sparklinlabs.com/account" target="_blank">Download it now</a>.`;
+  }
 });

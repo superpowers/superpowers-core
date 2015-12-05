@@ -67,10 +67,10 @@ interface SystemManifest {
 function loadSystemsInfo(callback: Function) {
   data.systemsByName = {};
 
-  window.fetch("/systems.json").then((response) => response.json()).then((systemsInfo: SupCore.SystemsInfo) => {
+  SupClient.fetch("/systems.json", "json", (err: Error, systemsInfo: SupCore.SystemsInfo) => {
     async.each(systemsInfo.list, (systemName, cb) => {
       i18nFiles.push({ root: `/systems/${systemName}`, name: "system", context: `system-${systemName}` });
-      window.fetch(`/systems/${systemName}/templates.json`).then((response) => response.json()).then((templatesList: string[]) => {
+      SupClient.fetch(`/systems/${systemName}/templates.json`, "json", (err: Error, templatesList: string[]) => {
         for (let templateName of templatesList) {
           i18nFiles.push({
             root: `/systems/${systemName}/templates/${templateName}`,

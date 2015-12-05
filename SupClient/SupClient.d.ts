@@ -8,6 +8,8 @@ declare namespace SupClient {
   export let query: { project: string, asset: string; [key: string]: string; };
   export let cookies: Cookies.CookiesStatic;
 
+  export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => any): void;
+
   export let activePluginPath: string;
   export let plugins: { [context: string]: { [name: string]: { path: string; content: any; } } };
   export function registerPlugin(context: string, name: string, plugin: any): void;
