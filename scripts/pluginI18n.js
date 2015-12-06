@@ -1,5 +1,7 @@
 var fs = require("fs");
 var defaultContexts = null;
+//exports.localesPath = "./public/locales/";
+exports.rootLocalesPath = "../../../../../public/locales/";
 exports.localesPath = "./public/locales/";
 
 exports.loadLocale = function(locale) {
@@ -12,7 +14,7 @@ exports.loadLocale = function(locale) {
     var file = fs.readFileSync(exports.localesPath + locale + "/" + fileName, { encoding: "utf8" });
     contexts[fileName.slice(0, fileName.lastIndexOf("."))] = JSON.parse(file);
   });
-  contexts["common"] = JSON.parse(fs.readFileSync("../../../../../public/locales/" + locale + "/common.json", { encoding: "utf8" }));
+  contexts["common"] = JSON.parse(fs.readFileSync(exports.rootLocalesPath + locale + "/common.json", { encoding: "utf8" }));
 
   if (defaultContexts != null) {
     function checkRecursively(defaultRoot, root, key, path) {

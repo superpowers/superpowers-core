@@ -7,7 +7,7 @@ var jade = require("gulp-jade");
 var rename = require("gulp-rename");
 var pluginI18n = require("./pluginI18n");
 var locales = [ "en" ];
-try { locales = fs.readdirSync(pluginI18n.localesPath); } catch (err) { /* Ignore */ }
+try { locales = fs.readdirSync(pluginI18n.rootLocalesPath); } catch (err) { /* Ignore */ }
 
 locales.forEach(function(locale) {
   var contexts = pluginI18n.loadLocale(locale);
