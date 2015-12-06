@@ -1,7 +1,6 @@
 {
   "header": {
     "goToHub": "Go to hub",
-    "loading": "Loading...",
     "publish": "Publish project",
     "publishDisabled": "Publish project (only works from the Superpowers app for technical reasons)",
     "stop": "Stop project",

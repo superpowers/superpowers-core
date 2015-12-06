@@ -15,9 +15,10 @@
     "search": "Search",
     "save": "Save"
   },
-  
+
   "states": { 
     "disabled": "Disabled",
-    "enabled": "Enabled"
+    "enabled": "Enabled",
+    "loading": "Loading..."
   }
 }
