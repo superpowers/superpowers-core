@@ -12,7 +12,8 @@
     "rename": "Rename",
     "delete": "Delete",
     "duplicate": "Duplicate",
-    "search": "Search"
+    "search": "Search",
+    "save": "Save"
   },
   
   "states": { 
