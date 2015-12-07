@@ -94,8 +94,8 @@ export default class ProjectClient {
       if (this.assetsById[assetId] != null) {
         this.assetsById[assetId].client_unload();
         delete this.assetsById[assetId];
-        this.socket.emit("unsub", "assets", assetId);
       }
+      this.socket.emit("unsub", "assets", assetId);
     }
   }
 
@@ -125,8 +125,8 @@ export default class ProjectClient {
       delete this.subscribersByResourceId[resourceId];
       if (this.resourcesById[resourceId] != null) {
         delete this.resourcesById[resourceId];
-        this.socket.emit("unsub", "resources", resourceId);
       }
+      this.socket.emit("unsub", "resources", resourceId);
     }
   }
 
