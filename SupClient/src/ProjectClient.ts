@@ -91,9 +91,11 @@ export default class ProjectClient {
     subscribers.splice(index, 1);
     if (subscribers.length === 0) {
       delete this.subscribersByAssetId[assetId];
-      this.assetsById[assetId].client_unload();
-      delete this.assetsById[assetId];
-      this.socket.emit("unsub", "assets", assetId);
+      if (this.assetsById[assetId] != null) {
+        this.assetsById[assetId].client_unload();
+        delete this.assetsById[assetId];
+        this.socket.emit("unsub", "assets", assetId);
+      }
     }
   }
 
@@ -121,8 +123,10 @@ export default class ProjectClient {
     subscribers.splice(index, 1);
     if (subscribers.length === 0) {
       delete this.subscribersByResourceId[resourceId];
-      delete this.resourcesById[resourceId];
-      this.socket.emit("unsub", "resources", resourceId);
+      if (this.resourcesById[resourceId] != null) {
+        delete this.resourcesById[resourceId];
+        this.socket.emit("unsub", "resources", resourceId);
+      }
     }
   }
 
