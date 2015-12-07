@@ -4,12 +4,10 @@ export default function() {
   document.addEventListener("keydown", (event) => {
     if (document.querySelector(".dialog") != null) return;
 
-    // window.location.origin isn't listed in lib.d.ts as of TypeScript 1.5
-    let origin: string = (<any>window.location).origin;
-
+    let ctrlOrCmd = event.ctrlKey || event.metaKey;
+    let origin = window.location.origin;
     function sendMessage(action: string) {
-      if (window.parent != null) window.parent.postMessage({ type: "hotkey", content: action }, origin);
-      else window.postMessage({ type: "hotkey", content: action }, origin);
+      window.top.postMessage({ type: "hotkey", content: action }, origin);
     }
 
     if (localStorage.getItem("superpowers-dev-mode") != null && window.parent != null) {
@@ -18,17 +16,17 @@ export default function() {
 
     if (event.keyCode === 8 /* Backspace */) isBackspaceDown = true;
 
-    if (event.keyCode === 78 && (event.ctrlKey || event.metaKey)) { // Ctrl+N
+    if (event.keyCode === 78 && ctrlOrCmd) { // Ctrl+N
       event.preventDefault();
       if (event.shiftKey) sendMessage("newFolder");
       else sendMessage("newAsset");
     }
 
-    if ((event.keyCode === 79 || event.keyCode === 80) && (event.ctrlKey || event.metaKey)) { // Ctrl+O or Ctrl+P
+    if ((event.keyCode === 79 || event.keyCode === 80) && ctrlOrCmd) { // Ctrl+O or Ctrl+P
       event.preventDefault(); sendMessage("searchEntry");
     }
 
-    if (event.keyCode === 87 && (event.ctrlKey || event.metaKey)) { // Ctrl+W
+    if (event.keyCode === 87 && ctrlOrCmd) { // Ctrl+W
       event.preventDefault(); sendMessage("closeTab");
     }
 
