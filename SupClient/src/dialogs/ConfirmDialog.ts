@@ -1,4 +1,5 @@
 import BaseDialog from "./BaseDialog";
+import * as i18n from "../i18n";
 
 export default class ConfirmDialog extends BaseDialog {
   constructor(label: string, validationLabel: string, private callback: (confirmed: boolean) => any) {
@@ -15,7 +16,7 @@ export default class ConfirmDialog extends BaseDialog {
 
     let cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = SupClient.i18n.t("common:actions.cancel");
+    cancelButtonElt.textContent = i18n.t("common:actions.cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
