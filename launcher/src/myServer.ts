@@ -1,5 +1,7 @@
+let shell: GitHubElectron.Shell = nodeRequire("shell");
 import * as config from "./config";
 import * as dummy_childProcess from "child_process";
+import { userData } from "./panes/serverPaths";
 
 let path = nodeRequire("path");
 let childProcess = nodeRequire("child_process");
@@ -61,3 +63,7 @@ function startServer() {
 }
 
 if (config.autoStartServer) startServer();
+
+myServerElt.querySelector("button.open-projects").addEventListener("click", () => {
+  shell.showItemInFolder(path.join(userData, "projects"));
+});
