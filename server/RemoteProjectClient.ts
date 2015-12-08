@@ -7,7 +7,6 @@ import * as fs from "fs";
 import * as rimraf from "rimraf";
 import * as async from "async";
 import * as recursiveReaddir from "recursive-readdir";
-import * as _ from "lodash";
 
 export default class RemoteProjectClient extends BaseRemoteClient {
 
@@ -100,8 +99,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     let entry: SupCore.Data.EntryNode = {
       id: null, name: newName, type: entryToDuplicate.type,
-      badges: _.cloneDeep(entryToDuplicate.badges),
-      dependentAssetIds: []
+      badges: [], dependentAssetIds: []
     };
 
     if (options == null) options = {};
@@ -110,7 +108,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       if (err != null) { callback(err); return; }
 
       let newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
-
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
         fs.mkdirSync(newAssetPath);
         referenceAsset.save(newAssetPath, (err: Error) => {
@@ -125,8 +122,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           }
 
           this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
-          callback(null, entry.id);
-          return;
+
+          this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
+            newAsset.restore();
+            this.server.data.assets.release(entry.id, null);
+            callback(null, entry.id);
+          });
         });
       });
     });
