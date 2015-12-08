@@ -4,7 +4,7 @@ let TreeView = require("dnd-tree-view");
 import * as dialogs from "../../../SupClient/src/dialogs/index";
 import * as config from "../config";
 
-let serversTreeView = new TreeView(document.querySelector(".servers-tree-view"));
+let serversTreeView = new TreeView(document.querySelector(".servers-tree-view"), { multipleSelection: false });
 export { serversTreeView };
 
 function start() {
@@ -13,6 +13,7 @@ function start() {
     serversTreeView.append(liElt, "item");
   }
 
+  serversTreeView.on("selectionChange", onSelectionChange);
   serversTreeView.on("activate", onServerActivate);
 
   document.querySelector(".servers .buttons .add-server").addEventListener("click", onAddServerClick);
@@ -96,6 +97,13 @@ function onRemoveAddressClick() {
 
     node.parentElement.removeChild(node);
  });
+}
+
+function onSelectionChange() {
+  let noServerSelected = serversTreeView.selectedNodes.length === 0;
+  (document.querySelector(".servers .buttons .rename-server") as HTMLButtonElement).disabled = noServerSelected;
+  (document.querySelector(".servers .buttons .edit-address") as HTMLButtonElement).disabled = noServerSelected;
+  (document.querySelector(".servers .buttons .remove-server") as HTMLButtonElement).disabled = noServerSelected;
 }
 
 let ipc: GitHubElectron.InProcess = nodeRequire("ipc");
