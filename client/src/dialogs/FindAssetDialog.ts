@@ -22,7 +22,7 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
 
     this.searchElt = document.createElement("input");
     this.searchElt.type = "search";
-    this.searchElt.placeholder = SupClient.i18n.t("project:treeView.search.placeholder");
+    this.searchElt.placeholder = SupClient.i18n.t("project:treeView.searchPlaceholder");
     this.formElt.appendChild(this.searchElt);
     this.searchElt.addEventListener("input", this.onSearchInput);
 

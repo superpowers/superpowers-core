@@ -16,41 +16,24 @@
     "connecting": "Connecting...",
     "openInNewWindow": "Open in new window",
     "newAsset": {
-      "title": "New asset (Ctrl+N)",
+      "title": "New asset",
       "prompt": "Select the type and enter a name for the new asset.",
       "placeholder": "Asset name (optional)",
-      "openAfterCreation": "Open after creation",
-      "validate": "Create"
+      "openAfterCreation": "Open after creation"
     },
     "newFolder": {
-      "title": "New folder (Ctrl+Shift+N)",
+      "title": "New folder",
       "prompt": "Enter a name for the new folder.",
       "placeholder": "Enter a name",
-      "initialValue": "Folder",
-      "validate": "Create"
+      "initialValue": "Folder"
     },
-    "rename": {
-      "title": "Rename (F2)",
-      "prompt": "Enter a new name for the asset.",
-      "validate": "Rename"
-    },
-    "duplicate": {
-      "title": "Duplicate (Ctrl+D)",
-      "prompt": "Enter a name for the new asset.",
-      "validate": "Duplicate"
-    },
+    "renamePrompt": "Enter a new name for the asset.",
+    "duplicatePrompt": "Enter a name for the new asset.",
     "trash": {
-      "title": "Trash (Delete)",
+      "title": "Trash",
       "prompt": "Are you sure you want to trash the selected entries?",
-      "validate": "Trash",
-      "warnBrokenDependency": {
-        "prompt": "${entryName} is used in ${dependentEntryNames}.",
-        "validate": "Close"
-      }
+      "warnBrokenDependency": "${entryName} is used in ${dependentEntryNames}."
     },
-    "search": {
-      "title": "Search (Ctrl+O)",
-      "placeholder": "Search for assets"
-    }
+    "searchPlaceholder": "Search for assets"
   }
 }

@@ -65,7 +65,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
     this.validateButtonElt = document.createElement("button");
-    this.validateButtonElt.textContent = SupClient.i18n.t("project:treeView.newAsset.validate");
+    this.validateButtonElt.textContent = SupClient.i18n.t("common:actions.create");
     this.validateButtonElt.className = "validate-button";
 
     if (navigator.platform === "Win32") {

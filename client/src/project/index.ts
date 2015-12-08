@@ -820,7 +820,7 @@ function onNewFolderClick() {
   let options = {
     placeholder: SupClient.i18n.t("project:treeView.newFolder.placeholder"),
     initialValue: SupClient.i18n.t("project:treeView.newFolder.initialValue"),
-    validationLabel: SupClient.i18n.t("project:treeView.newFolder.validate"),
+    validationLabel: SupClient.i18n.t("common:actions.create"),
     pattern: SupClient.namePattern,
     title: SupClient.i18n.t("common:namePatternDescription")
   };
@@ -843,7 +843,7 @@ function onTrashEntryClick() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
       /* tslint:disable:no-unused-expression */
-      new SupClient.dialogs.ConfirmDialog(SupClient.i18n.t("project:treeView.trash.prompt"), SupClient.i18n.t("project:treeView.trash.validate"), (confirm) => {
+      new SupClient.dialogs.ConfirmDialog(SupClient.i18n.t("project:treeView.trash.prompt"), SupClient.i18n.t("project:treeView.trash.title"), (confirm) => {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
@@ -872,10 +872,10 @@ function onTrashEntryClick() {
       let dependentAssetNames: string[] = [];
       for (let usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
       /* tslint:disable:no-unused-expression */
-      let promptString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency.prompt", {
+      let promptString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
         entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
       });
-      let validateString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency.validate");
+      let validateString = SupClient.i18n.t("common:actions.close");
       new SupClient.dialogs.InfoDialog(promptString, validateString, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
     } else checkNextEntry();
@@ -919,13 +919,13 @@ function onRenameEntryClick() {
 
   let options = {
     initialValue: entry.name,
-    validationLabel: SupClient.i18n.t("project:treeView.rename.validate"),
+    validationLabel: SupClient.i18n.t("common:actions.rename"),
     pattern: SupClient.namePattern,
     title: SupClient.i18n.t("common:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.rename.prompt"), options, (newName) => {
+  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.renamePrompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null || newName === entry.name) return;
 
@@ -944,13 +944,13 @@ function onDuplicateEntryClick() {
 
   let options = {
     initialValue: entry.name,
-    validationLabel: SupClient.i18n.t("project:treeView.duplicate.validate"),
+    validationLabel: SupClient.i18n.t("common:actions.duplicate"),
     pattern: SupClient.namePattern,
     title: SupClient.i18n.t("common:namePatternDescription")
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicate.prompt"), options, (newName) => {
+  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null) return;
 

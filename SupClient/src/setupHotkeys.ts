@@ -60,4 +60,22 @@ export default function() {
     }
     return null;
   });
+
+  let hotkeyButtons = document.querySelectorAll("[data-hotkey]") as NodeListOf<HTMLButtonElement>;
+  for (let i = 0; i < hotkeyButtons.length; i++) {
+    let hotkeyButton = hotkeyButtons[i];
+    let hotkeys = hotkeyButton.dataset["hotkey"].split("+");
+    let hotkeyComplete = "";
+    for (let hotkey of hotkeys) {
+      let hotkeyPartKey: string;
+      if (hotkey === "control" && window.navigator.platform === "MacIntel") hotkeyPartKey = `common:hotkeys.command`;
+      else hotkeyPartKey = `common:hotkeys.${hotkey}`;
+
+      let hotkeyPartString = SupClient.i18n.t(hotkeyPartKey);
+      if (hotkeyComplete !== "") hotkeyComplete += "+";
+      if (hotkeyPartString === hotkeyPartKey) hotkeyComplete += hotkey;
+      else hotkeyComplete += hotkeyPartString;
+    }
+    hotkeyButton.title += ` (${hotkeyComplete})`;
+  }
 }
