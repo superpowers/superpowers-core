@@ -892,8 +892,15 @@ function onOpenInNewWindowClick(event: any) {
     let address = `${window.location.origin}/systems/${data.systemName}` +
     `/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
     `?project=${SupClient.query.project}&asset=${entry.id}`;
-    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address);
-    else window.open(address);
+
+    let title = entry.name;
+    let entryPath = data.entries.getPathFromId(id);
+    if (entryPath !== entry.name) title += ` - ${entryPath}`;
+    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address, title);
+    else {
+      let newWindow: any = window.open(address);
+      newWindow.addEventListener("load", () => { newWindow.document.title = title; });
+    }
   } else {
     let name = event.target.parentElement.dataset.name;
     let address = `${window.location.origin}/systems/${data.systemName}` +

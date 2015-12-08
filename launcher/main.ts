@@ -126,9 +126,9 @@ function connect(openServer: OpenServer) {
 }
 
 let standaloneWindowsById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
-ipc.on("new-standalone-window", (event: Event, address: string) => {
+ipc.on("new-standalone-window", (event: Event, address: string, title: string) => {
   let standaloneWindow = new BrowserWindow({
-    title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
+    title, icon: `${__dirname}/public/images/icon.png`,
     width: 1000, height: 600,
     "min-width": 800, "min-height": 480,
     "auto-hide-menu-bar": true
