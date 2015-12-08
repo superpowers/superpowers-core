@@ -24,6 +24,7 @@ export function load(files: File[], callback: Function) {
   }
 
   let filesToLoad = files.length;
+  if (filesToLoad === 0) { callback(); return; }
   if (language !== "en") filesToLoad *= 2;
 
   let loadFile = (language: string, file: File, root: I18nContext) => {
