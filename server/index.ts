@@ -37,12 +37,15 @@ fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ ver
 // Main HTTP server
 let mainApp = express();
 
+let languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
+languageIds.unshift("none");
+
 mainApp.use(cookieParser());
 mainApp.use((req, res, next) => {
   if (req.cookies["language"] == null) {
     let language = req.header("Accept-Language");
     if (language != null) language = language.split(",")[0].split("-")[0];
-    if (SupCore.languages[language] == null) language = "en";
+    if (languageIds.indexOf(language) == null) language = "en";
     res.cookie("language", language);
   }
 
