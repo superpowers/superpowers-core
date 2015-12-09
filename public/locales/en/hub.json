@@ -1,4 +1,5 @@
 {
+  "serverAddress": "${hostname} on port ${port}",
   "newProject": {
     "title": "New project",
     "prompt": "Enter a name and select a type for the new project.",

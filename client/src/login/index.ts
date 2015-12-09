@@ -2,9 +2,6 @@ import "../window";
 
 let port = (window.location.port.length === 0) ? "80" : window.location.port;
 
-document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
-document.querySelector("form.login").addEventListener("submit", onFormSubmit);
-
 let serverPasswordElt = document.querySelector(".server-password") as HTMLInputElement;
 let usernameElt = document.querySelector(".username") as HTMLInputElement;
 
@@ -23,6 +20,13 @@ if (supServerAuth != null) {
 
 let redirect: string = (SupClient.query as any).redirect;
 if (redirect == null) redirect = "/";
+
+SupClient.i18n.load([{ root: "/", name: "hub" }, { root: "/", name: "login" }], start);
+
+function start() {
+  document.querySelector(".server-name").textContent = SupClient.i18n.t("hub:serverAddress", { hostname: window.location.hostname, port });
+  document.querySelector("form.login").addEventListener("submit", onFormSubmit);
+}
 
 function onFormSubmit(event: Event) {
   event.preventDefault();

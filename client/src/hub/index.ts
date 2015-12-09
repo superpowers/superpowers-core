@@ -19,7 +19,7 @@ let languageNamesById: { [id: string]: string; } = {};
 if (localStorage.getItem("superpowers-dev-mode") != null) languageNamesById["none"] = "None";
 
 function start() {
-  document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
+  document.querySelector(".server-name").textContent = SupClient.i18n.t(`hub:serverAddress`, { hostname: window.location.hostname, port });
 
   ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"), { multipleSelection: false });
   ui.projectsTreeView.on("selectionChange", onProjectSelectionChange);
