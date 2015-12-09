@@ -18,6 +18,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     let systemPath = path.join(systemsPath, systemName);
 
     // Expose public stuff
+    try { fs.mkdirSync(`${systemPath}/public`); } catch (err) { /* Ignore */ }
     mainApp.use(`/systems/${systemName}`, express.static(`${systemPath}/public`));
     buildApp.use(`/systems/${systemName}`, express.static(`${systemPath}/public`));
 
