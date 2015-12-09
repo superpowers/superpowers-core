@@ -3,7 +3,6 @@
 
 declare namespace SupCore {
   export function log(message: string): void;
-  export let languages: { [value: string]: string; };
 
   namespace Data {
     export function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;

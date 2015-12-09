@@ -24,6 +24,7 @@ var browserify = require("browserify");
 var source = require("vinyl-source-stream");
 gulp.task("browserify", [ "typescript" ], function() {
   var bundler = browserify("./src/index.js", { standalone: "SupClient" });
+  bundler.transform("brfs");
   function bundle() { return bundler.bundle().pipe(source("SupClient.js")).pipe(gulp.dest("../public")); };
   return bundle();
 });

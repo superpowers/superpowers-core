@@ -1,3 +1,7 @@
 {
-  "cancel": "Annuler"
+  "activeLanguage": "Français",
+
+  "actions": {
+    "cancel": "Annuler"
+  }
 }

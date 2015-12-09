@@ -1,4 +1,6 @@
 {
+  "activeLanguage": "English",
+
   "namePatternDescription": "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].",
   "none": "(None)",
 

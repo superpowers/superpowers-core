@@ -93,6 +93,8 @@ declare namespace SupClient {
   }
 
   namespace i18n {
+    export let languageIds: string[];
+
     export interface File {
       root: string;
       name: string;

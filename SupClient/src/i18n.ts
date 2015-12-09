@@ -1,6 +1,9 @@
+import * as fs from "fs";
 import * as cookies from "js-cookie";
 import * as path from "path";
 import * as _ from "lodash";
+
+export let languageIds = fs.readdirSync(`${__dirname}/../../public/locales`);
 
 interface File {
   root: string;

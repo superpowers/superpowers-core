@@ -15,6 +15,9 @@ let ui: { projectsTreeView?: any } = {};
 let socket: SocketIOClient.Socket;
 let port = (window.location.port.length === 0) ? "80" : window.location.port;
 
+let languageNamesById: { [id: string]: string; } = {};
+if (localStorage.getItem("superpowers-dev-mode") != null) languageNamesById["none"] = "None";
+
 function start() {
   document.querySelector(".server-name").textContent = `${window.location.hostname} on port ${port}`;
 
@@ -28,14 +31,12 @@ function start() {
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
 
   let selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
-  let availableLanguageValues = Object.keys(SupCore.languages);
-  availableLanguageValues.sort();
-  for (let languageValue of availableLanguageValues) {
-    if (languageValue === "none" && localStorage.getItem("superpowers-dev-mode") == null) continue;
-
+  let languageIds = Object.keys(languageNamesById);
+  languageIds.sort();
+  for (let languageId of languageIds) {
     let optionElt = document.createElement("option");
-    optionElt.value = languageValue;
-    optionElt.textContent = SupCore.languages[languageValue];
+    optionElt.value = languageId;
+    optionElt.textContent = languageNamesById[languageId];
     selectLanguageElt.appendChild(optionElt);
   }
   selectLanguageElt.value = SupClient.cookies.get("language");
@@ -57,7 +58,16 @@ function start() {
 }
 
 let i18nFiles: SupClient.i18n.File[] = [ { root: "/", name: "hub" } ];
-loadSystemsInfo(() => { SupClient.i18n.load(i18nFiles, start); });
+loadSystemsInfo(() => {
+  async.each(SupClient.i18n.languageIds, (languageId, cb) => {
+    SupClient.fetch(`/locales/${languageId}/common.json`, "json", (err, data) => {
+       languageNamesById[languageId] = data.activeLanguage;
+       cb();
+    });
+  }, () => {
+    SupClient.i18n.load(i18nFiles, start);
+  });
+});
 
 interface SystemManifest {
   title: string;
