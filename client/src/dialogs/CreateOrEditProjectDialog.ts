@@ -191,8 +191,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
     this.validateButtonElt = document.createElement("button");
-    if (options.existingProject == null) this.validateButtonElt.textContent = SupClient.i18n.t("hub:newProject.validate");
-    else this.validateButtonElt.textContent = SupClient.i18n.t("hub:editDetails.validate");
+    if (options.existingProject == null) this.validateButtonElt.textContent = SupClient.i18n.t("common:actions.create");
+    else this.validateButtonElt.textContent = SupClient.i18n.t("common:actions.update");
     this.validateButtonElt.className = "validate-button";
 
     if (navigator.platform === "Win32") {

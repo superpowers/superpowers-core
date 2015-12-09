@@ -17,7 +17,8 @@
     "delete": "Delete",
     "duplicate": "Duplicate",
     "search": "Search",
-    "save": "Save"
+    "save": "Save",
+    "update": "Update"
   },
 
   "states": { 
