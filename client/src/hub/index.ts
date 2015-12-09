@@ -32,7 +32,7 @@ function start() {
 
   let selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
   let languageIds = Object.keys(languageNamesById);
-  languageIds.sort();
+  languageIds.sort((a, b) => languageNamesById[a].localeCompare(languageNamesById[b]));
   for (let languageId of languageIds) {
     let optionElt = document.createElement("option");
     optionElt.value = languageId;
