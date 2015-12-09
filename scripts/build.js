@@ -1,33 +1,29 @@
 var path = require("path");
 var fs = require("fs");
-var getBuildPaths = require("./getBuildPaths");
-
-var rootPath = path.resolve(__dirname + "/..");
-
-var systemsDirectoryExists = false;
-try { if (fs.statSync(rootPath + "/systems").isDirectory) systemsDirectoryExists = true; } catch(err) {}
-
-var oldSystemDirectoryExists = false;
-try { if (fs.statSync(rootPath + "/system").isDirectory) oldSystemDirectoryExists = true; } catch(err) {}
-
-if (!systemsDirectoryExists && oldSystemDirectoryExists) {
-  console.log("IMPORTANT: Superpowers now supports multiple systems, many things have moved.");
-  console.log("The system/ and plugins/ folders have moved respectively to systems/supGame/ and system/supGame/plugins/.");
-  console.log("The repositories have also been renamed to sup-game-system and sup-game-sparklinlabs-plugins.");
-  console.log("");
-  console.log("The simplest approach is probably to do a fresh bootstrap from https://sparklinlabs.com/account to avoid any potential issues with left-over build files.");
-  console.log("As always, make sure to backup your projects and plugins!");
-  process.exit(1);
-}
-
-var async = require("async");
 var child_process = require("child_process");
+var execSuffix = process.platform == "win32";
+var rootPath = path.resolve(__dirname + "/..");
 
 function log(message) {
   var text = new Date().toISOString() + " - " + message;
   console.log(text);
 }
 
+try {
+  require.resolve("async");
+} catch (err) {
+  var spawnOptions = { cwd: rootPath, env: process.env, stdio: "inherit" };
+  var result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async" ], spawnOptions);
+  
+  if (result.error != null) {
+    log("Failed to install async");
+    console.log(result.error);
+    process.exit(1);
+  }
+}
+
+var async = require("async");
+var getBuildPaths = require("./getBuildPaths");
 var buildPaths = getBuildPaths(rootPath);
 
 // Filter
@@ -39,7 +35,6 @@ if (process.argv.length > 2) {
 }
 
 // Build
-var execSuffix = process.platform == "win32";
 var errors = [];
 
 log("Build paths: " + buildPaths.map(function(buildPath) { return path.sep + path.relative(rootPath, buildPath); }).join(", "));
