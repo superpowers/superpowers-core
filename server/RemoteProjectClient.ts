@@ -4,6 +4,7 @@ import config from "./config";
 import { buildFilesBySystem } from "./loadSystems";
 import * as path from "path";
 import * as fs from "fs";
+import * as mkdirp from "mkdirp";
 import * as rimraf from "rimraf";
 import * as async from "async";
 import * as recursiveReaddir from "recursive-readdir";
@@ -81,8 +82,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         let asset = new assetClass(entry.id, null, this.server);
         asset.init({ name: entry.name }, () => {
           let assetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
-          fs.mkdirSync(assetPath);
-          asset.save(assetPath, onEntryCreated);
+          mkdirp(assetPath, () => { asset.save(assetPath, onEntryCreated); });
         });
       } else {
         onEntryCreated();
@@ -109,24 +109,25 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       let newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
-        fs.mkdirSync(newAssetPath);
-        referenceAsset.save(newAssetPath, (err: Error) => {
-          this.server.data.assets.release(id, null);
+        mkdirp(newAssetPath, () => {
+          referenceAsset.save(newAssetPath, (err: Error) => {
+            this.server.data.assets.release(id, null);
 
-          if (err != null) {
-            this.server.log(`Failed to save duplicated asset at ${newAssetPath} (duplicating ${id})`);
-            this.server.log(err.toString());
-            this.server.data.entries.remove(entry.id, (err) => { if (err != null) this.server.log(err); });
-            callback("Could not save asset");
-            return;
-          }
+            if (err != null) {
+              this.server.log(`Failed to save duplicated asset at ${newAssetPath} (duplicating ${id})`);
+              this.server.log(err.toString());
+              this.server.data.entries.remove(entry.id, (err) => { if (err != null) this.server.log(err); });
+              callback("Could not save asset");
+              return;
+            }
 
-          this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+            this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
+              newAsset.restore();
+              this.server.data.assets.release(entry.id, null);
 
-          this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
-            newAsset.restore();
-            this.server.data.assets.release(entry.id, null);
-            callback(null, entry.id);
+              this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+              callback(null, entry.id);
+            });
           });
         });
       });
@@ -136,12 +137,18 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   private onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id, { includeId: false });
+    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
+    let oldParent = this.server.data.entries.parentNodesById[id];
 
     this.server.data.entries.move(id, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
 
-      this.onEntryChangeFullPath(id, oldFullAssetPath);
+      this.onEntryChangeFullPath(id, oldFullAssetPath, () => {
+        if (oldParent == null || oldParent.children.length > 0) return;
+
+        let oldParentPath = this.server.data.entries.getStoragePathFromId(oldParent.id);
+        fs.rmdir(path.join(this.server.projectPath, `assets/${oldParentPath}`));
+      });
       this.server.io.in("sub:entries").emit("move:entries", id, parentId, actualIndex);
       callback(null);
     });
@@ -150,76 +157,111 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   private onTrashEntry = (id: string, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let entry = this.server.data.entries.byId[id];
-    let trashedAssetFolder = this.server.data.entries.getStoragePathFromId(id);
-    let asset: SupCore.Data.Base.Asset = null;
-
-    let doTrashEntry = () => {
-      // Clear all dependencies for this entry
-      let dependentAssetIds = (entry != null) ? entry.dependentAssetIds : null;
-
-      let dependencies = this.server.data.entries.dependenciesByAssetId[id];
-      if (dependencies != null) {
-        let removedDependencyEntryIds = <string[]>[];
-        for (let depId of dependencies) {
-          let depEntry = this.server.data.entries.byId[depId];
-          if (depEntry == null) continue;
-
-          let dependentAssetIds = depEntry.dependentAssetIds;
-          let index = dependentAssetIds.indexOf(id);
-          if (index !== -1) {
-            dependentAssetIds.splice(index, 1);
-            removedDependencyEntryIds.push(depId);
-          }
-        }
-
-        if (removedDependencyEntryIds.length > 0) {
-          this.server.io.in("sub:entries").emit("remove:dependencies", id, dependencies);
-        }
-
-        delete this.server.data.entries.dependenciesByAssetId[id];
-      }
-
-      // Delete the entry
-      this.server.data.entries.remove(id, (err) => {
+    let doTrashEntry = (entry: SupCore.Data.EntryNode, callback: (err: Error) => void) => {
+      let removeEntry = (err: Error) => {
         if (err != null) { callback(err); return; }
 
-        this.server.io.in("sub:entries").emit("trash:entries", id);
+        // Clear all dependencies for this entry
+        let dependentAssetIds = (entry != null) ? entry.dependentAssetIds : null;
 
-        // Notify and clear all asset subscribers
-        let roomName = `sub:assets:${id}`;
-        this.server.io.in(roomName).emit("trash:assets", id);
+        let dependencies = this.server.data.entries.dependenciesByAssetId[entry.id];
+        if (dependencies != null) {
+          let removedDependencyEntryIds = <string[]>[];
+          for (let depId of dependencies) {
+            let depEntry = this.server.data.entries.byId[depId];
+            if (depEntry == null) continue;
 
-        // NOTE: "SocketIO.Namespace.adapter" is not part of the official documented API
-        // It does exist though: https://github.com/Automattic/socket.io/blob/3f72dd3322bcefff07b5976ab817766e421d237b/lib/namespace.js#L89
-        for (let socketId in (<any>this.server.io).adapter.rooms[roomName]) {
-          let remoteClient = this.server.clientsBySocketId[socketId];
-          remoteClient.socket.leave(roomName);
-          remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
+            let dependentAssetIds = depEntry.dependentAssetIds;
+            let index = dependentAssetIds.indexOf(entry.id);
+            if (index !== -1) {
+              dependentAssetIds.splice(index, 1);
+              removedDependencyEntryIds.push(depId);
+            }
+          }
+
+          if (removedDependencyEntryIds.length > 0) {
+            this.server.io.in("sub:entries").emit("remove:dependencies", entry.id, dependencies);
+          }
+          delete this.server.data.entries.dependenciesByAssetId[entry.id];
         }
 
-        // Generate badges for any assets depending on this entry
-        if (dependentAssetIds != null) this.server.markMissingDependency(dependentAssetIds, id);
+        let asset: SupCore.Data.Base.Asset;
+        async.series([
+          (cb) => {
+            if (entry.type != null) {
+              this.server.data.assets.acquire(entry.id, null, (err, acquiredAsset) => {
+                if (err != null) { cb(err); return; }
+                asset = acquiredAsset;
+                cb(null);
+              });
+            } else cb(null);
+          }, (cb) => {
+            // Delete the entry
+            this.server.data.entries.remove(entry.id, (err) => {
+              if (err != null) { cb(new Error(err)); return; }
 
-        // Skip asset destruction & release if trashing a folder
-        if (asset == null) { callback(null); return; }
+              this.server.io.in("sub:entries").emit("trash:entries", entry.id);
 
-        // NOTE: It is important that we destroy the asset after having removed its entry
-        // from the tree so that nobody can subscribe to it after it's been destroyed
-        asset.destroy(() => {
-          this.server.data.assets.releaseAll(id);
-          this.server.moveAssetFolderToTrash(trashedAssetFolder, () => { callback(null); });
-        });
-      });
+              // Notify and clear all asset subscribers
+              let roomName = `sub:assets:${entry.id}`;
+              this.server.io.in(roomName).emit("trash:assets", entry.id);
+
+              // NOTE: "SocketIO.Namespace.adapter" is not part of the official documented API
+              // It does exist though: https://github.com/Automattic/socket.io/blob/3f72dd3322bcefff07b5976ab817766e421d237b/lib/namespace.js#L89
+              for (let socketId in (<any>this.server.io).adapter.rooms[roomName]) {
+                let remoteClient = this.server.clientsBySocketId[socketId];
+                remoteClient.socket.leave(roomName);
+                remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
+              }
+
+              // Generate badges for any assets depending on this entry
+              if (dependentAssetIds != null) this.server.markMissingDependency(dependentAssetIds, id);
+
+              // Skip asset destruction & release if trashing a folder
+              if (asset == null) { cb(null); return; }
+
+              // NOTE: It is important that we destroy the asset after having removed its entry
+              // from the tree so that nobody can subscribe to it after it's been destroyed
+              asset.destroy(() => {
+                this.server.data.assets.releaseAll(entry.id);
+                cb(null);
+              });
+            });
+          }
+        ], callback);
+      };
+
+      if (entry.type == null) {
+        async.each(entry.children, (entry, cb) => { doTrashEntry(entry, cb); }
+        , removeEntry);
+      } else removeEntry(null);
     };
 
-    // Skip asset acquisition if trashing a folder
-    if (entry.type == null) { doTrashEntry(); return; }
+    let trashedAssetFolder = this.server.data.entries.getStoragePathFromId(id);
+    let entry = this.server.data.entries.byId[id];
+    let gotChildren = entry.type == null && entry.children.length > 0;
+    let parentEntry = this.server.data.entries.parentNodesById[id];
+    doTrashEntry(entry, (err: Error) => {
+      if (err != null) { callback(err.message); return; }
 
-    this.server.data.assets.acquire(id, null, (err, acquiredAsset) => {
-      if (err != null) { callback("Could not acquire asset"); return; }
-      asset = acquiredAsset;
-      doTrashEntry();
+      if (entry.type != null || gotChildren) {
+        this.server.moveAssetFolderToTrash(trashedAssetFolder, (err) => {
+          if (err != null) { callback(err.message); return; }
+
+          if (parentEntry != null && parentEntry.children.length === 0) {
+            let parentAssetFolder = this.server.data.entries.getStoragePathFromId(parentEntry.id);
+            fs.rmdir(path.join(this.server.projectPath, "assets", parentAssetFolder), (err) => {
+              if (err != null) { callback(err.message); return; }
+              callback(null);
+            });
+          } else callback(null);
+        });
+      } else {
+        fs.rmdir(path.join(this.server.projectPath, "assets", trashedAssetFolder), () => {
+          if (err != null) { callback(err.message); return; }
+          callback(null);
+        });
+      }
     });
   };
 
@@ -227,7 +269,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (!this.errorIfCant("editAssets", callback)) return;
     if (key === "name" && value.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
-    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id, { includeId: false });
+    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
 
     this.server.data.entries.setProperty(id, key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err); return; }
@@ -238,13 +280,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  private onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string) => {
-    let entry = this.server.data.entries.byId[assetId];
-    if (entry.type == null) {
-      for (let child of entry.children) this.onEntryChangeFullPath(child.id, `${oldFullAssetPath}__${child.name}`);
-      return;
-    }
-
+  private onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string, callback?: Function) => {
     let mustScheduleSave = false;
 
     let scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${assetId}`];
@@ -255,12 +291,25 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       mustScheduleSave = true;
     }
 
-    let oldDirPath = path.join(this.server.projectPath, `assets/${assetId}-${oldFullAssetPath}`);
-    let dirPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(assetId)}`);
+    let assetPath = this.server.data.entries.getStoragePathFromId(assetId);
+    async.series([
+      (cb) => {
+        let index = assetPath.lastIndexOf("/");
+        if (index !== -1) {
+          let parentPath = assetPath.slice(0, index);
+          mkdirp(path.join(this.server.projectPath, `assets/${parentPath}`), cb);
+        } else cb(null);
+      }, (cb) => {
+        let oldDirPath = path.join(this.server.projectPath, `assets/${oldFullAssetPath}`);
+        let dirPath = path.join(this.server.projectPath, `assets/${assetPath}`);
 
-    fs.rename(oldDirPath, dirPath, (err) => {
-      if (mustScheduleSave) this.server.scheduleAssetSave(assetId);
-    });
+        fs.rename(oldDirPath, dirPath, (err) => {
+          if (mustScheduleSave) this.server.scheduleAssetSave(assetId);
+
+          if (callback != null) callback();
+        });
+      }
+    ]);
   };
 
   // Assets

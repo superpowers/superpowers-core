@@ -203,12 +203,17 @@ export default class ProjectServer {
 
       let renameSuccessful = false;
       async.until(() => renameSuccessful, (cb) => {
+        let index = trashedAssetFolder.lastIndexOf("/");
+        if (index !== -1) trashedAssetFolder = trashedAssetFolder.slice(index);
         let newFolderPath = path.join(trashedAssetsPath, trashedAssetFolder);
+
         if (folderNumber > 0) newFolderPath = `${newFolderPath} (${folderNumber})`;
         fs.rename(folderPath, newFolderPath, (err) => {
           if (err != null) folderNumber++;
           else renameSuccessful = true;
-          cb();
+
+          if (folderNumber > 1000) callback(new Error(`Couldn't trash asset: ${trashedAssetFolder}`));
+          else cb();
         });
       }, callback);
     });

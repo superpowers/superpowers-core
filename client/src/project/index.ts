@@ -847,17 +847,11 @@ function onTrashEntryClick() {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
-        function trashEntry(entry: SupCore.Data.EntryNode) {
-          if (entry.type == null) for (let entryChild of entry.children) trashEntry(entryChild);
-
+        for (let selectedNode of ui.entriesTreeView.selectedNodes) {
+          let entry = data.entries.byId[selectedNode.dataset.id];
           socket.emit("trash:entries", entry.id, (err: string) => {
             if (err != null) { alert(err); return; }
           });
-        }
-
-        for (let selectedNode of ui.entriesTreeView.selectedNodes) {
-          let entry = data.entries.byId[selectedNode.dataset.id];
-          trashEntry(entry);
         }
         ui.entriesTreeView.clearSelection();
       });

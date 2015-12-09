@@ -61,6 +61,7 @@ declare namespace SupCore {
     class Entries extends Base.TreeById {
       pub: EntryNode[];
       byId: { [id: string]: EntryNode };
+      parentNodesById: { [id: string]: EntryNode };
 
       badgesByEntryId: { [key: string]: Badges };
       dependenciesByAssetId: any;
@@ -73,7 +74,7 @@ declare namespace SupCore {
       remove(id: string, callback: (err: string) => any): void;
       setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any): void;
       getForStorage(): EntryNode[];
-      getStoragePathFromId(id: string, options?: { includeId: boolean }): string;
+      getStoragePathFromId(id: string): string;
     }
 
     class Assets extends Base.Dictionary {
