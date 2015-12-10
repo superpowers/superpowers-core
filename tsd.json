@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "f8af639bf29b2b00e5d27ce93c0f046564b8525c"
     },
     "async/async.d.ts": {
       "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
@@ -35,15 +35,6 @@
     "es6-promise/es6-promise.d.ts": {
       "commit": "c2c22c3b953fe9730d4802022d5e0d18d083909e"
     },
-    "github-electron/github-electron.d.ts": {
-      "commit": "708609e0764daeb5eb64104af7aca50c520c4e6e"
-    },
-    "github-electron/github-electron-main.d.ts": {
-      "commit": "708609e0764daeb5eb64104af7aca50c520c4e6e"
-    },
-    "github-electron/github-electron-renderer.d.ts": {
-      "commit": "708609e0764daeb5eb64104af7aca50c520c4e6e"
-    },
     "cookie-parser/cookie-parser.d.ts": {
       "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
     },
@@ -58,6 +49,9 @@
     },
     "mkdirp/mkdirp.d.ts": {
       "commit": "16134c168d021351acb1673ee9659644fc58c424"
+    },
+    "github-electron/github-electron.d.ts": {
+      "commit": "f8af639bf29b2b00e5d27ce93c0f046564b8525c"
     }
   }
 }

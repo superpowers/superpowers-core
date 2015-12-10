@@ -13,3 +13,4 @@
 /// <reference path="serve-static/serve-static.d.ts" />
 /// <reference path="js-cookie/js-cookie.d.ts" />
 /// <reference path="mkdirp/mkdirp.d.ts" />
+/// <reference path="github-electron/github-electron.d.ts" />
