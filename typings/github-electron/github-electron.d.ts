@@ -1451,6 +1451,9 @@ declare module GitHubElectron {
 	}
 
 	interface Remote {
+		BrowserWindow: typeof BrowserWindow;
+		Menu: typeof GitHubElectron.Menu;
+		MenuItem: typeof GitHubElectron.MenuItem;
 		/**
 		 * @returns The object returned by require(module) in the main process.
 		 */
@@ -1458,7 +1461,7 @@ declare module GitHubElectron {
 		/**
 		 * @returns The BrowserWindow object which this web page belongs to.
 		 */
-		getCurrentWindow(): BrowserWindow
+		getCurrentWindow(): BrowserWindow;
 		/**
 		 * @returns The global variable of name (e.g. global[name]) in the main process.
 		 */
@@ -1700,7 +1703,7 @@ declare module GitHubElectron {
 	interface Electron {
 		clipboard: GitHubElectron.Clipboard;
 		crashReporter: GitHubElectron.CrashReporter;
-		nativeImage: GitHubElectron.NativeImage;
+		nativeImage: typeof GitHubElectron.NativeImage;
 		screen: GitHubElectron.Screen;
 		shell: GitHubElectron.Shell;
 		remote: GitHubElectron.Remote;

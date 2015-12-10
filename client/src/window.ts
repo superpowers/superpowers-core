@@ -1,7 +1,7 @@
 if (SupClient.isApp) {
   let nodeRequire = require;
-  let remote: GitHubElectron.Remote = nodeRequire("remote");
-  let win = remote.getCurrentWindow();
+  let electron = nodeRequire("electron");
+  let win = electron.remote.getCurrentWindow();
 
   function onMinimizeWindowClick() { win.minimize(); }
 
@@ -20,7 +20,6 @@ if (SupClient.isApp) {
   let link = document.querySelector("a.superpowers");
   if (link != null) link.addEventListener("click", (event: any) => {
     event.preventDefault();
-    let shell: GitHubElectron.Shell = nodeRequire("shell");
-    shell.openExternal(event.target.href);
+    electron.shell.openExternal(event.target.href);
   });
 }

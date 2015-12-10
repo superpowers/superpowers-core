@@ -5,8 +5,8 @@ import "./splash";
 import * as myServer from "./myServer";
 import * as config from "./config";
 
-let remote: GitHubElectron.Remote = nodeRequire("remote");
-let currentWindow = remote.getCurrentWindow();
+let electron: GitHubElectron.Electron = nodeRequire("electron");
+let currentWindow = electron.remote.getCurrentWindow();
 
 document.querySelector(".controls .minimize").addEventListener("click", () => { currentWindow.minimize(); });
 document.querySelector(".controls .close").addEventListener("click", () => { currentWindow.close(); });

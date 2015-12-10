@@ -106,10 +106,10 @@ function onSelectionChange() {
   (document.querySelector(".servers .buttons .remove-server") as HTMLButtonElement).disabled = noServerSelected;
 }
 
-let ipc: GitHubElectron.InProcess = nodeRequire("ipc");
+let ipcRenderer: GitHubElectron.IpcRenderer = nodeRequire("electron").ipcRenderer;
 function onServerActivate() {
   let address = serversTreeView.selectedNodes[0].dataset.address;
-  ipc.send("new-server-window", address);
+  ipcRenderer.send("new-server-window", address);
 }
 
 start();

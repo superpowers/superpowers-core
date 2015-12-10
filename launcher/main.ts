@@ -1,10 +1,6 @@
 /// <reference path="../typings/tsd.d.ts" />
-/// <reference path="../typings/github-electron/github-electron-main.d.ts" />
 
-import * as app from "app";
-import * as BrowserWindow from "browser-window";
-import * as ipc from "ipc";
-import * as dialog from "dialog";
+import * as electron from "electron";
 
 import * as _ from "lodash";
 import * as async from "async";
@@ -19,31 +15,31 @@ let { superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSy
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow: GitHubElectron.BrowserWindow;
 
-app.on("window-all-closed", function() {
+electron.app.on("window-all-closed", function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== "darwin") app.quit();
+  if (process.platform !== "darwin") electron.app.quit();
 });
 
-app.on("ready", function() {
-  mainWindow = new BrowserWindow({
+electron.app.on("ready", function() {
+  mainWindow = new electron.BrowserWindow({
     title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
     width: 800, height: 480,
     frame: false, resizable: false
   });
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.loadUrl(`file://${__dirname}/public/index.html`);
+  mainWindow.loadURL(`file://${__dirname}/public/index.html`);
   mainWindow.on("closed", function() { mainWindow = null; });
 });
 
 interface OpenServer { window: GitHubElectron.BrowserWindow; address: string; closed: boolean; }
 let openServersById: { [id: string]: OpenServer } = {};
-ipc.on("new-server-window", (event: Event, address: string) => {
+electron.ipcMain.on("new-server-window", (event: Event, address: string) => {
   let openServer = {
-    window: new BrowserWindow({
+    window: new electron.BrowserWindow({
       title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
       width: 1000, height: 600,
-      "min-width": 800, "min-height": 480,
+      minWidth: 800, minHeight: 480,
       frame: false
     }),
     address,
@@ -59,7 +55,7 @@ ipc.on("new-server-window", (event: Event, address: string) => {
   });
 
   let status = `Connecting to ${openServer.address}...`;
-  openServer.window.loadUrl(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
+  openServer.window.loadURL(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
 
   openServer.window.webContents.addListener("did-finish-load", onServerWindowLoaded);
   function onServerWindowLoaded(event: Event) {
@@ -92,7 +88,7 @@ function connect(openServer: OpenServer) {
         return;
       }
 
-      openServer.window.loadUrl(`http://${openServer.address}`);
+      openServer.window.loadURL(`http://${openServer.address}`);
       openServer.window.webContents.addListener("did-finish-load", onServerLoaded);
       openServer.window.webContents.addListener("did-fail-load", onServerFailed);
     });
@@ -120,30 +116,30 @@ function connect(openServer: OpenServer) {
     // in a callback, the app closes unexpectedly most of the time.
     setTimeout(() => {
       if (openServer.closed) return;
-      openServer.window.loadUrl(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(error)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
+      openServer.window.loadURL(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(error)}&address=${encodeURIComponent(openServer.address)}&reload=true`);
     }, 0);
   }
 }
 
 let standaloneWindowsById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
-ipc.on("new-standalone-window", (event: Event, address: string, title: string) => {
-  let standaloneWindow = new BrowserWindow({
+electron.ipcMain.on("new-standalone-window", (event: Event, address: string, title: string) => {
+  let standaloneWindow = new electron.BrowserWindow({
     title, icon: `${__dirname}/public/images/icon.png`,
     width: 1000, height: 600,
-    "min-width": 800, "min-height": 480,
-    "auto-hide-menu-bar": true
+    minWidth: 800, minHeight: 480,
+    autoHideMenuBar: true
   });
 
   standaloneWindowsById[standaloneWindow.id] = standaloneWindow;
 
   standaloneWindow.on("closed", () => { delete standaloneWindowsById[standaloneWindow.id]; });
-  standaloneWindow.loadUrl(address);
+  standaloneWindow.loadURL(address);
 });
 
-ipc.on("reconnect", (event: Event, id: string) => { connect(openServersById[id]); });
+electron.ipcMain.on("reconnect", (event: Event, id: string) => { connect(openServersById[id]); });
 
-ipc.on("choose-export-folder", (event: { sender: any }) => {
-  dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {
+electron.ipcMain.on("choose-export-folder", (event: { sender: any }) => {
+  electron.dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {
     if (directory == null) return;
 
     let outputFolder = directory[0];
@@ -161,15 +157,14 @@ interface ExportData {
   address: string; mainPort: string; buildPort: string;
   outputFolder: string; files: string[];
 }
-ipc.on("export", (event: { sender: any }, data: ExportData) => {
-  let exportWindow = new BrowserWindow({
+electron.ipcMain.on("export", (event: { sender: any }, data: ExportData) => {
+  let exportWindow = new electron.BrowserWindow({
     title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
     width: 1000, height: 600,
-    "min-width": 800, "min-height": 480,
-    "node-integration": true
+    minWidth: 800, minHeight: 480
   });
   exportWindow.setMenuBarVisibility(false);
-  exportWindow.loadUrl(`${data.address}:${data.mainPort}/build.html`);
+  exportWindow.loadURL(`${data.address}:${data.mainPort}/build.html`);
 
   let doExport = () => {
     exportWindow.webContents.removeListener("did-finish-load", doExport);

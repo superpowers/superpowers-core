@@ -39,12 +39,7 @@ let ui: {
   toolsElt?: HTMLUListElement;
 } = {};
 
-// FIXME: Use propertype when Electron typings have been updated
-let electron: {
-  remote: GitHubElectron.Remote;
-  ipcRenderer: GitHubElectron.InProcess;
-};
-
+let electron: GitHubElectron.Electron;
 let runWindow: GitHubElectron.BrowserWindow;
 
 if (SupClient.isApp) {
@@ -525,14 +520,14 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
       runWindow = new ((electron.remote as any).BrowserWindow as typeof GitHubElectron.BrowserWindow)({
         title: "Superpowers", icon: `public/images/icon.png`,
         width: 1000, height: 600,
-        "min-width": 800, "min-height": 480
+        minWidth: 800, minHeight: 480
       });
       runWindow.setMenuBarVisibility(false);
       runWindow.on("closed", onCloseRunWindow);
 
       (document.querySelector(".project-buttons") as HTMLDivElement).classList.toggle("running", true);
     }
-    runWindow.loadUrl(`${window.location.origin}/build.html`);
+    runWindow.loadURL(`${window.location.origin}/build.html`);
     runWindow.focus();
 
     (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = false;
@@ -545,7 +540,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
     if (options.debug) url += "&debug";
 
     if (SupClient.isApp) {
-      if (runWindow != null) runWindow.loadUrl(url);
+      if (runWindow != null) runWindow.loadURL(url);
     } else window.open(url, `player_${SupClient.query.project}`);
   });
 }
@@ -576,8 +571,8 @@ if (SupClient.isApp) {
   });
 }
 
-function showDevTools() {
-  if (electron != null) electron.remote.getCurrentWindow().toggleDevTools();
+function toggleDevTools() {
+  if (electron != null) electron.remote.getCurrentWindow().webContents.toggleDevTools();
 }
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
@@ -720,7 +715,7 @@ function onMessageHotKey(action: string) {
     case "nextTab":      onActivateNextTab(); break;
     case "run":          runProject(); break;
     case "debug":        runProject({ debug: true }); break;
-    case "devtools":     showDevTools(); break;
+    case "devtools":     toggleDevTools(); break;
   }
 }
 

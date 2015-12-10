@@ -1,6 +1,6 @@
 import supFetch from "../../../SupClient/src/fetch";
 
-let shell: GitHubElectron.Shell = nodeRequire("shell");
+let electron: GitHubElectron.Electron = nodeRequire("electron");
 
 /* tslint:disable */
 // Must use require rather than fs so that it gets browserified
@@ -12,7 +12,7 @@ let splash = <HTMLDivElement>document.querySelector(".splash");
 splash.addEventListener("click", (event) => {
   if ((<Element>event.target).tagName === "A") {
     event.preventDefault();
-    shell.openExternal((<HTMLAnchorElement>event.target).href);
+    electron.shell.openExternal((<HTMLAnchorElement>event.target).href);
     return;
   }
 
