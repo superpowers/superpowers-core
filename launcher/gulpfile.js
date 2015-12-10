@@ -44,6 +44,7 @@ var browserify = require("browserify");
 var source = require("vinyl-source-stream");
 gulp.task("browserify", [ "typescript-renderer" ], function() {
   var bundler = browserify("./src/index.js");
+  bundler.transform("brfs");
   function bundle() { return bundler.bundle().pipe(source("index.js")).pipe(gulp.dest("./public")); };
   return bundle();
 });
