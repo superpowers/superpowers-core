@@ -7,6 +7,8 @@ export default function(server: ProjectServer, callback: (err: Error) => any) {
   let oldVersion = server.data.manifest.migratedFromFormatVersion;
   if (oldVersion == null) { callback(null); return; }
 
+  SupCore.log(`Migrating "${server.data.manifest.pub.name}" project (from format version ${oldVersion} to ${SupCore.Data.ProjectManifest.currentFormatVersion})...`);
+
   async.series([
     (cb) => { if (oldVersion < 1) migrateTo1(server, cb); else cb(); },
     (cb) => { if (oldVersion < 3) migrateTo3(server, cb); else cb(); }
