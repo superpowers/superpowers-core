@@ -45,7 +45,7 @@ mainApp.use((req, res, next) => {
   if (req.cookies["language"] == null) {
     let language = req.header("Accept-Language");
     if (language != null) language = language.split(",")[0].split("-")[0];
-    if (languageIds.indexOf(language) == null) language = "en";
+    if (languageIds.indexOf(language) === -1) language = "en";
     res.cookie("language", language);
   }
 
