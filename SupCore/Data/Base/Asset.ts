@@ -2,6 +2,7 @@ import Hash from "./Hash";
 
 import * as path from "path";
 import * as fs from "fs";
+import * as mkdirp from "mkdirp";
 
 export default class Asset extends Hash {
   constructor(public id: string, pub: any, schema: any, public server: ProjectServer) {
@@ -56,7 +57,7 @@ export default class Asset extends Hash {
 
   publish(buildPath: string, callback: (err: Error) => any) {
     let folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(this.id)}`;
-    fs.mkdir(folderPath, (err) => { this.save(folderPath, callback); });
+    mkdirp(folderPath, (err) => { this.save(folderPath, callback); });
   }
 
   server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any) {

@@ -21,6 +21,7 @@ export default class Entries extends SupData.Base.TreeById {
 
   pub: EntryNode[];
   byId: { [id: string]: EntryNode };
+  parentNodesById: { [id: string]: EntryNode };
 
   badgesByEntryId: { [key: string]: SupData.Badges } = {};
   dependenciesByAssetId: any = {};
@@ -114,9 +115,13 @@ export default class Entries extends SupData.Base.TreeById {
     return entries;
   }
 
-  getStoragePathFromId(id: string, options = { includeId: true }) {
-    let fullStoragePath = this.getPathFromId(id).replace(new RegExp("/", "g"), "__");
-    if (options.includeId) fullStoragePath = `${id}-${fullStoragePath}`;
+  getStoragePathFromId(id: string) {
+    let fullStoragePath = `${this.byId[id].name} (${id})`;
+    while (this.parentNodesById[id] != null) {
+      let parentNode = this.parentNodesById[id];
+      fullStoragePath = `${this.byId[parentNode.id].name} (${parentNode.id})/${fullStoragePath}`;
+      id = parentNode.id;
+    }
     return fullStoragePath;
   }
 }
