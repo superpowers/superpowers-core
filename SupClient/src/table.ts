@@ -109,13 +109,22 @@ export function appendSelectBox(parent: HTMLElement, options: { [value: string]:
   return selectInput;
 }
 
-export function appendSelectOption(parent: HTMLSelectElement, value: string, label: string) {
+export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement, value: string, label: string) {
   let option = document.createElement("option");
   option.value = value;
   option.textContent = label;
   parent.appendChild(option);
 
   return option;
+}
+
+export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupElement, label: string) {
+  let optionGroup = document.createElement("optgroup");
+  optionGroup.label = label;
+  optionGroup.textContent = label;
+  parent.appendChild(optionGroup);
+
+  return optionGroup;
 }
 
 export function appendColorField(parent: HTMLElement, value: string) {
