@@ -10,6 +10,10 @@ import * as table from "./table";
 import * as dialogs from "./dialogs/index";
 import * as i18n from "./i18n";
 /* tslint:enable:no-unused-variable */
+/* tslint:disable */
+let PerfectResize = require("perfect-resize");
+/* tslint:enable */
+
 export { fetch, cookies, ProjectClient, setupHotkeys, table, dialogs, i18n };
 
 export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
@@ -163,4 +167,27 @@ export function findEntryByPath(entries: any, path: string|string[]) {
   });
 
   return foundEntry;
+}
+
+export function setupCollapsablePane(paneElt: HTMLDivElement, refreshCallback?: Function) {
+  let handle = new PerfectResize(paneElt, "bottom");
+  if (refreshCallback != null)
+    handle.on("drag", () => { refreshCallback(); });
+
+  let statusElt = paneElt.querySelector(".header") as HTMLDivElement;
+
+  let buttonElt = document.createElement("button");
+  buttonElt.classList.add("toggle");
+  statusElt.appendChild(buttonElt);
+
+  let contentElt = paneElt.querySelector(".content") as HTMLDivElement;
+  let collaspe = (collapsed: boolean) => {
+    contentElt.hidden = collapsed;
+    buttonElt.textContent = collapsed ? "+" : "–";
+
+    if (refreshCallback != null) refreshCallback();
+  };
+
+  collaspe(paneElt.classList.contains("collapsed"));
+  statusElt.addEventListener("click", (event) => { collaspe(paneElt.classList.toggle("collapsed")); });
 }

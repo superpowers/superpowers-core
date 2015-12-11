@@ -24,6 +24,8 @@ declare namespace SupClient {
   export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
   export function findEntryByPath(entries: any, path: string|string[]): any;
 
+  export function setupCollapsablePane(pane: HTMLDivElement, refreshCallback?: Function): void;
+
   namespace table {
 
     interface RowParts {

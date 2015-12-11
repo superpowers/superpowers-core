@@ -42,3 +42,49 @@ html.handle-dragging
 
   &.vertical * { cursor: ew-resize; }
   &.horizontal * { cursor: ns-resize; }
+
+.collapsable
+  display flex
+  flex-flow column
+  
+  &.collapsed
+    min-height 0 !important
+    height auto !important
+
+  .header
+    cursor pointer
+    background-color #444
+    color #fff
+    display flex
+    align-items center
+
+    &.has-draft
+      background-color #37d
+
+    &.has-errors
+      background-color #a44
+
+    button.toggle
+      width 30px
+      align-self stretch
+      background transparent
+      border none
+      box-shadow none
+      padding 0
+      opacity 0.5
+      font-size 20px
+      font-weight bold
+      cursor pointer
+      color #fff
+
+      &:hover
+        opacity 1
+        background-color rgba(0,0,0,0.1)
+
+      &:active
+        background-color #fff
+        color #444
+
+      &:disabled
+        opacity 0.2
+        cursor default
