@@ -24,7 +24,8 @@
   "states": { 
     "disabled": "Disabled",
     "enabled": "Enabled",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "connecting": "Connecting..."
   },
   
   "hotkeys": {

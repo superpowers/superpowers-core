@@ -13,7 +13,6 @@
     }
   },
   "treeView": {
-    "connecting": "Connecting...",
     "openInNewWindow": "Open in new window",
     "newAsset": {
       "title": "New asset",
