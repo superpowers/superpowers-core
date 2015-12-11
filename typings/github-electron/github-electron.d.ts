@@ -1450,10 +1450,7 @@ declare module GitHubElectron {
 		sendToHost(channel: string, ...args: any[]): void;
 	}
 
-	interface Remote {
-		BrowserWindow: typeof BrowserWindow;
-		Menu: typeof GitHubElectron.Menu;
-		MenuItem: typeof GitHubElectron.MenuItem;
+	interface Remote extends CommonElectron {
 		/**
 		 * @returns The object returned by require(module) in the main process.
 		 */
@@ -1470,7 +1467,7 @@ declare module GitHubElectron {
 		 * Returns the process object in the main process. This is the same as
 		 * remote.getGlobal('process'), but gets cached.
 		 */
-		process: any;
+		process: NodeJS.Process;
 	}
 	
 	interface WebFrame {
@@ -1512,7 +1509,7 @@ declare module GitHubElectron {
 
 	// Type definitions for main process
 
-	interface ContentTracing  {
+	interface ContentTracing {
 		/**
 		 * Get a set of category groups. The category groups can change as new code paths are reached.
 		 * @param callback Called once all child processes have acked to the getCategories request.
@@ -1699,28 +1696,92 @@ declare module GitHubElectron {
 		RequestBufferJob: typeof RequestBufferJob;
 	}
 
+	interface PowerSaveBlocker {
+		start(type: string): number;
+		stop(id: number): void;
+		isStarted(id: number): boolean;
+	}
 
-	interface Electron {
+	interface ClearStorageDataOptions {
+		origin?: string;
+		storages?: string[];
+		quotas?: string[];
+	}
+	
+	interface NetworkEmulationOptions {
+		offline?: boolean;
+		latency?: number;
+		downloadThroughput?: number;
+		uploadThroughput?: number;
+	}
+	
+	interface CertificateVerifyProc {
+		(hostname: string, cert: any, callback: (accepted: boolean) => any): any;
+	}
+
+	class Session {
+		static fromPartition(partition: string): Session;
+		static defaultSession: Session;
+
+		cookies: any;
+		clearCache(callback: Function): void;
+		clearStorageData(callback: Function): void;
+		clearStorageData(options: ClearStorageDataOptions, callback: Function): void;
+		setProxy(config: string, callback: Function): void;
+		resolveProxy(url: URL, callback: (proxy: any) => any): void;
+		setDownloadPath(path: string): void;
+		enableNetworkEmulation(options: NetworkEmulationOptions): void;
+		disableNetworkEmulation(): void;
+		setCertificateVerifyProc(proc: CertificateVerifyProc): void;
+		webRequest: any;
+	}
+
+	interface CommonElectron {
 		clipboard: GitHubElectron.Clipboard;
 		crashReporter: GitHubElectron.CrashReporter;
 		nativeImage: typeof GitHubElectron.NativeImage;
-		screen: GitHubElectron.Screen;
 		shell: GitHubElectron.Shell;
-		remote: GitHubElectron.Remote;
-		ipcRenderer: GitHubElectron.IpcRenderer;
-		webFrame: GitHubElectron.WebFrame;
+
 		app: GitHubElectron.App;
 		autoUpdater: GitHubElectron.AutoUpdater;
 		BrowserWindow: typeof GitHubElectron.BrowserWindow;
 		contentTracing: GitHubElectron.ContentTracing;
 		dialog: GitHubElectron.Dialog;
-		globalShortcut: GitHubElectron.GlobalShortcut;
 		ipcMain: NodeJS.EventEmitter;
+		globalShortcut: GitHubElectron.GlobalShortcut;
 		Menu: typeof GitHubElectron.Menu;
 		MenuItem: typeof GitHubElectron.MenuItem;
 		powerMonitor: NodeJS.EventEmitter;
+		powerSaveBlocker: GitHubElectron.PowerSaveBlocker;
 		protocol: GitHubElectron.Protocol;
+		screen: GitHubElectron.Screen;
+		session: GitHubElectron.Session;
 		Tray: typeof GitHubElectron.Tray;
+	}
+
+	interface DesktopCapturerOptions {
+		types?: string[];
+		thumbnailSize?: {
+			width: number;
+			height: number;
+		}
+	}
+
+	interface DesktopCapturerSource {
+		id: string;
+		name: string;
+		thumbnail: NativeImage;
+	}
+
+	interface DesktopCapturer {
+		getSources(options: any, callback: (error: Error, sources: DesktopCapturerSource[]) => any): void;
+	}
+
+	interface Electron extends CommonElectron {
+		desktopCapturer: GitHubElectron.DesktopCapturer;
+		ipcRenderer: GitHubElectron.IpcRenderer;
+		remote: GitHubElectron.Remote;
+		webFrame: GitHubElectron.WebFrame;
 	}
 }
 
