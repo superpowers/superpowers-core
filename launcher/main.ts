@@ -130,9 +130,10 @@ electron.ipcMain.on("new-standalone-window", (event: Event, address: string, tit
     autoHideMenuBar: true
   });
 
-  standaloneWindowsById[standaloneWindow.id] = standaloneWindow;
+  let windowId = standaloneWindow.id;
+  standaloneWindowsById[windowId] = standaloneWindow;
 
-  standaloneWindow.on("closed", () => { delete standaloneWindowsById[standaloneWindow.id]; });
+  standaloneWindow.on("closed", () => { delete standaloneWindowsById[windowId]; });
   standaloneWindow.loadURL(address);
 });
 
