@@ -18,6 +18,7 @@
     "duplicate": "Duplicate",
     "search": "Search",
     "save": "Save",
+    "saveWithErrors": "Save with errors",
     "update": "Update"
   },
 
@@ -25,7 +26,8 @@
     "disabled": "Disabled",
     "enabled": "Enabled",
     "loading": "Loading...",
-    "connecting": "Connecting..."
+    "connecting": "Connecting...",
+    "saving": "Saving..."
   },
   
   "hotkeys": {
