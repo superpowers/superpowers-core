@@ -42,11 +42,11 @@ languageIds.unshift("none");
 
 mainApp.use(cookieParser());
 mainApp.use((req, res, next) => {
-  if (req.cookies["language"] == null) {
+  if (req.cookies["supLanguage"] == null) {
     let language = req.header("Accept-Language");
     if (language != null) language = language.split(",")[0].split("-")[0];
     if (languageIds.indexOf(language) === -1) language = "en";
-    res.cookie("language", language);
+    res.cookie("supLanguage", language);
   }
 
   next();
@@ -64,14 +64,14 @@ function redirectIfNoAuth(req: express.Request, res: express.Response, next: Fun
 mainApp.get("/", (req, res) => { res.redirect("/hub"); });
 mainApp.get("/hub", redirectIfNoAuth);
 mainApp.get("/hub", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "hub", paths.getHtml(req.cookies["language"])));
+  res.sendFile(path.join(__dirname, "../public", "hub", paths.getHtml(req.cookies["supLanguage"])));
 });
 mainApp.get("/project", redirectIfNoAuth);
 mainApp.get("/project", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "project", paths.getHtml(req.cookies["language"])));
+  res.sendFile(path.join(__dirname, "../public", "project", paths.getHtml(req.cookies["supLanguage"])));
 });
 mainApp.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "login", paths.getHtml(req.cookies["language"])));
+  res.sendFile(path.join(__dirname, "../public", "login", paths.getHtml(req.cookies["supLanguage"])));
 });
 
 mainApp.use("/", express.static(`${__dirname}/../public`));

@@ -13,7 +13,7 @@ interface File {
 interface I18nValue { [key: string]: I18nValue|string; }
 interface I18nContext { [context: string]: I18nValue; }
 
-let language = cookies.get("language");
+let language = cookies.get("supLanguage");
 let i18nFallbackContexts: I18nContext = {};
 let i18nContexts: I18nContext = {};
 let commonLocalesLoaded = false;

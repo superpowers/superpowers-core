@@ -39,10 +39,10 @@ function start() {
     optionElt.textContent = languageNamesById[languageId];
     selectLanguageElt.appendChild(optionElt);
   }
-  selectLanguageElt.value = SupClient.cookies.get("language");
+  selectLanguageElt.value = SupClient.cookies.get("supLanguage");
 
   document.querySelector("select.language").addEventListener("change", (event: any) => {
-    SupClient.cookies.set("language", event.target.value);
+    SupClient.cookies.set("supLanguage", event.target.value, { expires: 7 });
     window.location.reload();
   });
 

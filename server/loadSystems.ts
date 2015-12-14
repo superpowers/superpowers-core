@@ -126,7 +126,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
           }
 
           mainApp.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
-            let language = req.cookies["language"];
+            let language = req.cookies["supLanguage"];
             let editorPath = path.join(pluginPath, "public/editors", editorName);
             let html = getHtml(language);
             fs.exists(path.join(editorPath, html), (exists) => {
