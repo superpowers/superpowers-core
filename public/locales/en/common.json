@@ -18,7 +18,8 @@
     "duplicate": "Duplicate",
     "search": "Search",
     "save": "Save",
-    "saveWithErrors": "Save with errors",
+    "applyChanges": "Apply changes",
+    "applyChangesWithErrors": "Apply changes with errors",
     "update": "Update"
   },
 
