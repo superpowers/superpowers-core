@@ -146,8 +146,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       this.onEntryChangeFullPath(id, oldFullAssetPath, () => {
         if (oldParent == null || oldParent.children.length > 0) return;
 
-        let oldParentPath = this.server.data.entries.getStoragePathFromId(oldParent.id);
-        fs.rmdir(path.join(this.server.projectPath, `assets/${oldParentPath}`));
+        let oldParentPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(oldParent.id)}`);
+        fs.readdir(oldParentPath, (err, files) => { if (files.length === 0) fs.rmdir(oldParentPath); });
       });
       this.server.io.in("sub:entries").emit("move:entries", id, parentId, actualIndex);
       callback(null);
@@ -249,17 +249,30 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           if (err != null) { callback(err.message); return; }
 
           if (parentEntry != null && parentEntry.children.length === 0) {
-            let parentAssetFolder = this.server.data.entries.getStoragePathFromId(parentEntry.id);
-            fs.rmdir(path.join(this.server.projectPath, "assets", parentAssetFolder), (err) => {
+            let parentAssetFolder = path.join(this.server.projectPath, "assets", this.server.data.entries.getStoragePathFromId(parentEntry.id));
+            fs.readdir(parentAssetFolder, (err, files) => {
               if (err != null) { callback(err.message); return; }
-              callback(null);
+
+              if (files.length === 0) {
+                fs.rmdir(parentAssetFolder, (err) => {
+                  if (err != null && err.code !== "ENOENT") { callback(err.message); return; }
+                  callback(null);
+                });
+              } else callback(null);
             });
           } else callback(null);
         });
       } else {
-        fs.rmdir(path.join(this.server.projectPath, "assets", trashedAssetFolder), () => {
+        let trashedAssetPath = path.join(this.server.projectPath, "assets", trashedAssetFolder);
+        fs.readdir(trashedAssetPath, (err, files) => {
           if (err != null) { callback(err.message); return; }
-          callback(null);
+
+          if (files.length === 0) {
+            fs.rmdir(trashedAssetPath, (err) => {
+              if (err != null && err.code !== "ENOENT") { callback(err.message); return; }
+              callback(null);
+            });
+          } else callback(null);
         });
       }
     });
