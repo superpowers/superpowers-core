@@ -21,7 +21,10 @@ if (supServerAuth != null) {
 let redirect: string = (SupClient.query as any).redirect;
 if (redirect == null) redirect = "/";
 
-SupClient.i18n.load([{ root: "/", name: "hub" }, { root: "/", name: "login" }], start);
+SupClient.fetch("superpowers.json", "json", (err, data) => {
+  serverPasswordElt.parentElement.parentElement.hidden = data.password === false;
+  SupClient.i18n.load([{ root: "/", name: "hub" }, { root: "/", name: "login" }], start);
+});
 
 function start() {
   document.querySelector(".server-name").textContent = SupClient.i18n.t("hub:serverAddress", { hostname: window.location.hostname, port });
