@@ -22,7 +22,7 @@ let redirect: string = (SupClient.query as any).redirect;
 if (redirect == null) redirect = "/";
 
 SupClient.fetch("superpowers.json", "json", (err, data) => {
-  serverPasswordElt.parentElement.parentElement.hidden = data.password === false;
+  serverPasswordElt.parentElement.parentElement.hidden = data.hasPassword === false;
   SupClient.i18n.load([{ root: "/", name: "hub" }, { root: "/", name: "login" }], start);
 });
 
