@@ -5,22 +5,26 @@
   "none": "(None)",
 
   "actions": {
-    "cancel": "Cancel",
-    "skip": "Skip",
-    "open": "Open",
-    "close": "Close",
-    "download": "Download",
-    "upload": "Upload",
-    "create": "Create",
-    "new": "New",
-    "rename": "Rename",
-    "delete": "Delete",
-    "duplicate": "Duplicate",
-    "search": "Search",
-    "save": "Save",
     "applyChanges": "Apply changes",
     "applyChangesWithErrors": "Apply changes with errors",
-    "update": "Update"
+    "cancel": "Cancel",
+    "close": "Close",
+    "create": "Create",
+    "delete": "Delete",
+    "download": "Download",
+    "duplicate": "Duplicate",
+    "new": "New",
+    "open": "Open",
+    "rename": "Rename",
+    "save": "Save",
+    "search": "Search",
+    "skip": "Skip",
+    "update": "Update",
+    "upload": "Upload",
+
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste"
   },
 
   "states": { 
