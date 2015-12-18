@@ -47,7 +47,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
       for (let entry of entries) {
         let relativePath = path.relative(`${systemPath}/public`, entry);
         if (relativePath === "manifest.json") continue;
-        if (relativePath === "templates.json") continue;
+        if (relativePath.slice(0, "templates".length) === "templates") continue;
 
         buildFiles.push(`/systems/${systemName}/${relativePath}`);
       }
