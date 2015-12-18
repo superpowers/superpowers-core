@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as express from "express";
 import * as async from "async";
 import * as readdirRecursive from "recursive-readdir";
-import { getHtml } from "./paths";
+import { getLocalizedFilename } from "./paths";
 
 function shouldIgnorePlugin(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 // FIXME: Let each system specify the required files? or just assume plugins will do their job
@@ -128,9 +128,9 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
           mainApp.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
             let language = req.cookies["supLanguage"];
             let editorPath = path.join(pluginPath, "public/editors", editorName);
-            let html = getHtml(language);
-            fs.exists(path.join(editorPath, html), (exists) => {
-              if (exists) res.sendFile(path.join(editorPath, html));
+            let localizedIndexFilename = getLocalizedFilename("index.html", language);
+            fs.exists(path.join(editorPath, localizedIndexFilename), (exists) => {
+              if (exists) res.sendFile(path.join(editorPath, localizedIndexFilename));
               else res.sendFile(path.join(editorPath, `index.html`));
             });
           });

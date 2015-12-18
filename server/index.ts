@@ -64,14 +64,14 @@ function redirectIfNoAuth(req: express.Request, res: express.Response, next: Fun
 mainApp.get("/", (req, res) => { res.redirect("/hub"); });
 mainApp.get("/hub", redirectIfNoAuth);
 mainApp.get("/hub", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "hub", paths.getHtml(req.cookies["supLanguage"])));
+  res.sendFile(path.join(__dirname, "../public", "hub", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
 });
 mainApp.get("/project", redirectIfNoAuth);
 mainApp.get("/project", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "project", paths.getHtml(req.cookies["supLanguage"])));
+  res.sendFile(path.join(__dirname, "../public", "project", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
 });
 mainApp.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "login", paths.getHtml(req.cookies["supLanguage"])));
+  res.sendFile(path.join(__dirname, "../public", "login", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
 });
 
 mainApp.use("/", express.static(`${__dirname}/../public`));
