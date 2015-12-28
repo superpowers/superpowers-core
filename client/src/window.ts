@@ -17,7 +17,7 @@ if (SupClient.isApp) {
   document.querySelector(".controls .maximize").addEventListener("click", onMaximizeWindowClick);
   document.querySelector(".controls .close").addEventListener("click", onCloseWindowClick);
 
-  let link = document.querySelector("a.superpowers");
+  let link = document.querySelector("a.server-footer");
   if (link != null) link.addEventListener("click", (event: any) => {
     event.preventDefault();
     electron.shell.openExternal(event.target.href);
