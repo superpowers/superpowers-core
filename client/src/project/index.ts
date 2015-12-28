@@ -528,6 +528,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
       (document.querySelector(".project-buttons") as HTMLDivElement).classList.toggle("running", true);
     }
     runWindow.loadURL(`${window.location.origin}/build.html`);
+    runWindow.show();
     runWindow.focus();
 
     (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = false;
