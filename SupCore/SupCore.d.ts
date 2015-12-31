@@ -314,11 +314,6 @@ declare namespace SupCore {
     list: string[];
   }
 
-  class SystemAPI {
-    registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
-    getPlugins<T>(contextName: string): { [pluginName: string]: T };
-  }
-
   class SystemData {
     assetClasses: { [assetName: string]: SupCore.Data.AssetClass; };
     componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; };
@@ -332,10 +327,11 @@ declare namespace SupCore {
 
   class System {
     name: string;
-    api: SystemAPI;
     data: SystemData;
 
     constructor(name: string);
+    registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
+    getPlugins<T>(contextName: string): { [pluginName: string]: T };
   }
 
   // All loaded systems (server-side only)
