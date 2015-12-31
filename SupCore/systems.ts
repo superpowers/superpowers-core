@@ -1,9 +1,9 @@
 class SystemAPI {
-  contexts: { [contextName: string]: { plugins: { [pluginName: string]: SupCore.APIPlugin; } } } = {};
+  private contexts: { [contextName: string]: { plugins: { [pluginName: string]: any; } } } = {};
 
   constructor(public system: System) {}
 
-  registerPlugin(contextName: string, pluginName: string, plugin: SupCore.APIPlugin) {
+  registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
     if (this.contexts[contextName] == null) this.contexts[contextName] = { plugins: {} };
 
     if (this.contexts[contextName].plugins[pluginName] != null) {
@@ -11,18 +11,11 @@ class SystemAPI {
       `named "${pluginName}" in context "${contextName}", system "${this.system.name}"`);
     }
 
-    if (plugin.exposeActorComponent != null ) {
-      if (plugin.exposeActorComponent.propertyName == null) {
-        console.error("SystemAPI.registerPlugin: Missing actor component property name " +
-        `in plugin "${pluginName}" in context "${contextName}", system "${this.system.name}"`);
-      }
-      if (plugin.exposeActorComponent.className == null) {
-        console.error("SystemAPI.registerPlugin: Missing actor component class name " +
-        `in plugin "${pluginName}" in context "${contextName}", system "${this.system.name}"`);
-      }
-    }
-
     this.contexts[contextName].plugins[pluginName] = plugin;
+  }
+
+  getPlugins<T>(contextName: string): { [pluginName: string]: T } {
+    return this.contexts[contextName].plugins;
   }
 }
 

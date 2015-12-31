@@ -314,16 +314,9 @@ declare namespace SupCore {
     list: string[];
   }
 
-  interface APIPlugin {
-    code: string;
-    defs: string;
-    exposeActorComponent?: { propertyName: string; className: string; };
-  }
-
   class SystemAPI {
-    contexts: { [contextName: string]: { plugins: { [pluginName: string]: APIPlugin; } } };
-
-    registerPlugin(contextName: string, pluginName: string, plugin: APIPlugin): void;
+    registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
+    getPlugins<T>(contextName: string): { [pluginName: string]: T };
   }
 
   class SystemData {
