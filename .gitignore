@@ -1,0 +1,16 @@
+**/node_modules
+*.sublime-*
+SupCore/**/*.js
+SupClient/**/*.js
+server/**/*.js
+client/**/*.js
+launcher/src/**/*.js
+launcher/main.js
+launcher/public/
+workbench/
+systems/
+projects/
+builds/
+public/
+!public/locales
+config.json
