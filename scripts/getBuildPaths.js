@@ -15,7 +15,9 @@ module.exports = function(rootPath) {
 
   // Systems and plugins
   var systemsPath = rootPath + "/systems";
-  fs.readdirSync(systemsPath).forEach(function(systemName) {
+  var systemFolders = [];
+  try { systemFolders = fs.readdirSync(systemsPath); } catch (err) { /* Ignore */ }
+  systemFolders.forEach(function(systemName) {
     if (shouldIgnoreFolder(systemName)) return;
   
     var systemPath = systemsPath + "/" + systemName;
