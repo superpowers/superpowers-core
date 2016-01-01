@@ -1,11 +1,11 @@
-# Superpowers, the HTML5 2D+3D game maker
+# Superpowers, the HTML5 2D+3D game maker  
 
 ![](https://img.shields.io/github/license/superpowers/superpowers.svg)
-[![](https://img.shields.io/gitter/room/superpowers/home.svg)](https://gitter.im/superpowers/home)  
+[![](https://img.shields.io/gitter/room/superpowers/dev.svg)](https://gitter.im/superpowers/dev)  
 [![](https://img.shields.io/badge/patreon-support%20us-brightgreen.svg)](https://www.patreon.com/SparklinLabs)
 [![](https://img.shields.io/twitter/follow/SuperpowersDev.svg?style=social)](https://twitter.com/SuperpowersDev)
 
-## Powerful, extensible, collaborative.
+## Powerful, extensible, collaborative game development.
 
   * [Website](http://superpowers-html5.com/) —
     [Download](https://sparklinlabs.itch.io/superpowers) —
@@ -18,8 +18,13 @@ or setup a password and let friends join in on your project through their Web br
 It's great for working together over long periods of time, for jamming over a weekend,
 or just for helping each other out with debugging!
 
-We've built the [Superpowers Game engine](https://github.com/superpowers/superpowers-game) and a bunch of asset editors for it.
+## ... not just for making games!
+
+We've built the [Superpowers Game](https://github.com/superpowers/superpowers-game) engine and a bunch of asset editors to make games with TypeScript.
 But the coolest thing is this: Superpowers itself is actually engine-agnostic.
-It's just a piece of software for collaborating on projects and you can add project types and editors to it.
+It's just a piece of software for collaborating on projects and you can extend it with project types and editors.
+
+Use Superpowers to make [static websites](http://github.com/superpowers/superpowers-web), [Lua LÖVE games](https://github.com/superpowers/superpowers-love2d), slideshows, blogs, movies...
+whatever you can come up with!
 
 ![](http://i.imgur.com/g4iNlEn.png)

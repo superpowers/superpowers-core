@@ -3,11 +3,11 @@ in the hope of making it as useful as possible for everyone.
 https://en.wikipedia.org/wiki/ISC_license
 
 We are a welcoming community and we'd love to have you contributing!
-http://bitbucket.org/superpowers/superpowers
+https://github.com/superpowers/superpowers
 
 ------------------------------------------------------------------------------
 
-Copyright © 2014-2015, Sparklin Labs
+Copyright © 2014-2016, Sparklin Labs
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
