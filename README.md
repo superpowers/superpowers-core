@@ -1,6 +1,6 @@
 ## Superpowers, the HTML5 2D+3D game maker  
 
-![](https://img.shields.io/github/license/superpowers/superpowers.svg)
+![](https://img.shields.io/badge/license-ISC-blue.svg)
 [![](https://img.shields.io/gitter/room/superpowers/dev.svg)](https://gitter.im/superpowers/dev)  
 [![](https://img.shields.io/badge/patreon-support%20us-brightgreen.svg)](https://www.patreon.com/SparklinLabs)
 [![](https://img.shields.io/twitter/follow/SuperpowersDev.svg?style=social)](https://twitter.com/SuperpowersDev)
