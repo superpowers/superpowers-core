@@ -35,6 +35,14 @@ declare namespace SupClient {
       checkbox?: HTMLInputElement;
     }
 
+    interface NumberOptions {
+      min?: number|string;
+      max?: number|string;
+      step?: number|string;
+    }
+
+    interface SliderOptions extends NumberOptions { sliderStep?: number|string; }
+
     export function createTable(parent?: HTMLElement): { table: HTMLTableElement; tbody: HTMLTableSectionElement; };
     export function appendRow(parentTableBody: HTMLTableSectionElement, name: string,
     options?: { checkbox?: boolean; title?: string; }): RowParts;
@@ -42,15 +50,17 @@ declare namespace SupClient {
     export function appendTextField(parentCell: HTMLElement, value: string): HTMLInputElement;
     export function appendTextAreaField(parent: HTMLElement, value: string): HTMLTextAreaElement;
     export function appendNumberField(parentCell: HTMLElement, value: number|string,
-    min?: number|string, max?: number|string, step?: number|string): HTMLInputElement;
+    options?: NumberOptions): HTMLInputElement;
     export function appendNumberFields(parentCell: HTMLElement, values: (number|string)[],
-    min?: number|string, max?: number|string, step?: number|string): HTMLInputElement[];
+    options?: NumberOptions): HTMLInputElement[];
     export function appendBooleanField(parentCell: HTMLElement, value: boolean): HTMLInputElement;
-    export function appendSelectBox(parentCell: HTMLElement, options: { [value: string]: string; },
-    initialValue?: string): HTMLSelectElement;
+    export function appendSelectBox(parentCell: HTMLElement,
+    options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
     export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement, value: string, label: string): HTMLOptionElement;
     export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupElement, label: string): HTMLOptGroupElement;
     export function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
+    export function appendSliderField(parent: HTMLElement, value: number|string,
+    options?: SliderOptions): { sliderField: HTMLInputElement; numberField: HTMLInputElement; };
     export function appendAssetField(parent: HTMLElement, value: string): { textField: HTMLInputElement; buttonElt: HTMLButtonElement; };
   }
 

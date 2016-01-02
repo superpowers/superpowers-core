@@ -71,25 +71,32 @@ export function appendTextAreaField(parent: HTMLElement, value: string) {
   return textarea;
 }
 
-export function appendNumberField(parent: HTMLElement, value: number|string,
-min?: number|string, max?: number|string, step?: number|string) {
+interface NumberOptions {
+  min?: number|string;
+  max?: number|string;
+  step?: number|string;
+};
+
+export function appendNumberField(parent: HTMLElement, value: number|string, options?: NumberOptions) {
   let input = createInput("number", parent);
-  input.value = <any>value;
-  if (min != null) input.min = <any>min;
-  if (max != null) input.max = <any>max;
-  if (step != null) input.step = <any>step;
+  input.value = value.toString();
+
+  if (options != null) {
+    if (options.min != null) input.min = options.min.toString();
+    if (options.max != null) input.max = options.max.toString();
+    if (options.step != null) input.step = options.step.toString();
+  }
 
   return input;
 }
 
-export function appendNumberFields(parent: HTMLElement, values: (number|string)[],
-min?: number|string, max?: number|string, step?: number|string) {
-  let inputsParent = <any>document.createElement("div");
+export function appendNumberFields(parent: HTMLElement, values: (number|string)[], options?: NumberOptions) {
+  let inputsParent = document.createElement("div");
   inputsParent.classList.add("inputs");
   parent.appendChild(inputsParent);
 
   let inputs: HTMLInputElement[] = [];
-  for (let value of values) inputs.push(appendNumberField(inputsParent, value, min, max));
+  for (let value of values) inputs.push(appendNumberField(inputsParent, value, options));
   return inputs;
 }
 
@@ -128,7 +135,7 @@ export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupEl
 }
 
 export function appendColorField(parent: HTMLElement, value: string) {
-  let colorParent = <any>document.createElement("div");
+  let colorParent = document.createElement("div");
   colorParent.classList.add("inputs");
   parent.appendChild(colorParent);
 
@@ -143,8 +150,31 @@ export function appendColorField(parent: HTMLElement, value: string) {
   return { textField, pickerField };
 }
 
+interface SliderOptions extends NumberOptions { sliderStep?: number|string; }
+
+export function appendSliderField(parent: HTMLElement, value: number|string, options?: SliderOptions) {
+  let sliderParent = document.createElement("div");
+  sliderParent.classList.add("inputs");
+  parent.appendChild(sliderParent);
+
+  let sliderField = document.createElement("input");
+  sliderParent.appendChild(sliderField);
+  sliderField.type = "range";
+  sliderField.style.flex = "2";
+  sliderField.value = value.toString();
+  if (options != null) {
+    if (options.min != null) sliderField.min = options.min.toString();
+    if (options.max != null) sliderField.max = options.max.toString();
+    if (options.sliderStep != null) sliderField.step = options.sliderStep.toString();
+  }
+
+  let numberField = appendNumberField(sliderParent, value, options);
+
+  return { sliderField, numberField };
+}
+
 export function appendAssetField(parent: HTMLElement, value: string) {
-  let assetParent = <any>document.createElement("div");
+  let assetParent = document.createElement("div");
   assetParent.classList.add("inputs");
   parent.appendChild(assetParent);
 
