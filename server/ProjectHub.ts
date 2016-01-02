@@ -57,6 +57,12 @@ export default class ProjectHub {
     let server = new ProjectServer(this.globalIO, folderName, (err) => {
       if (err != null) { callback(err); return; }
 
+      if (this.serversById[server.data.manifest.pub.id] != null) {
+        callback(new Error(`There's already a project with this ID: ${server.data.manifest.pub.id} ` +
+        `(${server.projectPath} and ${this.serversById[server.data.manifest.pub.id].projectPath})`));
+        return;
+      }
+
       this.serversById[server.data.manifest.pub.id] = server;
       callback(null);
     });
