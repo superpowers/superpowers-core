@@ -33,25 +33,25 @@ class SystemData {
 
 export class System {
   data: SystemData;
-  private contexts: { [contextName: string]: { plugins: { [pluginName: string]: any; } } } = {};
+  private plugins: { [contextName: string]: { [pluginName: string]: any; } } = {};
 
   constructor(public name: string) {
     this.data = new SystemData(this);
   }
 
   registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
-    if (this.contexts[contextName] == null) this.contexts[contextName] = { plugins: {} };
+    if (this.plugins[contextName] == null) this.plugins[contextName] = { plugins: {} };
 
-    if (this.contexts[contextName].plugins[pluginName] != null) {
+    if (this.plugins[contextName][pluginName] != null) {
       console.error("SystemAPI.registerPlugin: Tried to register two or more plugins " +
       `named "${pluginName}" in context "${contextName}", system "${this.name}"`);
     }
 
-    this.contexts[contextName].plugins[pluginName] = plugin;
+    this.plugins[contextName][pluginName] = plugin;
   }
 
   getPlugins<T>(contextName: string): { [pluginName: string]: T } {
-    return this.contexts[contextName].plugins;
+    return this.plugins[contextName];
   }
 }
 
