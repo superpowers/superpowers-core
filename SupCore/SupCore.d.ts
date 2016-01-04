@@ -9,7 +9,6 @@ declare namespace SupCore {
     export function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;
 
     interface AssetClass { new(id: string, pub: any, server?: ProjectServer): Base.Asset; }
-    interface ComponentConfigClass { new(pub: any, sceneAsset?: any): Base.ComponentConfig; create(): any; }
     interface ResourceClass { new(id: string, pub: any, server?: ProjectServer): Base.Resource; }
 
     class Projects extends Base.ListById {
@@ -279,26 +278,6 @@ declare namespace SupCore {
 
         server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
       }
-
-      class ComponentConfig extends Hash {
-        constructor(pub: any, schema: any);
-
-        // OVERRIDE: Called when loading a scene
-        // Check for any error/warning/info and this.emit("setBadge", ...) as required
-        // Also if the component depends on assets, this.emit("addDependencies", ...) with a list of entry IDs
-        restore(): void;
-
-        // OVERRIDE: Called when destroying a component or its actor
-        // If the component depends on assets, this.emit("removeDependencies", ...) with a list of entry IDs
-        destroy(): void;
-
-        // OVERRIDE: Called when editing a property
-        // You can check for asset dependency changes by overriding this method
-        // and calling this.emit("addDependencies" / "removeDependencies", ...) as needed
-        // setProperty(path, value, callback) {}
-
-        server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
-      }
     }
   }
 
@@ -316,11 +295,9 @@ declare namespace SupCore {
 
   class SystemData {
     assetClasses: { [assetName: string]: SupCore.Data.AssetClass; };
-    componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; };
     resourceClasses: { [resourceId: string]: SupCore.Data.ResourceClass };
 
     registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass): void;
-    registerComponentConfigClass(name: string, configClass: SupCore.Data.ComponentConfigClass): void;
     // Register a plugin *resource* (see SupCore.Data.Resources), not just a resource class, hence the name
     registerResource(id: string, resourceClass: SupCore.Data.ResourceClass): void;
   }

@@ -7,7 +7,7 @@ import { getLocalizedFilename } from "./paths";
 
 function shouldIgnorePlugin(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 // FIXME: Let each system specify the required files? or just assume plugins will do their job
-let publicPluginFiles = [ "data", "components", "componentEditors", "settingsEditors", "api", "runtime" ];
+let publicPluginFiles = [ "data", "components", "componentEditors", "componentConfigs", "settingsEditors", "api", "runtime" ];
 let systemsPath = path.resolve(`${__dirname}/../systems`);
 
 export let buildFilesBySystem: { [systemName: string]: string[]; } = {};

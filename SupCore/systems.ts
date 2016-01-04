@@ -3,7 +3,6 @@ import * as path from "path";
 
 class SystemData {
   assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
-  componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; } = {};
   resourceClasses: { [resourceId: string]: SupCore.Data.ResourceClass; } = {};
 
   constructor(public system: System) {}
@@ -15,14 +14,6 @@ class SystemData {
     }
     this.assetClasses[name] = assetClass;
     return;
-  }
-
-  registerComponentConfigClass(name: string, configClass: SupCore.Data.ComponentConfigClass) {
-    if (this.componentConfigClasses[name] != null) {
-      console.log(`SystemData.registerComponentConfigClass: Tried to register two or more component configuration classes named "${name}" in system "${this.system.name}"`);
-      return;
-    }
-    this.componentConfigClasses[name] = configClass;
   }
 
   registerResource(id: string, resourceClass: SupCore.Data.ResourceClass) {

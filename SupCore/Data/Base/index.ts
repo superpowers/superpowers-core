@@ -5,9 +5,8 @@ import TreeById from "./TreeById";
 import Dictionary from "./Dictionary";
 import Asset from "./Asset";
 import Resource from "./Resource";
-import ComponentConfig from "./ComponentConfig";
 /* tslint:enable:no-unused-variable */
-export { Hash, ListById, TreeById, Dictionary, Asset, Resource, ComponentConfig };
+export { Hash, ListById, TreeById, Dictionary, Asset, Resource };
 
 interface Rule {
   mutable?: boolean;

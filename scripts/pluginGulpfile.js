@@ -69,6 +69,7 @@ makeBrowserify("./data/index.js", "./public", "data");
 // FIXME: Remove hardcoded list of folders to browserify
 // (allow systems or plugins to define what they expect?)
 makeBrowserify("./components/index.js", "./public", "components");
+makeBrowserify("./componentConfigs/index.js", "./public", "componentConfigs");
 makeBrowserify("./componentEditors/index.js", "./public", "componentEditors");
 makeBrowserify("./runtime/index.js", "./public", "runtime");
 makeBrowserify("./api/index.js", "./public", "api");
