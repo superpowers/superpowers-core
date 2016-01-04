@@ -5,7 +5,7 @@
   "license": "ISC",
   "main": "main.js",
   "repository": {
-    "type": "hg",
-    "url": "https://bitbucket.org/superpowers/superpowers"
+    "type": "git",
+    "url": "https://github.com/superpowers/superpowers.git"
   }
 }
