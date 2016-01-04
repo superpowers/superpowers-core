@@ -8,8 +8,9 @@
 [Website](http://superpowers-html5.com/) —
 [Download](https://sparklinlabs.itch.io/superpowers) —
 [Documentation](http://docs.superpowers-html5.com/)  
+[Roadmap](http://docs.superpowers-html5.com/en/development/roadmap) —
 [How to contribute](http://docs.superpowers-html5.com/en/development/how-to-contribute) —
-[Building Superpowers](http://docs.superpowers-html5.com/en/development/building-superpowers)
+[Build instructions](http://docs.superpowers-html5.com/en/development/building-superpowers)
 
 ### Powerful, extensible, collaborative game development.
 
