@@ -251,11 +251,15 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           if (parentEntry != null && parentEntry.children.length === 0) {
             let parentAssetFolder = path.join(this.server.projectPath, "assets", this.server.data.entries.getStoragePathFromId(parentEntry.id));
             fs.readdir(parentAssetFolder, (err, files) => {
-              if (err != null) { callback(err.message); return; }
+              if (err != null) {
+                if (err.code !== "ENOENT") callback(err.message);
+                else callback(null);
+                return;
+              }
 
               if (files.length === 0) {
                 fs.rmdir(parentAssetFolder, (err) => {
-                  if (err != null && err.code !== "ENOENT") { callback(err.message); return; }
+                  if (err != null) { callback(err.message); return; }
                   callback(null);
                 });
               } else callback(null);
@@ -265,11 +269,15 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       } else {
         let trashedAssetPath = path.join(this.server.projectPath, "assets", trashedAssetFolder);
         fs.readdir(trashedAssetPath, (err, files) => {
-          if (err != null) { callback(err.message); return; }
+          if (err != null) {
+            if (err.code !== "ENOENT") callback(err.message);
+            else callback(null);
+            return;
+          }
 
           if (files.length === 0) {
             fs.rmdir(trashedAssetPath, (err) => {
-              if (err != null && err.code !== "ENOENT") { callback(err.message); return; }
+              if (err != null) { callback(err.message); return; }
               callback(null);
             });
           } else callback(null);
