@@ -81,17 +81,12 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
     }
   }
 
-  // First pass
-  for (let pluginAuthor in pluginNamesByAuthor) {
+  Object.keys(pluginNamesByAuthor).forEach((pluginAuthor) => {
     let pluginNames = pluginNamesByAuthor[pluginAuthor];
     let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
 
-    for (let pluginName of pluginNames) {
+    pluginNames.forEach((pluginName) => {
       let pluginPath = `${pluginAuthorPath}/${pluginName}`;
-
-      // Load scripting API module
-      let apiModulePath = `${pluginPath}/api/index.js`;
-      if (fs.existsSync(apiModulePath)) require(apiModulePath);
 
       // Ensure all public files exist
       try { fs.mkdirSync(`${pluginPath}/public`); } catch (err) { /* Ignore */ }
@@ -99,16 +94,6 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
         let requiredFilePath = `${pluginPath}/public/${requiredFile}.js`;
         if (!fs.existsSync(requiredFilePath)) fs.closeSync(fs.openSync(requiredFilePath, "w"));
       }
-    }
-  }
-
-  // Second pass, because data modules might depend on API modules
-  Object.keys(pluginNamesByAuthor).forEach((pluginAuthor) => {
-    let pluginNames = pluginNamesByAuthor[pluginAuthor];
-    let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
-
-    pluginNames.forEach((pluginName) => {
-      let pluginPath = `${pluginAuthorPath}/${pluginName}`;
 
       // Load data module
       let dataModulePath = `${pluginPath}/data/index.js`;

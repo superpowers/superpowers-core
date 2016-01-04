@@ -1,3 +1,6 @@
+import * as fs from "fs";
+import * as path from "path";
+
 class SystemData {
   assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
   componentConfigClasses: { [componentConfigName: string]: SupCore.Data.ComponentConfigClass; } = {};
@@ -37,6 +40,19 @@ export class System {
 
   constructor(public name: string) {
     this.data = new SystemData(this);
+  }
+
+  requireForAllPlugins(filePath: string) {
+    let pluginsPath = path.resolve(`${__dirname}/../systems/${this.name}/plugins`);
+
+    for (let pluginAuthor of fs.readdirSync(pluginsPath)) {
+      let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+
+      for (let pluginName of fs.readdirSync(pluginAuthorPath)) {
+        let completeFilePath = `${pluginAuthorPath}/${pluginName}/${filePath}`;
+        if (fs.existsSync(completeFilePath)) require(completeFilePath);
+      }
+    }
   }
 
   registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {

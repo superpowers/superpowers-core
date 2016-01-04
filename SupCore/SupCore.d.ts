@@ -330,6 +330,7 @@ declare namespace SupCore {
     data: SystemData;
 
     constructor(name: string);
+    requireForAllPlugins(filePath: string): void;
     registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
     getPlugins<T>(contextName: string): { [pluginName: string]: T };
   }
