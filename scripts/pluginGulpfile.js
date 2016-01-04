@@ -65,12 +65,16 @@ function makeBrowserify(source, destination, output) {
 }
 
 makeBrowserify("./data/index.js", "./public", "data");
+
+// FIXME: Remove hardcoded list of folders to browserify
+// (allow systems or plugins to define what they expect?)
 makeBrowserify("./components/index.js", "./public", "components");
 makeBrowserify("./componentEditors/index.js", "./public", "componentEditors");
 makeBrowserify("./runtime/index.js", "./public", "runtime");
 makeBrowserify("./api/index.js", "./public", "api");
 makeBrowserify("./settingsEditors/index.js", "./public", "settingsEditors");
 makeBrowserify("./documentation/index.js", "./public", "documentation");
+
 editors.forEach(function(editor) { makeBrowserify("./editors/" + editor + "/index.js", "./public/editors", editor + "/index"); });
 
 // All
