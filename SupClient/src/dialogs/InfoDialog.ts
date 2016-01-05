@@ -1,7 +1,7 @@
 import BaseDialog from "./BaseDialog";
 
 export default class InfoDialog extends BaseDialog {
-  constructor(label: string, validationLabel: string, private callback: () => any) {
+  constructor(label: string, validationLabel: string, private callback?: () => any) {
     super();
 
     let labelElt = document.createElement("label");

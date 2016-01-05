@@ -390,7 +390,7 @@ function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: nu
 
 let autoOpenAsset = true;
 function onEntryAddedAck(err: string, id: string) {
-  if (err != null) { alert(err); return; }
+  if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
 
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`));
@@ -535,7 +535,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
   } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
-    if (err != null) { alert(err); return; }
+    if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
 
     let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemName}/?project=${SupClient.query.project}&build=${buildId}`;
     if (options.debug) url += "&debug";
@@ -563,7 +563,7 @@ function publishProject() {
 }
 
 if (SupClient.isApp) {
-  electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => { alert(message); });
+  electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => { new SupClient.dialogs.InfoDialog(message, SupClient.i18n.t("common:actions.close")); });
   electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
       let address = `${window.location.protocol}//${window.location.hostname}`;
@@ -636,7 +636,7 @@ function onEntryDrop(dropInfo: any, orderedNodes: any) {
 
   let i = 0;
   for (let id of entryIds) {
-    socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => { if (err != null) alert(err); });
+    socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => { if (err != null) new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); });
     if (!sameParent || sourceChildren.indexOf(data.entries.byId[id]) >= dropPoint.index) i++;
   }
   return false;
@@ -846,7 +846,7 @@ function onTrashEntryClick() {
         for (let selectedNode of ui.entriesTreeView.selectedNodes) {
           let entry = data.entries.byId[selectedNode.dataset.id];
           socket.emit("trash:entries", entry.id, (err: string) => {
-            if (err != null) { alert(err); return; }
+            if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
           });
         }
         ui.entriesTreeView.clearSelection();
@@ -920,7 +920,7 @@ function onRenameEntryClick() {
     if (newName == null || newName === entry.name) return;
 
     socket.emit("setProperty:entries", entry.id, "name", newName, (err: string) => {
-      if (err != null) { alert(err); return; }
+      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
     });
   });
 }

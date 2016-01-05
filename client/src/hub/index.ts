@@ -234,7 +234,7 @@ function onNewProjectClick() {
 }
 
 function onProjectAddedAck(err: string, id: string) {
-  if (err != null) { alert(err); return; }
+  if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
 
   ui.projectsTreeView.clearSelection();
 
@@ -260,7 +260,7 @@ function onEditProjectClick() {
     if (editedProject.icon == null) delete editedProject.icon;
 
     socket.emit("edit:projects", existingProject.id, editedProject, (err: string) => {
-      if (err != null) { alert(err); return; }
+      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
     });
   });
 }

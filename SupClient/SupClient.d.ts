@@ -98,7 +98,7 @@ declare namespace SupClient {
       constructor(label: string, validationLabel: string, callback: (confirmed: boolean) => any);
     }
     export class InfoDialog {
-      constructor(label: string, validationLabel: string, callback: () => any);
+      constructor(label: string, validationLabel: string, callback?: () => any);
     }
     export class SelectDialog {
       constructor(label: string, choices: { [value: string]: string; }, validationLabel: string, options: SelectOptions, callback: (value: string) => any);
