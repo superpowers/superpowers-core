@@ -64,17 +64,19 @@ function makeBrowserify(source, destination, output) {
   tasks.push(output + "-browserify");
 }
 
-makeBrowserify("./data/index.js", "./public", "data");
+if (fs.exists("./public/bundles")) {
+  var bundles = fs.readdirSync("./public/bundles");
+  bundles.forEach(function(bundle) { fs.unlinkSync("./public/bundles/" + bundle); });
+}
 
-// FIXME: Remove hardcoded list of folders to browserify
-// (allow systems or plugins to define what they expect?)
-makeBrowserify("./components/index.js", "./public", "components");
-makeBrowserify("./componentConfigs/index.js", "./public", "componentConfigs");
-makeBrowserify("./componentEditors/index.js", "./public", "componentEditors");
-makeBrowserify("./runtime/index.js", "./public", "runtime");
-makeBrowserify("./api/index.js", "./public", "api");
-makeBrowserify("./settingsEditors/index.js", "./public", "settingsEditors");
-makeBrowserify("./documentation/index.js", "./public", "documentation");
+var folders = fs.readdirSync("./");
+folders.forEach(function(folder) {
+  if (folder === "public" || folder === "editors" || folder === "node_modules" || folder === "typings") return;
+  
+  if (fs.existsSync("./" + folder + "/index.ts"))
+    makeBrowserify("./" + folder + "/index.js", "./public/bundles", folder);
+})
+makeBrowserify("./data/index.js", "./public/bundles", "data");
 
 editors.forEach(function(editor) { makeBrowserify("./editors/" + editor + "/index.js", "./public/editors", editor + "/index"); });
 

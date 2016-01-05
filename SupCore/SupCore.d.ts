@@ -287,6 +287,7 @@ declare namespace SupCore {
       editors: { [assetType: string]: string; };
       tools: { [name: string]: string; };
     };
+    publishedBundles: string[];
   }
 
   interface SystemsInfo {
