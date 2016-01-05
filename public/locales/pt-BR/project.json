@@ -1,0 +1,38 @@
+{
+  "header": {
+    "goToHub": "Ir para o hub",
+    "publish": "Publicar projeto",
+    "publishDisabled": "Publicar projeto (funciona apenas quando executado diretamente no Superpowers, por razões técnicas)",
+    "stop": "Parar projeto",
+    "debug": "Depurar projeto (F6)",
+    "run": "Executar projeto (F5)",
+    "notifications": {
+      "enable": "Clique para habilitar as notificações",
+      "disable": "Clique para desabilitar as notificações",
+      "new": "Nova mensagem no chat do projeto -${projectName}-"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "Abrir em uma nova janela",
+    "newAsset": {
+      "title": "Novo asset",
+      "prompt": "Selecione um tipo e um nome para este novo asset.",
+      "placeholder": "Nome do asset (opcional)",
+      "openAfterCreation": "Abrir após a criação"
+    },
+    "newFolder": {
+      "title": "Nova pasta",
+      "prompt": "Insira um nome para esta nova pasta.",
+      "placeholder": "Insira um nome",
+      "initialValue": "Pasta"
+    },
+    "renamePrompt": "Insira um novo nome para este asset.",
+    "duplicatePrompt": "Insira um nome para este novo asset.",
+    "trash": {
+      "title": "Lixeira",
+      "prompt": "Você certeza que deseja enviar os itens selecionados para a lixeira?",
+      "warnBrokenDependency": "${entryName} está sendo usado por ${dependentEntryNames}."
+    },
+    "searchPlaceholder": "Pesquisar por assets"
+  }
+}
