@@ -9,7 +9,7 @@ export default function(socket: SocketIO.Socket, next: Function) {
     try { auth = JSON.parse(authJSON); } catch (e) { /* Ignore */ }
   }
 
-  if (auth != null && auth.serverPassword === config.password && typeof auth.username === "string" && usernameRegex.test(auth.username)) {
+  if (auth != null && (auth.serverPassword === config.password || config.password.length === 0) && typeof auth.username === "string" && usernameRegex.test(auth.username)) {
     (<any>socket).username = auth.username;
   }
 
