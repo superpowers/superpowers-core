@@ -11,6 +11,6 @@ workbench/
 systems/
 projects/
 builds/
-public/
+public/*
 !public/locales
 config.json
