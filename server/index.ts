@@ -44,7 +44,12 @@ mainApp.use(cookieParser());
 mainApp.use((req, res, next) => {
   if (req.cookies["supLanguage"] == null) {
     let language = req.header("Accept-Language");
-    if (language != null) language = language.split(",")[0].split("-")[0];
+    if (language != null) {
+      language = language.split(",")[0];
+      if (languageIds.indexOf(language) === -1 && language.indexOf("-") !== -1) {
+        language = language.split("-")[0];
+      }
+    }
     if (languageIds.indexOf(language) === -1) language = "en";
     res.cookie("supLanguage", language);
   }
