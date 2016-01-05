@@ -64,7 +64,7 @@ function makeBrowserify(source, destination, output) {
   tasks.push(output + "-browserify");
 }
 
-if (fs.exists("./public/bundles")) {
+if (fs.existsSync("./public/bundles")) {
   var bundles = fs.readdirSync("./public/bundles");
   bundles.forEach(function(bundle) { fs.unlinkSync("./public/bundles/" + bundle); });
 }
