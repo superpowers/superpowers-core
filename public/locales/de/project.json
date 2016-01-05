@@ -1,0 +1,38 @@
+{
+  "header": {
+    "goToHub": "Zum Hub",
+    "publish": "Projekt veröffentlichen",
+    "publishDisabled": "Projekt veröffentlichen (funktioniert aus technischen Gründen nur aus der Superpowers App)",
+    "stop": "Projekt stoppen",
+    "debug": "Projekt debuggen (F6)",
+    "run": "Projekt starten (F5)",
+    "notifications": {
+      "enable": "Klicke um Benachrichtigungen zu aktivieren",
+      "disable": "Klicke um Benachrichtigungen zu deaktivieren",
+      "new": "Neue Chatnachricht beim Projekt -${projectName}-"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "Öffne in neuem Fenster",
+    "newAsset": {
+      "title": "Neues Asset",
+      "prompt": "Wähle einen Typ und trage einen Namen für das neue Asset ein.",
+      "placeholder": "Asset Name (optional)",
+      "openAfterCreation": "Öffne nach Erstellung"
+    },
+    "newFolder": {
+      "title": "Neues Verzeichnis",
+      "prompt": "Trage einen Namen für das neue Verzeichnis ein.",
+      "placeholder": "Trage einen Namen ein",
+      "initialValue": "Verzeichnis"
+    },
+    "renamePrompt": "Trage einen Namen für das Asset ein.",
+    "duplicatePrompt": "Trage einen Namen für das neue Asset ein.",
+    "trash": {
+      "title": "Papierkorb",
+      "prompt": "Bist du sicher das du die ausgewählten Einträge löschen willst?",
+      "warnBrokenDependency": "${entryName} wird verwendet in ${dependentEntryNames}."
+    },
+    "searchPlaceholder": "Suche nach Assets"
+  }
+}
