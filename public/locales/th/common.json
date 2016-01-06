@@ -1,8 +1,8 @@
 {
   "activeLanguage": "ภาษาไทย",
 
-  "namePatternDescription": "ไม่สามารถใช้ตัวอักษรเหล่านี้ได้ : \\, /, :, *, ?, \", <, >, |, [ and ].",
-  "none": "(None)",
+  "namePatternDescription": "ไม่สามารถใช้ตัวอักษรเหล่านี้ได้ : \\, /, :, *, ?, \", <, >, |, [ และ ]",
+  "none": "(ไม่มี)",
 
   "actions": {
     "applyChanges": "นำไปใช้",
