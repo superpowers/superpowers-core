@@ -24,16 +24,16 @@ splash.addEventListener("click", (event) => {
 document.querySelector(".splash .version").textContent = `v${packageInfo.version}`;
 let updateStatus = <HTMLDivElement>document.querySelector(".splash .update-status");
 
-supFetch("http://sparklinlabs.com/releases.json", "json", (err, releases) => {
+supFetch("https://api.github.com/repos/superpowers/superpowers/releases/latest", "json", (err, lastRelease) => {
   if (err != null) {
     updateStatus.textContent = "Failed to check for updates.";
     return;
   }
 
-  let lastVersion = releases[0].version;
-  if (lastVersion === packageInfo.version) updateStatus.textContent = "";
+  let lastVersion = lastRelease.tag_name;
+  if (lastVersion === `v${packageInfo.version}`) updateStatus.textContent = "";
   else {
-    updateStatus.innerHTML = `UPDATE: v${lastVersion} is available. ` +
-    `<a href="https://sparklinlabs.com/account" target="_blank">Download it now</a>.`;
+    updateStatus.innerHTML = `UPDATE: ${lastVersion} is available. ` +
+    `<a href="http://superpowers-html5.com/" target="_blank">Download it now</a>.`;
   }
 });
