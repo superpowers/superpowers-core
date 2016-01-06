@@ -1,0 +1,45 @@
+{
+  "activeLanguage": "ภาษาไทย",
+
+  "namePatternDescription": "ไม่สามารถใช้ตัวอักษรเหล่านี้ได้ : \\, /, :, *, ?, \", <, >, |, [ and ].",
+  "none": "(None)",
+
+  "actions": {
+    "applyChanges": "นำไปใช้",
+    "applyChangesWithErrors": "นำไปใช้ด้วยข้อผิดพลาด",
+    "cancel": "ยกเลิก",
+    "close": "ปิด",
+    "create": "สร้างใหม่",
+    "delete": "ลบ",
+    "download": "ดาวน์โหลด",
+    "duplicate": "ทำซ้ำ",
+    "new": "สร้างใหม่",
+    "open": "เปิด",
+    "rename": "เปลี่ยนชื่อ",
+    "save": "บันทึก",
+    "search": "ค้นหา",
+    "skip": "ข้าม",
+    "update": "อัพเดท",
+    "upload": "อัพโหลด",
+
+    "cut": "ตัด",
+    "copy": "คัดลอก",
+    "paste": "วาง"
+  },
+
+  "states": { 
+    "disabled": "ปิดการทำงาน",
+    "enabled": "เปิดการทำงาน",
+    "loading": "กำลังโหลด...",
+    "connecting": "กำลังเชื่อมต่อ...",
+    "saving": "กำลังบันทึก..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "Return"
+  }
+}
