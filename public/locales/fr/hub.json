@@ -1,7 +1,7 @@
 {
   "newProject": {
     "title": "Nouveau projet",
-    "prompt": "Entrez le nom et choississez le type du nouveau projet.",
+    "prompt": "Entrez le nom et choisissez le type du nouveau projet.",
     "namePlaceholder": "Nom du projet",
     "descriptionPlaceholder": "Description (optionelle)",
     "emptyProject": {
