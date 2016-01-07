@@ -1,0 +1,20 @@
+{
+  "serverAddress": "${hostname} en el puerto ${port}",
+  "newProject": {
+    "title": "Nuevo proyecto",
+    "prompt": "Escribe un nombre y selecciona un tipo de proyecto.",
+    "namePlaceholder": "Nombre del proyecto",
+    "descriptionPlaceholder": "Descripción (opcional)",
+    "emptyProject": {
+      "title": "Proyecto vacío",
+      "description": "Un proyecto en blanco para empezar desde cero."
+    },
+    "autoOpen": "Abrir después de crear"
+  },
+  "editDetails": {
+    "title": "Editar detalles",
+    "prompt": "Editar los detalles del proyecto"
+  },
+  "openProject": "Abrir Proyecto",
+  "language": "Idioma"
+}

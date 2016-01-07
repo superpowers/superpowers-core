@@ -1,0 +1,45 @@
+{
+  "activeLanguage": "Español",
+
+  "namePatternDescription": "Los siguientes carácteres no pueden ser usados: \\, /, :, *, ?, \", <, >, |, [ y ].",
+  "none": "(Ninguno)",
+
+  "actions": {
+    "applyChanges": "Aplicar cambios",
+    "applyChangesWithErrors": "Aplicar cambios con errores",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "create": "Crear",
+    "delete": "Eliminar",
+    "download": "Descargar",
+    "duplicate": "Duplicar",
+    "new": "Nuevo",
+    "open": "Abrir",
+    "rename": "Renombrar",
+    "save": "Guardar",
+    "search": "Buscar",
+    "skip": "Saltar",
+    "update": "Actualizar",
+    "upload": "Subir",
+
+    "cut": "Cortar",
+    "copy": "Copiar",
+    "paste": "Pegar"
+  },
+
+  "states": { 
+    "disabled": "Deshabilitado",
+    "enabled": "Habilitado",
+    "loading": "Cargando...",
+    "connecting": "Conectando...",
+    "saving": "Guardando..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "Return"
+  }
+}
