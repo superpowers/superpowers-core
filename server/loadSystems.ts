@@ -12,8 +12,12 @@ export let buildFilesBySystem: { [systemName: string]: string[]; } = {};
 
 export default function(mainApp: express.Express, buildApp: express.Express, callback: Function) {
   async.eachSeries(fs.readdirSync(systemsPath), (systemName, cb) => {
-    SupCore.system = SupCore.systems[systemName] = new SupCore.System(systemName);
+    if (systemName.indexOf(".") !== -1) { cb(); return; }
+
     let systemPath = path.join(systemsPath, systemName);
+    if (!fs.statSync(systemPath).isDirectory()) { cb(); return; }
+
+    SupCore.system = SupCore.systems[systemName] = new SupCore.System(systemName);
 
     // Expose public stuff
     try { fs.mkdirSync(`${systemPath}/public`); } catch (err) { /* Ignore */ }
@@ -82,9 +86,13 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
     pluginNamesByAuthor[pluginAuthor] = [];
     for (let pluginName of fs.readdirSync(pluginAuthorPath)) {
       if (shouldIgnorePlugin(pluginName)) continue;
+
+      let pluginPath = `${pluginsPath}/${pluginAuthor}/${pluginName}`;
+      if (!fs.statSync(pluginPath).isDirectory()) continue;
+
       pluginNamesByAuthor[pluginAuthor].push(pluginName);
 
-      let packageData = fs.readFileSync(`${pluginsPath}/${pluginAuthor}/${pluginName}/package.json`, { encoding: "utf8" });
+      let packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
       if (packageData != null) {
         let packageJSON = JSON.parse(packageData);
         if (packageJSON.superpowers != null && packageJSON.superpowers.publishedPluginBundles != null)
