@@ -1,0 +1,38 @@
+{
+  "header": {
+    "goToHub": "Anar al hub",
+    "publish": "Publicar projecte",
+    "publishDisabled": "Publicar projecte (només funciona desde la app de Superpowers per raons técniques)",
+    "stop": "Parar projecte",
+    "debug": "Depurar projecte (F6)",
+    "run": "Executar projecte (F5)",
+    "notifications": {
+      "enable": "Fes click per habilitar les notificacions",
+      "disable": "Fes click per deshabilitar les notificacions",
+      "new": "Nou missatge de xat en el projecte -${projectName}-"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "Obrir en una nova finestra",
+    "newAsset": {
+      "title": "Nou asset",
+      "prompt": "Selecciona el tipus i escriu un nom per al nou asset.",
+      "placeholder": "Nom del asset (opcional)",
+      "openAfterCreation": "Obrir després de crear"
+    },
+    "newFolder": {
+      "title": "Nova carpeta",
+      "prompt": "Escriu un nom per a la nova carpeta.",
+      "placeholder": "Escriu un nom",
+      "initialValue": "Carpeta"
+    },
+    "renamePrompt": "Escriu un nom per al asset.",
+    "duplicatePrompt": "Escriu un nom per al nou asset.",
+    "trash": {
+      "title": "Esborrar",
+      "prompt": "Segur que vols esborrar els elements seleccionats?",
+      "warnBrokenDependency": "${entryName} s'está fent servir en ${dependentEntryNames}."
+    },
+    "searchPlaceholder": "Buscar assets"
+  }
+}

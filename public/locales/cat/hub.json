@@ -1,0 +1,20 @@
+{
+  "serverAddress": "${hostname} al port ${port}",
+  "newProject": {
+    "title": "Nou Projecte",
+    "prompt": "Escriu un nom i selecciona un tipus de projecte.",
+    "namePlaceholder": "Nom del projecte",
+    "descriptionPlaceholder": "Descripció (opcional)",
+    "emptyProject": {
+      "title": "Projecte buit",
+      "description": "Un projecte en blanc per començar desde zero."
+    },
+    "autoOpen": "Obrir després de crear"
+  },
+  "editDetails": {
+    "title": "Editar detalls",
+    "prompt": "Editar els detalls del projecte"
+  },
+  "openProject": "Obrir Projecte",
+  "language": "Idioma"
+}
