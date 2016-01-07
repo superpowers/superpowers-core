@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 
+function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
+
 class SystemData {
   assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
   resourceClasses: { [resourceId: string]: SupCore.Data.ResourceClass; } = {};
@@ -38,8 +40,11 @@ export class System {
 
     for (let pluginAuthor of fs.readdirSync(pluginsPath)) {
       let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+      if (shouldIgnoreFolder(pluginAuthor)) continue;
 
       for (let pluginName of fs.readdirSync(pluginAuthorPath)) {
+        if (shouldIgnoreFolder(pluginName)) continue;
+
         let completeFilePath = `${pluginAuthorPath}/${pluginName}/${filePath}`;
         if (fs.existsSync(completeFilePath)) require(completeFilePath);
       }
