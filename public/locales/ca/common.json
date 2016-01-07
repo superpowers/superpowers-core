@@ -1,0 +1,45 @@
+{
+  "activeLanguage": "Català",
+
+  "namePatternDescription": "Els següents caràcters no es poden fer servir: \\, /, :, *, ?, \", <, >, |, [ i ].",
+  "none": "(Ningún)",
+
+  "actions": {
+    "applyChanges": "Aplicar canvis",
+    "applyChangesWithErrors": "Aplicar canvis amb errors",
+    "cancel": "Cancelar",
+    "close": "Tancar",
+    "create": "Crear",
+    "delete": "Eliminar",
+    "download": "Descarregar",
+    "duplicate": "Duplicar",
+    "new": "Nou",
+    "open": "Obrir",
+    "rename": "Renombrar",
+    "save": "Guardar",
+    "search": "Buscar",
+    "skip": "Saltar",
+    "update": "Actualitzar",
+    "upload": "Pujar",
+
+    "cut": "Tallar",
+    "copy": "Copiar",
+    "paste": "Enganxar"
+  },
+
+  "states": { 
+    "disabled": "Deshabilitat",
+    "enabled": "Habilitat",
+    "loading": "Carregant...",
+    "connecting": "Conectant...",
+    "saving": "Guardant..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "Return"
+  }
+}
