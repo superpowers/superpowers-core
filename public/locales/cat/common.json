@@ -1,7 +1,7 @@
 {
   "activeLanguage": "Català",
 
-  "namePatternDescription": "Els següents carácters no es poden fer servir: \\, /, :, *, ?, \", <, >, |, [ i ].",
+  "namePatternDescription": "Els següents caràcters no es poden fer servir: \\, /, :, *, ?, \", <, >, |, [ i ].",
   "none": "(Ningún)",
 
   "actions": {
