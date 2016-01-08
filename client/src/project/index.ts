@@ -663,8 +663,8 @@ function onMessage(event: any) {
   switch(event.data.type) {
     case "chat": onMessageChat(event.data.content); break;
     case "hotkey": onMessageHotKey(event.data.content); break;
-    case "openEntry": openEntry(event.data.id, event.data.options); break;
-    case "openTool": openTool(event.data.name, event.data.options); break;
+    case "openEntry": openEntry(event.data.id, event.data.state); break;
+    case "openTool": openTool(event.data.name, event.data.state); break;
     case "error": onWindowDevError(); break;
   }
 }
@@ -746,7 +746,7 @@ function onSearchEntryDialog() {
   });
 }
 
-function openEntry(id: string, optionValues?: {[name: string]: any}) {
+function openEntry(id: string, state?: {[name: string]: any}) {
   let entry = data.entries.byId[id];
 
   // Just toggle folders
@@ -760,19 +760,17 @@ function openEntry(id: string, optionValues?: {[name: string]: any}) {
     ui.tabStrip.tabsRoot.appendChild(tab);
 
     iframe = document.createElement("iframe");
-    let options = "";
-    if (optionValues != null)
-      for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
-    iframe.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}${options}`;
     iframe.dataset["assetId"] = id;
+    iframe.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
+    if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
     ui.panesElt.appendChild(iframe);
-  } else if (optionValues != null) {
-    iframe.contentWindow.postMessage(optionValues, window.location.origin);
-  }
+  } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
+
   onTabActivate(tab);
+  return tab;
 }
 
-function openTool(name: string, optionValues?: {[name: string]: any}) {
+function openTool(name: string, state?: {[name: string]: any}) {
   let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`);
   let iframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${name}']`);
 
@@ -782,16 +780,11 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
     ui.tabStrip.tabsRoot.appendChild(tab);
 
     iframe = document.createElement("iframe");
-
-    let options = "";
-    if (optionValues != null)
-      for (let optionName in optionValues) options += `&${optionName}=${optionValues[optionName]}`;
-    iframe.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}${options}`;
     iframe.dataset["name"] = name;
+    iframe.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
+    if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
     ui.panesElt.appendChild(iframe);
-  } else if (optionValues != null) {
-    iframe.contentWindow.postMessage(optionValues, window.location.origin);
-  }
+  } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
 
   onTabActivate(tab);
   return tab;
