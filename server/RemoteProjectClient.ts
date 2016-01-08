@@ -157,8 +157,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   private onTrashEntry = (id: string, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let doTrashEntry = (entry: SupCore.Data.EntryNode, callback: (err: Error) => void) => {
-      let removeEntry = (err: Error) => {
+    let trashEntryRecursively = (entry: SupCore.Data.EntryNode, callback: (err: Error) => void) => {
+      let finishTrashEntry = (err: Error) => {
         if (err != null) { callback(err); return; }
 
         // Clear all dependencies for this entry
@@ -232,43 +232,21 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       };
 
       if (entry.type == null) {
-        async.each(entry.children, (entry, cb) => { doTrashEntry(entry, cb); }
-        , removeEntry);
-      } else removeEntry(null);
+        async.each(entry.children, (entry, cb) => { trashEntryRecursively(entry, cb); }
+        , finishTrashEntry);
+      } else finishTrashEntry(null);
     };
 
     let trashedAssetFolder = this.server.data.entries.getStoragePathFromId(id);
     let entry = this.server.data.entries.byId[id];
     let gotChildren = entry.type == null && entry.children.length > 0;
     let parentEntry = this.server.data.entries.parentNodesById[id];
-    doTrashEntry(entry, (err: Error) => {
+    trashEntryRecursively(entry, (err: Error) => {
       if (err != null) { callback(err.message); return; }
 
-      if (entry.type != null || gotChildren) {
-        this.server.moveAssetFolderToTrash(trashedAssetFolder, (err) => {
-          if (err != null) { callback(err.message); return; }
-
-          if (parentEntry != null && parentEntry.children.length === 0) {
-            let parentAssetFolder = path.join(this.server.projectPath, "assets", this.server.data.entries.getStoragePathFromId(parentEntry.id));
-            fs.readdir(parentAssetFolder, (err, files) => {
-              if (err != null) {
-                if (err.code !== "ENOENT") callback(err.message);
-                else callback(null);
-                return;
-              }
-
-              if (files.length === 0) {
-                fs.rmdir(parentAssetFolder, (err) => {
-                  if (err != null) { callback(err.message); return; }
-                  callback(null);
-                });
-              } else callback(null);
-            });
-          } else callback(null);
-        });
-      } else {
-        let trashedAssetPath = path.join(this.server.projectPath, "assets", trashedAssetFolder);
-        fs.readdir(trashedAssetPath, (err, files) => {
+      // After the trash on memory, move folder to trashed assets and clean up empty folders
+      let deleteFolder = (folderPath: string, callback: (error: string) => void) => {
+        fs.readdir(folderPath, (err, files) => {
           if (err != null) {
             if (err.code !== "ENOENT") callback(err.message);
             else callback(null);
@@ -276,13 +254,23 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           }
 
           if (files.length === 0) {
-            fs.rmdir(trashedAssetPath, (err) => {
+            fs.rmdir(folderPath, (err) => {
               if (err != null) { callback(err.message); return; }
               callback(null);
             });
           } else callback(null);
         });
-      }
+      };
+
+      if (entry.type != null || gotChildren) {
+        this.server.moveAssetFolderToTrash(trashedAssetFolder, (err) => {
+          if (err != null) { callback(err.message); return; }
+
+          if (parentEntry != null && parentEntry.children.length === 0)
+            deleteFolder(path.join(this.server.projectPath, "assets", this.server.data.entries.getStoragePathFromId(parentEntry.id)), callback);
+          else callback(null);
+        });
+      } else deleteFolder(path.join(this.server.projectPath, "assets", trashedAssetFolder), callback);
     });
   };
 
