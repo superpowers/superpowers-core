@@ -767,8 +767,7 @@ function openEntry(id: string, optionValues?: {[name: string]: any}) {
     iframe.dataset["assetId"] = id;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
-    let origin: string = (<any>window.location).origin;
-    iframe.contentWindow.postMessage(optionValues, origin);
+    iframe.contentWindow.postMessage(optionValues, window.location.origin);
   }
   onTabActivate(tab);
 }
@@ -791,8 +790,7 @@ function openTool(name: string, optionValues?: {[name: string]: any}) {
     iframe.dataset["name"] = name;
     ui.panesElt.appendChild(iframe);
   } else if (optionValues != null) {
-    let origin: string = (<any>window.location).origin;
-    iframe.contentWindow.postMessage(optionValues, origin);
+    iframe.contentWindow.postMessage(optionValues, window.location.origin);
   }
 
   onTabActivate(tab);
@@ -1041,7 +1039,7 @@ function onTabActivate(tabElement: any) {
     activeTab.classList.remove("active");
 
     let activeIframe = (<HTMLIFrameElement>ui.panesElt.querySelector("iframe.active"));
-    activeIframe.contentWindow.postMessage({ type: "deactivate" }, (<any>window.location).origin);
+    activeIframe.contentWindow.postMessage({ type: "deactivate" }, window.location.origin);
     activeIframe.classList.remove("active");
   }
 
@@ -1055,7 +1053,7 @@ function onTabActivate(tabElement: any) {
 
   tabIframe.classList.add("active");
   tabIframe.contentWindow.focus();
-  tabIframe.contentWindow.postMessage({ type: "activate" }, (<any>window.location).origin);
+  tabIframe.contentWindow.postMessage({ type: "activate" }, window.location.origin);
 }
 
 function onTabClose(tabElement: HTMLLIElement) {
