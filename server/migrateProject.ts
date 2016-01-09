@@ -54,12 +54,8 @@ function migrateTo3(server: ProjectServer, callback: (err: Error) => any) {
   async.eachSeries(Object.keys(server.data.entries.byId), (nodeId, cb) => {
     let node = server.data.entries.byId[nodeId];
     let storagePath = server.data.entries.getStoragePathFromId(nodeId);
-    // let storagePath = server.data.entries.getPathFromId(nodeId);
-    if (node.type == null) mkdirp(path.join(assetsPath, storagePath), (err) => {
-      if (err != null && err.code !== "EEXIST") cb(err);
-      else cb(null);
-    });
-    else {
+
+    if (node.type != null) {
       let index = storagePath.lastIndexOf("/");
       let parentStoragePath = storagePath;
       let oldStoragePath = path.join(assetsPath, `${nodeId}-${server.data.entries.getPathFromId(nodeId).replace(new RegExp("/", "g"), "__")}`);
@@ -70,7 +66,9 @@ function migrateTo3(server: ProjectServer, callback: (err: Error) => any) {
           if (err != null && err.code !== "EEXIST") { cb(err); return; }
           fs.rename(oldStoragePath, path.join(assetsPath, storagePath), cb);
         });
-      } else fs.rename(oldStoragePath, path.join(assetsPath, storagePath), cb);
+      } else {
+        fs.rename(oldStoragePath, path.join(assetsPath, storagePath), cb);
+      }
     }
   }, callback);
 }

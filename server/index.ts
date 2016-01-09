@@ -19,17 +19,22 @@ import ProjectHub from "./ProjectHub";
 let { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
 SupCore.log(`Server v${version} starting...`);
 
-process.on("uncaughtException", (err: Error) => {
-  SupCore.log(`The server crashed.\n${(<any>err).stack}`);
-  process.exit(1);
-});
-
 function handle404(err: any, req: express.Request, res: express.Response, next: Function) {
   if (err.status === 404) { res.status(404).end("File not found"); return; }
   next();
 }
 
 let hub: ProjectHub = null;
+
+process.on("uncaughtException", (err: Error) => {
+  if (hub != null && hub.loadingProjectFolderName != null) {
+    SupCore.log(`The server crashed while loading project "${hub.loadingProjectFolderName}".\n${(<any>err).stack}`);
+  } else {
+    SupCore.log(`The server crashed.\n${(<any>err).stack}`);
+  }
+  process.exit(1);
+});
+
 
 // Public version
 fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.password.length !== 0 }, null, 2));

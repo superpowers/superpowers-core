@@ -12,19 +12,24 @@ export default class ProjectHub {
   io: SocketIO.Namespace;
 
   data = {
-    projects: <SupCore.Data.Projects>null
+    projects: null as SupCore.Data.Projects
   };
 
   serversById: { [serverId: string]: ProjectServer } = {};
+  loadingProjectFolderName: string;
 
   constructor(globalIO: SocketIO.Server, callback: (err: Error) => any) {
     this.globalIO = globalIO;
 
     let serveProjects = (callback: ErrorCallback) => {
-      async.each(fs.readdirSync(paths.projects), (folderName: string, cb: (err: Error) => any) => {
+      async.eachSeries(fs.readdirSync(paths.projects), (folderName: string, cb: (err: Error) => any) => {
         if (folderName.indexOf(".") !== -1) { cb(null); return; }
+        this.loadingProjectFolderName = folderName;
         this.loadProject(folderName, cb);
-      }, callback);
+      }, () => {
+        this.loadingProjectFolderName = null;
+        callback();
+      });
     };
 
     let setupProjectsList = (callback: Function) => {
