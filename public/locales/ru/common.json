@@ -1,0 +1,45 @@
+{
+  "activeLanguage": "Русский",
+
+  "namePatternDescription": "Не используйте следующие символы: \\, /, :, *, ?, \", <, >, |, [ и ].",
+  "none": "(пусто)",
+
+  "actions": {
+    "applyChanges": "Применить изменения",
+    "applyChangesWithErrors": "Применить изменения с ошибками",
+    "cancel": "Отмена",
+    "close": "Закрыть",
+    "create": "Создать",
+    "delete": "Удалить",
+    "download": "Скачать",
+    "duplicate": "Дублировать",
+    "new": "Создать",
+    "open": "Открыть",
+    "rename": "Переименовать",
+    "save": "Сохранить",
+    "search": "Искать",
+    "skip": "Пропустить",
+    "update": "Обновить",
+    "upload": "Загрузить",
+
+    "cut": "Вырезать",
+    "copy": "Копировать",
+    "paste": "Вставить"
+  },
+
+  "states": { 
+    "disabled": "Отключено",
+    "enabled": "Включено",
+    "loading": "Загрузка...",
+    "connecting": "Соединение...",
+    "saving": "Сохранение..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "Enter"
+  }
+}
