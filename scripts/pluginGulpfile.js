@@ -76,7 +76,6 @@ folders.forEach(function(folder) {
   if (fs.existsSync("./" + folder + "/index.ts") || fs.existsSync("./" + folder + "/index.js"))
     makeBrowserify("./" + folder + "/index.js", "./public/bundles", folder);
 })
-makeBrowserify("./data/index.js", "./public/bundles", "data");
 
 editors.forEach(function(editor) { makeBrowserify("./editors/" + editor + "/index.js", "./public/editors", editor + "/index"); });
 
