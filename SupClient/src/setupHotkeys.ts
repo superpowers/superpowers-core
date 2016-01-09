@@ -1,3 +1,6 @@
+let helpCallback: Function = null;
+export function setupHelpCallback(callback: Function) { helpCallback = callback; }
+
 export default function() {
   let isBackspaceDown = false;
 
@@ -36,6 +39,10 @@ export default function() {
       else sendMessage("nextTab");
     }
 
+    if (event.keyCode === 112) { // F1
+        event.preventDefault();
+        if (helpCallback != null) helpCallback();
+    }
     if (event.keyCode === 116 || (event.keyCode === 80 && event.metaKey)) { // F5 || Cmd+P
       event.preventDefault(); sendMessage("run");
     }

@@ -18,6 +18,7 @@ declare namespace SupClient {
   export function onAssetTrashed(): void;
   export function onDisconnected(): void;
   export function setupHotkeys(): void;
+  export function setupHelpCallback(callback: Function): void;
   export function getTreeViewInsertionPoint(treeView: any): { parentId: string; index: number };
 
   export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
