@@ -5,7 +5,7 @@ import * as cookies from "js-cookie";
 /* tslint:disable:no-unused-variable */
 import fetch from "./fetch";
 import ProjectClient from "./ProjectClient";
-import setupHotkeys from "./setupHotkeys";
+import setupHotkeys, { setupHelpCallback } from "./setupHotkeys";
 import * as table from "./table";
 import * as dialogs from "./dialogs/index";
 import * as i18n from "./i18n";
@@ -14,7 +14,7 @@ import * as i18n from "./i18n";
 let PerfectResize = require("perfect-resize");
 /* tslint:enable */
 
-export { fetch, cookies, ProjectClient, setupHotkeys, table, dialogs, i18n };
+export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, dialogs, i18n };
 
 export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 export let query = querystring.parse(window.location.search.slice(1));
