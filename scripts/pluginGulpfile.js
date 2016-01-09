@@ -73,7 +73,7 @@ var folders = fs.readdirSync("./");
 folders.forEach(function(folder) {
   if (folder === "public" || folder === "editors" || folder === "node_modules" || folder === "typings") return;
   
-  if (fs.existsSync("./" + folder + "/index.js"))
+  if (fs.existsSync("./" + folder + "/index.ts") || fs.existsSync("./" + folder + "/index.js"))
     makeBrowserify("./" + folder + "/index.js", "./public/bundles", folder);
 })
 makeBrowserify("./data/index.js", "./public/bundles", "data");
