@@ -55,7 +55,7 @@ function start() {
 
   // Development mode
   if (localStorage.getItem("superpowers-dev-mode") != null) {
-    let projectManagementDiv = <HTMLDivElement>document.querySelector(".project-management");
+    let projectManagementDiv = (document as HTMLDivElement).querySelector(".project-management");
     projectManagementDiv.style.backgroundColor = "#37d";
 
     // According to http://stackoverflow.com/a/12747364/915914, window.onerror
@@ -96,9 +96,9 @@ function start() {
   document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
 
   if (!SupClient.isApp) {
-    (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).title = SupClient.i18n.t("project:header.publishDisabled");
-    (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).hidden = true;
-    (<HTMLButtonElement>document.querySelector(".project-buttons .stop")).hidden = true;
+    ((document as HTMLButtonElement).querySelector(".project-buttons .publish")).title = SupClient.i18n.t("project:header.publishDisabled");
+    ((document as HTMLButtonElement).querySelector(".project-buttons .debug")).hidden = true;
+    ((document as HTMLButtonElement).querySelector(".project-buttons .stop")).hidden = true;
   }
 
   // Entries tree view
@@ -136,7 +136,7 @@ function start() {
   });
 
   // Global controls
-  let toggleNotificationsButton = <HTMLButtonElement>document.querySelector(".top .controls button.toggle-notifications");
+  let toggleNotificationsButton = (document as HTMLButtonElement).querySelector(".top .controls button.toggle-notifications");
   toggleNotificationsButton.addEventListener("click", onClickToggleNotifications);
 
   if (localStorage.getItem("superpowers-disable-notifications") != null) {
@@ -148,8 +148,8 @@ function start() {
   }
 
   // Panes and tools
-  ui.panesElt = <HTMLDivElement>document.querySelector(".main .panes");
-  ui.toolsElt = <HTMLUListElement>document.querySelector(".sidebar .tools ul");
+  ui.panesElt = (document as HTMLDivElement).querySelector(".main .panes");
+  ui.toolsElt = (document as HTMLUListElement).querySelector(".sidebar .tools ul");
 
   // Messaging
   window.addEventListener("message", onMessage);
@@ -293,14 +293,14 @@ function onDisconnected() {
   ui.entriesTreeView.treeRoot.innerHTML = "";
   updateSelectedEntry();
 
-  (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .stop")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = true;
-  (<HTMLDivElement>document.querySelector(".connecting")).hidden = false;
+  ((document as HTMLButtonElement).querySelector(".project-buttons .run")).disabled = true;
+  ((document as HTMLButtonElement).querySelector(".project-buttons .debug")).disabled = true;
+  ((document as HTMLButtonElement).querySelector(".project-buttons .stop")).disabled = true;
+  ((document as HTMLButtonElement).querySelector(".project-buttons .publish")).disabled = true;
+  ((document as HTMLButtonElement).querySelector(".entries-buttons .new-asset")).disabled = true;
+  ((document as HTMLButtonElement).querySelector(".entries-buttons .new-folder")).disabled = true;
+  ((document as HTMLButtonElement).querySelector(".entries-buttons .search")).disabled = true;
+  ((document as HTMLDivElement).querySelector(".connecting")).hidden = false;
 }
 
 function onWelcome(clientId: number, config: { buildPort: number; systemName: string; }) {
@@ -336,14 +336,14 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
 
-  (<HTMLDivElement>document.querySelector(".connecting")).hidden = true;
+  ((document as HTMLDivElement).querySelector(".connecting")).hidden = true;
 
-  if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = false;
+  if (SupClient.isApp) ((document as HTMLButtonElement).querySelector(".project-buttons .publish")).disabled = false;
+  ((document as HTMLButtonElement).querySelector(".project-buttons .run")).disabled = false;
+  ((document as HTMLButtonElement).querySelector(".project-buttons .debug")).disabled = false;
+  ((document as HTMLButtonElement).querySelector(".entries-buttons .new-asset")).disabled = false;
+  ((document as HTMLButtonElement).querySelector(".entries-buttons .new-folder")).disabled = false;
+  ((document as HTMLButtonElement).querySelector(".entries-buttons .search")).disabled = false;
 
   function walk(entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode, parentElt: HTMLLIElement) {
     let liElt = createEntryElement(entry);
@@ -402,11 +402,11 @@ function onEntryAddedAck(err: string, id: string) {
 function onEntryMoved(id: string, parentId: string, index: number) {
   data.entries.client_move(id, parentId, index);
 
-  let entryElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  let entryElt = (ui as HTMLLIElement).entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
 
   let oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
-    let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
+    let oldParentElt = (ui as HTMLLIElement).entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
     let parentEntry = data.entries.byId[oldParentId];
     let childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
@@ -447,7 +447,7 @@ function onEntryTrashed(id: string) {
 
   let oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
-    let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
+    let oldParentElt = (ui as HTMLLIElement).entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
     let parentEntry = data.entries.byId[oldParentId];
     let childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
@@ -645,7 +645,7 @@ function onEntryDrop(dropInfo: any, orderedNodes: any) {
 function updateSelectedEntry() {
   let allButtons = document.querySelectorAll(".entries-buttons button.edit");
   for (let index = 0; index < allButtons.length; index++) {
-    let button = <HTMLButtonElement>allButtons.item(index);
+    let button = (all as HTMLButtonElement)Buttons.item(index);
     let disabled = (ui.entriesTreeView.selectedNodes.length === 0 ||
       (button.classList.contains("single") && ui.entriesTreeView.selectedNodes.length !== 1) ||
       (button.classList.contains("asset-only") && ui.entriesTreeView.selectedNodes[0].classList.contains("group")));
@@ -670,7 +670,7 @@ function onMessage(event: any) {
 }
 
 function onWindowDevError() {
-  let projectManagementDiv = <HTMLDivElement>document.querySelector(".project-management");
+  let projectManagementDiv = (document as HTMLDivElement).querySelector(".project-management");
   projectManagementDiv.style.backgroundColor = "#c42";
   return false;
 }
@@ -685,7 +685,7 @@ function onMessageChat(message: string) {
 
   function doNotification() {
     let title = SupClient.i18n.t("project:header.notifications.new", { projectName: data.manifest.pub.name });
-    let notification = new (<any>window).Notification(title, { icon: "/images/icon.png", body: message });
+    let notification = new ((window as any)).Notification(title, { icon: "/images/icon.png", body: message });
 
     let closeTimeoutId = setTimeout(() => { notification.close(); }, 5000);
 
@@ -697,11 +697,11 @@ function onMessageChat(message: string) {
     });
   }
 
-  if ((<any>window).Notification.permission === "granted") doNotification();
-  else if ((<any>window).Notification.permission !== "denied") {
-    (<any>window).Notification.requestPermission((status: string) => {
-      (<any>window).Notification.permission = status;
-      if ((<any>window).Notification.permission === "granted") doNotification();
+  if (((window as any)).Notification.permission === "granted") doNotification();
+  else if (((window as any)).Notification.permission !== "denied") {
+    ((window as any)).Notification.requestPermission((status: string) => {
+      ((window as any)).Notification.permission = status;
+      if (((window as any)).Notification.permission === "granted") doNotification();
     });
   }
 }
@@ -753,7 +753,7 @@ function openEntry(id: string, state?: {[name: string]: any}) {
   if (entry.type == null) { ui.entriesTreeView.selectedNodes[0].classList.toggle("collapsed"); return; }
 
   let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`);
-  let iframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${id}']`);
+  let iframe = (ui as HTMLIFrameElement).panesElt.querySelector(`iframe[data-asset-id='${id}']`);
 
   if (tab == null) {
     tab = createAssetTabElement(entry);
@@ -772,7 +772,7 @@ function openEntry(id: string, state?: {[name: string]: any}) {
 
 function openTool(name: string, state?: {[name: string]: any}) {
   let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`);
-  let iframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${name}']`);
+  let iframe = (ui as HTMLIFrameElement).panesElt.querySelector(`iframe[data-name='${name}']`);
 
   if (tab == null) {
     let tool = data.toolsByName[name];
@@ -1031,7 +1031,7 @@ function onTabActivate(tabElement: any) {
   if (activeTab != null) {
     activeTab.classList.remove("active");
 
-    let activeIframe = (<HTMLIFrameElement>ui.panesElt.querySelector("iframe.active"));
+    let activeIframe = ((ui as HTMLIFrameElement).panesElt.querySelector("iframe.active"));
     activeIframe.contentWindow.postMessage({ type: "deactivate" }, window.location.origin);
     activeIframe.classList.remove("active");
   }
@@ -1041,8 +1041,8 @@ function onTabActivate(tabElement: any) {
 
   let assetId = tabElement.dataset["assetId"];
   let tabIframe: HTMLIFrameElement;
-  if (assetId != null) tabIframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
-  else tabIframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${tabElement.dataset.pane}']`);
+  if (assetId != null) tabIframe = (ui as HTMLIFrameElement).panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
+  else tabIframe = (ui as HTMLIFrameElement).panesElt.querySelector(`iframe[data-name='${tabElement.dataset.pane}']`);
 
   tabIframe.classList.add("active");
   tabIframe.contentWindow.focus();
@@ -1052,12 +1052,12 @@ function onTabActivate(tabElement: any) {
 function onTabClose(tabElement: HTMLLIElement) {
   let assetId = tabElement.dataset["assetId"];
   let frameElt: HTMLIFrameElement;
-  if (assetId != null) frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
+  if (assetId != null) frameElt = (ui as HTMLIFrameElement).panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
   else {
     let toolName = tabElement.dataset["pane"];
     if (toolName === "main") return;
 
-    frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${toolName}']`);
+    frameElt = (ui as HTMLIFrameElement).panesElt.querySelector(`iframe[data-name='${toolName}']`);
   }
 
   if (tabElement.classList.contains("active")) {

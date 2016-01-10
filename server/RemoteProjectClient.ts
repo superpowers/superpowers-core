@@ -208,7 +208,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
               // NOTE: "SocketIO.Namespace.adapter" is not part of the official documented API
               // It does exist though: https://github.com/Automattic/socket.io/blob/3f72dd3322bcefff07b5976ab817766e421d237b/lib/namespace.js#L89
-              for (let socketId in (<any>this.server.io).adapter.rooms[roomName]) {
+              for (let socketId in ((this as any).server.io).adapter.rooms[roomName]) {
                 let remoteClient = this.server.clientsBySocketId[socketId];
                 remoteClient.socket.leave(roomName);
                 remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
@@ -503,7 +503,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       async.each(trashedAssetFolders, (trashedAssetFolder, cb) => {
         let folderPath = path.join(trashedAssetsPath, trashedAssetFolder);
         rimraf(folderPath, (err) => {
-          if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(<any>err).stack}`);
+          if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${((err as any)).stack}`);
           else removedFolderCount++;
           cb();
         });
