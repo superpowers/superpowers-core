@@ -4,6 +4,7 @@
 [![](https://img.shields.io/gitter/room/superpowers/dev.svg)](https://gitter.im/superpowers/dev)  
 [![](https://img.shields.io/badge/patreon-support%20us-brightgreen.svg)](https://www.patreon.com/SparklinLabs)
 [![](https://img.shields.io/twitter/follow/SuperpowersDev.svg?style=social)](https://twitter.com/SuperpowersDev)
+[![Build Status](https://travis-ci.org/superpowers/superpowers.svg?branch=master)](https://travis-ci.org/superpowers/superpowers)
 
 [Website](http://superpowers-html5.com/) —
 [Download](https://sparklinlabs.itch.io/superpowers) —
