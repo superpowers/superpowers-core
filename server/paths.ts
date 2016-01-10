@@ -2,6 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as SupCore from "../SupCore";
 
+import * as mkdirp from "mkdirp";
 import * as yargs from "yargs";
 
 let argv = yargs
@@ -38,9 +39,9 @@ export let config = path.join(userData, "config.json");
 
 SupCore.log(`Using data from ${userData}.`);
 
-try { fs.mkdirSync(userData); } catch (err) { if (err.code !== "EEXIST") throw err; }
-try { fs.mkdirSync(projects); } catch (err) { if (err.code !== "EEXIST") throw err; }
-try { fs.mkdirSync(builds); } catch (err) { if (err.code !== "EEXIST") throw err; }
+try { mkdirp.sync(userData); } catch (err) { if (err.code !== "EEXIST") throw err; }
+try { mkdirp.sync(projects); } catch (err) { if (err.code !== "EEXIST") throw err; }
+try { mkdirp.sync(builds); } catch (err) { if (err.code !== "EEXIST") throw err; }
 
 export function getLocalizedFilename(filename: string, language: string) {
   if (language === "en") return filename;
