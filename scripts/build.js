@@ -109,5 +109,6 @@ async.eachSeries(buildPaths, function(buildPath, callback) {
     errors.forEach(function(error) {
       console.log(error);
     });
+    process.exit(1);
   } else log("Build complete.");
 });

@@ -21,10 +21,13 @@ var tsMainProject = ts.createProject("./tsconfig.json");
 var tslint = require("gulp-tslint");
 
 gulp.task("typescript-main", function() {
+  var failed = false;
   var tsResult = tsMainProject.src()
     .pipe(tslint({ tslint: require("tslint") }))
     .pipe(tslint.report("prose", { emitError: false }))
-    .pipe(ts(tsMainProject));
+    .pipe(ts(tsMainProject))
+    .on("error", () => { failed = true; })
+    .on("end", () => { if (failed) throw new Error("There were TypeScript errors."); });
   return tsResult.js.pipe(gulp.dest("./"));
 });
 
@@ -32,10 +35,13 @@ gulp.task("typescript-main", function() {
 var tsRendererProject = ts.createProject("./src/tsconfig.json");
 
 gulp.task("typescript-renderer", function() {
+  var failed = false;
   var tsResult = tsRendererProject.src()
     .pipe(tslint({ tslint: require("tslint") }))
     .pipe(tslint.report("prose", { emitError: false }))
-    .pipe(ts(tsRendererProject));
+    .pipe(ts(tsRendererProject))
+    .on("error", () => { failed = true; })
+    .on("end", () => { if (failed) throw new Error("There were TypeScript errors."); });
   return tsResult.js.pipe(gulp.dest("./src"));
 });
 
