@@ -11,7 +11,7 @@ class SystemData {
 
   registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass) {
     if (this.assetClasses[name] != null) {
-      console.log(`SystemData.registerAssetClass: Tried to register two or more asset classes named "${name}" in system "${this.system.name}"`);
+      console.log(`SystemData.registerAssetClass: Tried to register two or more asset classes named "${name}" in system "${this.system.id}"`);
       return;
     }
     this.assetClasses[name] = assetClass;
@@ -20,7 +20,7 @@ class SystemData {
 
   registerResource(id: string, resourceClass: SupCore.Data.ResourceClass) {
     if (this.resourceClasses[id] != null) {
-      console.log(`SystemData.registerResource: Tried to register two or more plugin resources named "${id}" in system "${this.system.name}"`);
+      console.log(`SystemData.registerResource: Tried to register two or more plugin resources named "${id}" in system "${this.system.id}"`);
       return;
     }
     this.resourceClasses[id] = resourceClass;
@@ -31,12 +31,12 @@ export class System {
   data: SystemData;
   private plugins: { [contextName: string]: { [pluginName: string]: any; } } = {};
 
-  constructor(public name: string) {
+  constructor(public id: string, public folderName: string) {
     this.data = new SystemData(this);
   }
 
   requireForAllPlugins(filePath: string) {
-    let pluginsPath = path.resolve(`${__dirname}/../systems/${this.name}/plugins`);
+    let pluginsPath = path.resolve(`${__dirname}/../systems/${this.folderName}/plugins`);
 
     for (let pluginAuthor of fs.readdirSync(pluginsPath)) {
       let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
@@ -56,7 +56,7 @@ export class System {
 
     if (this.plugins[contextName][pluginName] != null) {
       console.error("SystemAPI.registerPlugin: Tried to register two or more plugins " +
-      `named "${pluginName}" in context "${contextName}", system "${this.name}"`);
+      `named "${pluginName}" in context "${contextName}", system "${this.id}"`);
     }
 
     this.plugins[contextName][pluginName] = plugin;

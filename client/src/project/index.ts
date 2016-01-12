@@ -20,7 +20,7 @@ interface EditorManifest {
 
 let data: {
   buildPort?: number;
-  systemName?: string;
+  systemId?: string;
   manifest?: SupCore.Data.ProjectManifest;
   entries?: SupCore.Data.Entries;
 
@@ -183,7 +183,7 @@ function connect() {
 
 function loadPluginLocales(pluginsPaths: string[], cb: Function) {
   let localeFiles: SupClient.i18n.File[] = [];
-  let pluginsRoot = `/systems/${data.systemName}/plugins`;
+  let pluginsRoot = `/systems/${data.systemId}/plugins`;
   for (let pluginPath of pluginsPaths) {
     localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "plugin", context: pluginPath });
     localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "badges" });
@@ -217,7 +217,7 @@ function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback
 function setupTools(toolPaths: { [name: string]: string; }, callback: Function) {
   data.toolsByName = {};
 
-  let pluginsRoot = `/systems/${data.systemName}/plugins`;
+  let pluginsRoot = `/systems/${data.systemId}/plugins`;
 
   async.each(Object.keys(toolPaths), (toolName, cb) => {
     let pluginPath = toolPaths[toolName];
@@ -263,7 +263,7 @@ function setupTool(toolName: string) {
   toolElt.appendChild(containerElt);
 
   let iconElt = document.createElement("img");
-  iconElt.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+  iconElt.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   containerElt.appendChild(iconElt);
 
   let nameSpanElt = document.createElement("span");
@@ -303,13 +303,13 @@ function onDisconnected() {
   (<HTMLDivElement>document.querySelector(".connecting")).hidden = false;
 }
 
-function onWelcome(clientId: number, config: { buildPort: number; systemName: string; }) {
+function onWelcome(clientId: number, config: { buildPort: number; systemId: string; }) {
   data = {
     buildPort: config.buildPort,
-    systemName: config.systemName
+    systemId: config.systemId
   };
 
-  SupClient.fetch(`/systems/${data.systemName}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
+  SupClient.fetch(`/systems/${data.systemId}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
     loadPluginLocales(pluginsInfo.list, () => {
       async.parallel([
         (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
@@ -537,7 +537,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
 
-    let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemName}/?project=${SupClient.query.project}&build=${buildId}`;
+    let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemId}/?project=${SupClient.query.project}&build=${buildId}`;
     if (options.debug) url += "&debug";
 
     if (SupClient.isApp) {
@@ -586,7 +586,7 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
   if (entry.type != null) {
     let iconElt = document.createElement("img");
     iconElt.draggable = false;
-    iconElt.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     liElt.appendChild(iconElt);
   }
 
@@ -761,7 +761,7 @@ function openEntry(id: string, state?: {[name: string]: any}) {
 
     iframe = document.createElement("iframe");
     iframe.dataset["assetId"] = id;
-    iframe.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
+    iframe.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
     ui.panesElt.appendChild(iframe);
   } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
@@ -781,7 +781,7 @@ function openTool(name: string, state?: {[name: string]: any}) {
 
     iframe = document.createElement("iframe");
     iframe.dataset["name"] = name;
-    iframe.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
+    iframe.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
     ui.panesElt.appendChild(iframe);
   } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
@@ -870,7 +870,7 @@ function onOpenInNewWindowClick(event: any) {
   let id = event.target.parentElement.dataset.id;
   if (id != null) {
     let entry = data.entries.byId[id];
-    let address = `${window.location.origin}/systems/${data.systemName}` +
+    let address = `${window.location.origin}/systems/${data.systemId}` +
     `/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
     `?project=${SupClient.query.project}&asset=${entry.id}`;
 
@@ -884,7 +884,7 @@ function onOpenInNewWindowClick(event: any) {
     }
   } else {
     let name = event.target.parentElement.dataset.name;
-    let address = `${window.location.origin}/systems/${data.systemName}` +
+    let address = `${window.location.origin}/systems/${data.systemId}` +
     `/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/` +
     `?project=${SupClient.query.project}`;
     if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address);
@@ -968,7 +968,7 @@ function createAssetTabElement(entry: SupCore.Data.EntryNode) {
   if (entry.type != null) {
     let iconElt = document.createElement("img");
     iconElt.classList.add("icon");
-    iconElt.src = `/systems/${data.systemName}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     tabElt.appendChild(iconElt);
   }
 
@@ -1001,7 +1001,7 @@ function createToolTabElement(toolName: string, tool: EditorManifest) {
 
   let iconElt = document.createElement("img");
   iconElt.classList.add("icon");
-  iconElt.src = `/systems/${data.systemName}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+  iconElt.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   tabElt.appendChild(iconElt);
 
   if (!tool.pinned) {

@@ -52,7 +52,7 @@ export default class ProjectServer {
         this.data.manifest.on("change", this.onManifestChanged);
         if (this.data.manifest.migratedFromFormatVersion != null) this.data.manifest.emit("change");
 
-        this.system = SupCore.systems[this.data.manifest.pub.system];
+        this.system = SupCore.systems[this.data.manifest.pub.systemId];
 
         this.buildsPath = path.join(paths.builds, this.data.manifest.pub.id);
         callback(null);

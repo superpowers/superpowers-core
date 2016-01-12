@@ -24,7 +24,7 @@ export let query = querystring.parse(window.location.search.slice(1));
 export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
 
 // Initialize empty system
-SupCore.system = new SupCore.System("");
+SupCore.system = new SupCore.System("", "");
 
 export let activePluginPath: string;
 export let plugins: { [context: string]: { [name: string]: { path: string; content: any; } } } = {};
@@ -51,8 +51,8 @@ export function connect(projectId: string, options?: { reconnection?: boolean; }
     { transports: [ "websocket" ], reconnection: options.reconnection, query: { supServerAuth } }
   );
 
-  socket.on("welcome", (clientId: number, config: { systemName: string; }) => {
-    SupCore.system.name = config.systemName;
+  socket.on("welcome", (clientId: number, config: { systemId: string; }) => {
+    SupCore.system.id = config.systemId;
   });
 
   return socket;

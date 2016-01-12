@@ -8,21 +8,22 @@ import { getLocalizedFilename } from "./paths";
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 let systemsPath = path.resolve(`${__dirname}/../systems`);
 
-export let buildFilesBySystem: { [systemName: string]: string[]; } = {};
+export let buildFilesBySystem: { [systemId: string]: string[]; } = {};
 
 export default function(mainApp: express.Express, buildApp: express.Express, callback: Function) {
-  async.eachSeries(fs.readdirSync(systemsPath), (systemName, cb) => {
-    if (systemName.indexOf(".") !== -1) { cb(); return; }
+  async.eachSeries(fs.readdirSync(systemsPath), (systemFolderName, cb) => {
+    if (systemFolderName.indexOf(".") !== -1) { cb(); return; }
 
-    let systemPath = path.join(systemsPath, systemName);
+    let systemPath = path.join(systemsPath, systemFolderName);
     if (!fs.statSync(systemPath).isDirectory()) { cb(); return; }
 
-    SupCore.system = SupCore.systems[systemName] = new SupCore.System(systemName);
+    let systemId = JSON.parse(fs.readFileSync(path.join(systemsPath, systemFolderName, "package.json"), { encoding: "utf8" })).superpowers.systemId;
+    SupCore.system = SupCore.systems[systemId] = new SupCore.System(systemId, systemFolderName);
 
     // Expose public stuff
     try { fs.mkdirSync(`${systemPath}/public`); } catch (err) { /* Ignore */ }
-    mainApp.use(`/systems/${systemName}`, express.static(`${systemPath}/public`));
-    buildApp.use(`/systems/${systemName}`, express.static(`${systemPath}/public`));
+    mainApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
+    buildApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
 
     // Write templates list
     let templatesList: string[] = [];
@@ -32,7 +33,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     fs.writeFileSync(`${systemPath}/public/templates.json`, JSON.stringify(templatesList, null, 2));
 
     // Load plugins
-    let pluginsInfo = loadPlugins(systemName, `${systemPath}/plugins`, mainApp, buildApp);
+    let pluginsInfo = loadPlugins(systemId, `${systemPath}/plugins`, mainApp, buildApp);
 
     let packagePath = `${systemPath}/package.json`;
     if (fs.existsSync(packagePath)) {
@@ -43,11 +44,11 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo, null, 2));
 
     // Build files
-    let buildFiles: string[] = buildFilesBySystem[systemName] = [ "/SupCore.js" ];
+    let buildFiles: string[] = buildFilesBySystem[systemId] = [ "/SupCore.js" ];
 
     for (let plugin of pluginsInfo.list) {
       for (let bundleName of pluginsInfo.publishedBundles) {
-        buildFiles.push(`/systems/${systemName}/plugins/${plugin}/bundles/${bundleName}.js`);
+        buildFiles.push(`/systems/${systemId}/plugins/${plugin}/bundles/${bundleName}.js`);
       }
     }
 
@@ -58,7 +59,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
         if (relativePath.slice(0, "templates".length) === "templates") continue;
         if (relativePath.slice(0, "locales".length) === "templates") continue;
 
-        buildFiles.push(`/systems/${systemName}/${relativePath}`);
+        buildFiles.push(`/systems/${systemId}/${relativePath}`);
       }
 
       cb();
@@ -72,7 +73,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
   });
 }
 
-function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.Express, buildApp: express.Express): SupCore.PluginsInfo {
+function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Express, buildApp: express.Express): SupCore.PluginsInfo {
   let pluginNamesByAuthor: { [author: string]: string[] } = {};
   let pluginsInfo: SupCore.PluginsInfo = { list: [], paths: { editors: {}, tools: {} }, publishedBundles: [] };
 
@@ -124,7 +125,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
             pluginsInfo.paths.tools[editorName] = `${pluginAuthor}/${pluginName}`;
           }
 
-          mainApp.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
+          mainApp.get(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
             let language = req.cookies["supLanguage"];
             let editorPath = path.join(pluginPath, "public/editors", editorName);
             let localizedIndexFilename = getLocalizedFilename("index.html", language);
@@ -137,7 +138,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       }
 
       // Expose public stuff
-      mainApp.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/locales/*.json`, (req, res) => {
+      mainApp.get(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}/locales/*.json`, (req, res) => {
         let localeFile = req.path.split("/locales/")[1];
         let localePath = path.join(pluginPath, "public/locales", localeFile);
         fs.exists(localePath, (exists) => {
@@ -147,7 +148,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
       });
 
       for (let app of [mainApp, buildApp]) {
-        app.get(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}/bundles/*.js`, (req, res) => {
+        app.get(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}/bundles/*.js`, (req, res) => {
           let bundleFile = req.path.split("/bundles/")[1];
           let bundlePath = path.join(pluginPath, "public/bundles", bundleFile);
           fs.exists(bundlePath, (exists) => {
@@ -155,7 +156,7 @@ function loadPlugins (systemName: string, pluginsPath: string, mainApp: express.
             else res.send("");
           });
         });
-        app.use(`/systems/${systemName}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+        app.use(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
       }
     });
   });

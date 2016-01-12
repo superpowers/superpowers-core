@@ -25,7 +25,7 @@ declare namespace SupCore {
       id: string;
       name: string;
       description: string;
-      system: string;
+      systemId: string;
       formatVersion: number;
     }
     class ProjectManifest extends Base.Hash {
@@ -304,10 +304,11 @@ declare namespace SupCore {
   }
 
   class System {
-    name: string;
+    id: string;
+    folderName: string;
     data: SystemData;
 
-    constructor(name: string);
+    constructor(id: string, folderName: string);
     requireForAllPlugins(filePath: string): void;
     registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
     getPlugins<T>(contextName: string): { [pluginName: string]: T };

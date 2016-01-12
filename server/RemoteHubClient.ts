@@ -9,7 +9,7 @@ import BaseRemoteClient from "./BaseRemoteClient";
 interface ProjectDetails {
   name: string;
   description: string;
-  system: string;
+  systemId: string;
   template: string;
   icon: Buffer;
 }
@@ -34,7 +34,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     let templatePath: string;
     if (details.template != null) {
       // FIXME: Use paths.userData once we move /systems/ to the user data folder
-      templatePath = path.join(__dirname, `../systems/${details.system}/public/templates/${details.template}`);
+      templatePath = path.join(__dirname, `../systems/${details.systemId}/public/templates/${details.template}`);
       formatVersion = JSON.parse(fs.readFileSync(path.join(templatePath, `manifest.json`), { encoding: "utf8" })).formatVersion;
     }
 
@@ -42,7 +42,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
       id: null,
       name: details.name,
       description: details.description,
-      system: details.system,
+      systemId: details.systemId,
       formatVersion
     };
 

@@ -26,7 +26,8 @@ export default class ProjectHub {
         if (folderName.indexOf(".") !== -1) { cb(null); return; }
         this.loadingProjectFolderName = folderName;
         this.loadProject(folderName, cb);
-      }, () => {
+      }, (err) => {
+        if (err != null) throw err;
         this.loadingProjectFolderName = null;
         callback();
       });

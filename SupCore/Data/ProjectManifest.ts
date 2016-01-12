@@ -5,11 +5,11 @@ export default class ProjectManifest extends Hash {
     id: { type: "string" },
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     description: { type: "string", maxLength: 300, mutable: true },
-    system: { type: "string" },
+    systemId: { type: "string" },
     formatVersion: { type: "integer" }
   };
 
-  static currentFormatVersion = 4;
+  static currentFormatVersion = 5;
   migratedFromFormatVersion: number;
 
   constructor(pub: SupCore.Data.ProjectManifestPub) {
@@ -36,21 +36,23 @@ export default class ProjectManifest extends Hash {
     }
 
     if (oldFormatVersion <= 1) {
-      pub.system = "supGame";
-    }
-
-    if (oldFormatVersion <= 3) {
-      switch (pub.system) {
+      pub.systemId = "game";
+    } else if (oldFormatVersion <= 3) {
+      switch ((pub as any).system) {
         case "supGame":
-          pub.system = "game";
+          pub.systemId = "game";
           break;
         case "supWeb":
-          pub.system = "web";
+          pub.systemId = "web";
           break;
         case "markSlide":
-          pub.system = "markslide";
+          pub.systemId = "markslide";
           break;
       }
+      delete (pub as any).system;
+    } else if (oldFormatVersion <= 4) {
+      pub.systemId = (pub as any).system;
+      delete (pub as any).system;
     }
 
     pub.formatVersion = ProjectManifest.currentFormatVersion;

@@ -58,7 +58,7 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
 
     let iconElt = document.createElement("img");
     iconElt.draggable = false;
-    iconElt.src = `/systems/${SupCore.system.name}/plugins/${this.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+    iconElt.src = `/systems/${SupCore.system.id}/plugins/${this.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     liElt.appendChild(iconElt);
 
     let nameSpan = document.createElement("span");

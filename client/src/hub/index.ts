@@ -8,7 +8,7 @@ let TreeView = require("dnd-tree-view");
 
 let data: {
   projects: SupCore.Data.Projects;
-  systemsByName: SystemsData;
+  systemsById: SystemsData;
 } = {} as any;
 
 let ui: { projectsTreeView?: any } = {};
@@ -80,21 +80,21 @@ interface SystemManifest {
 }
 
 function loadSystemsInfo(callback: Function) {
-  data.systemsByName = {};
+  data.systemsById = {};
 
   SupClient.fetch("/systems.json", "json", (err: Error, systemsInfo: SupCore.SystemsInfo) => {
-    async.each(systemsInfo.list, (systemName, cb) => {
-      i18nFiles.push({ root: `/systems/${systemName}`, name: "system", context: `system-${systemName}` });
-      SupClient.fetch(`/systems/${systemName}/templates.json`, "json", (err: Error, templatesList: string[]) => {
+    async.each(systemsInfo.list, (systemId, cb) => {
+      i18nFiles.push({ root: `/systems/${systemId}`, name: "system", context: `system-${systemId}` });
+      SupClient.fetch(`/systems/${systemId}/templates.json`, "json", (err: Error, templatesList: string[]) => {
         for (let templateName of templatesList) {
           i18nFiles.push({
-            root: `/systems/${systemName}/templates/${templateName}`,
+            root: `/systems/${systemId}/templates/${templateName}`,
             name: "template",
-            context: `${systemName}-${templateName}`
+            context: `${systemId}-${templateName}`
           });
         }
 
-        data.systemsByName[systemName] = templatesList;
+        data.systemsById[systemId] = templatesList;
         cb();
       });
     }, () => { callback(); });
@@ -199,7 +199,7 @@ function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
 
   let projectTypeSpan = document.createElement("span");
   projectTypeSpan.className = "project-type";
-  projectTypeSpan.textContent = SupClient.i18n.t(`system-${manifest.system}:title`);
+  projectTypeSpan.textContent = SupClient.i18n.t(`system-${manifest.systemId}:title`);
   detailsElt.appendChild(projectTypeSpan);
 
   return liElt;
@@ -224,7 +224,7 @@ function onProjectActivate() {
 let autoOpenProject = true;
 function onNewProjectClick() {
   /* tslint:disable:no-unused-expression */
-  new CreateOrEditProjectDialog(data.systemsByName, { autoOpen: autoOpenProject }, (project, open) => {
+  new CreateOrEditProjectDialog(data.systemsById, { autoOpen: autoOpenProject }, (project, open) => {
     /* tslint:enable:no-unused-expression */
     if (project == null) return;
     autoOpenProject = open;
@@ -252,11 +252,11 @@ function onEditProjectClick() {
   let existingProject = data.projects.byId[selectedNode.dataset.id];
 
   /* tslint:disable:no-unused-expression */
-  new CreateOrEditProjectDialog(data.systemsByName, { existingProject }, (editedProject) => {
+  new CreateOrEditProjectDialog(data.systemsById, { existingProject }, (editedProject) => {
     /* tslint:enable:no-unused-expression */
     if (editedProject == null) return;
 
-    delete editedProject.system;
+    delete editedProject.systemId;
     if (editedProject.icon == null) delete editedProject.icon;
 
     socket.emit("edit:projects", existingProject.id, editedProject, (err: string) => {

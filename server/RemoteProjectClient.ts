@@ -17,7 +17,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   constructor(server: ProjectServer, id: string, socket: SocketIO.Socket) {
     super(server, socket);
     this.id = id;
-    this.socket.emit("welcome", this.id, { buildPort: config.buildPort, systemName: this.server.system.name });
+    this.socket.emit("welcome", this.id, { buildPort: config.buildPort, systemId: this.server.system.id });
 
     // Manifest
     this.socket.on("setProperty:manifest", this.onSetManifestProperty);
@@ -470,7 +470,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
               files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
             }
 
-            files = files.concat(buildFilesBySystem[this.server.system.name]);
+            files = files.concat(buildFilesBySystem[this.server.system.id]);
             callback(null, buildId.toString(), files);
 
             // Remove an old build to avoid using too much disk space
