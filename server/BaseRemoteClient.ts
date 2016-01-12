@@ -2,7 +2,7 @@ export default class BaseRemoteClient {
   subscriptions: string[] = [];
 
   constructor(public server: BaseServer, public socket: SocketIO.Socket) {
-    this.socket.on("error", (err: Error) => { SupCore.log((<any>err).stack); });
+    this.socket.on("error", (err: Error) => { SupCore.log(((err as any)).stack); });
     this.socket.on("disconnect", this.onDisconnect);
 
     this.socket.on("sub", this.onSubscribe);
@@ -32,7 +32,7 @@ export default class BaseRemoteClient {
       let [ , endpoint, id ] = subscription.split(":");
       if (id == null) continue;
 
-      (<SupCore.Data.Base.Dictionary>this.server.data[endpoint]).release(id, this);
+      ((this as SupCore.Data.Base.Dictionary).server.data[endpoint]).release(id, this);
     }
 
     this.server.removeRemoteClient(this.socket.id);
@@ -49,11 +49,11 @@ export default class BaseRemoteClient {
     if (id == null) {
       this.socket.join(roomName);
       this.subscriptions.push(roomName);
-      callback(null, (<SupCore.Data.Base.Hash>data).pub);
+      callback(null, ((data as SupCore.Data.Base.Hash)).pub);
       return;
     }
 
-    (<SupCore.Data.Base.Dictionary>data).acquire(id, this, (err: Error, item: any) => {
+    ((data as SupCore.Data.Base.Dictionary)).acquire(id, this, (err: Error, item: any) => {
       if (err != null) { callback(`Could not acquire asset: ${err}`, null); return; }
 
       this.socket.join(roomName);
@@ -73,7 +73,7 @@ export default class BaseRemoteClient {
     let index = this.subscriptions.indexOf(roomName);
      if (index === -1) return;
 
-    if (id != null) { (<SupCore.Data.Base.Dictionary>data).release(id, this); }
+    if (id != null) { ((data as SupCore.Data.Base.Dictionary)).release(id, this); }
 
     this.socket.leave(roomName);
     this.subscriptions.splice(index, 1);

@@ -7,12 +7,12 @@ let electron: GitHubElectron.Electron = nodeRequire("electron");
 let packageInfo = require("../../../package.json");
 /* tslint:enable */
 
-let splash = <HTMLDivElement>document.querySelector(".splash");
+let splash = (document as HTMLDivElement).querySelector(".splash");
 
 splash.addEventListener("click", (event) => {
-  if ((<Element>event.target).tagName === "A") {
+  if (((event as Element).target).tagName === "A") {
     event.preventDefault();
-    electron.shell.openExternal((<HTMLAnchorElement>event.target).href);
+    electron.shell.openExternal(((event as HTMLAnchorElement).target).href);
     return;
   }
 
@@ -22,7 +22,7 @@ splash.addEventListener("click", (event) => {
 
 // Check for new releases
 document.querySelector(".splash .version").textContent = `v${packageInfo.version}`;
-let updateStatus = <HTMLDivElement>document.querySelector(".splash .update-status");
+let updateStatus = (document as HTMLDivElement).querySelector(".splash .update-status");
 
 supFetch("https://api.github.com/repos/superpowers/superpowers/releases/latest", "json", (err, lastRelease) => {
   if (err != null) {

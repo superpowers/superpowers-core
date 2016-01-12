@@ -237,7 +237,7 @@ export default class ProjectServer {
     if (item == null) {
       SupCore.log(`Tried to schedule an asset save for item with id ${id} but the asset is not loaded.`);
       SupCore.log(JSON.stringify(this.data.entries.byId[id], null, 2));
-      SupCore.log((<any>new Error()).stack);
+      SupCore.log(((new as any) Error()).stack);
       return;
     }
     let assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(id)}`);

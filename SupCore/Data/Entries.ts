@@ -80,7 +80,7 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   remove(id: string, callback: (err: string) => any) {
-    let node = <EntryNode>this.byId[id];
+    let node = (this as EntryNode).byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
     if (node.type == null && node.children.length !== 0) { callback("The folder must be empty"); return; }
 

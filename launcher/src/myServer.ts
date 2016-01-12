@@ -8,17 +8,17 @@ let childProcess = nodeRequire("child_process");
 
 let myServerElt = document.querySelector(".my-server");
 
-let myServerTextarea = <HTMLTextAreaElement>myServerElt.querySelector("textarea");
+let myServerTextarea = (my as HTMLTextAreaElement)ServerElt.querySelector("textarea");
 export let serverProcess: dummy_childProcess.ChildProcess = null;
 
-let autoStartServerCheckbox = <HTMLInputElement>document.getElementById("auto-start-server");
+let autoStartServerCheckbox = (document as HTMLInputElement).getElementById("auto-start-server");
 autoStartServerCheckbox.checked = config.autoStartServer;
 
 autoStartServerCheckbox.addEventListener("change", (event) => {
   config.autoStartServer = autoStartServerCheckbox.checked;
 });
 
-let startStopServerButton = <HTMLButtonElement>myServerElt.querySelector("button.start-stop-server");
+let startStopServerButton = (my as HTMLButtonElement)ServerElt.querySelector("button.start-stop-server");
 startStopServerButton.addEventListener("click", () => {
   if (serverProcess != null) {
     startStopServerButton.textContent = "Start";

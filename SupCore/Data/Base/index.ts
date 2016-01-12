@@ -71,7 +71,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
     case "enum": {
       if (typeof value !== "string") return { message: "Expected string for enum" };
 
-      let items = <string[]>rule.items;
+      let items = (rule as string[]).items;
       if (items.indexOf(value) === -1) return { message: `Invalid enum value: ${value}` };
     } break;
 
@@ -130,7 +130,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       if (rule.items != null) {
         for (let index = 0; index < value.length; index++) {
           let item: any = value[index];
-          let violation = getRuleViolation(item, <Rule>rule.items, true);
+          let violation = getRuleViolation(item, (rule as Rule).items, true);
           if (violation != null) {
             let violationPath = (violation.path != null) ? `[${index}].${violation.path}` : `[${index}]`;
             return { message: violation.message, path: violationPath };
