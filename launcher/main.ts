@@ -27,10 +27,66 @@ electron.app.on("ready", function() {
     width: 800, height: 480,
     frame: false, resizable: false
   });
-  mainWindow.setMenuBarVisibility(false);
+  if (process.platform !== "darwin") mainWindow.setMenuBarVisibility(false);
+  else setupOSXAppMenu();
   mainWindow.loadURL(`file://${__dirname}/public/index.html`);
   mainWindow.on("closed", function() { mainWindow = null; });
 });
+
+function setupOSXAppMenu() {
+  let template: GitHubElectron.MenuItemOptions[] = [
+    {
+      label: "Edit",
+      submenu: [
+        { label: "Undo", accelerator: "CmdOrCtrl+Z", role: "undo" },
+        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", role: "redo" },
+        { type: "separator" },
+        { label: "Cut", accelerator: "CmdOrCtrl+X", role: "cut" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", role: "copy" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", role: "paste" },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", role: "selectall" },
+      ]
+    },
+    {
+      label: "Window",
+      role: "window",
+      submenu: [
+        { label: "Minimize", accelerator: "CmdOrCtrl+M", role: "minimize" },
+        { label: "Close", accelerator: "CmdOrCtrl+W", role: "close" },
+        { type: "separator" },
+        { label: "Bring All to Front", role: "front" }
+      ]
+    },
+    {
+      label: "Help",
+      role: "help",
+      submenu: [
+        { label: "Website", click: function() { electron.shell.openExternal("http://superpowers-html5.com"); } },
+        { label: "Documentation", click: function() { electron.shell.openExternal("http://docs.superpowers-html5.com"); } },
+      ]
+    },
+  ];
+
+  let appName = electron.app.getName();
+  template.unshift({
+      label: appName,
+      role: null,
+      submenu: [
+        { label: `About ${appName}`, role: "about" },
+        { type: "separator" },
+        { label: "Services", role: "services", submenu: [] },
+        { type: "separator" },
+        { label: `Hide ${appName}`, accelerator: "Command+H", role: "hide" },
+        { label: "Hide Others", accelerator: "Command+Shift+H", role: "hideothers" },
+        { label: "Show All", role: "unhide" },
+        { type: "separator" },
+        { label: "Quit", accelerator: "Command+Q", click: () => { electron.app.quit(); } },
+    ]
+  });
+
+  let menu = electron.Menu.buildFromTemplate(template);
+  electron.Menu.setApplicationMenu(menu);
+}
 
 interface OpenServer { window: GitHubElectron.BrowserWindow; address: string; closed: boolean; }
 let openServersById: { [id: string]: OpenServer } = {};
