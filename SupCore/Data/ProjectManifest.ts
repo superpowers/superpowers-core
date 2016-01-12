@@ -9,7 +9,7 @@ export default class ProjectManifest extends Hash {
     formatVersion: { type: "integer" }
   };
 
-  static currentFormatVersion = 3;
+  static currentFormatVersion = 4;
   migratedFromFormatVersion: number;
 
   constructor(pub: SupCore.Data.ProjectManifestPub) {
@@ -37,6 +37,20 @@ export default class ProjectManifest extends Hash {
 
     if (oldFormatVersion <= 1) {
       pub.system = "supGame";
+    }
+
+    if (oldFormatVersion <= 3) {
+      switch (pub.system) {
+        case "supGame":
+          pub.system = "game";
+          break;
+        case "supWeb":
+          pub.system = "web";
+          break;
+        case "markSlide":
+          pub.system = "markslide";
+          break;
+      }
     }
 
     pub.formatVersion = ProjectManifest.currentFormatVersion;
