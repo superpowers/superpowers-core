@@ -120,7 +120,9 @@ buildApp.use("/", express.static(`${__dirname}/../public`));
 buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
   let projectServer = hub.serversById[req.params.projectId];
   if (projectServer == null) { res.status(404).end("No such project"); return; }
-  res.sendFile(path.join(projectServer.buildsPath, req.params.buildId, req.params[0]));
+  let buildId = req.params.buildId;
+  if (req.params.buildId === "latest") buildId = projectServer.nextBuildId - 1;
+  res.sendFile(path.join(projectServer.buildsPath, buildId, req.params[0]));
 });
 
 let buildHttpServer = http.createServer(buildApp);
