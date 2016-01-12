@@ -1,10 +1,11 @@
 ## Superpowers, the HTML5 2D+3D game maker  
 
-[![](https://img.shields.io/badge/license-ISC-blue.svg)](https://github.com/superpowers/superpowers/blob/master/LICENSE.txt)
-[![](https://img.shields.io/gitter/room/superpowers/dev.svg)](https://gitter.im/superpowers/dev)  
-[![](https://img.shields.io/badge/patreon-support%20us-brightgreen.svg)](https://www.patreon.com/SparklinLabs)
-[![](https://img.shields.io/twitter/follow/SuperpowersDev.svg?style=social)](https://twitter.com/SuperpowersDev)
+[![License](https://img.shields.io/badge/license-ISC-blue.svg)](https://github.com/superpowers/superpowers/blob/master/LICENSE.txt)
 [![Build Status](https://travis-ci.org/superpowers/superpowers.svg?branch=master)](https://travis-ci.org/superpowers/superpowers)
+[![Gitter](https://img.shields.io/gitter/room/superpowers/dev.svg)](https://gitter.im/superpowers/dev)  
+[![Patreon](https://img.shields.io/badge/patreon-support%20us-brightgreen.svg)](https://www.patreon.com/SparklinLabs)
+[![Twitter](https://img.shields.io/twitter/follow/SuperpowersDev.svg?style=social)](https://twitter.com/SuperpowersDev)
+
 
 [Website](http://superpowers-html5.com/) —
 [Download](https://sparklinlabs.itch.io/superpowers) —
