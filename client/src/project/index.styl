@@ -214,6 +214,7 @@ body
     iframe
       border none
       flex 1
-
-      &:not(.active)
-        display none
+      // NOTE: Workaround for Microsoft Edge
+      // (iframes seem to ignore flex: 1)
+      min-height 100%
+      &:not(.active) { display: none; }
