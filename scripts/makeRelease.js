@@ -29,9 +29,11 @@ function shouldIgnore(file) {
   if (templateRegex.test(file)) return false;
   if (_.endsWith(file, "gulpfile.js") || _.endsWith(file, "Gulpfile.js") || _.endsWith(file, "tsconfig.json")) return true;
   if (_.endsWith(file, "launcher.cmd")) return true;
-  if (_.endsWith(file, ".jade")) return true;
-  if (_.endsWith(file, ".styl")) return true;
-  if (_.endsWith(file, ".ts") && file.indexOf("typings/") === -1 && file.indexOf("node_modules/") === -1) return true;
+  if (file.indexOf("node_modules/") === -1) {
+    if (_.endsWith(file, ".jade")) return true;
+    if (_.endsWith(file, ".styl")) return true;
+    if (_.endsWith(file, ".ts") && file.indexOf("typings/") === -1) return true;
+  }
   if (_.endsWith(file, ".js") && file.indexOf("editors/") !== -1 && file.indexOf("public/") === -1) return true;
   if (_.startsWith(file, "client")) return true;
   if (_.startsWith(file, "scripts")) return true;
