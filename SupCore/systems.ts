@@ -52,7 +52,7 @@ export class System {
   }
 
   registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
-    if (this.plugins[contextName] == null) this.plugins[contextName] = { plugins: {} };
+    if (this.plugins[contextName] == null) this.plugins[contextName] = {};
 
     if (this.plugins[contextName][pluginName] != null) {
       console.error("SystemAPI.registerPlugin: Tried to register two or more plugins " +
