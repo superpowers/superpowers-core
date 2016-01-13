@@ -49,7 +49,7 @@ function startServer() {
   if (nodeProcess.env["HOME"] != null) serverEnv["HOME"] = nodeProcess.env["HOME"];
   if (nodeProcess.env["XDG_DATA_HOME"] != null) serverEnv["XDG_DATA_HOME"] = nodeProcess.env["XDG_DATA_HOME"];
 
-  serverProcess = childProcess.fork(serverPath, { silent: true, env: serverEnv });
+  serverProcess = childProcess.fork(serverPath, ["start"], { silent: true, env: serverEnv });
   serverProcess.on("exit", () => {
     serverProcess = null;
     startStopServerButton.disabled = false;
