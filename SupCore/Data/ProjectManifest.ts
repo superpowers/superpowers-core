@@ -1,7 +1,7 @@
 import Hash from "./Base/Hash";
 
 export default class ProjectManifest extends Hash {
-  static schema = {
+  static schema: SupCore.Data.Schema = {
     id: { type: "string" },
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     description: { type: "string", maxLength: 300, mutable: true },

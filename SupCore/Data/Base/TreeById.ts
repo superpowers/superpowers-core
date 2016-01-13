@@ -10,16 +10,14 @@ interface TreeNode {
 
 export default class TreeById extends EventEmitter {
   pub: TreeNode[];
-  schema: any;
   nextId: number;
 
   byId: { [key: string]: TreeNode };
   parentNodesById: { [key: string]: TreeNode };
 
-  constructor(pub: any, schema: any, nextId?: number) {
+  constructor(pub: any, public schema: SupCore.Data.Schema, nextId?: number) {
     super();
     this.pub = pub;
-    this.schema = schema;
     this.nextId = nextId;
 
     this.byId = {};
@@ -63,7 +61,7 @@ export default class TreeById extends EventEmitter {
   }
 
   add(node: TreeNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    if (node.id != null && this.schema.id == null) { callback("Found unexpected id key"); return; }
+    if (node.id != null && this.schema["id"] == null) { callback("Found unexpected id key"); return; }
 
     let siblings = this.pub;
     if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;

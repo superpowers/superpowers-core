@@ -4,7 +4,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 export default class Resource extends Hash {
-  constructor(public id: string, pub: any, schema: any, public server: ProjectServer) {
+  constructor(public id: string, pub: any, schema: SupCore.Data.Schema, public server: ProjectServer) {
     super(pub, schema);
     if (server == null) this.setup();
   }

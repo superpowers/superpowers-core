@@ -2,17 +2,13 @@ import * as base from "./index";
 import { EventEmitter } from "events";
 
 export default class ListById extends EventEmitter {
-  pub: any[];
-  schema: any;
   generateNextId: Function;
   nextId = 0;
 
-  byId: {[id: string]: any} = {};
+  byId: { [id: string]: any } = {};
 
-  constructor(pub: any[], schema: any, generateNextId?: Function) {
+  constructor(public pub: any[], public schema: SupCore.Data.Schema, generateNextId?: Function) {
     super();
-    this.pub = pub;
-    this.schema = schema;
     this.generateNextId = generateNextId;
 
     let maxItemId = -1;
@@ -36,7 +32,7 @@ export default class ListById extends EventEmitter {
   }
 
   add(item: any, index: number, callback: (err: string, index?: number) => any) {
-    if (item.id != null && this.schema.id == null) { callback("Found unexpected id key"); return; }
+    if (item.id != null && this.schema["id"] == null) { callback("Found unexpected id key"); return; }
 
     let missingKeys = Object.keys(this.schema);
     for (let key in item) {
