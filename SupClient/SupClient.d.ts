@@ -138,8 +138,10 @@ declare namespace SupClient {
 
     subAsset(assetId: string, assetType: string, subscriber: AssetSubscriber): void;
     unsubAsset(assetId: string, subscriber: AssetSubscriber): void;
+    editAsset(assetId: string, command: string, ...args: any[]): void;
     subResource(resourceId: string, subscriber: ResourceSubscriber): void;
     unsubResource(resourceId: string, subscriber: ResourceSubscriber): void;
+    editResource(resourceId: string, command: string, ...args: any[]): void;
   }
 
   interface EntriesSubscriber {
