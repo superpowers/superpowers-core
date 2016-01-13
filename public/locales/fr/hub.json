@@ -3,7 +3,7 @@
     "title": "Nouveau projet",
     "prompt": "Entrez le nom et choisissez le type du nouveau projet.",
     "namePlaceholder": "Nom du projet",
-    "descriptionPlaceholder": "Description (optionelle)",
+    "descriptionPlaceholder": "Description (optionnelle)",
     "emptyProject": {
       "title": "Projet vide",
       "description": "Un projet vide pour partir de 0."
