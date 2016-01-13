@@ -1,7 +1,7 @@
 {
   "name": "superpowers",
   "description": "Superpowers, the HTML5 2D+3D game maker",
-  "version": "0.18.1",
+  "version": "0.19.0",
   "license": "ISC",
   "main": "./server/index.js",
   "repository": {
@@ -12,7 +12,7 @@
     "build": "node scripts/build.js"
   },
   "superpowers": {
-    "electronVersion": "0.35.4",
+    "electronVersion": "0.36.3",
     "appApiVersion": 1
   },
   "devDependencies": {
