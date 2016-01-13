@@ -1,170 +1,110 @@
 /// <reference path="index.d.ts" />
 
-import * as path from "path";
+import start from "./start";
+import * as dummy_https from "https";
 import * as fs from "fs";
-import * as http from "http";
-import * as express from "express";
-import * as cookieParser from "cookie-parser";
-import * as socketio from "socket.io";
 
-import * as paths from "./paths";
-import config from "./config";
-import * as SupCore from "../SupCore";
-import loadSystems from "./loadSystems";
-import ProjectHub from "./ProjectHub";
+let https: typeof dummy_https = require("follow-redirects").https;
+let unzip = require("unzip");
 
-// Globals
-(<any>global).SupCore = SupCore;
+let installedSystems: string[] = [];
+let systemsPath = `${__dirname}/../systems`;
+for (let file of fs.readdirSync(systemsPath)) {
+  if (file.indexOf(".") !== -1) continue;
+  if (!fs.statSync(`${systemsPath}/${file}`).isDirectory) continue;
 
-let { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
-SupCore.log(`Server v${version} starting...`);
-
-function handle404(err: any, req: express.Request, res: express.Response, next: Function) {
-  if (err.status === 404) { res.status(404).end("File not found"); return; }
-  next();
+  let packageData = fs.readFileSync(`${systemsPath}/${file}/package.json`, { encoding: "utf8" });
+  let systemId = JSON.parse(packageData).superpowers.systemId;
+  installedSystems.push(systemId);
 }
 
-let hub: ProjectHub = null;
+let registry: { [ sytemId: string ]: { repository: string; plugins: { [ name: string ]: string } } };
 
-process.on("uncaughtException", (err: Error) => {
-  if (hub != null && hub.loadingProjectFolderName != null) {
-    SupCore.log(`The server crashed while loading project "${hub.loadingProjectFolderName}".\n${(<any>err).stack}`);
-  } else {
-    SupCore.log(`The server crashed.\n${(<any>err).stack}`);
+let command = process.argv[2];
+if (command == null) console.log("Available commands: start, update, install, uninstall");
+else {
+  switch (command) {
+    case "start":
+      start();
+      break;
+    case "install":
+      let registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers/master/registry.json";
+      https.get(registryUrl, (res) => {
+        if (res.statusCode === 404) {
+          console.log(`Couldn't load registry from ${registryUrl}`);
+          return;
+        }
+        let content = "";
+        res.on("data", (chunk: string) => { content += chunk; });
+        res.on("end", () => {
+          registry = JSON.parse(content);
+
+          let systemAndPlugin = process.argv[3];
+          if (systemAndPlugin == null) {
+            console.log(`Available systems: ${Object.keys(registry).join(", ")}`);
+            return;
+          }
+
+          if (systemAndPlugin.indexOf(":") === -1) {
+            installSystem(systemAndPlugin);
+          } else {
+            let [systemId, plugin] = systemAndPlugin.split(":");
+            installPlugin(systemId, plugin);
+          }
+        });
+      });
+      break;
+    default:
+      console.log(`Unknown command: ${command}`);
+      break;
   }
-  process.exit(1);
-});
+}
 
-
-// Public version
-fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.password.length !== 0 }, null, 2));
-
-// Main HTTP server
-let mainApp = express();
-
-let languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
-languageIds.unshift("none");
-
-mainApp.use(cookieParser());
-mainApp.use((req, res, next) => {
-  if (req.cookies["supLanguage"] == null) {
-    let language = req.header("Accept-Language");
-    if (language != null) {
-      language = language.split(",")[0];
-      if (languageIds.indexOf(language) === -1 && language.indexOf("-") !== -1) {
-        language = language.split("-")[0];
-      }
-    }
-    if (languageIds.indexOf(language) === -1) language = "en";
-    res.cookie("supLanguage", language);
-  }
-
-  next();
-});
-
-function redirectIfNoAuth(req: express.Request, res: express.Response, next: Function) {
-  if (req.cookies["supServerAuth"] == null) {
-    res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl)}`);
+function installSystem(systemId: string) {
+  if (installedSystems.indexOf(systemId) !== -1) {
+    console.log(`System ${systemId} is already installed`);
+    console.log(`Available systems: ${Object.keys(registry).join(", ")}`);
+    return;
+  } else if (registry[systemId] == null ) {
+    console.log(`System ${systemId} doesn't exist`);
+    console.log(`Available systems: ${Object.keys(registry).join(", ")}`);
     return;
   }
 
-  next();
-}
+  console.log(`Installing system ${systemId}...`);
+  let repositoryUrl = `${registry[systemId].repository.replace("https://github.com", "/repos")}/releases/latest`;
+  https.get({
+    hostname: "api.github.com",
+    path: repositoryUrl,
+    headers: { "user-agent": "Superpowers" }
+  }, function(res) {
+    if (res.statusCode === 404) {
+      console.log("Couldn't get information from repository");
+      return;
+    }
 
-mainApp.get("/", (req, res) => { res.redirect("/hub"); });
-mainApp.get("/hub", redirectIfNoAuth);
-mainApp.get("/hub", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "hub", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
-});
-mainApp.get("/project", redirectIfNoAuth);
-mainApp.get("/project", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "project", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
-});
-mainApp.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "login", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
-});
+    let content = "";
+    res.on("data", (chunk: string) => { content += chunk; });
+    res.on("end", () => {
+      let repositoryInfo = JSON.parse(content);
+      let downloadUrl = repositoryInfo.assets[0].browser_download_url;
 
-mainApp.use("/", express.static(`${__dirname}/../public`));
-mainApp.use("/projects/:projectId/*", (req, res) => {
-  let projectPath = hub.serversById[req.params.projectId].projectPath;
-
-  res.sendFile(req.params[0], { root: `${projectPath}/public` }, (err) => {
-    if (req.params[0] === "icon.png") res.sendFile("/images/default-project-icon.png", { root: `${__dirname}/../public` });
-  });
-});
-
-let mainHttpServer = http.createServer(mainApp);
-mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
-  if (err.code === "EADDRINUSE") {
-    SupCore.log(`Could not start the server: another application is already listening on port ${config.mainPort}.`);
-    process.exit(1);
-  } else throw(err);
-});
-
-let io = socketio(mainHttpServer, { transports: ["websocket"] });
-
-// Build HTTP server
-let buildApp = express();
-
-function redirectToHub(req: express.Request, res: express.Response) {
-  res.redirect(`http://${req.hostname}:${config.mainPort}/hub/`);
-}
-
-buildApp.get("/", redirectToHub);
-buildApp.get("/systems/:systemId/SupCore.js", (req, res) => {
-  res.sendFile("SupCore.js", { root: `${__dirname}/../public` });
-});
-
-buildApp.use("/", express.static(`${__dirname}/../public`));
-
-buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
-  let projectServer = hub.serversById[req.params.projectId];
-  if (projectServer == null) { res.status(404).end("No such project"); return; }
-  let buildId = req.params.buildId as string;
-  if (buildId === "latest") buildId = (projectServer.nextBuildId - 1).toString();
-  res.sendFile(path.join(projectServer.buildsPath, buildId, req.params[0]));
-});
-
-let buildHttpServer = http.createServer(buildApp);
-
-loadSystems(mainApp, buildApp, () => {
-  mainApp.use(handle404);
-  buildApp.use(handle404);
-
-  // Project hub
-  hub = new ProjectHub(io, (err: Error) => {
-    if (err != null) { SupCore.log(`Failed to start server:\n${(<any>err).stack}`); return; }
-
-    SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${paths.projects}.`);
-
-    let hostname = (config.password.length === 0) ? "localhost" : "";
-
-    mainHttpServer.listen(config.mainPort, hostname, () => {
-      buildHttpServer.listen(config.buildPort, hostname, () => {
-        SupCore.log(`Main server started on port ${config.mainPort}, build server started on port ${config.buildPort}.`);
-        if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
+      https.get({
+        hostname: "github.com",
+        path: downloadUrl,
+        headers: { "user-agent": "Superpowers" }
+      }, function(res) {
+        if (res.statusCode === 404) {
+          console.log("Couldn't download the system");
+          return;
+        }
+        res.pipe(unzip.Extract({ path: systemsPath }));
+        res.on("end", () => { console.log("System installed"); });
       });
     });
   });
-});
-
-// Save on exit and handle crashes
-let isQuitting = false;
-
-function onExit() {
-  if (isQuitting) return;
-  isQuitting = true;
-  mainHttpServer.close();
-  buildHttpServer.close();
-
-  SupCore.log("Saving all projects...");
-
-  hub.saveAll((err: Error) => {
-    if (err != null) SupCore.log(`Error while exiting:\n${(<any>err).stack}`);
-    else SupCore.log("Exited cleanly.");
-    process.exit(0);
-  });
 }
 
-process.on("SIGINT", onExit);
-process.on("message", (msg: string) => { if (msg === "stop") onExit(); });
+function installPlugin(systemId: string, plugin: string) {
+  console.log("Plugin installation isn't supported yet");
+}

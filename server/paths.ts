@@ -37,8 +37,6 @@ export let projects = path.join(userData, "projects");
 export let builds = path.join(userData, "builds");
 export let config = path.join(userData, "config.json");
 
-SupCore.log(`Using data from ${userData}.`);
-
 try { mkdirp.sync(userData); } catch (err) { if (err.code !== "EEXIST") throw err; }
 try { mkdirp.sync(projects); } catch (err) { if (err.code !== "EEXIST") throw err; }
 try { mkdirp.sync(builds); } catch (err) { if (err.code !== "EEXIST") throw err; }

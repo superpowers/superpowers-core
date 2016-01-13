@@ -37,6 +37,7 @@
     "cson-parser": "^1.0.8",
     "dnd-tree-view": "^2.3.2",
     "express": "^4.11.2",
+    "follow-redirects": "0.0.7",
     "fuzzy": "^0.1.0",
     "js-cookie": "^2.0.4",
     "lodash": "^3.2.0",
@@ -50,6 +51,7 @@
     "tv4": "^1.1.9",
     "typedarray-to-buffer": "^3.0.1",
     "typescript": "1.6.2",
+    "unzip": "^0.1.11",
     "yargs": "^3.6.0"
   }
 }
