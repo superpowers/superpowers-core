@@ -100,7 +100,7 @@ export default class ProjectClient {
   }
 
   editAsset(assetId: string, command: string, ...args: any[]) {
-    this.socket.emit("edit:assets", assetId, ...args);
+    this.socket.emit("edit:assets", assetId, command, ...args);
   }
 
   subResource(resourceId: string, subscriber: ResourceSubscriber) {
@@ -135,7 +135,7 @@ export default class ProjectClient {
   }
 
   editResource(resourceId: string, command: string, ...args: any[]) {
-    this.socket.emit("edit:assets", resourceId, ...args);
+    this.socket.emit("edit:assets", resourceId, command, ...args);
   }
 
 
