@@ -45,6 +45,7 @@ function shouldIgnore(file) {
   if (_.startsWith(file, "workbench")) return true;
   if (_.startsWith(file, "builds") || _.startsWith(file, "projects")) return true;
   if (file === "config.json") return true;
+  if (file === "registry.json") return true;
   return false;
 };
 
