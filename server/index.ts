@@ -21,7 +21,7 @@ for (let file of fs.readdirSync(systemsPath)) {
 let registry: { [ sytemId: string ]: { repository: string; plugins: { [ name: string ]: string } } };
 
 let command = process.argv[2];
-if (command == null) console.log("Available commands: start, update, install, uninstall");
+if (command == null) console.log("Available commands: start, install");
 else {
   switch (command) {
     case "start":
