@@ -38,7 +38,10 @@ export default class ProjectManifest extends Hash {
     if (oldFormatVersion <= 1) {
       pub.systemId = "game";
     } else if (oldFormatVersion <= 3) {
-      switch ((pub as any).system) {
+      pub.systemId = (pub as any).system;
+      delete (pub as any).system;
+
+      switch (pub.systemId) {
         case "supGame":
           pub.systemId = "game";
           break;
@@ -49,7 +52,6 @@ export default class ProjectManifest extends Hash {
           pub.systemId = "markslide";
           break;
       }
-      delete (pub as any).system;
     } else if (oldFormatVersion <= 4) {
       pub.systemId = (pub as any).system;
       delete (pub as any).system;
