@@ -55,7 +55,8 @@ function migrateTo3(server: ProjectServer, callback: (err: Error) => any) {
     let node = server.data.entries.byId[nodeId];
     let storagePath = server.data.entries.getStoragePathFromId(nodeId);
 
-    if (node.type != null) {
+    if (node.type == null) cb();
+    else {
       let index = storagePath.lastIndexOf("/");
       let parentStoragePath = storagePath;
       let oldStoragePath = path.join(assetsPath, `${nodeId}-${server.data.entries.getPathFromId(nodeId).replace(new RegExp("/", "g"), "__")}`);
