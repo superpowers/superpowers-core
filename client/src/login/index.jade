@@ -26,7 +26,7 @@ html
         tr
           th= t("login:username")
           td
-            input.username(type="text",placeholder="Your username",spellcheck="false")
+            input.username(type="text",placeholder="Your username",spellcheck="false",pattern="[A-Za-z0-9_]{3,20}",title="a-z,A-Z,0-9,_")
 
       .buttons
         button.log-in= t("login:logIn")
