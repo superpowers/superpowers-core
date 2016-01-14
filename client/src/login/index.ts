@@ -2,8 +2,13 @@ import "../window";
 
 let port = (window.location.port.length === 0) ? "80" : window.location.port;
 
+const connectionInfoElt = document.querySelector(".connection") as HTMLDivElement;
+const formElt = document.querySelector(".login") as HTMLDivElement;
 let serverPasswordElt = document.querySelector(".server-password") as HTMLInputElement;
 let usernameElt = document.querySelector(".username") as HTMLInputElement;
+
+formElt.hidden = true;
+connectionInfoElt.hidden = false;
 
 let supServerAuth = SupClient.cookies.getJSON("supServerAuth");
 
@@ -27,6 +32,8 @@ SupClient.fetch("superpowers.json", "json", (err, data) => {
 });
 
 function start() {
+  formElt.hidden = false;
+  connectionInfoElt.hidden = true;
   document.querySelector(".server-name").textContent = SupClient.i18n.t("hub:serverAddress", { hostname: window.location.hostname, port });
   document.querySelector("form.login").addEventListener("submit", onFormSubmit);
 }
