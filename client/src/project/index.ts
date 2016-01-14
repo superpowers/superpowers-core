@@ -338,7 +338,7 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
 
   (document.querySelector(".connecting") as HTMLDivElement).hidden = true;
 
-  if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
+  if (SupClient.isApp) (document.querySelector(".project-buttons .publish") as HTMLButtonElement).disabled = false;
   (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
   (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
