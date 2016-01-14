@@ -14,7 +14,7 @@ import loadSystems from "./loadSystems";
 import ProjectHub from "./ProjectHub";
 
 // Globals
-((global as any)).SupCore = SupCore;
+(global as any).SupCore = SupCore;
 
 let { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
 SupCore.log(`Server v${version} starting...`);
@@ -28,9 +28,9 @@ let hub: ProjectHub = null;
 
 process.on("uncaughtException", (err: Error) => {
   if (hub != null && hub.loadingProjectFolderName != null) {
-    SupCore.log(`The server crashed while loading project "${hub.loadingProjectFolderName}".\n${((err as any)).stack}`);
+    SupCore.log(`The server crashed while loading project "${hub.loadingProjectFolderName}".\n${(err as any).stack}`);
   } else {
-    SupCore.log(`The server crashed.\n${((err as any)).stack}`);
+    SupCore.log(`The server crashed.\n${(err as any).stack}`);
   }
   process.exit(1);
 });
@@ -131,7 +131,7 @@ loadSystems(mainApp, buildApp, () => {
 
   // Project hub
   hub = new ProjectHub(io, (err: Error) => {
-    if (err != null) { SupCore.log(`Failed to start server:\n${((err as any)).stack}`); return; }
+    if (err != null) { SupCore.log(`Failed to start server:\n${(err as any).stack}`); return; }
 
     SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${paths.projects}.`);
 
@@ -158,7 +158,7 @@ function onExit() {
   SupCore.log("Saving all projects...");
 
   hub.saveAll((err: Error) => {
-    if (err != null) SupCore.log(`Error while exiting:\n${((err as any)).stack}`);
+    if (err != null) SupCore.log(`Error while exiting:\n${(err as any).stack}`);
     else SupCore.log("Exited cleanly.");
     process.exit(0);
   });

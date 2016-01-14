@@ -10,10 +10,10 @@ export default function(socket: SocketIO.Socket, next: Function) {
   }
 
   if (auth != null && (auth.serverPassword === config.password || config.password.length === 0) && typeof auth.username === "string" && usernameRegex.test(auth.username)) {
-    ((socket as any)).username = auth.username;
+    (socket as any).username = auth.username;
   }
 
-  if (((socket as any)).username == null) {
+  if ((socket as any).username == null) {
     if (config.password.length > 0) { next(new Error("invalidCredentials")); return; }
     else { next(new Error("invalidUsername")); return; }
   }

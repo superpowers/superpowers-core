@@ -23,11 +23,11 @@ function start() {
 }
 
 function createServerElement(entry: { name: string; address: string; }) {
-  let liElt = (document as HTMLLIElement).createElement("li");
+  let liElt = document.createElement("li") as HTMLLIElement;
   liElt.dataset["name"] = entry.name;
   liElt.dataset["address"] = entry.address;
 
-  let nameSpan = (document as HTMLSpanElement).createElement("span");
+  let nameSpan = document.createElement("span") as HTMLSpanElement;
   nameSpan.className = "name";
   nameSpan.textContent = entry.name;
   liElt.appendChild(nameSpan);

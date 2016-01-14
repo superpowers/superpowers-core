@@ -21,10 +21,10 @@ if (fs.existsSync(serverPaths.config)) {
   _.merge(config, userConfig);
 }
 
-let mainPortInput = (document as HTMLInputElement).querySelector("input.main-server-port");
-let buildPortInput = (document as HTMLInputElement).querySelector("input.build-server-port");
-let passwordInput = (document as HTMLInputElement).querySelector("input.server-password");
-let maxRecentBuildsInput = (document as HTMLInputElement).querySelector("input.max-recent-builds");
+let mainPortInput = document.querySelector("input.main-server-port") as HTMLInputElement;
+let buildPortInput = document.querySelector("input.build-server-port") as HTMLInputElement;
+let passwordInput = document.querySelector("input.server-password") as HTMLInputElement;
+let maxRecentBuildsInput = document.querySelector("input.max-recent-builds") as HTMLInputElement;
 
 mainPortInput.value = config.mainPort.toString();
 buildPortInput.value = config.buildPort.toString();
