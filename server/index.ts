@@ -10,6 +10,7 @@ let unzip = require("unzip");
 /* tslint:enable */
 
 let systemIdRegex = /^[a-z0-9_-]+$/;
+let pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
 
 let systemFolderNamesById: { [id: string]: string } = {};
 let systemsPath = `${__dirname}/../systems`;
@@ -84,8 +85,8 @@ function install() {
       process.exit(1);
     }
 
-    let installPattern = process.argv[3];
-    if (installPattern == null) {
+    let pattern = process.argv[3];
+    if (pattern == null) {
       console.log(`Available systems: ${Object.keys(registry).join(", ")}.`);
       process.exit(0);
     }
@@ -93,10 +94,10 @@ function install() {
     let systemId: string;
     let pluginName: string;
 
-    if (installPattern.indexOf(":") === -1) {
-      systemId = installPattern;
+    if (pattern.indexOf(":") === -1) {
+      systemId = pattern;
     } else {
-      [ systemId, pluginName ] = installPattern.split(":");
+      [ systemId, pluginName ] = pattern.split(":");
     }
 
     if (registry[systemId] == null) {
@@ -175,31 +176,72 @@ function installPlugin(systemId: string, pluginName: string, repositoryURL: stri
 }
 
 function init() {
-  let systemId = process.argv[3];
+  let pattern = process.argv[3];
+  let systemId: string;
+  let pluginName: string;
+
+  if (pattern.indexOf(":") === -1) {
+    systemId = pattern;
+  } else {
+    [ systemId, pluginName ] = pattern.split(":");
+  }
+
   if (!systemIdRegex.test(systemId)) {
     console.error("Invalid system ID: only lowercase letters, numbers and dashes are allowed.");
     process.exit(1);
   }
 
-  if (systemFolderNamesById[systemId] != null) {
+  if (pluginName != null && !pluginNameRegex.test(pluginName)) {
+    console.error("Invalid plugin name: only two sets of letters and numbers separated by a slash are allowed.");
+    process.exit(1);
+  }
+
+  let systemFolderName = systemFolderNamesById[systemId];
+
+  if (pluginName == null && systemFolderName != null) {
     console.error(`You already have a system with the ID ${systemId} installed as systems/${systemFolderNamesById[systemId]}.`);
     process.exit(1);
-  }
-
-  let stats: fs.Stats;
-  try { stats = fs.lstatSync(`${systemsPath}/${systemId}`); } catch (err) { /* Ignore */ }
-  if (stats != null) {
-    console.error(`systems/${systemId} already exists.`);
+  } else if (pluginName != null && systemFolderName == null) {
+    console.error(`You don't have a system with the ID ${systemId} installed.`);
     process.exit(1);
   }
 
-  getRegistry((err, registry) => {
-    if (registry[systemId] != null) {
-      console.error(`System ${systemId} already exists.`);
+  if (systemFolderName == null) systemFolderName = systemId;
+
+  let systemStats: fs.Stats;
+  try { systemStats = fs.lstatSync(`${systemsPath}/${systemFolderName}`); } catch (err) { /* Ignore */ }
+
+  if (pluginName == null) {
+    if (systemStats != null) {
+      console.error(`systems/${systemFolderName} already exists.`);
+      process.exit(1);
+    }
+  } else {
+    if (systemStats == null) {
+      console.error(`systems/${systemFolderName} doesn't exist.`);
       process.exit(1);
     }
 
-    initSystem(systemId);
+    let pluginStats: fs.Stats;
+    try { pluginStats = fs.lstatSync(`${systemsPath}/${systemFolderName}/plugins/${pluginName}`); } catch (err) { /* Ignore */ }
+    if (pluginStats != null) {
+      console.error(`systems/${systemFolderName}/plugins/${pluginName} already exists.`);
+      process.exit(1);
+    }
+  }
+
+  getRegistry((err, registry) => {
+    let registrySystemEntry = registry[systemId];
+    if (pluginName == null && registrySystemEntry != null) {
+      console.error(`System ${systemId} already exists.`);
+      process.exit(1);
+    } else if (pluginName != null && registrySystemEntry != null && registrySystemEntry.plugins[pluginName] != null) {
+      console.error(`Plugin ${pluginName} on system ${systemId} already exists.`);
+      process.exit(1);
+    }
+
+    if (pluginName == null) initSystem(systemId);
+    else initPlugin(systemFolderName, systemId, pluginName);
   });
 }
 
@@ -215,16 +257,45 @@ function initSystem(systemId: string) {
 
   let systemPath = `${systemsPath}/${systemId}`;
   fs.mkdirSync(systemPath);
-
   fs.writeFileSync(`${systemPath}/package.json`, packageJSON);
 
   let localeJSON = JSON.stringify({
     title: `${systemId}`,
     description: `(Edit systems/${systemId}/public/locales/en/system.json to change the title and description)`
   }, null, 2) + "\n";
-
   mkdirp.sync(`${systemPath}/public/locales/en`);
   fs.writeFileSync(`${systemPath}/public/locales/en/system.json`, localeJSON);
 
   console.log(`A system named ${systemId} has been initialized.`);
+}
+
+function initPlugin(systemFolderName: string, systemId: string, pluginName: string) {
+  let pluginSlug = pluginName.replace(/\//g, "-").replace(/[A-Z]/g, (x) => `-${x.toLowerCase()}`);
+  let packageJSON = JSON.stringify({
+    name: `superpowers-${systemId}-${pluginSlug}-plugin`,
+    description: `Plugin for Superpowers ${systemId}`,
+    scripts: {
+      "build": "gulp --gulpfile=../../../../../scripts/pluginGulpfile.js --cwd=."
+    }
+  }, null, 2) + "\n";
+
+  let pluginPath = `${systemsPath}/${systemFolderName}/plugins/${pluginName}`;
+  mkdirp.sync(pluginPath);
+  fs.writeFileSync(`${pluginPath}/package.json`, packageJSON);
+
+  let tsconfigJSON = JSON.stringify({
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es5",
+      "noImplicitAny": true
+    }
+  }, null, 2) + "\n";
+  fs.writeFileSync(`${pluginPath}/tsconfig.json`, tsconfigJSON);
+
+  let indexDTS = `/// <reference path="../../../../../SupClient/SupClient.d.ts" />
+/// <reference path="../../../../../SupCore/SupCore.d.ts" />
+`;
+  fs.writeFileSync(`${pluginPath}/index.d.ts`, indexDTS);
+
+  console.log(`A plugin named ${pluginName} has been initialized in systems/${systemFolderName}.`);
 }
