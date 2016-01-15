@@ -9,27 +9,46 @@ let https: typeof dummy_https = require("follow-redirects").https;
 let unzip = require("unzip");
 /* tslint:enable */
 
-let systemIdRegex = /^[a-z0-9_-]+$/;
+let folderNameRegex = /^[a-z0-9_-]+$/;
 let pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
 
-let systemFolderNamesById: { [id: string]: string } = {};
+let systemsById: { [id: string]: { folderName: string; plugins: { [author: string]: string[] } } } = {};
 let systemsPath = `${__dirname}/../systems`;
 try { fs.mkdirSync(systemsPath); } catch (err) { /* Ignore */ }
 
 for (let entry of fs.readdirSync(systemsPath)) {
-  if (!systemIdRegex.test(entry)) continue;
+  if (!folderNameRegex.test(entry)) continue;
   if (!fs.statSync(`${systemsPath}/${entry}`).isDirectory) continue;
 
   let systemId: string;
+  let systemPath = `${systemsPath}/${entry}`;
   try {
-    let packageData = fs.readFileSync(`${systemsPath}/${entry}/package.json`, { encoding: "utf8" });
+    let packageData = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
     systemId = JSON.parse(packageData).superpowers.systemId;
   } catch (err) {
     console.error(`Could not load system id from systems/${entry}/package.json:`);
     console.error(err.stack);
     process.exit(1);
   }
-  systemFolderNamesById[systemId] = entry;
+  systemsById[systemId] = { folderName: entry, plugins: {} };
+  let pluginAuthors: string[];
+  try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
+  if (pluginAuthors == null) continue;
+
+  for (let pluginAuthor of pluginAuthors) {
+    if (pluginAuthor === "default" || pluginAuthor === "common") continue;
+    if (!folderNameRegex.test(pluginAuthor)) continue;
+
+    let pluginNames: string[] = [];
+    for (let pluginName of fs.readdirSync(`${systemPath}/plugins/${pluginAuthor}`)) {
+      if (!folderNameRegex.test(pluginName)) continue;
+      if (!fs.statSync(`${systemPath}/plugins/${pluginAuthor}/${pluginName}`).isDirectory) continue;
+      pluginNames.push(pluginName);
+    }
+    if (pluginNames.length > 0) {
+      systemsById[systemId].plugins[pluginAuthor] = pluginNames;
+    }
+  }
 }
 
 let command = process.argv[2];
@@ -40,6 +59,7 @@ switch (command) {
     require("./start").default();
     /* tslint:enable */
     break;
+  case "list": list(); break;
   case "install": install(); break;
   case "init": init(); break;
   default:
@@ -49,9 +69,29 @@ switch (command) {
     break;
 }
 
-type Registry = { [sytemId: string]: { repository: string; plugins: { [name: string]: string } } };
+function list() {
+  for (let systemId in systemsById) {
+    let system = systemsById[systemId];
+    console.log(`System ${systemId} installed in folder ${system.folderName}.`);
+
+    let pluginAuthors = Object.keys(system.plugins);
+    if (pluginAuthors.length === 0) {
+      console.log("No external plugin installed.");
+    } else {
+      for (let pluginAuthor of pluginAuthors) {
+        console.log(`|- ${pluginAuthor}`);
+        for (let pluginName of system.plugins[pluginAuthor]) console.log(`   |- ${pluginName}`);
+      }
+    }
+    console.log("\n");
+  }
+}
+
+const currentRegistryVersion = 1;
+type Registry = { version: number; systems: { [sytemId: string]: { repository: string; plugins: { [author: string]: { [name: string]: string } } } } };
 function getRegistry(callback: (err: Error, registry: Registry) => any) {
-  let registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers/master/registry.json";
+  // FIXME: Use registry.json instead once the next release is out
+  let registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers/master/registryNext.json";
   let request = https.get(registryUrl, (res) => {
     if (res.statusCode !== 200) {
       callback(new Error(`Unexpected status code: ${res.statusCode}`), null);
@@ -68,7 +108,8 @@ function getRegistry(callback: (err: Error, registry: Registry) => any) {
         return;
       }
 
-      callback(null, registry);
+      if (registry.version !== currentRegistryVersion) callback(new Error("The registry format has changed. Please update Superpowers."), null);
+      else callback(null, registry);
     });
   });
 
@@ -77,56 +118,21 @@ function getRegistry(callback: (err: Error, registry: Registry) => any) {
   });
 }
 
-function install() {
-  getRegistry((err, registry) => {
-    if (err) {
-      console.error("Error while fetching registry:");
-      console.error(err.stack);
-      process.exit(1);
+function listAvailableSystems(registry: Registry) { console.log(`Available systems: ${Object.keys(registry.systems).join(", ")}.`); }
+function listAvailablePlugins(registry: Registry, systemId: string) {
+  let pluginAuthors = Object.keys(registry.systems[systemId].plugins);
+  if (pluginAuthors.length === 0) {
+    console.log(`No available plugins in system ${systemId}.`);
+  } else {
+    console.log(`Available plugins in system ${systemId}.`);
+    for (let pluginAuthor of pluginAuthors) {
+      console.log(`|- ${pluginAuthor}`);
+      for (let pluginName of Object.keys(registry.systems[systemId].plugins[pluginAuthor])) console.log(`   |- ${pluginName}`);
     }
-
-    let pattern = process.argv[3];
-    if (pattern == null) {
-      console.log(`Available systems: ${Object.keys(registry).join(", ")}.`);
-      process.exit(0);
-    }
-
-    let systemId: string;
-    let pluginName: string;
-
-    if (pattern.indexOf(":") === -1) {
-      systemId = pattern;
-    } else {
-      [ systemId, pluginName ] = pattern.split(":");
-    }
-
-    if (registry[systemId] == null) {
-      console.error(`System ${systemId} doesn't exist.`);
-      console.error(`Available systems: ${Object.keys(registry).join(", ")}.`);
-      process.exit(1);
-    }
-
-    if (systemFolderNamesById[systemId] != null) {
-      if (pluginName == null) {
-        console.error(`System ${systemId} is already installed.`);
-        console.error(`Available systems: ${Object.keys(registry).join(", ")}.`);
-        process.exit(1);
-      }
-
-      installPlugin(systemId, pluginName, registry[systemId].plugins[pluginName]);
-    } else {
-      if (pluginName != null) {
-        console.error(`System ${systemId} is not installed.`);
-        process.exit(1);
-      }
-
-      console.log(`Installing system ${systemId}...`);
-      installSystem(registry[systemId].repository);
-    }
-  });
+  }
 }
 
-function installSystem(repositoryURL: string) {
+function getLatestRelease(repositoryURL: string, callback: (downloadURL: string) => void) {
   let repositoryPath = `${repositoryURL.replace("https://github.com", "/repos")}/releases/latest`;
   let request = https.get({
     hostname: "api.github.com",
@@ -144,64 +150,157 @@ function installSystem(repositoryURL: string) {
     res.on("data", (chunk: string) => { content += chunk; });
     res.on("end", () => {
       let repositoryInfo = JSON.parse(content);
-      let downloadUrl = repositoryInfo.assets[0].browser_download_url;
-
-      https.get({
-        hostname: "github.com",
-        path: downloadUrl,
-        headers: { "user-agent": "Superpowers" }
-      }, (res) => {
-        if (res.statusCode !== 200) {
-          console.error("Couldn't download the system:");
-          let err = new Error(`Unexpected status code: ${res.statusCode}`);
-          console.error(err.stack);
-          process.exit(1);
-        }
-        res.pipe(unzip.Extract({ path: systemsPath }));
-        res.on("end", () => { console.log("System successfully installed."); });
-      });
+      let downloadURL: string;
+      if (repositoryInfo.assets.length > 0) downloadURL = repositoryInfo.assets[0].browser_download_url;
+      else downloadURL = repositoryInfo.zipball_url;
+      callback(downloadURL);
     });
   });
 
   request.on("error", (err: Error) => {
-    console.error("Couldn't download the system");
+    console.error(`Couldn't get latest release from repository at ${repositoryURL}:`);
     console.error(err.stack);
     process.exit(1);
   });
 }
 
-function installPlugin(systemId: string, pluginName: string, repositoryURL: string) {
-  console.error("Plugin installation isn't supported yet.");
-  process.exit(1);
+function install() {
+  getRegistry((err, registry) => {
+    if (err) {
+      console.error("Error while fetching registry:");
+      console.error(err.stack);
+      process.exit(1);
+    }
+
+    let pattern = process.argv[3];
+    if (pattern == null) {
+      listAvailableSystems(registry);
+      process.exit(0);
+    }
+
+    let systemId: string;
+    let pluginPath: string;
+
+    if (pattern.indexOf(":") === -1) {
+      systemId = pattern;
+    } else {
+      [ systemId, pluginPath ] = pattern.split(":");
+    }
+
+    if (registry.systems[systemId] == null) {
+      console.error(`System ${systemId} doesn't exist.`);
+      listAvailableSystems(registry);
+      process.exit(1);
+    }
+
+    let systemFolderName = systemsById[systemId].folderName;
+    if (systemFolderName != null) {
+      if (pluginPath == null) {
+        console.error(`System ${systemId} is already installed.`);
+        listAvailableSystems(registry);
+        process.exit(1);
+      } else if (pluginPath === "") {
+        listAvailablePlugins(registry, systemId);
+        process.exit(0);
+      }
+
+      let [ pluginAuthor, pluginName ] = pluginPath.split("/");
+      if (registry.systems[systemId].plugins[pluginAuthor] == null || registry.systems[systemId].plugins[pluginAuthor][pluginName] == null) {
+        console.error(`Plugin ${pluginPath} doesn't exist.`);
+        listAvailablePlugins(registry, systemId);
+        process.exit(1);
+      }
+
+      if (systemsById[systemId].plugins[pluginAuthor] != null && systemsById[systemId].plugins[pluginAuthor].indexOf(pluginName) !== -1) {
+        console.error(`Plugin ${pluginPath} is already installed.`);
+        listAvailablePlugins(registry, systemId);
+        process.exit(1);
+      }
+
+      // console.log(`Installing plugin ${pluginPath} on system ${systemId}...`);
+      // installPlugin(systemId, pluginAuthor, registry.systems[systemId].plugins[pluginAuthor][pluginName]);
+      console.log(`Plugin installation isn't supported yet`);
+    } else {
+      if (pluginPath != null) {
+        console.error(`System ${systemId} is not installed.`);
+        process.exit(1);
+      }
+
+      console.log(`Installing system ${systemId}...`);
+      installSystem(registry.systems[systemId].repository);
+    }
+  });
+}
+
+function installSystem(repositoryURL: string) {
+  getLatestRelease(repositoryURL, (downloadURL) => {
+    https.get({
+      hostname: "github.com",
+      path: downloadURL,
+      headers: { "user-agent": "Superpowers" }
+    }, (res) => {
+      if (res.statusCode !== 200) {
+        console.error("Couldn't download the system:");
+        let err = new Error(`Unexpected status code: ${res.statusCode}`);
+        console.error(err.stack);
+        process.exit(1);
+      }
+      res.pipe(unzip.Extract({ path: systemsPath }));
+      res.on("end", () => { console.log("System successfully installed."); });
+    });
+  });
+}
+
+function installPlugin(systemId: string, pluginAuthor: string, repositoryURL: string) {
+  getLatestRelease(repositoryURL, (downloadURL) => {
+    let pluginPath = `${systemsPath}/${systemsById[systemId].folderName}/plugins/${pluginAuthor}`;
+    mkdirp.sync(pluginPath);
+    console.log(downloadURL);
+
+    https.get({
+      hostname: "github.com",
+      path: downloadURL,
+      headers: { "user-agent": "Superpowers" }
+    }, (res) => {
+      if (res.statusCode !== 200) {
+        console.error("Couldn't download the plugin:");
+        let err = new Error(`Unexpected status code: ${res.statusCode}`);
+        console.error(err.stack);
+        process.exit(1);
+      }
+      res.pipe(unzip.Extract({ path: pluginPath }));
+      res.on("end", () => { console.log("Plugin successfully installed."); });
+    });
+  });
 }
 
 function init() {
   let pattern = process.argv[3];
   let systemId: string;
-  let pluginName: string;
+  let pluginPath: string;
 
   if (pattern.indexOf(":") === -1) {
     systemId = pattern;
   } else {
-    [ systemId, pluginName ] = pattern.split(":");
+    [ systemId, pluginPath ] = pattern.split(":");
   }
 
-  if (!systemIdRegex.test(systemId)) {
+  if (!folderNameRegex.test(systemId)) {
     console.error("Invalid system ID: only lowercase letters, numbers and dashes are allowed.");
     process.exit(1);
   }
 
-  if (pluginName != null && !pluginNameRegex.test(pluginName)) {
+  if (pluginPath != null && !pluginNameRegex.test(pluginPath)) {
     console.error("Invalid plugin name: only two sets of letters and numbers separated by a slash are allowed.");
     process.exit(1);
   }
 
-  let systemFolderName = systemFolderNamesById[systemId];
+  let systemFolderName = systemsById[systemId].folderName;
 
-  if (pluginName == null && systemFolderName != null) {
-    console.error(`You already have a system with the ID ${systemId} installed as systems/${systemFolderNamesById[systemId]}.`);
+  if (pluginPath == null && systemFolderName != null) {
+    console.error(`You already have a system with the ID ${systemId} installed as systems/${systemFolderName}.`);
     process.exit(1);
-  } else if (pluginName != null && systemFolderName == null) {
+  } else if (pluginPath != null && systemFolderName == null) {
     console.error(`You don't have a system with the ID ${systemId} installed.`);
     process.exit(1);
   }
@@ -211,7 +310,7 @@ function init() {
   let systemStats: fs.Stats;
   try { systemStats = fs.lstatSync(`${systemsPath}/${systemFolderName}`); } catch (err) { /* Ignore */ }
 
-  if (pluginName == null) {
+  if (pluginPath == null) {
     if (systemStats != null) {
       console.error(`systems/${systemFolderName} already exists.`);
       process.exit(1);
@@ -223,25 +322,28 @@ function init() {
     }
 
     let pluginStats: fs.Stats;
-    try { pluginStats = fs.lstatSync(`${systemsPath}/${systemFolderName}/plugins/${pluginName}`); } catch (err) { /* Ignore */ }
+    try { pluginStats = fs.lstatSync(`${systemsPath}/${systemFolderName}/plugins/${pluginPath}`); } catch (err) { /* Ignore */ }
     if (pluginStats != null) {
-      console.error(`systems/${systemFolderName}/plugins/${pluginName} already exists.`);
+      console.error(`systems/${systemFolderName}/plugins/${pluginPath} already exists.`);
       process.exit(1);
     }
   }
 
   getRegistry((err, registry) => {
-    let registrySystemEntry = registry[systemId];
-    if (pluginName == null && registrySystemEntry != null) {
+    let registrySystemEntry = registry.systems[systemId];
+    if (pluginPath == null && registrySystemEntry != null) {
       console.error(`System ${systemId} already exists.`);
       process.exit(1);
-    } else if (pluginName != null && registrySystemEntry != null && registrySystemEntry.plugins[pluginName] != null) {
-      console.error(`Plugin ${pluginName} on system ${systemId} already exists.`);
-      process.exit(1);
+    } else if (pluginPath != null && registrySystemEntry != null) {
+      let [ pluginAuthor, pluginName ] = pluginPath.split("/");
+      if (registrySystemEntry.plugins[pluginAuthor][pluginName] != null) {
+        console.error(`Plugin ${pluginPath} on system ${systemId} already exists.`);
+        process.exit(1);
+      }
     }
 
-    if (pluginName == null) initSystem(systemId);
-    else initPlugin(systemFolderName, systemId, pluginName);
+    if (pluginPath == null) initSystem(systemId);
+    else initPlugin(systemFolderName, systemId, pluginPath);
   });
 }
 
