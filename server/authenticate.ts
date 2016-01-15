@@ -9,8 +9,8 @@ export default function(socket: SocketIO.Socket, next: Function) {
     try { auth = JSON.parse(authJSON); } catch (e) { /* Ignore */ }
   }
 
-  if (auth != null && (auth.serverPassword === config.password || config.password.length === 0) && typeof auth.username === "string" && usernameRegex.test(auth.username)) {
-    (<any>socket).username = auth.username;
+  if (authentify(auth)) {
+      (<any>socket).username = auth.username;
   }
 
   if ((<any>socket).username == null) {
@@ -18,4 +18,32 @@ export default function(socket: SocketIO.Socket, next: Function) {
     else { next(new Error("invalidUsername")); return; }
   }
   next();
+}
+
+function authentify(auth: any) {
+  if (auth == null) {
+    return false;
+  }
+
+  if (typeof auth.username !== "string" || !usernameRegex.test(auth.username)) {
+    return false;
+  }
+
+  if (verifyServerPassword(auth.serverPassword, config.password)) {
+    return true;
+  }
+
+  return false;
+}
+
+function verifyServerPassword(password: string, hash: string) {
+  if (config.password.length === 0) {
+    return true;
+  }
+
+  if (config.password === password) {
+    return true;
+  }
+
+  return false;
 }
