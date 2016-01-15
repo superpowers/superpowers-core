@@ -1,7 +1,9 @@
 import config from "./config";
 
-// NOTE: The regex must match the pattern and min/max lengths in client/src/login/index.jade
-let usernameRegex = /^[A-Za-z0-9_-]{3,20}$/;
+/* tslint:disable */
+let bcrypt = require("bcryptjs");
+/* tslin:enable */
+let usernameRegex = /^[A-Za-z0-9_]{3,20}$/;
 
 export default function(socket: SocketIO.Socket, next: Function) {
   let auth: any;
@@ -10,41 +12,35 @@ export default function(socket: SocketIO.Socket, next: Function) {
     try { auth = JSON.parse(authJSON); } catch (e) { /* Ignore */ }
   }
 
-  if (authentify(auth)) {
-      (<any>socket).username = auth.username;
-  }
-
-  if ((<any>socket).username == null) {
-    if (config.password.length > 0) { next(new Error("invalidCredentials")); return; }
-    else { next(new Error("invalidUsername")); return; }
-  }
-  next();
+  authentify(auth, socket, next);
+  return;
 }
 
-function authentify(auth: any) {
+function authentify(auth: any, socket: SocketIO.Socket, next: Function) {
   if (auth == null) {
-    return false;
+    next(new Error("invalidCredentials"));
+    return;
   }
 
   if (typeof auth.username !== "string" || !usernameRegex.test(auth.username)) {
-    return false;
+    next(new Error("invalidUsername"));
+    return;
   }
 
-  if (verifyServerPassword(auth.serverPassword, config.password)) {
-    return true;
-  }
-
-  return false;
+  verifyServerPassword(auth.serverPassword, config.password, socket, next);
+  return;
 }
 
-function verifyServerPassword(password: string, hash: string) {
+function verifyServerPassword(password: string, hash: string, socket: SocketIO.Socket, next : Function) {
   if (config.password.length === 0) {
-    return true;
+    next();
+    return;
   }
 
   if (config.password === password) {
-    return true;
+    bcrypt.compare(password, password, function(err : Error, res : boolean) {
+      console.log(res);
+    });
   }
-
-  return false;
+  next();
 }
