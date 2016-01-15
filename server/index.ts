@@ -1,170 +1,301 @@
 /// <reference path="index.d.ts" />
 
-import * as path from "path";
+import * as dummy_https from "https";
 import * as fs from "fs";
-import * as http from "http";
-import * as express from "express";
-import * as cookieParser from "cookie-parser";
-import * as socketio from "socket.io";
+import * as mkdirp from "mkdirp";
 
-import * as paths from "./paths";
-import config from "./config";
-import * as SupCore from "../SupCore";
-import loadSystems from "./loadSystems";
-import ProjectHub from "./ProjectHub";
+/* tslint:disable */
+let https: typeof dummy_https = require("follow-redirects").https;
+let unzip = require("unzip");
+/* tslint:enable */
 
-// Globals
-(<any>global).SupCore = SupCore;
+let systemIdRegex = /^[a-z0-9_-]+$/;
+let pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
 
-let { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
-SupCore.log(`Server v${version} starting...`);
+let systemFolderNamesById: { [id: string]: string } = {};
+let systemsPath = `${__dirname}/../systems`;
+try { fs.mkdirSync(systemsPath); } catch (err) { /* Ignore */ }
 
-function handle404(err: any, req: express.Request, res: express.Response, next: Function) {
-  if (err.status === 404) { res.status(404).end("File not found"); return; }
-  next();
-}
+for (let entry of fs.readdirSync(systemsPath)) {
+  if (!systemIdRegex.test(entry)) continue;
+  if (!fs.statSync(`${systemsPath}/${entry}`).isDirectory) continue;
 
-let hub: ProjectHub = null;
-
-process.on("uncaughtException", (err: Error) => {
-  if (hub != null && hub.loadingProjectFolderName != null) {
-    SupCore.log(`The server crashed while loading project "${hub.loadingProjectFolderName}".\n${(<any>err).stack}`);
-  } else {
-    SupCore.log(`The server crashed.\n${(<any>err).stack}`);
-  }
-  process.exit(1);
-});
-
-
-// Public version
-fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.password.length !== 0 }, null, 2));
-
-// Main HTTP server
-let mainApp = express();
-
-let languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
-languageIds.unshift("none");
-
-mainApp.use(cookieParser());
-mainApp.use((req, res, next) => {
-  if (req.cookies["supLanguage"] == null) {
-    let language = req.header("Accept-Language");
-    if (language != null) {
-      language = language.split(",")[0];
-      if (languageIds.indexOf(language) === -1 && language.indexOf("-") !== -1) {
-        language = language.split("-")[0];
-      }
-    }
-    if (languageIds.indexOf(language) === -1) language = "en";
-    res.cookie("supLanguage", language);
-  }
-
-  next();
-});
-
-function redirectIfNoAuth(req: express.Request, res: express.Response, next: Function) {
-  if (req.cookies["supServerAuth"] == null) {
-    res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl)}`);
-    return;
-  }
-
-  next();
-}
-
-mainApp.get("/", (req, res) => { res.redirect("/hub"); });
-mainApp.get("/hub", redirectIfNoAuth);
-mainApp.get("/hub", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "hub", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
-});
-mainApp.get("/project", redirectIfNoAuth);
-mainApp.get("/project", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "project", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
-});
-mainApp.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "login", paths.getLocalizedFilename("index.html", req.cookies["supLanguage"])));
-});
-
-mainApp.use("/", express.static(`${__dirname}/../public`));
-mainApp.use("/projects/:projectId/*", (req, res) => {
-  let projectPath = hub.serversById[req.params.projectId].projectPath;
-
-  res.sendFile(req.params[0], { root: `${projectPath}/public` }, (err) => {
-    if (req.params[0] === "icon.png") res.sendFile("/images/default-project-icon.png", { root: `${__dirname}/../public` });
-  });
-});
-
-let mainHttpServer = http.createServer(mainApp);
-mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
-  if (err.code === "EADDRINUSE") {
-    SupCore.log(`Could not start the server: another application is already listening on port ${config.mainPort}.`);
+  let systemId: string;
+  try {
+    let packageData = fs.readFileSync(`${systemsPath}/${entry}/package.json`, { encoding: "utf8" });
+    systemId = JSON.parse(packageData).superpowers.systemId;
+  } catch (err) {
+    console.error(`Could not load system id from systems/${entry}/package.json:`);
+    console.error(err.stack);
     process.exit(1);
-  } else throw(err);
-});
-
-let io = socketio(mainHttpServer, { transports: ["websocket"] });
-
-// Build HTTP server
-let buildApp = express();
-
-function redirectToHub(req: express.Request, res: express.Response) {
-  res.redirect(`http://${req.hostname}:${config.mainPort}/hub/`);
+  }
+  systemFolderNamesById[systemId] = entry;
 }
 
-buildApp.get("/", redirectToHub);
-buildApp.get("/systems/:systemId/SupCore.js", (req, res) => {
-  res.sendFile("SupCore.js", { root: `${__dirname}/../public` });
-});
+let command = process.argv[2];
 
-buildApp.use("/", express.static(`${__dirname}/../public`));
+switch (command) {
+  case "start":
+    /* tslint:disable */
+    require("./start").default();
+    /* tslint:enable */
+    break;
+  case "install": install(); break;
+  case "init": init(); break;
+  default:
+    if (command != null) console.error(`Unknown command: ${command}`);
+    console.log("Available commands: start, install, init");
+    process.exit(1);
+    break;
+}
 
-buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
-  let projectServer = hub.serversById[req.params.projectId];
-  if (projectServer == null) { res.status(404).end("No such project"); return; }
-  let buildId = req.params.buildId as string;
-  if (buildId === "latest") buildId = (projectServer.nextBuildId - 1).toString();
-  res.sendFile(path.join(projectServer.buildsPath, buildId, req.params[0]));
-});
+type Registry = { [sytemId: string]: { repository: string; plugins: { [name: string]: string } } };
+function getRegistry(callback: (err: Error, registry: Registry) => any) {
+  let registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers/master/registry.json";
+  let request = https.get(registryUrl, (res) => {
+    if (res.statusCode !== 200) {
+      callback(new Error(`Unexpected status code: ${res.statusCode}`), null);
+      return;
+    }
 
-let buildHttpServer = http.createServer(buildApp);
+    let content = "";
+    res.on("data", (chunk: string) => { content += chunk; });
+    res.on("end", () => {
+      let registry: Registry;
+      try { registry = JSON.parse(content); }
+      catch (err) {
+        callback(new Error(`Could not parse registry as JSON`), null);
+        return;
+      }
 
-loadSystems(mainApp, buildApp, () => {
-  mainApp.use(handle404);
-  buildApp.use(handle404);
+      callback(null, registry);
+    });
+  });
 
-  // Project hub
-  hub = new ProjectHub(io, (err: Error) => {
-    if (err != null) { SupCore.log(`Failed to start server:\n${(<any>err).stack}`); return; }
+  request.on("error", (err: Error) => {
+    callback(err, null);
+  });
+}
 
-    SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${paths.projects}.`);
+function install() {
+  getRegistry((err, registry) => {
+    if (err) {
+      console.error("Error while fetching registry:");
+      console.error(err.stack);
+      process.exit(1);
+    }
 
-    let hostname = (config.password.length === 0) ? "localhost" : "";
+    let pattern = process.argv[3];
+    if (pattern == null) {
+      console.log(`Available systems: ${Object.keys(registry).join(", ")}.`);
+      process.exit(0);
+    }
 
-    mainHttpServer.listen(config.mainPort, hostname, () => {
-      buildHttpServer.listen(config.buildPort, hostname, () => {
-        SupCore.log(`Main server started on port ${config.mainPort}, build server started on port ${config.buildPort}.`);
-        if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
+    let systemId: string;
+    let pluginName: string;
+
+    if (pattern.indexOf(":") === -1) {
+      systemId = pattern;
+    } else {
+      [ systemId, pluginName ] = pattern.split(":");
+    }
+
+    if (registry[systemId] == null) {
+      console.error(`System ${systemId} doesn't exist.`);
+      console.error(`Available systems: ${Object.keys(registry).join(", ")}.`);
+      process.exit(1);
+    }
+
+    if (systemFolderNamesById[systemId] != null) {
+      if (pluginName == null) {
+        console.error(`System ${systemId} is already installed.`);
+        console.error(`Available systems: ${Object.keys(registry).join(", ")}.`);
+        process.exit(1);
+      }
+
+      installPlugin(systemId, pluginName, registry[systemId].plugins[pluginName]);
+    } else {
+      if (pluginName != null) {
+        console.error(`System ${systemId} is not installed.`);
+        process.exit(1);
+      }
+
+      console.log(`Installing system ${systemId}...`);
+      installSystem(registry[systemId].repository);
+    }
+  });
+}
+
+function installSystem(repositoryURL: string) {
+  let repositoryPath = `${repositoryURL.replace("https://github.com", "/repos")}/releases/latest`;
+  let request = https.get({
+    hostname: "api.github.com",
+    path: repositoryPath,
+    headers: { "user-agent": "Superpowers" }
+  }, (res) => {
+    if (res.statusCode !== 200) {
+      console.error(`Couldn't get latest release from repository at ${repositoryURL}:`);
+      let err = new Error(`Unexpected status code: ${res.statusCode}`);
+      console.error(err.stack);
+      process.exit(1);
+    }
+
+    let content = "";
+    res.on("data", (chunk: string) => { content += chunk; });
+    res.on("end", () => {
+      let repositoryInfo = JSON.parse(content);
+      let downloadUrl = repositoryInfo.assets[0].browser_download_url;
+
+      https.get({
+        hostname: "github.com",
+        path: downloadUrl,
+        headers: { "user-agent": "Superpowers" }
+      }, (res) => {
+        if (res.statusCode !== 200) {
+          console.error("Couldn't download the system:");
+          let err = new Error(`Unexpected status code: ${res.statusCode}`);
+          console.error(err.stack);
+          process.exit(1);
+        }
+        res.pipe(unzip.Extract({ path: systemsPath }));
+        res.on("end", () => { console.log("System successfully installed."); });
       });
     });
   });
-});
 
-// Save on exit and handle crashes
-let isQuitting = false;
-
-function onExit() {
-  if (isQuitting) return;
-  isQuitting = true;
-  mainHttpServer.close();
-  buildHttpServer.close();
-
-  SupCore.log("Saving all projects...");
-
-  hub.saveAll((err: Error) => {
-    if (err != null) SupCore.log(`Error while exiting:\n${(<any>err).stack}`);
-    else SupCore.log("Exited cleanly.");
-    process.exit(0);
+  request.on("error", (err: Error) => {
+    console.error("Couldn't download the system");
+    console.error(err.stack);
+    process.exit(1);
   });
 }
 
-process.on("SIGINT", onExit);
-process.on("message", (msg: string) => { if (msg === "stop") onExit(); });
+function installPlugin(systemId: string, pluginName: string, repositoryURL: string) {
+  console.error("Plugin installation isn't supported yet.");
+  process.exit(1);
+}
+
+function init() {
+  let pattern = process.argv[3];
+  let systemId: string;
+  let pluginName: string;
+
+  if (pattern.indexOf(":") === -1) {
+    systemId = pattern;
+  } else {
+    [ systemId, pluginName ] = pattern.split(":");
+  }
+
+  if (!systemIdRegex.test(systemId)) {
+    console.error("Invalid system ID: only lowercase letters, numbers and dashes are allowed.");
+    process.exit(1);
+  }
+
+  if (pluginName != null && !pluginNameRegex.test(pluginName)) {
+    console.error("Invalid plugin name: only two sets of letters and numbers separated by a slash are allowed.");
+    process.exit(1);
+  }
+
+  let systemFolderName = systemFolderNamesById[systemId];
+
+  if (pluginName == null && systemFolderName != null) {
+    console.error(`You already have a system with the ID ${systemId} installed as systems/${systemFolderNamesById[systemId]}.`);
+    process.exit(1);
+  } else if (pluginName != null && systemFolderName == null) {
+    console.error(`You don't have a system with the ID ${systemId} installed.`);
+    process.exit(1);
+  }
+
+  if (systemFolderName == null) systemFolderName = systemId;
+
+  let systemStats: fs.Stats;
+  try { systemStats = fs.lstatSync(`${systemsPath}/${systemFolderName}`); } catch (err) { /* Ignore */ }
+
+  if (pluginName == null) {
+    if (systemStats != null) {
+      console.error(`systems/${systemFolderName} already exists.`);
+      process.exit(1);
+    }
+  } else {
+    if (systemStats == null) {
+      console.error(`systems/${systemFolderName} doesn't exist.`);
+      process.exit(1);
+    }
+
+    let pluginStats: fs.Stats;
+    try { pluginStats = fs.lstatSync(`${systemsPath}/${systemFolderName}/plugins/${pluginName}`); } catch (err) { /* Ignore */ }
+    if (pluginStats != null) {
+      console.error(`systems/${systemFolderName}/plugins/${pluginName} already exists.`);
+      process.exit(1);
+    }
+  }
+
+  getRegistry((err, registry) => {
+    let registrySystemEntry = registry[systemId];
+    if (pluginName == null && registrySystemEntry != null) {
+      console.error(`System ${systemId} already exists.`);
+      process.exit(1);
+    } else if (pluginName != null && registrySystemEntry != null && registrySystemEntry.plugins[pluginName] != null) {
+      console.error(`Plugin ${pluginName} on system ${systemId} already exists.`);
+      process.exit(1);
+    }
+
+    if (pluginName == null) initSystem(systemId);
+    else initPlugin(systemFolderName, systemId, pluginName);
+  });
+}
+
+function initSystem(systemId: string) {
+  let packageJSON = JSON.stringify({
+    name: `superpowers-${systemId}`,
+    description: "A system for Superpowers, the HTML5 app for real-time collaborative projects",
+    superpowers: {
+      systemId: systemId,
+      publishedPluginBundles: []
+    }
+  }, null, 2) + "\n";
+
+  let systemPath = `${systemsPath}/${systemId}`;
+  fs.mkdirSync(systemPath);
+  fs.writeFileSync(`${systemPath}/package.json`, packageJSON);
+
+  let localeJSON = JSON.stringify({
+    title: `${systemId}`,
+    description: `(Edit systems/${systemId}/public/locales/en/system.json to change the title and description)`
+  }, null, 2) + "\n";
+  mkdirp.sync(`${systemPath}/public/locales/en`);
+  fs.writeFileSync(`${systemPath}/public/locales/en/system.json`, localeJSON);
+
+  console.log(`A system named ${systemId} has been initialized.`);
+}
+
+function initPlugin(systemFolderName: string, systemId: string, pluginName: string) {
+  let pluginSlug = pluginName.replace(/\//g, "-").replace(/[A-Z]/g, (x) => `-${x.toLowerCase()}`);
+  let packageJSON = JSON.stringify({
+    name: `superpowers-${systemId}-${pluginSlug}-plugin`,
+    description: `Plugin for Superpowers ${systemId}`,
+    scripts: {
+      "build": "gulp --gulpfile=../../../../../scripts/pluginGulpfile.js --cwd=."
+    }
+  }, null, 2) + "\n";
+
+  let pluginPath = `${systemsPath}/${systemFolderName}/plugins/${pluginName}`;
+  mkdirp.sync(pluginPath);
+  fs.writeFileSync(`${pluginPath}/package.json`, packageJSON);
+
+  let tsconfigJSON = JSON.stringify({
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es5",
+      "noImplicitAny": true
+    }
+  }, null, 2) + "\n";
+  fs.writeFileSync(`${pluginPath}/tsconfig.json`, tsconfigJSON);
+
+  let indexDTS = `/// <reference path="../../../../../SupClient/SupClient.d.ts" />
+/// <reference path="../../../../../SupCore/SupCore.d.ts" />
+`;
+  fs.writeFileSync(`${pluginPath}/index.d.ts`, indexDTS);
+
+  console.log(`A plugin named ${pluginName} has been initialized in systems/${systemFolderName}.`);
+}

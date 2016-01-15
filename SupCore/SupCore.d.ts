@@ -10,6 +10,7 @@ declare namespace SupCore {
 
     interface AssetClass { new(id: string, pub: any, server?: ProjectServer): Base.Asset; }
     interface ResourceClass { new(id: string, pub: any, server?: ProjectServer): Base.Resource; }
+    type Schema = { [key: string]: Base.Rule };
 
     class Projects extends Base.ListById {
       static sort(a: ProjectManifestPub, b: ProjectManifestPub): number;
@@ -148,22 +149,22 @@ declare namespace SupCore {
 
       class Hash extends EventEmitter {
         pub: any;
-        schema: any;
+        schema: Schema;
 
-        constructor(pub: any, schema: any);
+        constructor(pub: any, schema: Schema);
         setProperty(path: string, value: number|string|boolean, callback: (err: string, value?: any) => any): void;
         client_setProperty(path: string, value: number|string|boolean): void;
       }
 
       class ListById extends EventEmitter {
         pub: any[];
-        schema: any;
+        schema: Schema;
         generateNextId: Function;
         nextId: number;
 
         byId: any;
 
-        constructor(pub: any[], schema: any, generateNextId?: Function);
+        constructor(pub: any[], schema: Schema, generateNextId?: Function);
         add(item: any, index: number, callback: (err: string, index?: number) => any): void;
         client_add(item: any, index: number): void;
         move(id: string, index: number, callback: (err: string, index?: number) => any): void;
@@ -182,13 +183,13 @@ declare namespace SupCore {
       }
       class TreeById extends EventEmitter {
         pub: TreeNode[];
-        schema: any;
+        schema: Schema;
         nextId: number;
 
         byId: { [key: string]: any };
         parentNodesById: { [key: string]: any };
 
-        constructor(pub: TreeNode[], schema: any, nextId?: number);
+        constructor(pub: TreeNode[], schema: Schema, nextId?: number);
         walk(callback: (node: TreeNode, parentNode?: TreeNode) => any): void;
         walkNode(node: TreeNode, parentNode: TreeNode, callback: (node: TreeNode, parentNode?: TreeNode) => any): void;
         getPathFromId(id: string): string;
@@ -216,7 +217,6 @@ declare namespace SupCore {
         releaseAll(id: string): void;
       }
 
-      interface Schema { [key: string]: Base.Rule; }
       class Asset extends Hash {
         id: string;
         server: ProjectServer;

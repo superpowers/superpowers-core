@@ -3,7 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 export default class Room extends SupData.Base.Hash {
-  static schema = {
+  static schema: SupCore.Data.Schema = {
     history: {
       type: "array",
       items: {

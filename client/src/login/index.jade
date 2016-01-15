@@ -26,7 +26,8 @@ html
         tr
           th= t("login:username")
           td
-            input.username(type="text",placeholder="Your username",spellcheck="false",pattern="[A-Za-z0-9_]{3,20}",title="a-z,A-Z,0-9,_")
+            // NOTE: The pattern and min/max lengths must match the regex in server/authenticate.ts
+            input.username(type="text",placeholder="Your username",spellcheck="false",minlength="3",maxlength="20",pattern="[A-Za-z0-9_-]+",title=t("login:usernamePatternDescription"))
 
       .buttons
         button.log-in= t("login:logIn")

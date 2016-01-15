@@ -5,8 +5,9 @@ import * as fs from "fs";
 import * as mkdirp from "mkdirp";
 
 export default class Asset extends Hash {
-  constructor(public id: string, pub: any, schema: any, public server: ProjectServer) {
+  constructor(public id: string, pub: any, schema: SupCore.Data.Schema, public server: ProjectServer) {
     super(pub, schema);
+    this.setMaxListeners(Infinity);
     if (this.server == null) this.setup();
   }
 

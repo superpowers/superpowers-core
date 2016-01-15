@@ -53,9 +53,12 @@ export default class ProjectServer {
         if (this.data.manifest.migratedFromFormatVersion != null) this.data.manifest.emit("change");
 
         this.system = SupCore.systems[this.data.manifest.pub.systemId];
-
-        this.buildsPath = path.join(paths.builds, this.data.manifest.pub.id);
-        callback(null);
+        if (this.system == null) {
+          callback(new Error(`The system ${this.data.manifest.pub.systemId} is not installed.`));
+        } else {
+          this.buildsPath = path.join(paths.builds, this.data.manifest.pub.id);
+          callback(null);
+        }
       };
 
       fs.readFile(path.join(this.projectPath, "manifest.json"), { encoding: "utf8" }, (err, manifestJSON) => {

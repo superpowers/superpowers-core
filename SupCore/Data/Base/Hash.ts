@@ -2,7 +2,7 @@ import * as base from "./index";
 import { EventEmitter } from "events";
 
 export default class Hash extends EventEmitter {
-  constructor(public pub: any, public schema: any) {
+  constructor(public pub: any, public schema: SupCore.Data.Schema) {
     super();
   }
 

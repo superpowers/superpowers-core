@@ -12,7 +12,7 @@ interface EntryNode {
 }
 
 export default class Entries extends SupData.Base.TreeById {
-  static schema = {
+  static schema: SupCore.Data.Schema = {
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     type: { type: "string?" },
     badges: { type: "array?" },

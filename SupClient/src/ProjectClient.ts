@@ -99,6 +99,10 @@ export default class ProjectClient {
     }
   }
 
+  editAsset(assetId: string, command: string, ...args: any[]) {
+    this.socket.emit("edit:assets", assetId, command, ...args);
+  }
+
   subResource(resourceId: string, subscriber: ResourceSubscriber) {
     let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) {
@@ -129,6 +133,11 @@ export default class ProjectClient {
       this.socket.emit("unsub", "resources", resourceId);
     }
   }
+
+  editResource(resourceId: string, command: string, ...args: any[]) {
+    this.socket.emit("edit:assets", resourceId, command, ...args);
+  }
+
 
   private onAssetReceived = (assetId: string, assetType: string, err: string, assetData: any) => {
     // FIXME: The asset was probably trashed in the meantime, handle that

@@ -1,6 +1,7 @@
 import config from "./config";
 
-let usernameRegex = /^[A-Za-z0-9_]{3,20}$/;
+// NOTE: The regex must match the pattern and min/max lengths in client/src/login/index.jade
+let usernameRegex = /^[A-Za-z0-9_-]{3,20}$/;
 
 export default function(socket: SocketIO.Socket, next: Function) {
   let auth: any;

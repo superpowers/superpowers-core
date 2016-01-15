@@ -1,7 +1,7 @@
 {
   "name": "superpowers",
   "description": "Superpowers, the HTML5 2D+3D game maker",
-  "version": "0.18.1",
+  "version": "0.19.0",
   "license": "ISC",
   "main": "./server/index.js",
   "repository": {
@@ -12,7 +12,7 @@
     "build": "node scripts/build.js"
   },
   "superpowers": {
-    "electronVersion": "0.35.4",
+    "electronVersion": "0.36.3",
     "appApiVersion": 1
   },
   "devDependencies": {
@@ -37,6 +37,7 @@
     "cson-parser": "^1.0.8",
     "dnd-tree-view": "^2.3.2",
     "express": "^4.11.2",
+    "follow-redirects": "0.0.7",
     "fuzzy": "^0.1.0",
     "js-cookie": "^2.0.4",
     "lodash": "^3.2.0",
@@ -50,6 +51,7 @@
     "tv4": "^1.1.9",
     "typedarray-to-buffer": "^3.0.1",
     "typescript": "1.6.2",
+    "unzip": "^0.1.11",
     "yargs": "^3.6.0",
     "bcryptjs": "2.3.0"
   }
