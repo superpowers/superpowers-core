@@ -50,6 +50,7 @@
     "tv4": "^1.1.9",
     "typedarray-to-buffer": "^3.0.1",
     "typescript": "1.6.2",
-    "yargs": "^3.6.0"
+    "yargs": "^3.6.0",
+    "bcryptjs": "2.3.0"
   }
 }
