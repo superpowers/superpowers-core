@@ -19,14 +19,14 @@ export default class SelectDialog extends BaseDialog {
     if (options == null) options = {};
 
     // Label
-    let labelElt = document.createElement("label");
+    const labelElt = document.createElement("label");
     labelElt.textContent = label;
     this.formElt.appendChild(labelElt);
 
     // Select
     this.selectElt = document.createElement("select");
-    for (let choiceName in choices) {
-      let optionElt = document.createElement("option");
+    for (const choiceName in choices) {
+      const optionElt = document.createElement("option");
       optionElt.value = choiceName;
       optionElt.textContent = choices[choiceName];
       this.selectElt.appendChild(optionElt);
@@ -41,11 +41,11 @@ export default class SelectDialog extends BaseDialog {
     this.selectElt.addEventListener("dblclick", () => { this.submit(); });
 
     // Buttons
-    let buttonsElt = document.createElement("div");
+    const buttonsElt = document.createElement("div");
     buttonsElt.className = "buttons";
     this.formElt.appendChild(buttonsElt);
 
-    let cancelButtonElt = document.createElement("button");
+    const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
     cancelButtonElt.textContent = i18n.t("common:actions.cancel");
     cancelButtonElt.className = "cancel-button";

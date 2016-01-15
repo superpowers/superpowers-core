@@ -3,8 +3,8 @@ import "./settings";
 import "./community";
 
 // Panes
-let paneButtonsContainer = document.querySelector(".pane-buttons") as HTMLDivElement;
-let panesContainer = document.querySelector(".panes") as HTMLDivElement;
+const paneButtonsContainer = document.querySelector(".pane-buttons") as HTMLDivElement;
+const panesContainer = document.querySelector(".panes") as HTMLDivElement;
 
 for (let i = 0; i < paneButtonsContainer.children.length; i++) {
   ((button: HTMLButtonElement, i: number) => {

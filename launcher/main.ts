@@ -9,7 +9,7 @@ import * as path from "path";
 import * as http from "http";
 import * as mkdirp from "mkdirp";
 
-let { superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
+const { superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -34,7 +34,7 @@ electron.app.on("ready", function() {
 });
 
 function setupOSXAppMenu() {
-  let template: GitHubElectron.MenuItemOptions[] = [
+  const template: GitHubElectron.MenuItemOptions[] = [
     {
       label: "Edit",
       submenu: [
@@ -67,7 +67,7 @@ function setupOSXAppMenu() {
     },
   ];
 
-  let appName = electron.app.getName();
+  const appName = electron.app.getName();
   template.unshift({
       label: appName,
       role: null,
@@ -84,14 +84,14 @@ function setupOSXAppMenu() {
     ]
   });
 
-  let menu = electron.Menu.buildFromTemplate(template);
+  const menu = electron.Menu.buildFromTemplate(template);
   electron.Menu.setApplicationMenu(menu);
 }
 
 interface OpenServer { window: GitHubElectron.BrowserWindow; address: string; closed: boolean; }
-let openServersById: { [id: string]: OpenServer } = {};
+const openServersById: { [id: string]: OpenServer } = {};
 electron.ipcMain.on("new-server-window", (event: Event, address: string) => {
-  let openServer = {
+  const openServer = {
     window: new electron.BrowserWindow({
       title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
       width: 1000, height: 600,
@@ -110,7 +110,7 @@ electron.ipcMain.on("new-server-window", (event: Event, address: string) => {
     delete openServersById[openServer.window.id];
   });
 
-  let status = `Connecting to ${openServer.address}...`;
+  const status = `Connecting to ${openServer.address}...`;
   openServer.window.loadURL(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
 
   openServer.window.webContents.addListener("did-finish-load", onServerWindowLoaded);
@@ -123,9 +123,7 @@ electron.ipcMain.on("new-server-window", (event: Event, address: string) => {
 function connect(openServer: OpenServer) {
   http.get(`http://${openServer.address}/superpowers.json`, (res) => {
     let content = "";
-    res.on("data", (chunk: string) => {
-      content += chunk;
-    });
+    res.on("data", (chunk: string) => { content += chunk; });
 
     res.on("end", () => {
       let serverInfo: { version: string; appApiVersion: number; } = null;
@@ -177,16 +175,16 @@ function connect(openServer: OpenServer) {
   }
 }
 
-let standaloneWindowsById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
+const standaloneWindowsById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
 electron.ipcMain.on("new-standalone-window", (event: Event, address: string, title: string) => {
-  let standaloneWindow = new electron.BrowserWindow({
+  const standaloneWindow = new electron.BrowserWindow({
     title, icon: `${__dirname}/public/images/icon.png`,
     width: 1000, height: 600,
     minWidth: 800, minHeight: 480,
     autoHideMenuBar: true
   });
 
-  let windowId = standaloneWindow.id;
+  const windowId = standaloneWindow.id;
   standaloneWindowsById[windowId] = standaloneWindow;
 
   standaloneWindow.on("closed", () => { delete standaloneWindowsById[windowId]; });
@@ -199,7 +197,7 @@ electron.ipcMain.on("choose-export-folder", (event: { sender: any }) => {
   electron.dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {
     if (directory == null) return;
 
-    let outputFolder = directory[0];
+    const outputFolder = directory[0];
     let isFolderEmpty = false;
     try { isFolderEmpty = fs.readdirSync(outputFolder).length === 0; }
     catch (e) { event.sender.send("export-folder-failed", `Error while checking if folder was empty: ${e.message}`); return; }
@@ -215,7 +213,7 @@ interface ExportData {
   outputFolder: string; files: string[];
 }
 electron.ipcMain.on("export", (event: { sender: any }, data: ExportData) => {
-  let exportWindow = new electron.BrowserWindow({
+  const exportWindow = new electron.BrowserWindow({
     title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
     width: 1000, height: 600,
     minWidth: 800, minHeight: 480
@@ -223,15 +221,15 @@ electron.ipcMain.on("export", (event: { sender: any }, data: ExportData) => {
   exportWindow.setMenuBarVisibility(false);
   exportWindow.loadURL(`${data.address}:${data.mainPort}/build.html`);
 
-  let doExport = () => {
+  const doExport = () => {
     exportWindow.webContents.removeListener("did-finish-load", doExport);
     exportWindow.webContents.send("setText", { title: "Superpowers — Exporting...", text: "Exporting..." });
 
     exportWindow.setProgressBar(0);
     let progress = 0;
-    let progressMax = data.files.length;
-    let buildPath = `/builds/${data.projectId}/${data.buildId}`;
-    let systemsPath = "/systems/";
+    const progressMax = data.files.length;
+    const buildPath = `/builds/${data.projectId}/${data.buildId}`;
+    const systemsPath = "/systems/";
 
     async.eachLimit(data.files, 10, (file: string, cb: (err: Error) => any) => {
 
@@ -251,12 +249,12 @@ electron.ipcMain.on("export", (event: { sender: any }, data: ExportData) => {
       }
       outputFilename = outputFilename.replace(/\//g, path.sep);
 
-      let outputPath = `${data.outputFolder}${outputFilename}`;
+      const outputPath = `${data.outputFolder}${outputFilename}`;
       exportWindow.webContents.send("setText", { text: outputPath });
 
       http.get(file, (response) => {
         mkdirp(path.dirname(outputPath), (err: Error) => {
-          let localFile = fs.createWriteStream(outputPath);
+          const localFile = fs.createWriteStream(outputPath);
           localFile.on("finish", () => {
             progress++;
             exportWindow.setProgressBar(progress / progressMax);

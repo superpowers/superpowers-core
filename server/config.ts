@@ -7,7 +7,7 @@ import configDefaults from "./configDefaults";
 export default configDefaults;
 
 if (fs.existsSync(paths.config)) {
-  let config = JSON.parse(fs.readFileSync(paths.config, { encoding: "utf8" }));
+  const config = JSON.parse(fs.readFileSync(paths.config, { encoding: "utf8" }));
   schemas.validate(config, "config");
 
   if (config.port != null) {

@@ -1,6 +1,6 @@
 export {};
 
-let electron: GitHubElectron.Electron = nodeRequire("electron");
+const electron: GitHubElectron.Electron = nodeRequire("electron");
 
 document.querySelector(".panes .community").addEventListener("click", (event) => {
   if ((event.target as Element).tagName !== "A") return;

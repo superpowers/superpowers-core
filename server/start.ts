@@ -15,7 +15,7 @@ export default function start() {
   // Globals
   (global as any).SupCore = SupCore;
 
-  let { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
+  const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
   SupCore.log(`Using data from ${paths.userData}.`);
   SupCore.log(`Server v${version} starting...`);
 
@@ -40,9 +40,9 @@ export default function start() {
   fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.password.length !== 0 }, null, 2));
 
   // Main HTTP server
-  let mainApp = express();
+  const mainApp = express();
 
-  let languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
+  const languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
   languageIds.unshift("none");
 
   mainApp.use(cookieParser());
@@ -86,14 +86,14 @@ export default function start() {
 
   mainApp.use("/", express.static(`${__dirname}/../public`));
   mainApp.use("/projects/:projectId/*", (req, res) => {
-    let projectPath = hub.serversById[req.params.projectId].projectPath;
+    const projectPath = hub.serversById[req.params.projectId].projectPath;
 
     res.sendFile(req.params[0], { root: `${projectPath}/public` }, (err) => {
       if (req.params[0] === "icon.png") res.sendFile("/images/default-project-icon.png", { root: `${__dirname}/../public` });
     });
   });
 
-  let mainHttpServer = http.createServer(mainApp);
+  const mainHttpServer = http.createServer(mainApp);
   mainHttpServer.on("error", (err: NodeJS.ErrnoException) => {
     if (err.code === "EADDRINUSE") {
       SupCore.log(`Could not start the server: another application is already listening on port ${config.mainPort}.`);
@@ -101,10 +101,10 @@ export default function start() {
     } else throw(err);
   });
 
-  let io = socketio(mainHttpServer, { transports: ["websocket"] });
+  const io = socketio(mainHttpServer, { transports: ["websocket"] });
 
   // Build HTTP server
-  let buildApp = express();
+  const buildApp = express();
 
   function redirectToHub(req: express.Request, res: express.Response) {
     res.redirect(`http://${req.hostname}:${config.mainPort}/hub/`);
@@ -118,14 +118,14 @@ export default function start() {
   buildApp.use("/", express.static(`${__dirname}/../public`));
 
   buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
-    let projectServer = hub.serversById[req.params.projectId];
+    const projectServer = hub.serversById[req.params.projectId];
     if (projectServer == null) { res.status(404).end("No such project"); return; }
     let buildId = req.params.buildId as string;
     if (buildId === "latest") buildId = (projectServer.nextBuildId - 1).toString();
     res.sendFile(path.join(projectServer.buildsPath, buildId, req.params[0]));
   });
 
-  let buildHttpServer = http.createServer(buildApp);
+  const buildHttpServer = http.createServer(buildApp);
 
   loadSystems(mainApp, buildApp, () => {
     mainApp.use(handle404);
@@ -137,7 +137,7 @@ export default function start() {
 
       SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${paths.projects}.`);
 
-      let hostname = (config.password.length === 0) ? "localhost" : "";
+      const hostname = (config.password.length === 0) ? "localhost" : "";
 
       mainHttpServer.listen(config.mainPort, hostname, () => {
         buildHttpServer.listen(config.buildPort, hostname, () => {

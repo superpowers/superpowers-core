@@ -1,4 +1,4 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-declare let nodeRequire: (module: string) => any;
-declare let nodeProcess: any;
+declare const nodeRequire: (module: string) => any;
+declare const nodeProcess: any;

@@ -4,14 +4,14 @@
 declare namespace SupClient {
   export const namePattern: string;
 
-  export let isApp: boolean;
-  export let query: { project: string, asset: string; [key: string]: string; };
-  export let cookies: Cookies.CookiesStatic;
+  export const isApp: boolean;
+  export const query: { project: string, asset: string; [key: string]: string; };
+  export const cookies: Cookies.CookiesStatic;
 
   export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => any): void;
 
   export let activePluginPath: string;
-  export let plugins: { [context: string]: { [name: string]: { path: string; content: any; } } };
+  export const plugins: { [context: string]: { [name: string]: { path: string; content: any; } } };
   export function registerPlugin(context: string, name: string, plugin: any): void;
 
   export function connect(projectId: string, options?: { reconnection: boolean; }): SocketIOClient.Socket;
@@ -107,7 +107,7 @@ declare namespace SupClient {
   }
 
   namespace i18n {
-    export let languageIds: string[];
+    export const languageIds: string[];
 
     export interface File {
       root: string;

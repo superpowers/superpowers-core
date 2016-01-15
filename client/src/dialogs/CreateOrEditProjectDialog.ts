@@ -46,12 +46,12 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     this.existingProject = options.existingProject;
 
     // Prompt name
-    let labelElt = document.createElement("label");
+    const labelElt = document.createElement("label");
     if (this.existingProject == null) labelElt.textContent = SupClient.i18n.t("hub:newProject.prompt");
     else labelElt.textContent = SupClient.i18n.t("hub:editDetails.prompt");
     this.formElt.appendChild(labelElt);
 
-    let containerElt = document.createElement("div");
+    const containerElt = document.createElement("div");
     containerElt.className = "group";
     containerElt.style.display = "flex";
     this.formElt.appendChild(containerElt);
@@ -63,7 +63,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     this.iconInputElt.accept = "image/png";
     containerElt.appendChild(this.iconInputElt);
 
-    let iconButtonElt = document.createElement("button");
+    const iconButtonElt = document.createElement("button");
     iconButtonElt.type = "button";
     iconButtonElt.style.cursor = "pointer";
     iconButtonElt.style.border = "0";
@@ -89,7 +89,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     iconButtonElt.appendChild(this.iconElt);
     this.iconInputElt.addEventListener("change", this.onIconChange);
 
-    let textContainerElt = document.createElement("div");
+    const textContainerElt = document.createElement("div");
     textContainerElt.style.flex = "1";
     textContainerElt.style.display = "flex";
     textContainerElt.style.flexFlow = "column";
@@ -113,27 +113,27 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     textContainerElt.appendChild(this.descriptionInputElt);
 
     // Down
-    let downElt = document.createElement("div");
+    const downElt = document.createElement("div");
     downElt.style.display = "flex";
     downElt.style.alignItems = "center";
 
     if (options.existingProject == null) {
       // Project type
       this.projectTypeSelectElt = document.createElement("select");
-      for (let systemId in systemsById) {
-        let systemInfo = systemsById[systemId];
+      for (const systemId in systemsById) {
+        const systemInfo = systemsById[systemId];
 
-        let optGroupElt = document.createElement("optgroup");
+        const optGroupElt = document.createElement("optgroup");
         optGroupElt.label = SupClient.i18n.t(`system-${systemId}:title`);
         this.projectTypeSelectElt.appendChild(optGroupElt);
 
-        let emptyOptionElt = document.createElement("option");
+        const emptyOptionElt = document.createElement("option");
         emptyOptionElt.value = `${systemId}.empty`;
         emptyOptionElt.textContent = SupClient.i18n.t("hub:newProject.emptyProject.title");
         optGroupElt.appendChild(emptyOptionElt);
 
-        for (let templateName of systemInfo) {
-          let optionElt = document.createElement("option");
+        for (const templateName of systemInfo) {
+          const optionElt = document.createElement("option");
           optionElt.value = `${systemId}.${templateName}`;
           optionElt.textContent = SupClient.i18n.t(`${systemId}-${templateName}:title`);
           optGroupElt.appendChild(optionElt);
@@ -142,7 +142,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       this.formElt.appendChild(this.projectTypeSelectElt);
 
       // Template description
-      let descriptionContainerElt = document.createElement("div");
+      const descriptionContainerElt = document.createElement("div");
       descriptionContainerElt.style.backgroundColor = "#eee";
       descriptionContainerElt.style.border = "1px solid #ccc";
       descriptionContainerElt.style.padding = "0.5em";
@@ -168,7 +168,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       this.openCheckboxElt.style.margin = "0 0.5em 0 0";
       downElt.appendChild(this.openCheckboxElt);
 
-      let openLabelElt = document.createElement("label");
+      const openLabelElt = document.createElement("label");
       openLabelElt.textContent = SupClient.i18n.t("hub:newProject.autoOpen");
       openLabelElt.setAttribute("for", "auto-open-checkbox");
       openLabelElt.style.flex = "1";
@@ -179,12 +179,12 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     this.formElt.appendChild(downElt);
 
     // Buttons
-    let buttonsElt = document.createElement("div");
+    const buttonsElt = document.createElement("div");
     if (options.existingProject != null) buttonsElt.style.flex = "1";
     buttonsElt.className = "buttons";
     downElt.appendChild(buttonsElt);
 
-    let cancelButtonElt = document.createElement("button");
+    const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
     cancelButtonElt.textContent = SupClient.i18n.t("common:actions.cancel");
     cancelButtonElt.className = "cancel-button";
@@ -222,7 +222,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     let templateName: string = null;
     if (this.projectTypeSelectElt != null) [ systemId, templateName ] = this.projectTypeSelectElt.value.split(".");
 
-    let project = {
+    const project = {
       name: this.nameInputElt.value,
       description: this.descriptionInputElt.value,
       systemId,
@@ -246,7 +246,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       else this.iconElt.src = `/projects/${this.existingProject.id}/icon.png`;
     } else {
       this.iconFile = this.iconInputElt.files[0];
-      let reader = new FileReader();
+      const reader = new FileReader();
       reader.addEventListener("load", (event) => { this.iconElt.src = (event.target as any).result; });
       reader.readAsDataURL(this.iconFile);
     }
@@ -261,21 +261,21 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
 
   private onProjectTypeChange = () => {
     if (this.projectType != null) {
-      let path = `${this.projectType.systemId}.${this.projectType.templateName}`;
-      let oldOptionElt = this.projectTypeSelectElt.querySelector(`option[value="${path}"]`);
-      let oldTemplate = this.getTemplate(this.projectType.systemId, this.projectType.templateName);
+      const path = `${this.projectType.systemId}.${this.projectType.templateName}`;
+      const oldOptionElt = this.projectTypeSelectElt.querySelector(`option[value="${path}"]`);
+      const oldTemplate = this.getTemplate(this.projectType.systemId, this.projectType.templateName);
       oldOptionElt.textContent =  oldTemplate.title;
     }
 
-    let [ systemId, templateName ] = this.projectTypeSelectElt.value.split(".");
+    const [ systemId, templateName ] = this.projectTypeSelectElt.value.split(".");
     this.projectType = { systemId, templateName };
 
-    let template = this.getTemplate(systemId, templateName);
-    let systemTitle = SupClient.i18n.t(`system-${systemId}:title`);
+    const template = this.getTemplate(systemId, templateName);
+    const systemTitle = SupClient.i18n.t(`system-${systemId}:title`);
     this.projectTypeSelectElt.querySelector("option:checked").textContent = `${systemTitle} — ${template.title}`;
     this.templateDescriptionElt.textContent = template.description;
 
-    let systemDescription = SupClient.i18n.t(`system-${systemId}:description`);
+    const systemDescription = SupClient.i18n.t(`system-${systemId}:description`);
     this.systemDescriptionElt.textContent = systemDescription;
 
     if (systemDescription.length === 0 && template.description.length === 0) {
@@ -284,16 +284,16 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
   };
 
   private getTemplate(systemId: string, templateName: string) {
-    let title: string;
-    let description: string;
     if (templateName !== "empty") {
-      title = SupClient.i18n.t(`${systemId}-${templateName}:title`);
-      description = SupClient.i18n.t(`${systemId}-${templateName}:description`);
-    } else {
-      title = SupClient.i18n.t("hub:newProject.emptyProject.title");
-      description = SupClient.i18n.t("hub:newProject.emptyProject.description");
+      return {
+        title: SupClient.i18n.t(`${systemId}-${templateName}:title`),
+        description: SupClient.i18n.t(`${systemId}-${templateName}:description`)
+      };
     }
 
-    return { title, description };
+    return {
+      title: SupClient.i18n.t("hub:newProject.emptyProject.title"),
+      description: SupClient.i18n.t("hub:newProject.emptyProject.description")
+    };
   }
 }

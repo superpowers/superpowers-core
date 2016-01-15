@@ -1,7 +1,7 @@
 import * as tv4 from "tv4";
 
 // Server config
-let config = {
+const config = {
   type: "object",
   properties: {
     // Deprecated, use mainPort instead
@@ -14,7 +14,7 @@ let config = {
 };
 
 // Project manifest
-let projectManifest = {
+const projectManifest = {
   type: "object",
   properties: {
     id: { type: "string", minLength: 4, maxLength: 4 },
@@ -28,7 +28,7 @@ let projectManifest = {
 };
 
 // Project entries
-let projectEntry = {
+const projectEntry = {
   type: "object",
   properties: {
     // IDs used to be integers but are now serialized as strings
@@ -43,17 +43,17 @@ let projectEntry = {
   required: [ "id", "name" ]
 };
 
-let projectEntries = {
+const projectEntries = {
   definitions: { projectEntry },
   type: "array",
   items: { $ref: "#/definitions/projectEntry" }
 };
 
-let schemas: { [name: string]: any } = { config, projectManifest, projectEntries };
+const schemas: { [name: string]: any } = { config, projectManifest, projectEntries };
 
 function validate(obj: any, schemaName: string) {
-  let schema = schemas[schemaName];
-  let result = tv4.validateResult(obj, schema);
+  const schema = schemas[schemaName];
+  const result = tv4.validateResult(obj, schema);
 
   if (!result.valid) {
     throw new Error(`${result.error.dataPath} (${result.error.schemaPath}): ${result.error.message}`);

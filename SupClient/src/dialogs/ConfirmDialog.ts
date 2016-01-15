@@ -5,22 +5,22 @@ export default class ConfirmDialog extends BaseDialog {
   constructor(label: string, validationLabel: string, private callback: (confirmed: boolean) => any) {
     super();
 
-    let labelElt = document.createElement("label");
+    const labelElt = document.createElement("label");
     labelElt.textContent = label;
     this.formElt.appendChild(labelElt);
 
     // Buttons
-    let buttonsElt = document.createElement("div");
+    const buttonsElt = document.createElement("div");
     buttonsElt.className = "buttons";
     this.formElt.appendChild(buttonsElt);
 
-    let cancelButtonElt = document.createElement("button");
+    const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
     cancelButtonElt.textContent = i18n.t("common:actions.cancel");
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
-    let validateButtonElt = document.createElement("button");
+    const validateButtonElt = document.createElement("button");
     validateButtonElt.textContent = validationLabel;
     validateButtonElt.className = "validate-button";
 

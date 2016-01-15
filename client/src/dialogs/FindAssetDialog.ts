@@ -3,7 +3,7 @@
 import * as fuzzy from "fuzzy";
 
 /* tslint:disable */
-let TreeView = require("dnd-tree-view");
+const TreeView = require("dnd-tree-view");
 /* tslint:enable */
 
 export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
@@ -26,7 +26,7 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
     this.formElt.appendChild(this.searchElt);
     this.searchElt.addEventListener("input", this.onSearchInput);
 
-    let treeViewContainer = document.createElement("div");
+    const treeViewContainer = document.createElement("div");
     treeViewContainer.className = "assets-tree-view";
     this.formElt.appendChild(treeViewContainer);
 
@@ -36,12 +36,12 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
     this.entries.walk((node: SupCore.Data.EntryNode) => {
       if (node.type == null) return;
 
-      let path = this.entries.getPathFromId(node.id);
+      const path = this.entries.getPathFromId(node.id);
       this.entriesByPath[path] = node;
       this.pathsList.push(path);
       this.pathsWithoutSlashesList.push(path.replace(/\//g, " "));
 
-      let liElt = this.createEntryElement(node);
+      const liElt = this.createEntryElement(node);
       this.entryElts.push(liElt);
       this.treeView.append(liElt, "item");
     });
@@ -53,15 +53,15 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
   }
 
   private createEntryElement(entry: SupCore.Data.EntryNode) {
-    let liElt = document.createElement("li");
+    const liElt = document.createElement("li");
     liElt.dataset["id"] = entry.id;
 
-    let iconElt = document.createElement("img");
+    const iconElt = document.createElement("img");
     iconElt.draggable = false;
     iconElt.src = `/systems/${SupCore.system.id}/plugins/${this.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     liElt.appendChild(iconElt);
 
-    let nameSpan = document.createElement("span");
+    const nameSpan = document.createElement("span");
     nameSpan.className = "name";
     nameSpan.textContent = this.entries.getPathFromId(entry.id);
     liElt.appendChild(nameSpan);
@@ -71,7 +71,7 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
 
   private onSearchInput = (event: UIEvent) => {
     let results = fuzzy.filter(this.searchElt.value, this.pathsList);
-    let resultsWithoutSlashes = fuzzy.filter(this.searchElt.value, this.pathsWithoutSlashesList);
+    const resultsWithoutSlashes = fuzzy.filter(this.searchElt.value, this.pathsWithoutSlashesList);
     results = results.concat(resultsWithoutSlashes);
     results.sort((a, b) => b.score - a.score);
 
@@ -79,8 +79,8 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
     this.treeView.treeRoot.innerHTML = "";
     if (results.length === 0) return;
 
-    for (let result of results) {
-      let liElt = this.entryElts[result.index];
+    for (const result of results) {
+      const liElt = this.entryElts[result.index];
       this.treeView.append(liElt, "item");
     }
 

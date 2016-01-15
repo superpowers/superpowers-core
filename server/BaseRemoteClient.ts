@@ -28,8 +28,8 @@ export default class BaseRemoteClient {
   */
 
   private onDisconnect = () => {
-    for (let subscription of this.subscriptions) {
-      let [ , endpoint, id ] = subscription.split(":");
+    for (const subscription of this.subscriptions) {
+      const [ , endpoint, id ] = subscription.split(":");
       if (id == null) continue;
 
       (this.server.data[endpoint] as SupCore.Data.Base.Dictionary).release(id, this);
@@ -39,10 +39,10 @@ export default class BaseRemoteClient {
   };
 
   private onSubscribe = (endpoint: string, id: string, callback: (err: string, pubData: any) => any) => {
-    let data = this.server.data[endpoint];
+    const data = this.server.data[endpoint];
     if (data == null) { callback("No such endpoint", null); return; }
 
-    let roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
+    const roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
 
     if (this.subscriptions.indexOf(roomName) !== -1) { callback(`You're already subscribed to ${id}`, null); return; }
 
@@ -65,12 +65,12 @@ export default class BaseRemoteClient {
   };
 
   private onUnsubscribe = (endpoint: string, id: string) => {
-    let data = this.server.data[endpoint];
+    const data = this.server.data[endpoint];
     if (data == null) return;
 
-    let roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
+    const roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
 
-    let index = this.subscriptions.indexOf(roomName);
+    const index = this.subscriptions.indexOf(roomName);
      if (index === -1) return;
 
     if (id != null) { (data as SupCore.Data.Base.Dictionary).release(id, this); }

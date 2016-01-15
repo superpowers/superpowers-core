@@ -24,7 +24,7 @@ export default class PromptDialog extends BaseDialog {
 
     if (options == null) options = {};
 
-    let labelElt = document.createElement("label");
+    const labelElt = document.createElement("label");
     labelElt.textContent = label;
     this.formElt.appendChild(labelElt);
 
@@ -38,11 +38,11 @@ export default class PromptDialog extends BaseDialog {
     this.formElt.appendChild(this.inputElt);
 
     // Buttons
-    let buttonsElt = document.createElement("div");
+    const buttonsElt = document.createElement("div");
     buttonsElt.className = "buttons";
     this.formElt.appendChild(buttonsElt);
 
-    let cancelButtonElt = document.createElement("button");
+    const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
     cancelButtonElt.textContent = (options.cancelLabel != null) ? options.cancelLabel : i18n.t("common:actions.cancel");
     cancelButtonElt.className = "cancel-button";

@@ -4,12 +4,12 @@ export default class InfoDialog extends BaseDialog {
   constructor(label: string, validationLabel: string, private callback?: () => any) {
     super();
 
-    let labelElt = document.createElement("label");
+    const labelElt = document.createElement("label");
     labelElt.textContent = label;
     this.formElt.appendChild(labelElt);
 
     // Buttons
-    let buttonsElt = document.createElement("div");
+    const buttonsElt = document.createElement("div");
     buttonsElt.className = "buttons";
     this.formElt.appendChild(buttonsElt);
 

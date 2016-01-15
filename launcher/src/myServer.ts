@@ -1,24 +1,24 @@
-let electron: GitHubElectron.Electron = nodeRequire("electron");
+const electron: GitHubElectron.Electron = nodeRequire("electron");
 import * as config from "./config";
 import * as dummy_childProcess from "child_process";
 import { userData } from "./panes/serverPaths";
 
-let path = nodeRequire("path");
-let childProcess = nodeRequire("child_process");
+const path = nodeRequire("path");
+const childProcess = nodeRequire("child_process");
 
-let myServerElt = document.querySelector(".my-server");
+const myServerElt = document.querySelector(".my-server");
 
-let myServerTextarea = myServerElt.querySelector("textarea") as HTMLTextAreaElement;
+const myServerTextarea = myServerElt.querySelector("textarea") as HTMLTextAreaElement;
 export let serverProcess: dummy_childProcess.ChildProcess = null;
 
-let autoStartServerCheckbox = document.getElementById("auto-start-server") as HTMLInputElement;
+const autoStartServerCheckbox = document.getElementById("auto-start-server") as HTMLInputElement;
 autoStartServerCheckbox.checked = config.autoStartServer;
 
 autoStartServerCheckbox.addEventListener("change", (event) => {
   config.autoStartServer = autoStartServerCheckbox.checked;
 });
 
-let startStopServerButton = myServerElt.querySelector("button.start-stop-server") as HTMLButtonElement;
+const startStopServerButton = myServerElt.querySelector("button.start-stop-server") as HTMLButtonElement;
 startStopServerButton.addEventListener("click", () => {
   if (serverProcess != null) {
     startStopServerButton.textContent = "Start";
@@ -33,15 +33,15 @@ startStopServerButton.addEventListener("click", () => {
 function startServer() {
   startStopServerButton.textContent = "Stop";
 
-  let serverPath = path.join(path.resolve(path.dirname(nodeProcess.mainModule.filename)), "../../server/index.js");
+  const serverPath = path.join(path.resolve(path.dirname(nodeProcess.mainModule.filename)), "../../server/index.js");
 
-  let serverEnv: { [key: string]: string; } = {};
+  const serverEnv: { [key: string]: string; } = {};
   serverEnv["ELECTRON_RUN_AS_NODE"] = "1";
   serverEnv["ELECTRON_NO_ATTACH_CONSOLE"] = "1";
 
   // NOTE: It would be nice to simply copy all environment variables
   // but somehow, this prevents Electron 0.35.1 from starting the server
-  // for (let key in nodeProcess.env) serverEnv[key] = nodeProcess.env[key];
+  // for (const key in nodeProcess.env) serverEnv[key] = nodeProcess.env[key];
 
   // So instead, we'll just copy the environment variables we definitely need
   if (nodeProcess.env["NODE_ENV"] != null) serverEnv["NODE_ENV"] = nodeProcess.env["NODE_ENV"];

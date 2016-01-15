@@ -5,25 +5,25 @@ import * as fs from "fs";
 import * as mkdirp from "mkdirp";
 
 /* tslint:disable */
-let https: typeof dummy_https = require("follow-redirects").https;
-let unzip = require("unzip");
+const https: typeof dummy_https = require("follow-redirects").https;
+const unzip = require("unzip");
 /* tslint:enable */
 
-let folderNameRegex = /^[a-z0-9_-]+$/;
-let pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
+const folderNameRegex = /^[a-z0-9_-]+$/;
+const pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
 
-let systemsById: { [id: string]: { folderName: string; plugins: { [author: string]: string[] } } } = {};
-let systemsPath = `${__dirname}/../systems`;
+const systemsById: { [id: string]: { folderName: string; plugins: { [author: string]: string[] } } } = {};
+const systemsPath = `${__dirname}/../systems`;
 try { fs.mkdirSync(systemsPath); } catch (err) { /* Ignore */ }
 
-for (let entry of fs.readdirSync(systemsPath)) {
+for (const entry of fs.readdirSync(systemsPath)) {
   if (!folderNameRegex.test(entry)) continue;
   if (!fs.statSync(`${systemsPath}/${entry}`).isDirectory) continue;
 
   let systemId: string;
-  let systemPath = `${systemsPath}/${entry}`;
+  const systemPath = `${systemsPath}/${entry}`;
   try {
-    let packageData = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
+    const packageData = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
     systemId = JSON.parse(packageData).superpowers.systemId;
   } catch (err) {
     console.error(`Could not load system id from systems/${entry}/package.json:`);
@@ -35,12 +35,12 @@ for (let entry of fs.readdirSync(systemsPath)) {
   try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
   if (pluginAuthors == null) continue;
 
-  for (let pluginAuthor of pluginAuthors) {
+  for (const pluginAuthor of pluginAuthors) {
     if (pluginAuthor === "default" || pluginAuthor === "common") continue;
     if (!folderNameRegex.test(pluginAuthor)) continue;
 
-    let pluginNames: string[] = [];
-    for (let pluginName of fs.readdirSync(`${systemPath}/plugins/${pluginAuthor}`)) {
+    const pluginNames: string[] = [];
+    for (const pluginName of fs.readdirSync(`${systemPath}/plugins/${pluginAuthor}`)) {
       if (!folderNameRegex.test(pluginName)) continue;
       if (!fs.statSync(`${systemPath}/plugins/${pluginAuthor}/${pluginName}`).isDirectory) continue;
       pluginNames.push(pluginName);
@@ -51,7 +51,7 @@ for (let entry of fs.readdirSync(systemsPath)) {
   }
 }
 
-let command = process.argv[2];
+const command = process.argv[2];
 
 switch (command) {
   case "start":
@@ -70,17 +70,17 @@ switch (command) {
 }
 
 function list() {
-  for (let systemId in systemsById) {
-    let system = systemsById[systemId];
+  for (const systemId in systemsById) {
+    const system = systemsById[systemId];
     console.log(`System ${systemId} installed in folder ${system.folderName}.`);
 
-    let pluginAuthors = Object.keys(system.plugins);
+    const pluginAuthors = Object.keys(system.plugins);
     if (pluginAuthors.length === 0) {
       console.log("No external plugin installed.");
     } else {
-      for (let pluginAuthor of pluginAuthors) {
+      for (const pluginAuthor of pluginAuthors) {
         console.log(`|- ${pluginAuthor}`);
-        for (let pluginName of system.plugins[pluginAuthor]) console.log(`   |- ${pluginName}`);
+        for (const pluginName of system.plugins[pluginAuthor]) console.log(`   |- ${pluginName}`);
       }
     }
     console.log("\n");
@@ -91,8 +91,8 @@ const currentRegistryVersion = 1;
 type Registry = { version: number; systems: { [sytemId: string]: { repository: string; plugins: { [author: string]: { [name: string]: string } } } } };
 function getRegistry(callback: (err: Error, registry: Registry) => any) {
   // FIXME: Use registry.json instead once the next release is out
-  let registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers/master/registryNext.json";
-  let request = https.get(registryUrl, (res) => {
+  const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers/master/registryNext.json";
+  const request = https.get(registryUrl, (res) => {
     if (res.statusCode !== 200) {
       callback(new Error(`Unexpected status code: ${res.statusCode}`), null);
       return;
@@ -120,28 +120,28 @@ function getRegistry(callback: (err: Error, registry: Registry) => any) {
 
 function listAvailableSystems(registry: Registry) { console.log(`Available systems: ${Object.keys(registry.systems).join(", ")}.`); }
 function listAvailablePlugins(registry: Registry, systemId: string) {
-  let pluginAuthors = Object.keys(registry.systems[systemId].plugins);
+  const pluginAuthors = Object.keys(registry.systems[systemId].plugins);
   if (pluginAuthors.length === 0) {
     console.log(`No available plugins in system ${systemId}.`);
   } else {
     console.log(`Available plugins in system ${systemId}.`);
-    for (let pluginAuthor of pluginAuthors) {
+    for (const pluginAuthor of pluginAuthors) {
       console.log(`|- ${pluginAuthor}`);
-      for (let pluginName of Object.keys(registry.systems[systemId].plugins[pluginAuthor])) console.log(`   |- ${pluginName}`);
+      for (const pluginName of Object.keys(registry.systems[systemId].plugins[pluginAuthor])) console.log(`   |- ${pluginName}`);
     }
   }
 }
 
 function getLatestRelease(repositoryURL: string, callback: (downloadURL: string) => void) {
-  let repositoryPath = `${repositoryURL.replace("https://github.com", "/repos")}/releases/latest`;
-  let request = https.get({
+  const repositoryPath = `${repositoryURL.replace("https://github.com", "/repos")}/releases/latest`;
+  const request = https.get({
     hostname: "api.github.com",
     path: repositoryPath,
     headers: { "user-agent": "Superpowers" }
   }, (res) => {
     if (res.statusCode !== 200) {
       console.error(`Couldn't get latest release from repository at ${repositoryURL}:`);
-      let err = new Error(`Unexpected status code: ${res.statusCode}`);
+      const err = new Error(`Unexpected status code: ${res.statusCode}`);
       console.error(err.stack);
       process.exit(1);
     }
@@ -149,10 +149,10 @@ function getLatestRelease(repositoryURL: string, callback: (downloadURL: string)
     let content = "";
     res.on("data", (chunk: string) => { content += chunk; });
     res.on("end", () => {
-      let repositoryInfo = JSON.parse(content);
-      let downloadURL: string;
-      if (repositoryInfo.assets.length > 0) downloadURL = repositoryInfo.assets[0].browser_download_url;
-      else downloadURL = repositoryInfo.zipball_url;
+      const repositoryInfo = JSON.parse(content);
+      const downloadURL = (repositoryInfo.assets.length > 0) ?
+        repositoryInfo.assets[0].browser_download_url :
+        repositoryInfo.zipball_url;
       callback(downloadURL);
     });
   });
@@ -172,7 +172,7 @@ function install() {
       process.exit(1);
     }
 
-    let pattern = process.argv[3];
+    const pattern = process.argv[3];
     if (pattern == null) {
       listAvailableSystems(registry);
       process.exit(0);
@@ -193,7 +193,7 @@ function install() {
       process.exit(1);
     }
 
-    let systemFolderName = systemsById[systemId].folderName;
+    const systemFolderName = systemsById[systemId].folderName;
     if (systemFolderName != null) {
       if (pluginPath == null) {
         console.error(`System ${systemId} is already installed.`);
@@ -204,7 +204,7 @@ function install() {
         process.exit(0);
       }
 
-      let [ pluginAuthor, pluginName ] = pluginPath.split("/");
+      const [ pluginAuthor, pluginName ] = pluginPath.split("/");
       if (registry.systems[systemId].plugins[pluginAuthor] == null || registry.systems[systemId].plugins[pluginAuthor][pluginName] == null) {
         console.error(`Plugin ${pluginPath} doesn't exist.`);
         listAvailablePlugins(registry, systemId);
@@ -241,7 +241,7 @@ function installSystem(repositoryURL: string) {
     }, (res) => {
       if (res.statusCode !== 200) {
         console.error("Couldn't download the system:");
-        let err = new Error(`Unexpected status code: ${res.statusCode}`);
+        const err = new Error(`Unexpected status code: ${res.statusCode}`);
         console.error(err.stack);
         process.exit(1);
       }
@@ -253,7 +253,7 @@ function installSystem(repositoryURL: string) {
 
 function installPlugin(systemId: string, pluginAuthor: string, repositoryURL: string) {
   getLatestRelease(repositoryURL, (downloadURL) => {
-    let pluginPath = `${systemsPath}/${systemsById[systemId].folderName}/plugins/${pluginAuthor}`;
+    const pluginPath = `${systemsPath}/${systemsById[systemId].folderName}/plugins/${pluginAuthor}`;
     mkdirp.sync(pluginPath);
     console.log(downloadURL);
 
@@ -264,7 +264,7 @@ function installPlugin(systemId: string, pluginAuthor: string, repositoryURL: st
     }, (res) => {
       if (res.statusCode !== 200) {
         console.error("Couldn't download the plugin:");
-        let err = new Error(`Unexpected status code: ${res.statusCode}`);
+        const err = new Error(`Unexpected status code: ${res.statusCode}`);
         console.error(err.stack);
         process.exit(1);
       }
@@ -275,7 +275,7 @@ function installPlugin(systemId: string, pluginAuthor: string, repositoryURL: st
 }
 
 function init() {
-  let pattern = process.argv[3];
+  const pattern = process.argv[3];
   let systemId: string;
   let pluginPath: string;
 
@@ -330,12 +330,12 @@ function init() {
   }
 
   getRegistry((err, registry) => {
-    let registrySystemEntry = registry.systems[systemId];
+    const registrySystemEntry = registry.systems[systemId];
     if (pluginPath == null && registrySystemEntry != null) {
       console.error(`System ${systemId} already exists.`);
       process.exit(1);
     } else if (pluginPath != null && registrySystemEntry != null) {
-      let [ pluginAuthor, pluginName ] = pluginPath.split("/");
+      const [ pluginAuthor, pluginName ] = pluginPath.split("/");
       if (registrySystemEntry.plugins[pluginAuthor][pluginName] != null) {
         console.error(`Plugin ${pluginPath} on system ${systemId} already exists.`);
         process.exit(1);
@@ -348,7 +348,7 @@ function init() {
 }
 
 function initSystem(systemId: string) {
-  let packageJSON = JSON.stringify({
+  const packageJSON = JSON.stringify({
     name: `superpowers-${systemId}`,
     description: "A system for Superpowers, the HTML5 app for real-time collaborative projects",
     superpowers: {
@@ -357,11 +357,11 @@ function initSystem(systemId: string) {
     }
   }, null, 2) + "\n";
 
-  let systemPath = `${systemsPath}/${systemId}`;
+  const systemPath = `${systemsPath}/${systemId}`;
   fs.mkdirSync(systemPath);
   fs.writeFileSync(`${systemPath}/package.json`, packageJSON);
 
-  let localeJSON = JSON.stringify({
+  const localeJSON = JSON.stringify({
     title: `${systemId}`,
     description: `(Edit systems/${systemId}/public/locales/en/system.json to change the title and description)`
   }, null, 2) + "\n";
@@ -372,8 +372,8 @@ function initSystem(systemId: string) {
 }
 
 function initPlugin(systemFolderName: string, systemId: string, pluginName: string) {
-  let pluginSlug = pluginName.replace(/\//g, "-").replace(/[A-Z]/g, (x) => `-${x.toLowerCase()}`);
-  let packageJSON = JSON.stringify({
+  const pluginSlug = pluginName.replace(/\//g, "-").replace(/[A-Z]/g, (x) => `-${x.toLowerCase()}`);
+  const packageJSON = JSON.stringify({
     name: `superpowers-${systemId}-${pluginSlug}-plugin`,
     description: `Plugin for Superpowers ${systemId}`,
     scripts: {
@@ -381,11 +381,11 @@ function initPlugin(systemFolderName: string, systemId: string, pluginName: stri
     }
   }, null, 2) + "\n";
 
-  let pluginPath = `${systemsPath}/${systemFolderName}/plugins/${pluginName}`;
+  const pluginPath = `${systemsPath}/${systemFolderName}/plugins/${pluginName}`;
   mkdirp.sync(pluginPath);
   fs.writeFileSync(`${pluginPath}/package.json`, packageJSON);
 
-  let tsconfigJSON = JSON.stringify({
+  const tsconfigJSON = JSON.stringify({
     "compilerOptions": {
       "module": "commonjs",
       "target": "es5",
@@ -394,7 +394,7 @@ function initPlugin(systemFolderName: string, systemId: string, pluginName: stri
   }, null, 2) + "\n";
   fs.writeFileSync(`${pluginPath}/tsconfig.json`, tsconfigJSON);
 
-  let indexDTS = `/// <reference path="../../../../../SupClient/SupClient.d.ts" />
+  const indexDTS = `/// <reference path="../../../../../SupClient/SupClient.d.ts" />
 /// <reference path="../../../../../SupCore/SupCore.d.ts" />
 `;
   fs.writeFileSync(`${pluginPath}/index.d.ts`, indexDTS);
