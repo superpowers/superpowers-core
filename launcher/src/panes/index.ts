@@ -3,19 +3,19 @@ import "./settings";
 import "./community";
 
 // Panes
-let paneButtonsContainer = <HTMLDivElement>document.querySelector(".pane-buttons");
-let panesContainer = <HTMLDivElement>document.querySelector(".panes");
+let paneButtonsContainer = document.querySelector(".pane-buttons") as HTMLDivElement;
+let panesContainer = document.querySelector(".panes") as HTMLDivElement;
 
 for (let i = 0; i < paneButtonsContainer.children.length; i++) {
   ((button: HTMLButtonElement, i: number) => {
     button.addEventListener("click", (event) => {
-      (<HTMLButtonElement>paneButtonsContainer.querySelector("button.active")).classList.remove("active");
-      (<HTMLDivElement>panesContainer.querySelector(".active")).classList.remove("active");
-      (<HTMLButtonElement>event.target).classList.add("active");
-      (<HTMLDivElement>panesContainer.children[i]).classList.add("active");
+      (paneButtonsContainer.querySelector("button.active") as HTMLButtonElement).classList.remove("active");
+      (panesContainer.querySelector(".active") as HTMLDivElement).classList.remove("active");
+      (event.target as HTMLButtonElement).classList.add("active");
+      (panesContainer.children[i] as HTMLDivElement).classList.add("active");
     });
-  })(<HTMLButtonElement>paneButtonsContainer.children[i], i);
+  })(paneButtonsContainer.children[i] as HTMLButtonElement, i);
 }
 
-(<HTMLButtonElement>paneButtonsContainer.children[0]).classList.add("active");
-(<HTMLDivElement>panesContainer.children[0]).classList.add("active");
+(paneButtonsContainer.children[0] as HTMLButtonElement).classList.add("active");
+(panesContainer.children[0] as HTMLDivElement).classList.add("active");

@@ -107,7 +107,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     // Description
     this.descriptionInputElt = document.createElement("textarea");
     this.descriptionInputElt.style.flex = "1";
-    (<any>this.descriptionInputElt.style).resize = "none";
+    (this.descriptionInputElt.style as any).resize = "none";
     this.descriptionInputElt.placeholder = SupClient.i18n.t("hub:newProject.descriptionPlaceholder");
     this.descriptionInputElt.addEventListener("keypress", this.onFieldKeyDown);
     textContainerElt.appendChild(this.descriptionInputElt);
@@ -247,7 +247,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
     } else {
       this.iconFile = this.iconInputElt.files[0];
       let reader = new FileReader();
-      reader.addEventListener("load", (event) => { this.iconElt.src = (<any>event.target).result; });
+      reader.addEventListener("load", (event) => { this.iconElt.src = (event.target as any).result; });
       reader.readAsDataURL(this.iconFile);
     }
   };
