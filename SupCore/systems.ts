@@ -36,16 +36,16 @@ export class System {
   }
 
   requireForAllPlugins(filePath: string) {
-    let pluginsPath = path.resolve(`${__dirname}/../systems/${this.folderName}/plugins`);
+    const pluginsPath = path.resolve(`${__dirname}/../systems/${this.folderName}/plugins`);
 
-    for (let pluginAuthor of fs.readdirSync(pluginsPath)) {
-      let pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+    for (const pluginAuthor of fs.readdirSync(pluginsPath)) {
+      const pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
       if (shouldIgnoreFolder(pluginAuthor)) continue;
 
-      for (let pluginName of fs.readdirSync(pluginAuthorPath)) {
+      for (const pluginName of fs.readdirSync(pluginAuthorPath)) {
         if (shouldIgnoreFolder(pluginName)) continue;
 
-        let completeFilePath = `${pluginAuthorPath}/${pluginName}/${filePath}`;
+        const completeFilePath = `${pluginAuthorPath}/${pluginName}/${filePath}`;
         if (fs.existsSync(completeFilePath)) require(completeFilePath);
       }
     }

@@ -25,7 +25,7 @@ export default class Resource extends Hash {
         throw err;
       }
 
-      let pub = JSON.parse(json);
+      const pub = JSON.parse(json);
       this._onLoaded(resourcePath, pub, false);
     });
   }
@@ -64,12 +64,12 @@ export default class Resource extends Hash {
   migrate(resourcePath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); };
 
   save(resourcePath: string, callback: (err: Error) => any) {
-    let json = JSON.stringify(this.pub, null, 2);
+    const json = JSON.stringify(this.pub, null, 2);
     fs.writeFile(path.join(resourcePath, "resource.json"), json, { encoding: "utf8" }, callback);
   }
 
   publish(buildPath: string, callback: (err: Error) => any) {
-    let folderPath = `${buildPath}/resources/${this.id}`;
+    const folderPath = `${buildPath}/resources/${this.id}`;
     fs.mkdir(folderPath, (err) => { this.save(folderPath, callback); });
   }
 

@@ -19,7 +19,7 @@ export default class Dictionary extends EventEmitter {
     // console.log(`Acquiring ${id}: ${this.refCountById[id]} refs`);
 
     // Cancel pending unload timeout if any
-    let timeout = this.unloadTimeoutsById[id];
+    const timeout = this.unloadTimeoutsById[id];
     if (timeout != null) {
       // console.log(`Cancelling unload timeout for ${id}`);
       clearTimeout(timeout);
@@ -80,7 +80,7 @@ export default class Dictionary extends EventEmitter {
 
   releaseAll(id: string) {
     // Cancel pending unload timeout if any
-    let timeout = this.unloadTimeoutsById[id];
+    const timeout = this.unloadTimeoutsById[id];
     if (timeout != null) {
       clearTimeout(timeout);
       delete this.unloadTimeoutsById[id];

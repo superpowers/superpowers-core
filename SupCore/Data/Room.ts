@@ -43,9 +43,9 @@ export default class Room extends SupData.Base.Hash {
   unload() { this.removeAllListeners(); return; }
 
   save(roomPath: string, callback: (err: Error) => any) {
-    let users = this.pub.users;
+    const users = this.pub.users;
     delete this.pub.users;
-    let json = JSON.stringify(this.pub, null, 2);
+    const json = JSON.stringify(this.pub, null, 2);
     this.pub.users = users;
 
     fs.writeFile(path.join(`${roomPath}.json`), json, { encoding: "utf8" }, callback);
@@ -73,7 +73,7 @@ export default class Room extends SupData.Base.Hash {
   }
 
   leave(client: any, callback: (err: string, username?: any) => any) {
-    let item = this.users.byId[client.socket.username];
+    const item = this.users.byId[client.socket.username];
     if (item.connectionCount > 1) {
       item.connectionCount--;
       callback(null, client.socket.username);
@@ -87,7 +87,7 @@ export default class Room extends SupData.Base.Hash {
   }
 
   client_leave(id: string) {
-    let item = this.users.byId[id];
+    const item = this.users.byId[id];
     if (item.connectionCount > 1) { item.connectionCount--; return; }
 
     this.users.client_remove(id);
@@ -96,7 +96,7 @@ export default class Room extends SupData.Base.Hash {
   server_appendMessage(client: any, text: string, callback: (err: string, entry?: any) => any) {
     if (typeof(text) !== "string" || text.length > 300) { callback("Your message was too long"); return; }
 
-    let entry = { timestamp: Date.now(), author: client.socket.username, text: text };
+    const entry = { timestamp: Date.now(), author: client.socket.username, text: text };
     this.pub.history.push(entry);
     if (this.pub.history.length > 100) this.pub.history.splice(0, 1);
 

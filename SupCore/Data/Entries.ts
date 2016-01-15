@@ -39,7 +39,7 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    let assetClass = this.server.system.data.assetClasses[node.type];
+    const assetClass = this.server.system.data.assetClasses[node.type];
     if (node.type != null && assetClass == null) { callback("Invalid asset type"); return; }
 
     super.add(node, parentId, index, (err, actualIndex) => {
@@ -50,7 +50,7 @@ export default class Entries extends SupData.Base.TreeById {
       node.name = SupData.ensureUniqueName(node.id, node.name, siblings);
 
       if (node.type != null) {
-        let badges = new SupData.Badges(node.badges);
+        const badges = new SupData.Badges(node.badges);
         this.badgesByEntryId[node.id] = badges;
         node.badges = badges.pub;
       }
@@ -66,7 +66,7 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    let node = this.byId[id];
+    const node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
     // Check that the requested parent is indeed a folder
@@ -80,7 +80,7 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   remove(id: string, callback: (err: string) => any) {
-    let node = this.byId[id] as EntryNode;
+    const node = this.byId[id] as EntryNode;
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
     if (node.type == null && node.children.length !== 0) { callback("The folder must be empty"); return; }
 
@@ -93,7 +93,7 @@ export default class Entries extends SupData.Base.TreeById {
       if (typeof (value) !== "string") { callback("Invalid value"); return; }
       value = value.trim();
 
-      let siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+      const siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
       if (SupData.hasDuplicateName(id, value, siblings)) { callback("There's already an entry with this name in this folder"); return; }
     }
 
@@ -101,11 +101,11 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   getForStorage() {
-    let entries: EntryNode[] = [];
-    let entriesById: {[id: string]: EntryNode} = {};
+    const entries: EntryNode[] = [];
+    const entriesById: {[id: string]: EntryNode} = {};
 
     this.walk((entry: EntryNode, parentEntry: EntryNode) => {
-      let savedEntry: EntryNode = { id: entry.id, name: entry.name, type: entry.type };
+      const savedEntry: EntryNode = { id: entry.id, name: entry.name, type: entry.type };
       if (entry.children != null) savedEntry.children = [];
       entriesById[savedEntry.id] = savedEntry;
 
@@ -118,7 +118,7 @@ export default class Entries extends SupData.Base.TreeById {
   getStoragePathFromId(id: string) {
     let fullStoragePath = `${this.byId[id].name} (${id})`;
     while (this.parentNodesById[id] != null) {
-      let parentNode = this.parentNodesById[id];
+      const parentNode = this.parentNodesById[id];
       fullStoragePath = `${this.byId[parentNode.id].name} (${parentNode.id})/${fullStoragePath}`;
       id = parentNode.id;
     }

@@ -315,9 +315,9 @@ declare namespace SupCore {
   }
 
   // All loaded systems (server-side only)
-  export let systems: { [system: string]: System };
+  export const systems: { [system: string]: System };
   // The currently active system
-  export let system: System;
+  export const system: System;
 
   class EventEmitter implements NodeJS.EventEmitter {
     static listenerCount(emitter: EventEmitter, event: string): number;

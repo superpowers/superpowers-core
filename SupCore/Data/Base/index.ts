@@ -37,7 +37,7 @@ interface Violation {
 export function getRuleViolation(value: any, rule: Rule, create = false): Violation {
   if (!create && !rule.mutable) return { message: "Immutable" };
 
-  let optional = rule.type[rule.type.length - 1] === "?";
+  const optional = rule.type[rule.type.length - 1] === "?";
   if (optional && value == null) return null;
 
   let ruleType: string;
@@ -71,19 +71,19 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
     case "enum": {
       if (typeof value !== "string") return { message: "Expected string for enum" };
 
-      let items = rule.items as string[];
+      const items = rule.items as string[];
       if (items.indexOf(value) === -1) return { message: `Invalid enum value: ${value}` };
     } break;
 
     case "hash": {
       if (value == null || typeof value !== "object") return { message: "Expected hash" };
 
-      let ruleProperties: {[key: string]: Rule} = (rule.properties != null) ? rule.properties : {};
-      let missingKeys = Object.keys(ruleProperties);
+      const ruleProperties: {[key: string]: Rule} = (rule.properties != null) ? rule.properties : {};
+      const missingKeys = Object.keys(ruleProperties);
 
-      for (let key in value) {
-        let propertyValue = value[key];
-        let propertyRule = ruleProperties[key];
+      for (const key in value) {
+        const propertyValue = value[key];
+        const propertyRule = ruleProperties[key];
 
         if (propertyRule == null) {
           if (rule.values == null) return { message: `Unexpected hash key: ${key}`, path: key };
@@ -94,17 +94,17 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
             if (rule.keys.maxLength != null && key.length > rule.keys.maxLength) return { message: `Key length (${key.length}) is greater than maximum length (${rule.keys.maxLength})`, path: key };
           }
 
-          let violation = getRuleViolation(propertyValue, rule.values, true);
+          const violation = getRuleViolation(propertyValue, rule.values, true);
           if (violation != null) {
-            let violationPath = (violation.path != null) ? `${key}.${violation.path}` : key;
+            const violationPath = (violation.path != null) ? `${key}.${violation.path}` : key;
             return { message: violation.message, path: violationPath };
           }
         }
 
         else {
-          let violation = getRuleViolation(propertyValue, propertyRule, true);
+          const violation = getRuleViolation(propertyValue, propertyRule, true);
           if (violation != null) {
-            let violationPath = (violation.path != null) ? `${key}.${violation.path}` : key;
+            const violationPath = (violation.path != null) ? `${key}.${violation.path}` : key;
             return { message: violation.message, path: violationPath };
           }
           missingKeys.splice(missingKeys.indexOf(key), 1);
@@ -112,9 +112,9 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
       }
 
       // Ignore optional keys
-      let actualMissingKeys: string[] = [];
-      for (let missingKey of missingKeys) {
-        let missingKeyRuleType = ruleProperties[missingKey].type;
+      const actualMissingKeys: string[] = [];
+      for (const missingKey of missingKeys) {
+        const missingKeyRuleType = ruleProperties[missingKey].type;
         if (missingKeyRuleType[missingKeyRuleType.length - 1] !== "?") actualMissingKeys.push(missingKey);
       }
       if (actualMissingKeys.length > 0) return { message: `Missing hash keys: ${actualMissingKeys.join(", ") }` };
@@ -129,10 +129,10 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
 
       if (rule.items != null) {
         for (let index = 0; index < value.length; index++) {
-          let item: any = value[index];
-          let violation = getRuleViolation(item, rule.items as Rule, true);
+          const item: any = value[index];
+          const violation = getRuleViolation(item, rule.items as Rule, true);
           if (violation != null) {
-            let violationPath = (violation.path != null) ? `[${index}].${violation.path}` : `[${index}]`;
+            const violationPath = (violation.path != null) ? `[${index}].${violation.path}` : `[${index}]`;
             return { message: violation.message, path: violationPath };
           }
         }
@@ -152,8 +152,5 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
 
 export function formatRuleViolation(violation: Violation): string {
   if (violation == null) return "No error";
-
-  let text = violation.message;
-  if (violation.path != null) text += ` at ${violation.path}`;
-  return text;
+  return (violation.path != null) ? `${violation.message} at ${violation.path}` : violation.message;
 }
