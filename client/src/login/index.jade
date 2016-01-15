@@ -15,7 +15,9 @@ html
         button.minimize
         button.maximize
         button.close
-    form.login
+    .connecting
+      p= t("common:states.connecting")
+    form.login(hidden)
       .welcome= t("login:welcome")
     
       table.properties
