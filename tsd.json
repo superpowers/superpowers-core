@@ -52,6 +52,9 @@
     },
     "github-electron/github-electron.d.ts": {
       "commit": "f8af639bf29b2b00e5d27ce93c0f046564b8525c"
+    },
+    "bcrypt/bcrypt.d.ts": {
+      "commit": "7577a2f4c134790891c52affdacdae99d802571b"
     }
   }
 }
