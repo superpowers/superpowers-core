@@ -1,5 +1,4 @@
 import config from "./config";
-
 /* tslint:disable */
 let bcrypt = require("bcryptjs");
 /* tslin:enable */
@@ -37,10 +36,13 @@ function verifyServerPassword(password: string, hash: string, socket: SocketIO.S
     return;
   }
 
-  if (config.password === password) {
-    bcrypt.compare(password, password, function(err : Error, res : boolean) {
-      console.log(res);
-    });
-  }
-  next();
+  bcrypt.compare(password, hash, function(err : Error, res : boolean) {
+    if (res) {
+      next();
+      return;
+    }
+
+    next(new Error("invalidCredentials"));
+  });
+  return;
 }
