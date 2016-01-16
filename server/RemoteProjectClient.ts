@@ -206,12 +206,13 @@ export default class RemoteProjectClient extends BaseRemoteClient {
               const roomName = `sub:assets:${entry.id}`;
               this.server.io.in(roomName).emit("trash:assets", entry.id);
 
-              // NOTE: "SocketIO.Namespace.adapter" is not part of the official documented API
-              // It does exist though: https://github.com/Automattic/socket.io/blob/3f72dd3322bcefff07b5976ab817766e421d237b/lib/namespace.js#L89
-              for (const socketId in (this.server.io as any).adapter.rooms[roomName]) {
-                const remoteClient = this.server.clientsBySocketId[socketId];
-                remoteClient.socket.leave(roomName);
-                remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
+              const room = this.server.io.adapter.rooms[roomName]; // room is null when the asset isn't open in any client
+              if (room != null) {
+                for (const socketId in room.sockets) {
+                  const remoteClient = this.server.clientsBySocketId[socketId];
+                  remoteClient.socket.leave(roomName);
+                  remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
+                }
               }
 
               // Generate badges for any assets depending on this entry
