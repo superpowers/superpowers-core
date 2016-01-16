@@ -11,14 +11,14 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     super();
 
     // Prompt name
-    let labelElt = document.createElement("label");
+    const labelElt = document.createElement("label");
     labelElt.textContent = SupClient.i18n.t("project:treeView.newAsset.prompt");
     this.formElt.appendChild(labelElt);
 
     // Type
     this.typeSelectElt = document.createElement("select");
-    for (let typeName in typeLabels) {
-      let optionElt = document.createElement("option");
+    for (const typeName in typeLabels) {
+      const optionElt = document.createElement("option");
       optionElt.textContent = typeName;
       optionElt.value = typeLabels[typeName];
       this.typeSelectElt.appendChild(optionElt);
@@ -34,7 +34,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     this.formElt.appendChild(this.nameInputElt);
 
     // Auto-open checkbox
-    let downElt = document.createElement("div");
+    const downElt = document.createElement("div");
     downElt.style.display = "flex";
     downElt.style.alignItems = "center";
     this.formElt.appendChild(downElt);
@@ -46,7 +46,7 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     this.openCheckboxElt.style.margin = "0 0.5em 0 0";
     downElt.appendChild(this.openCheckboxElt);
 
-    let openLabelElt = document.createElement("label");
+    const openLabelElt = document.createElement("label");
     openLabelElt.textContent = SupClient.i18n.t("project:treeView.newAsset.openAfterCreation");
     openLabelElt.setAttribute("for", "auto-open-checkbox");
     openLabelElt.style.flex = "1";
@@ -54,11 +54,11 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     downElt.appendChild(openLabelElt);
 
     // Buttons
-    let buttonsElt = document.createElement("div");
+    const buttonsElt = document.createElement("div");
     buttonsElt.className = "buttons";
     downElt.appendChild(buttonsElt);
 
-    let cancelButtonElt = document.createElement("button");
+    const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
     cancelButtonElt.textContent = SupClient.i18n.t("common:actions.cancel");
     cancelButtonElt.className = "cancel-button";

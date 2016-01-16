@@ -27,7 +27,7 @@ export default class ProjectManifest extends Hash {
       `Format version is ${pub.formatVersion} but this version of Superpowers only supports up to ${ProjectManifest.currentFormatVersion}.`);
     }
 
-    let oldFormatVersion = pub.formatVersion;
+    const oldFormatVersion = pub.formatVersion;
 
     if (oldFormatVersion === 0) {
       // Nothing to migrate here, the manifest itself didn't change

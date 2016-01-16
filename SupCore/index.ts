@@ -8,8 +8,8 @@ export { Data };
 export * from "./systems";
 
 export function log(message: string): void {
-  let date = new Date();
-  let text = `${date.toLocaleDateString()} ${date.toLocaleTimeString()} - ${message}`;
+  const date = new Date();
+  const text = `${date.toLocaleDateString()} ${date.toLocaleTimeString()} - ${message}`;
   console.log(text);
 
   if (process != null && process.send != null) process.send(text);

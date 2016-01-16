@@ -1,33 +1,33 @@
 export function createTable(parent?: HTMLElement) {
-  let table = document.createElement("table");
+  const table = document.createElement("table");
   if (parent != null) parent.appendChild(table);
 
-  let tbody = document.createElement("tbody");
+  const tbody = document.createElement("tbody");
   table.appendChild(tbody);
 
   return { table, tbody };
 }
 
 function createInput(type: string, parent?: HTMLElement) {
-  let input = document.createElement("input");
+  const input = document.createElement("input");
   input.type = type;
   if (parent != null) parent.appendChild(input);
   return input;
 }
 
 export function appendRow(parentTableBody: HTMLTableSectionElement, name: string, options?: { checkbox?: boolean; title?: string; }) {
-  let row = document.createElement("tr");
+  const row = document.createElement("tr");
   parentTableBody.appendChild(row);
 
-  let labelCell = document.createElement("th");
+  const labelCell = document.createElement("th");
   row.appendChild(labelCell);
 
   let checkbox: HTMLInputElement;
   if (options != null && options.checkbox) {
-    let container = document.createElement("div");
+    const container = document.createElement("div");
     labelCell.appendChild(container);
 
-    let nameElt = document.createElement("div");
+    const nameElt = document.createElement("div");
     nameElt.textContent = name;
     nameElt.title = options.title;
     container.appendChild(nameElt);
@@ -38,17 +38,17 @@ export function appendRow(parentTableBody: HTMLTableSectionElement, name: string
     if (options != null && options.title != null) labelCell.title = options.title;
   }
 
-  let valueCell = document.createElement("td");
+  const valueCell = document.createElement("td");
   row.appendChild(valueCell);
 
   return { row, labelCell, valueCell, checkbox };
 }
 
 export function appendHeader(parentTableBody: HTMLTableSectionElement, text: string) {
-  let headerRow = document.createElement("tr");
+  const headerRow = document.createElement("tr");
   parentTableBody.appendChild(headerRow);
 
-  let headerTh = document.createElement("th");
+  const headerTh = document.createElement("th");
   headerTh.textContent = text;
   headerTh.colSpan = 2;
   headerRow.appendChild(headerTh);
@@ -57,14 +57,14 @@ export function appendHeader(parentTableBody: HTMLTableSectionElement, text: str
 }
 
 export function appendTextField(parent: HTMLElement, value: string) {
-  let input = createInput("text", parent);
+  const input = createInput("text", parent);
   input.value = value;
 
   return input;
 }
 
 export function appendTextAreaField(parent: HTMLElement, value: string) {
-  let textarea = document.createElement("textarea");
+  const textarea = document.createElement("textarea");
   parent.appendChild(textarea);
   textarea.value = value;
 
@@ -78,7 +78,7 @@ interface NumberOptions {
 };
 
 export function appendNumberField(parent: HTMLElement, value: number|string, options?: NumberOptions) {
-  let input = createInput("number", parent);
+  const input = createInput("number", parent);
   input.value = value.toString();
 
   if (options != null) {
@@ -91,33 +91,33 @@ export function appendNumberField(parent: HTMLElement, value: number|string, opt
 }
 
 export function appendNumberFields(parent: HTMLElement, values: (number|string)[], options?: NumberOptions) {
-  let inputsParent = document.createElement("div");
+  const inputsParent = document.createElement("div");
   inputsParent.classList.add("inputs");
   parent.appendChild(inputsParent);
 
-  let inputs: HTMLInputElement[] = [];
-  for (let value of values) inputs.push(appendNumberField(inputsParent, value, options));
+  const inputs: HTMLInputElement[] = [];
+  for (const value of values) inputs.push(appendNumberField(inputsParent, value, options));
   return inputs;
 }
 
 export function appendBooleanField(parent: HTMLElement, value: boolean) {
-  let input = createInput("checkbox", parent);
+  const input = createInput("checkbox", parent);
   input.checked = value;
 
   return input;
 }
 
 export function appendSelectBox(parent: HTMLElement, options: { [value: string]: string; }, initialValue = "") {
-  let selectInput = document.createElement("select");
+  const selectInput = document.createElement("select");
   parent.appendChild(selectInput);
-  for (let value in options) appendSelectOption(selectInput, value, options[value]);
+  for (const value in options) appendSelectOption(selectInput, value, options[value]);
   selectInput.value = initialValue;
 
   return selectInput;
 }
 
 export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement, value: string, label: string) {
-  let option = document.createElement("option");
+  const option = document.createElement("option");
   option.value = value;
   option.textContent = label;
   parent.appendChild(option);
@@ -126,7 +126,7 @@ export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement
 }
 
 export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupElement, label: string) {
-  let optionGroup = document.createElement("optgroup");
+  const optionGroup = document.createElement("optgroup");
   optionGroup.label = label;
   optionGroup.textContent = label;
   parent.appendChild(optionGroup);
@@ -135,14 +135,14 @@ export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupEl
 }
 
 export function appendColorField(parent: HTMLElement, value: string) {
-  let colorParent = document.createElement("div");
+  const colorParent = document.createElement("div");
   colorParent.classList.add("inputs");
   parent.appendChild(colorParent);
 
-  let textField = appendTextField(colorParent, value);
+  const textField = appendTextField(colorParent, value);
   textField.classList.add("color");
 
-  let pickerField = document.createElement("input");
+  const pickerField = document.createElement("input");
   pickerField.type = "color";
   pickerField.value = `#${value}`;
   colorParent.appendChild(pickerField);
@@ -153,11 +153,11 @@ export function appendColorField(parent: HTMLElement, value: string) {
 interface SliderOptions extends NumberOptions { sliderStep?: number|string; }
 
 export function appendSliderField(parent: HTMLElement, value: number|string, options?: SliderOptions) {
-  let sliderParent = document.createElement("div");
+  const sliderParent = document.createElement("div");
   sliderParent.classList.add("inputs");
   parent.appendChild(sliderParent);
 
-  let sliderField = document.createElement("input");
+  const sliderField = document.createElement("input");
   sliderParent.appendChild(sliderField);
   sliderField.type = "range";
   sliderField.style.flex = "2";
@@ -168,19 +168,19 @@ export function appendSliderField(parent: HTMLElement, value: number|string, opt
     if (options.sliderStep != null) sliderField.step = options.sliderStep.toString();
   }
 
-  let numberField = appendNumberField(sliderParent, value, options);
+  const numberField = appendNumberField(sliderParent, value, options);
 
   return { sliderField, numberField };
 }
 
 export function appendAssetField(parent: HTMLElement, value: string) {
-  let assetParent = document.createElement("div");
+  const assetParent = document.createElement("div");
   assetParent.classList.add("inputs");
   parent.appendChild(assetParent);
 
-  let textField = appendTextField(assetParent, value);
+  const textField = appendTextField(assetParent, value);
 
-  let buttonElt = document.createElement("button");
+  const buttonElt = document.createElement("button");
   buttonElt.textContent = SupClient.i18n.t("common:actions.open");
   assetParent.appendChild(buttonElt);
 

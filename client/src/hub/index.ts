@@ -3,19 +3,19 @@ import CreateOrEditProjectDialog, { SystemsData } from "../dialogs/CreateOrEditP
 import * as async from "async";
 
 /* tslint:disable */
-let TreeView = require("dnd-tree-view");
+const TreeView = require("dnd-tree-view");
 /* tslint:enable */
 
-let data: {
+const data: {
   projects: SupCore.Data.Projects;
   systemsById: SystemsData;
 } = {} as any;
 
-let ui: { projectsTreeView?: any } = {};
+const ui: { projectsTreeView?: any } = {};
 let socket: SocketIOClient.Socket;
-let port = (window.location.port.length === 0) ? "80" : window.location.port;
+const port = (window.location.port.length === 0) ? "80" : window.location.port;
 
-let languageNamesById: { [id: string]: string; } = {};
+const languageNamesById: { [id: string]: string; } = {};
 if (localStorage.getItem("superpowers-dev-mode") != null) languageNamesById["none"] = "None";
 
 function start() {
@@ -30,16 +30,16 @@ function start() {
   if ("ontouchstart" in window) (document.querySelector(".projects-buttons .open-project") as HTMLButtonElement).hidden = false;
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
 
-  let selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
-  let languageIds = Object.keys(languageNamesById);
+  const selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
+  const languageIds = Object.keys(languageNamesById);
   languageIds.sort((a, b) => {
     // Always sort "None" at the end
     if (a === "none") return 1;
     if (b === "none") return -1;
     return languageNamesById[a].localeCompare(languageNamesById[b]);
   });
-  for (let languageId of languageIds) {
-    let optionElt = document.createElement("option");
+  for (const languageId of languageIds) {
+    const optionElt = document.createElement("option");
     optionElt.value = languageId;
     optionElt.textContent = languageNamesById[languageId];
     selectLanguageElt.appendChild(optionElt);
@@ -62,7 +62,7 @@ function start() {
   socket.on("updateIcon:projects", onUpdateProjectIcon);
 }
 
-let i18nFiles: SupClient.i18n.File[] = [ { root: "/", name: "hub" } ];
+const i18nFiles: SupClient.i18n.File[] = [ { root: "/", name: "hub" } ];
 loadSystemsInfo(() => {
   async.each(SupClient.i18n.languageIds, (languageId, cb) => {
     SupClient.fetch(`/locales/${languageId}/common.json`, "json", (err, data) => {
@@ -86,7 +86,7 @@ function loadSystemsInfo(callback: Function) {
     async.each(systemsInfo.list, (systemId, cb) => {
       i18nFiles.push({ root: `/systems/${systemId}`, name: "system", context: `system-${systemId}` });
       SupClient.fetch(`/systems/${systemId}/templates.json`, "json", (err: Error, templatesList: string[]) => {
-        for (let templateName of templatesList) {
+        for (const templateName of templatesList) {
           i18nFiles.push({
             root: `/systems/${systemId}/templates/${templateName}`,
             name: "template",
@@ -111,7 +111,7 @@ function onConnected() {
 
   const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
   buttons[0].disabled = false;
-  let noSelection = ui.projectsTreeView.selectedNodes.length === 0;
+  const noSelection = ui.projectsTreeView.selectedNodes.length === 0;
   for (let i = 1; i < buttons.length; i++) buttons[i].disabled = noSelection;
 }
 
@@ -134,7 +134,7 @@ function onProjectsReceived(err: string, projects: SupCore.Data.ProjectManifestP
   ui.projectsTreeView.clearSelection();
   ui.projectsTreeView.treeRoot.innerHTML = "";
 
-  for (let manifest of projects) {
+  for (const manifest of projects) {
     const liElt = createProjectElement(manifest);
     ui.projectsTreeView.append(liElt, "item");
   }
@@ -145,14 +145,14 @@ function onProjectsReceived(err: string, projects: SupCore.Data.ProjectManifestP
 function onProjectAdded(manifest: SupCore.Data.ProjectManifestPub, index: number) {
   data.projects.client_add(manifest, index);
 
-  let liElt = createProjectElement(manifest);
+  const liElt = createProjectElement(manifest);
   ui.projectsTreeView.insertAt(liElt, "item", index);
 }
 
 function onSetProjectProperty(id: string, key: string, value: any) {
   data.projects.client_setProperty(id, key, value);
 
-  let projectElt = ui.projectsTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const projectElt = ui.projectsTreeView.treeRoot.querySelector(`[data-id='${id}']`);
 
   switch (key) {
     case "name":
@@ -165,39 +165,39 @@ function onSetProjectProperty(id: string, key: string, value: any) {
 }
 
 function onUpdateProjectIcon(id: string) {
-  let projectElt = ui.projectsTreeView.treeRoot.querySelector(`[data-id='${id}']`);
-  let iconElt = projectElt.querySelector("img") as HTMLImageElement;
+  const projectElt = ui.projectsTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const iconElt = projectElt.querySelector("img") as HTMLImageElement;
   iconElt.src = `/projects/${id}/icon.png?${Date.now()}`;
 }
 
 // User interface
 function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
-  let liElt = document.createElement("li");
+  const liElt = document.createElement("li");
   liElt.dataset["id"] = manifest.id;
 
-  let iconElt = new Image();
+  const iconElt = new Image();
   iconElt.src = `/projects/${manifest.id}/icon.png`;
   liElt.appendChild(iconElt);
 
-  let infoElt = document.createElement("div");
+  const infoElt = document.createElement("div");
   infoElt.className = "info";
   liElt.appendChild(infoElt);
 
-  let nameElt = document.createElement("div");
+  const nameElt = document.createElement("div");
   nameElt.className = "name";
   nameElt.textContent = manifest.name;
   infoElt.appendChild(nameElt);
 
-  let detailsElt = document.createElement("div");
+  const detailsElt = document.createElement("div");
   detailsElt.className = "details";
   infoElt.appendChild(detailsElt);
 
-  let descriptionElt = document.createElement("span");
+  const descriptionElt = document.createElement("span");
   descriptionElt.className = "description";
   descriptionElt.textContent = manifest.description;
   detailsElt.appendChild(descriptionElt);
 
-  let projectTypeSpan = document.createElement("span");
+  const projectTypeSpan = document.createElement("span");
   projectTypeSpan.className = "project-type";
   projectTypeSpan.textContent = SupClient.i18n.t(`system-${manifest.systemId}:title`);
   detailsElt.appendChild(projectTypeSpan);
@@ -208,12 +208,12 @@ function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
 function onProjectSelectionChange() {
   const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
   buttons[0].disabled = false;
-  let noSelection = ui.projectsTreeView.selectedNodes.length === 0;
+  const noSelection = ui.projectsTreeView.selectedNodes.length === 0;
   for (let i = 1; i < buttons.length; i++) buttons[i].disabled = noSelection;
 }
 
 function onProjectActivate() {
-  let href = `/project/?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
+  const href = `/project/?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
 
   // When in the app, use location.replace to avoid creating an history item
   // which could lead to accidentally navigating back by pressing Backspace
@@ -238,7 +238,7 @@ function onProjectAddedAck(err: string, id: string) {
 
   ui.projectsTreeView.clearSelection();
 
-  let node = ui.projectsTreeView.treeRoot.querySelector(`li[data-id='${id}']`);
+  const node = ui.projectsTreeView.treeRoot.querySelector(`li[data-id='${id}']`);
   ui.projectsTreeView.addToSelection(node);
   ui.projectsTreeView.scrollIntoView(node);
 
@@ -248,8 +248,8 @@ function onProjectAddedAck(err: string, id: string) {
 function onEditProjectClick() {
   if (ui.projectsTreeView.selectedNodes.length !== 1) return;
 
-  let selectedNode = ui.projectsTreeView.selectedNodes[0];
-  let existingProject = data.projects.byId[selectedNode.dataset.id];
+  const selectedNode = ui.projectsTreeView.selectedNodes[0];
+  const existingProject = data.projects.byId[selectedNode.dataset.id];
 
   /* tslint:disable:no-unused-expression */
   new CreateOrEditProjectDialog(data.systemsById, { existingProject }, (editedProject) => {

@@ -3,11 +3,11 @@ import CreateAssetDialog from "../dialogs/CreateAssetDialog";
 import FindAssetDialog from "../dialogs/FindAssetDialog";
 import * as async from "async";
 
-let nodeRequire = require;
+const nodeRequire = require;
 /* tslint:disable */
-let TreeView = require("dnd-tree-view");
-let PerfectResize = require("perfect-resize");
-let TabStrip = require("tab-strip");
+const TreeView = require("dnd-tree-view");
+const PerfectResize = require("perfect-resize");
+const TabStrip = require("tab-strip");
 /* tslint:enable */
 
 let socket: SocketIOClient.Socket;
@@ -29,7 +29,7 @@ let data: {
   toolsByName?: { [name: string]: EditorManifest };
 };
 
-let ui: {
+const ui: {
   entriesTreeView?: any;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
@@ -55,7 +55,7 @@ function start() {
 
   // Development mode
   if (localStorage.getItem("superpowers-dev-mode") != null) {
-    let projectManagementDiv = <HTMLDivElement>document.querySelector(".project-management");
+    const projectManagementDiv = document.querySelector(".project-management") as HTMLDivElement;
     projectManagementDiv.style.backgroundColor = "#37d";
 
     // According to http://stackoverflow.com/a/12747364/915914, window.onerror
@@ -96,9 +96,9 @@ function start() {
   document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
 
   if (!SupClient.isApp) {
-    (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).title = SupClient.i18n.t("project:header.publishDisabled");
-    (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).hidden = true;
-    (<HTMLButtonElement>document.querySelector(".project-buttons .stop")).hidden = true;
+    (document.querySelector(".project-buttons .publish") as HTMLButtonElement).title = SupClient.i18n.t("project:header.publishDisabled");
+    (document.querySelector(".project-buttons .debug") as HTMLButtonElement).hidden = true;
+    (document.querySelector(".project-buttons .stop") as HTMLButtonElement).hidden = true;
   }
 
   // Entries tree view
@@ -119,7 +119,7 @@ function start() {
   ui.openInNewWindowButton.addEventListener("click", onOpenInNewWindowClick);
 
   // Tab strip
-  let tabsBarElt = document.querySelector(".tabs-bar");
+  const tabsBarElt = document.querySelector(".tabs-bar");
   ui.tabStrip = new TabStrip(tabsBarElt);
   ui.tabStrip.on("activateTab", onTabActivate);
   ui.tabStrip.on("closeTab", onTabClose);
@@ -136,7 +136,7 @@ function start() {
   });
 
   // Global controls
-  let toggleNotificationsButton = <HTMLButtonElement>document.querySelector(".top .controls button.toggle-notifications");
+  const toggleNotificationsButton = document.querySelector(".top .controls button.toggle-notifications") as HTMLButtonElement;
   toggleNotificationsButton.addEventListener("click", onClickToggleNotifications);
 
   if (localStorage.getItem("superpowers-disable-notifications") != null) {
@@ -148,8 +148,8 @@ function start() {
   }
 
   // Panes and tools
-  ui.panesElt = <HTMLDivElement>document.querySelector(".main .panes");
-  ui.toolsElt = <HTMLUListElement>document.querySelector(".sidebar .tools ul");
+  ui.panesElt = document.querySelector(".main .panes") as HTMLDivElement;
+  ui.toolsElt = document.querySelector(".sidebar .tools ul") as HTMLUListElement;
 
   // Messaging
   window.addEventListener("message", onMessage);
@@ -182,9 +182,9 @@ function connect() {
 }
 
 function loadPluginLocales(pluginsPaths: string[], cb: Function) {
-  let localeFiles: SupClient.i18n.File[] = [];
-  let pluginsRoot = `/systems/${data.systemId}/plugins`;
-  for (let pluginPath of pluginsPaths) {
+  const localeFiles: SupClient.i18n.File[] = [];
+  const pluginsRoot = `/systems/${data.systemId}/plugins`;
+  for (const pluginPath of pluginsPaths) {
     localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "plugin", context: pluginPath });
     localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "badges" });
   }
@@ -196,19 +196,19 @@ function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback
   data.editorsByAssetType = {};
   data.assetTypesByTitle = {};
 
-  for (let assetType in editorPaths)
+  for (const assetType in editorPaths)
     data.editorsByAssetType[assetType] = { pluginPath: editorPaths[assetType] };
 
-  let assetTypes = Object.keys(data.editorsByAssetType);
+  const assetTypes = Object.keys(data.editorsByAssetType);
   assetTypes.sort((a, b) => {
-    let titleA = SupClient.i18n.t(`${data.editorsByAssetType[a].pluginPath}:editors.${a}.title`);
-    let titleB = SupClient.i18n.t(`${data.editorsByAssetType[b].pluginPath}:editors.${b}.title`);
+    const titleA = SupClient.i18n.t(`${data.editorsByAssetType[a].pluginPath}:editors.${a}.title`);
+    const titleB = SupClient.i18n.t(`${data.editorsByAssetType[b].pluginPath}:editors.${b}.title`);
     return titleA.localeCompare(titleB);
   });
 
-  for (let assetType of assetTypes) {
-    let manifest = data.editorsByAssetType[assetType];
-    let title = SupClient.i18n.t(`${manifest.pluginPath}:editors.${assetType}.title`);
+  for (const assetType of assetTypes) {
+    const manifest = data.editorsByAssetType[assetType];
+    const title = SupClient.i18n.t(`${manifest.pluginPath}:editors.${assetType}.title`);
     data.assetTypesByTitle[title] = assetType;
   }
   callback();
@@ -217,10 +217,10 @@ function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback
 function setupTools(toolPaths: { [name: string]: string; }, callback: Function) {
   data.toolsByName = {};
 
-  let pluginsRoot = `/systems/${data.systemId}/plugins`;
+  const pluginsRoot = `/systems/${data.systemId}/plugins`;
 
   async.each(Object.keys(toolPaths), (toolName, cb) => {
-    let pluginPath = toolPaths[toolName];
+    const pluginPath = toolPaths[toolName];
 
     SupClient.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`, "json", (err: Error, manifest: EditorManifest) => {
       if (err != null) {
@@ -236,20 +236,20 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
   }, () => {
     ui.toolsElt.innerHTML = "";
 
-    let toolNames = Object.keys(data.toolsByName);
+    const toolNames = Object.keys(data.toolsByName);
     toolNames.sort((a, b) => {
-      let titleA = SupClient.i18n.t(`${data.toolsByName[a].pluginPath}:editors.${a}.title`);
-      let titleB = SupClient.i18n.t(`${data.toolsByName[b].pluginPath}:editors.${b}.title`);
+      const titleA = SupClient.i18n.t(`${data.toolsByName[a].pluginPath}:editors.${a}.title`);
+      const titleB = SupClient.i18n.t(`${data.toolsByName[b].pluginPath}:editors.${b}.title`);
       return titleA.localeCompare(titleB);
     });
 
-    for (let toolName of toolNames) setupTool(toolName);
+    for (const toolName of toolNames) setupTool(toolName);
     callback();
   });
 }
 
 function setupTool(toolName: string) {
-  let tool = data.toolsByName[toolName];
+  const tool = data.toolsByName[toolName];
 
   if (tool.pinned) {
     // TODO: Support multiple pinned tabs
@@ -257,16 +257,16 @@ function setupTool(toolName: string) {
     return;
   }
 
-  let toolElt = document.createElement("li");
+  const toolElt = document.createElement("li");
   toolElt.dataset["name"] = toolName;
-  let containerElt = document.createElement("div");
+  const containerElt = document.createElement("div");
   toolElt.appendChild(containerElt);
 
-  let iconElt = document.createElement("img");
+  const iconElt = document.createElement("img");
   iconElt.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   containerElt.appendChild(iconElt);
 
-  let nameSpanElt = document.createElement("span");
+  const nameSpanElt = document.createElement("span");
   nameSpanElt.className = "name";
   nameSpanElt.textContent = SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`);
   containerElt.appendChild(nameSpanElt);
@@ -281,7 +281,7 @@ function setupTool(toolName: string) {
 
 // Network callbacks
 function onConnectionError() {
-  let redirect = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+  const redirect = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
   window.location.replace(`/login?redirect=${redirect}`);
 }
 
@@ -293,14 +293,14 @@ function onDisconnected() {
   ui.entriesTreeView.treeRoot.innerHTML = "";
   updateSelectedEntry();
 
-  (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .stop")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = true;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = true;
-  (<HTMLDivElement>document.querySelector(".connecting")).hidden = false;
+  (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".project-buttons .publish") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".connecting") as HTMLDivElement).hidden = false;
 }
 
 function onWelcome(clientId: number, config: { buildPort: number; systemId: string; }) {
@@ -336,25 +336,25 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
 
-  (<HTMLDivElement>document.querySelector(".connecting")).hidden = true;
+  (document.querySelector(".connecting") as HTMLDivElement).hidden = true;
 
   if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .run")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".project-buttons .debug")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-asset")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .new-folder")).disabled = false;
-  (<HTMLButtonElement>document.querySelector(".entries-buttons .search")).disabled = false;
+  (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = false;
 
   function walk(entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode, parentElt: HTMLLIElement) {
-    let liElt = createEntryElement(entry);
+    const liElt = createEntryElement(entry);
     liElt.classList.add("collapsed");
 
-    let nodeType = (entry.children != null) ? "group" : "item";
+    const nodeType = (entry.children != null) ? "group" : "item";
     ui.entriesTreeView.append(liElt, nodeType, parentElt);
 
-    if (entry.children != null) for (let child of entry.children) walk(child, entry, liElt);
+    if (entry.children != null) for (const child of entry.children) walk(child, entry, liElt);
   }
-  for (let entry of entries) walk(entry, null, null);
+  for (const entry of entries) walk(entry, null, null);
 }
 
 function onSetManifestProperty(key: string, value: any) {
@@ -374,14 +374,14 @@ function onUpdateProjectIcon() {
 function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: number) {
   data.entries.client_add(entry, parentId, index);
 
-  let liElt = createEntryElement(entry);
-  let nodeType = (entry.children != null) ? "group" : "item";
+  const liElt = createEntryElement(entry);
+  const nodeType = (entry.children != null) ? "group" : "item";
 
   let parentElt: HTMLLIElement;
   if (parentId != null) {
     parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
-    let parentEntry = data.entries.byId[parentId];
-    let childrenElt = parentElt.querySelector("span.children");
+    const parentEntry = data.entries.byId[parentId];
+    const childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
 
@@ -402,23 +402,23 @@ function onEntryAddedAck(err: string, id: string) {
 function onEntryMoved(id: string, parentId: string, index: number) {
   data.entries.client_move(id, parentId, index);
 
-  let entryElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`) as HTMLLIElement;
 
-  let oldParentId: string = entryElt.dataset["parentId"];
+  const oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
-    let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
-    let parentEntry = data.entries.byId[oldParentId];
-    let childrenElt = oldParentElt.querySelector("span.children");
+    const oldParentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`) as HTMLLIElement;
+    const parentEntry = data.entries.byId[oldParentId];
+    const childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
 
-  let nodeType = (entryElt.classList.contains("group")) ? "group" : "item";
+  const nodeType = (entryElt.classList.contains("group")) ? "group" : "item";
 
   let parentElt: HTMLLIElement;
   if (parentId != null) {
     parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
-    let parentEntry = data.entries.byId[parentId];
-    let childrenElt = parentElt.querySelector("span.children");
+    const parentEntry = data.entries.byId[parentId];
+    const childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
 
@@ -431,25 +431,25 @@ function onEntryMoved(id: string, parentId: string, index: number) {
 }
 
 function updateEntryElementPath(id: string) {
-  let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
   entryElt.dataset["dndText"] = data.entries.getPathFromId(id);
 
-  let node = data.entries.byId[id];
+  const node = data.entries.byId[id];
   if (node.children != null) {
-    for (let child of node.children) updateEntryElementPath(child.id);
+    for (const child of node.children) updateEntryElementPath(child.id);
   }
 }
 
 function onEntryTrashed(id: string) {
   data.entries.client_remove(id);
 
-  let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
 
-  let oldParentId: string = entryElt.dataset["parentId"];
+  const oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
-    let oldParentElt = <HTMLLIElement>ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`);
-    let parentEntry = data.entries.byId[oldParentId];
-    let childrenElt = oldParentElt.querySelector("span.children");
+    const oldParentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`) as HTMLLIElement;
+    const parentEntry = data.entries.byId[oldParentId];
+    const childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
 
@@ -459,16 +459,16 @@ function onEntryTrashed(id: string) {
 function onSetEntryProperty(id: string, key: string, value: any) {
   data.entries.client_setProperty(id, key, value);
 
-  let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
 
   switch (key) {
     case "name":
       entryElt.querySelector(".name").textContent = value;
       updateEntryElementPath(id);
 
-      let walk = (entry: SupCore.Data.EntryNode) => {
+      const walk = (entry: SupCore.Data.EntryNode) => {
         refreshAssetTabElement(entry);
-        if (entry.children != null) for (let child of entry.children) walk(child);
+        if (entry.children != null) for (const child of entry.children) walk(child);
       };
 
       walk(data.entries.byId[id]);
@@ -477,36 +477,36 @@ function onSetEntryProperty(id: string, key: string, value: any) {
 }
 
 function onBadgeSet(id: string, newBadge: SupCore.Data.BadgeItem) {
-  let badges = data.entries.badgesByEntryId[id];
+  const badges = data.entries.badgesByEntryId[id];
 
-  let existingBadge = badges.byId[newBadge.id];
+  const existingBadge = badges.byId[newBadge.id];
   if (existingBadge != null) {
     existingBadge.type = newBadge.type;
     existingBadge.data = newBadge.data;
   } else badges.client_add(newBadge, null);
 
-  let badgesElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges`);
-  let badgeSpan = document.createElement("span");
+  const badgesElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges`);
+  const badgeSpan = document.createElement("span");
   badgeSpan.className = newBadge.id;
   badgeSpan.textContent = SupClient.i18n.t(`badges:${newBadge.id}`);
   badgesElt.appendChild(badgeSpan);
 }
 
 function onBadgeCleared(id: string, badgeId: string) {
-  let badges = data.entries.badgesByEntryId[id];
+  const badges = data.entries.badgesByEntryId[id];
   badges.client_remove(badgeId);
 
-  let badgeElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges .${badgeId}`);
+  const badgeElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges .${badgeId}`);
   badgeElt.parentElement.removeChild(badgeElt);
 }
 
 function onDependenciesAdded(id: string, depIds: string[]) {
-  for (let depId of depIds) data.entries.byId[depId].dependentAssetIds.push(id);
+  for (const depId of depIds) data.entries.byId[depId].dependentAssetIds.push(id);
 }
 
 function onDependenciesRemoved(id: string, depIds: string[]) {
-  for (let depId of depIds) {
-    let dependentAssetIds = data.entries.byId[depId].dependentAssetIds;
+  for (const depId of depIds) {
+    const dependentAssetIds = data.entries.byId[depId].dependentAssetIds;
     dependentAssetIds.splice(dependentAssetIds.indexOf(id), 1);
   }
 }
@@ -566,7 +566,7 @@ if (SupClient.isApp) {
   electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => { new SupClient.dialogs.InfoDialog(message, SupClient.i18n.t("common:actions.close")); });
   electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
-      let address = `${window.location.protocol}//${window.location.hostname}`;
+      const address = `${window.location.protocol}//${window.location.hostname}`;
       electron.ipcRenderer.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
     });
   });
@@ -577,20 +577,20 @@ function toggleDevTools() {
 }
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
-  let liElt = document.createElement("li");
+  const liElt = document.createElement("li");
   liElt.dataset["id"] = entry.id;
   liElt.dataset["dndText"] = data.entries.getPathFromId(entry.id);
-  let parentEntry = data.entries.parentNodesById[entry.id];
+  const parentEntry = data.entries.parentNodesById[entry.id];
   if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
   if (entry.type != null) {
-    let iconElt = document.createElement("img");
+    const iconElt = document.createElement("img");
     iconElt.draggable = false;
     iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     liElt.appendChild(iconElt);
   }
 
-  let nameSpan = document.createElement("span");
+  const nameSpan = document.createElement("span");
   nameSpan.className = "name";
   nameSpan.textContent = entry.name;
   liElt.appendChild(nameSpan);
@@ -601,18 +601,18 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
       if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
     });
 
-    let badgesSpan = document.createElement("span");
+    const badgesSpan = document.createElement("span");
     badgesSpan.className = "badges";
 
-    for (let badge of entry.badges) {
-      let badgeSpan = document.createElement("span");
+    for (const badge of entry.badges) {
+      const badgeSpan = document.createElement("span");
       badgeSpan.className = badge.id;
       badgeSpan.textContent = SupClient.i18n.t(`badges:${badge.id}`);
       badgesSpan.appendChild(badgeSpan);
     }
     liElt.appendChild(badgesSpan);
   } else {
-    let childrenElt = document.createElement("span");
+    const childrenElt = document.createElement("span");
     childrenElt.className = "children";
     childrenElt.textContent = `(${entry.children.length})`;
     liElt.appendChild(childrenElt);
@@ -625,17 +625,17 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
 }
 
 function onEntryDrop(dropInfo: any, orderedNodes: any) {
-  let dropPoint = SupClient.getTreeViewDropPoint(dropInfo, data.entries);
+  const dropPoint = SupClient.getTreeViewDropPoint(dropInfo, data.entries);
 
-  let entryIds: string[] = [];
-  for (let entry of orderedNodes) entryIds.push(entry.dataset.id);
+  const entryIds: string[] = [];
+  for (const entry of orderedNodes) entryIds.push(entry.dataset.id);
 
-  let sourceParentNode = data.entries.parentNodesById[entryIds[0]];
-  let sourceChildren = (sourceParentNode != null && sourceParentNode.children != null) ? sourceParentNode.children : data.entries.pub;
-  let sameParent = (sourceParentNode != null && dropPoint.parentId === sourceParentNode.id);
+  const sourceParentNode = data.entries.parentNodesById[entryIds[0]];
+  const sourceChildren = (sourceParentNode != null && sourceParentNode.children != null) ? sourceParentNode.children : data.entries.pub;
+  const sameParent = (sourceParentNode != null && dropPoint.parentId === sourceParentNode.id);
 
   let i = 0;
-  for (let id of entryIds) {
+  for (const id of entryIds) {
     socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => { if (err != null) new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); });
     if (!sameParent || sourceChildren.indexOf(data.entries.byId[id]) >= dropPoint.index) i++;
   }
@@ -643,10 +643,10 @@ function onEntryDrop(dropInfo: any, orderedNodes: any) {
 }
 
 function updateSelectedEntry() {
-  let allButtons = document.querySelectorAll(".entries-buttons button.edit");
+  const allButtons = document.querySelectorAll(".entries-buttons button.edit");
   for (let index = 0; index < allButtons.length; index++) {
-    let button = <HTMLButtonElement>allButtons.item(index);
-    let disabled = (ui.entriesTreeView.selectedNodes.length === 0 ||
+    const button = allButtons.item(index) as HTMLButtonElement;
+    const disabled = (ui.entriesTreeView.selectedNodes.length === 0 ||
       (button.classList.contains("single") && ui.entriesTreeView.selectedNodes.length !== 1) ||
       (button.classList.contains("asset-only") && ui.entriesTreeView.selectedNodes[0].classList.contains("group")));
 
@@ -655,7 +655,7 @@ function updateSelectedEntry() {
 }
 
 function onEntryActivate() {
-  let activatedEntry = ui.entriesTreeView.selectedNodes[0];
+  const activatedEntry = ui.entriesTreeView.selectedNodes[0];
   openEntry(activatedEntry.dataset.id);
 }
 
@@ -670,13 +670,13 @@ function onMessage(event: any) {
 }
 
 function onWindowDevError() {
-  let projectManagementDiv = <HTMLDivElement>document.querySelector(".project-management");
+  const projectManagementDiv = document.querySelector(".project-management") as HTMLDivElement;
   projectManagementDiv.style.backgroundColor = "#c42";
   return false;
 }
 
 function onMessageChat(message: string) {
-  let isHomeTabVisible = ui.homeTab.classList.contains("active");
+  const isHomeTabVisible = ui.homeTab.classList.contains("active");
   if (isHomeTabVisible && !document.hidden) return;
 
   if (!isHomeTabVisible) ui.homeTab.classList.add("blink");
@@ -684,10 +684,10 @@ function onMessageChat(message: string) {
   if (localStorage.getItem("superpowers-disable-notifications") != null) return;
 
   function doNotification() {
-    let title = SupClient.i18n.t("project:header.notifications.new", { projectName: data.manifest.pub.name });
-    let notification = new (<any>window).Notification(title, { icon: "/images/icon.png", body: message });
+    const title = SupClient.i18n.t("project:header.notifications.new", { projectName: data.manifest.pub.name });
+    const notification = new (window as any).Notification(title, { icon: "/images/icon.png", body: message });
 
-    let closeTimeoutId = setTimeout(() => { notification.close(); }, 5000);
+    const closeTimeoutId = setTimeout(() => { notification.close(); }, 5000);
 
     notification.addEventListener("click", () => {
       window.focus();
@@ -697,11 +697,11 @@ function onMessageChat(message: string) {
     });
   }
 
-  if ((<any>window).Notification.permission === "granted") doNotification();
-  else if ((<any>window).Notification.permission !== "denied") {
-    (<any>window).Notification.requestPermission((status: string) => {
-      (<any>window).Notification.permission = status;
-      if ((<any>window).Notification.permission === "granted") doNotification();
+  if ((window as any).Notification.permission === "granted") doNotification();
+  else if ((window as any).Notification.permission !== "denied") {
+    (window as any).Notification.requestPermission((status: string) => {
+      (window as any).Notification.permission = status;
+      if ((window as any).Notification.permission === "granted") doNotification();
     });
   }
 }
@@ -721,10 +721,10 @@ function onMessageHotKey(action: string) {
 }
 
 function onClickToggleNotifications(event: any) {
-  let disableNotifications = (localStorage.getItem("superpowers-disable-notifications") != null) ? true : false;
-  disableNotifications = !disableNotifications;
+  let notificationsDisabled = (localStorage.getItem("superpowers-disable-notifications") != null) ? true : false;
+  notificationsDisabled = !notificationsDisabled;
 
-  if (!disableNotifications) {
+  if (!notificationsDisabled) {
     localStorage.removeItem("superpowers-disable-notifications");
     event.target.classList.remove("disabled");
     event.target.title = SupClient.i18n.t("project:header.notifications.disable");
@@ -747,13 +747,13 @@ function onSearchEntryDialog() {
 }
 
 function openEntry(id: string, state?: {[name: string]: any}) {
-  let entry = data.entries.byId[id];
+  const entry = data.entries.byId[id];
 
   // Just toggle folders
   if (entry.type == null) { ui.entriesTreeView.selectedNodes[0].classList.toggle("collapsed"); return; }
 
   let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`);
-  let iframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${id}']`);
+  let iframe = ui.panesElt.querySelector(`iframe[data-asset-id='${id}']`) as HTMLIFrameElement;
 
   if (tab == null) {
     tab = createAssetTabElement(entry);
@@ -772,10 +772,10 @@ function openEntry(id: string, state?: {[name: string]: any}) {
 
 function openTool(name: string, state?: {[name: string]: any}) {
   let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`);
-  let iframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${name}']`);
+  let iframe = ui.panesElt.querySelector(`iframe[data-name='${name}']`) as HTMLIFrameElement;
 
   if (tab == null) {
-    let tool = data.toolsByName[name];
+    const tool = data.toolsByName[name];
     tab = createToolTabElement(name, tool);
     ui.tabStrip.tabsRoot.appendChild(tab);
 
@@ -804,7 +804,7 @@ function onNewAssetClick() {
 }
 
 function onNewFolderClick() {
-  let options = {
+  const options = {
     placeholder: SupClient.i18n.t("project:treeView.newFolder.placeholder"),
     initialValue: SupClient.i18n.t("project:treeView.newFolder.initialValue"),
     validationLabel: SupClient.i18n.t("common:actions.create"),
@@ -824,7 +824,7 @@ function onNewFolderClick() {
 function onTrashEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length === 0) return;
 
-  let selectedEntries: SupCore.Data.EntryNode[] = [];
+  const selectedEntries: SupCore.Data.EntryNode[] = [];
 
   function checkNextEntry() {
     selectedEntries.splice(0, 1);
@@ -834,8 +834,8 @@ function onTrashEntryClick() {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
-        for (let selectedNode of ui.entriesTreeView.selectedNodes) {
-          let entry = data.entries.byId[selectedNode.dataset.id];
+        for (const selectedNode of ui.entriesTreeView.selectedNodes) {
+          const entry = data.entries.byId[selectedNode.dataset.id];
           socket.emit("trash:entries", entry.id, (err: string) => {
             if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
           });
@@ -847,44 +847,43 @@ function onTrashEntryClick() {
   }
 
   function warnBrokenDependency(entry: SupCore.Data.EntryNode) {
-    if (entry.type == null) for (let entryChild of entry.children) selectedEntries.push(entryChild);
+    if (entry.type == null) for (const entryChild of entry.children) selectedEntries.push(entryChild);
 
     if (entry.dependentAssetIds != null && entry.dependentAssetIds.length > 0) {
-      let dependentAssetNames: string[] = [];
-      for (let usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
+      const dependentAssetNames: string[] = [];
+      for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
       /* tslint:disable:no-unused-expression */
-      let promptString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
+      const promptString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
         entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
       });
-      let validateString = SupClient.i18n.t("common:actions.close");
+      const validateString = SupClient.i18n.t("common:actions.close");
       new SupClient.dialogs.InfoDialog(promptString, validateString, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
     } else checkNextEntry();
   }
 
-  for (let selectedNode of ui.entriesTreeView.selectedNodes) selectedEntries.push(data.entries.byId[selectedNode.dataset.id]);
+  for (const selectedNode of ui.entriesTreeView.selectedNodes) selectedEntries.push(data.entries.byId[selectedNode.dataset.id]);
   warnBrokenDependency(selectedEntries[0]);
 }
 
 function onOpenInNewWindowClick(event: any) {
-  let id = event.target.parentElement.dataset.id;
+  const id = event.target.parentElement.dataset.id;
   if (id != null) {
-    let entry = data.entries.byId[id];
-    let address = `${window.location.origin}/systems/${data.systemId}` +
+    const entry = data.entries.byId[id];
+    const address = `${window.location.origin}/systems/${data.systemId}` +
     `/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
     `?project=${SupClient.query.project}&asset=${entry.id}`;
 
-    let title = entry.name;
-    let entryPath = data.entries.getPathFromId(id);
-    if (entryPath !== entry.name) title += ` - ${entryPath}`;
+    const entryPath = data.entries.getPathFromId(id);
+    const title = (entryPath !== entry.name) ? `${entry.name} - ${entryPath}` : entry.name;
     if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address, title);
     else {
-      let newWindow: any = window.open(address);
+      const newWindow: any = window.open(address);
       newWindow.addEventListener("load", () => { newWindow.document.title = title; });
     }
   } else {
-    let name = event.target.parentElement.dataset.name;
-    let address = `${window.location.origin}/systems/${data.systemId}` +
+    const name = event.target.parentElement.dataset.name;
+    const address = `${window.location.origin}/systems/${data.systemId}` +
     `/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/` +
     `?project=${SupClient.query.project}`;
     if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address);
@@ -895,10 +894,10 @@ function onOpenInNewWindowClick(event: any) {
 function onRenameEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length !== 1) return;
 
-  let selectedNode = ui.entriesTreeView.selectedNodes[0];
-  let entry = data.entries.byId[selectedNode.dataset.id];
+  const selectedNode = ui.entriesTreeView.selectedNodes[0];
+  const entry = data.entries.byId[selectedNode.dataset.id];
 
-  let options = {
+  const options = {
     initialValue: entry.name,
     validationLabel: SupClient.i18n.t("common:actions.rename"),
     pattern: SupClient.namePattern,
@@ -919,11 +918,11 @@ function onRenameEntryClick() {
 function onDuplicateEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length !== 1) return;
 
-  let selectedNode = ui.entriesTreeView.selectedNodes[0];
-  let entry = data.entries.byId[selectedNode.dataset.id];
+  const selectedNode = ui.entriesTreeView.selectedNodes[0];
+  const entry = data.entries.byId[selectedNode.dataset.id];
   if (entry.type == null) return;
 
-  let options = {
+  const options = {
     initialValue: entry.name,
     validationLabel: SupClient.i18n.t("common:actions.duplicate"),
     pattern: SupClient.namePattern,
@@ -943,16 +942,15 @@ function refreshAssetTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLIEl
   if (tabElt == null) tabElt = ui.tabStrip.tabsRoot.querySelector(`[data-asset-id='${entry.id}']`);
   if (tabElt == null) return;
 
-  let entryPath = data.entries.getPathFromId(entry.id);
-  let entryLocation = "";
-  let entryName = entry.name;
+  const entryPath = data.entries.getPathFromId(entry.id);
+  const entryName = entry.name;
 
-  let lastSlash = entryPath.lastIndexOf("/");
-  if (lastSlash !== -1) entryLocation = entryPath.slice(0, lastSlash);
+  const lastSlash = entryPath.lastIndexOf("/");
+  let entryLocation = (lastSlash !== -1) ? entryPath.slice(0, lastSlash) : "";
 
   const maxEntryLocationLength = 20;
   while (entryLocation.length > maxEntryLocationLength) {
-    let slashIndex = entryLocation.indexOf("/", 2);
+    const slashIndex = entryLocation.indexOf("/", 2);
     if (slashIndex === -1) break;
     entryLocation = `…/${entryLocation.slice(slashIndex + 1)}`;
   }
@@ -963,28 +961,28 @@ function refreshAssetTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLIEl
 }
 
 function createAssetTabElement(entry: SupCore.Data.EntryNode) {
-  let tabElt = document.createElement("li");
+  const tabElt = document.createElement("li");
 
   if (entry.type != null) {
-    let iconElt = document.createElement("img");
+    const iconElt = document.createElement("img");
     iconElt.classList.add("icon");
     iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     tabElt.appendChild(iconElt);
   }
 
-  let tabLabel = document.createElement("div");
+  const tabLabel = document.createElement("div");
   tabLabel.classList.add("label");
   tabElt.appendChild(tabLabel);
 
-  let tabLabelLocation = document.createElement("div");
+  const tabLabelLocation = document.createElement("div");
   tabLabelLocation.classList.add("location");
   tabLabel.appendChild(tabLabelLocation);
 
-  let tabLabelName = document.createElement("div");
+  const tabLabelName = document.createElement("div");
   tabLabelName.classList.add("name");
   tabLabel.appendChild(tabLabelName);
 
-  let closeButton = document.createElement("button");
+  const closeButton = document.createElement("button");
   closeButton.classList.add("close");
   closeButton.addEventListener("click", () => { onTabClose(tabElt); });
   tabElt.appendChild(closeButton);
@@ -997,24 +995,24 @@ function createAssetTabElement(entry: SupCore.Data.EntryNode) {
 }
 
 function createToolTabElement(toolName: string, tool: EditorManifest) {
-  let tabElt = document.createElement("li");
+  const tabElt = document.createElement("li");
 
-  let iconElt = document.createElement("img");
+  const iconElt = document.createElement("img");
   iconElt.classList.add("icon");
   iconElt.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   tabElt.appendChild(iconElt);
 
   if (!tool.pinned) {
-    let tabLabel = document.createElement("div");
+    const tabLabel = document.createElement("div");
     tabLabel.classList.add("label");
     tabElt.appendChild(tabLabel);
 
-    let tabLabelName = document.createElement("div");
+    const tabLabelName = document.createElement("div");
     tabLabelName.classList.add("name");
     tabLabel.appendChild(tabLabelName);
     tabLabelName.textContent = SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`);
 
-    let closeButton = document.createElement("button");
+    const closeButton = document.createElement("button");
     closeButton.classList.add("close");
     closeButton.addEventListener("click", () => { onTabClose(tabElt); });
     tabElt.appendChild(closeButton);
@@ -1027,11 +1025,11 @@ function createToolTabElement(toolName: string, tool: EditorManifest) {
 }
 
 function onTabActivate(tabElement: any) {
-  let activeTab = ui.tabStrip.tabsRoot.querySelector(".active");
+  const activeTab = ui.tabStrip.tabsRoot.querySelector(".active");
   if (activeTab != null) {
     activeTab.classList.remove("active");
 
-    let activeIframe = (<HTMLIFrameElement>ui.panesElt.querySelector("iframe.active"));
+    const activeIframe = (ui.panesElt.querySelector("iframe.active") as HTMLIFrameElement);
     activeIframe.contentWindow.postMessage({ type: "deactivate" }, window.location.origin);
     activeIframe.classList.remove("active");
   }
@@ -1039,10 +1037,10 @@ function onTabActivate(tabElement: any) {
   tabElement.classList.add("active");
   tabElement.classList.remove("blink");
 
-  let assetId = tabElement.dataset["assetId"];
+  const assetId = tabElement.dataset["assetId"];
   let tabIframe: HTMLIFrameElement;
-  if (assetId != null) tabIframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
-  else tabIframe = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${tabElement.dataset.pane}']`);
+  if (assetId != null) tabIframe = ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`) as HTMLIFrameElement;
+  else tabIframe = ui.panesElt.querySelector(`iframe[data-name='${tabElement.dataset.pane}']`) as HTMLIFrameElement;
 
   tabIframe.classList.add("active");
   tabIframe.contentWindow.focus();
@@ -1050,18 +1048,18 @@ function onTabActivate(tabElement: any) {
 }
 
 function onTabClose(tabElement: HTMLLIElement) {
-  let assetId = tabElement.dataset["assetId"];
+  const assetId = tabElement.dataset["assetId"];
   let frameElt: HTMLIFrameElement;
-  if (assetId != null) frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`);
+  if (assetId != null) frameElt = ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`) as HTMLIFrameElement;
   else {
-    let toolName = tabElement.dataset["pane"];
+    const toolName = tabElement.dataset["pane"];
     if (toolName === "main") return;
 
-    frameElt = <HTMLIFrameElement>ui.panesElt.querySelector(`iframe[data-name='${toolName}']`);
+    frameElt = ui.panesElt.querySelector(`iframe[data-name='${toolName}']`) as HTMLIFrameElement;
   }
 
   if (tabElement.classList.contains("active")) {
-    let activeTabElement = (tabElement.nextSibling != null) ? tabElement.nextSibling : tabElement.previousSibling;
+    const activeTabElement = (tabElement.nextSibling != null) ? tabElement.nextSibling : tabElement.previousSibling;
     if (activeTabElement != null) onTabActivate(activeTabElement);
   }
 
@@ -1070,11 +1068,11 @@ function onTabClose(tabElement: HTMLLIElement) {
 }
 
 function onActivatePreviousTab() {
-  let activeTabElt = ui.tabStrip.tabsRoot.querySelector(".active");
+  const activeTabElt = ui.tabStrip.tabsRoot.querySelector(".active");
   for (let tabIndex = 0; ui.tabStrip.tabsRoot.children.length; tabIndex++) {
-    let tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
+    const tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
     if (tabElt === activeTabElt) {
-      let newTabIndex = (tabIndex === 0) ? ui.tabStrip.tabsRoot.children.length - 1 : tabIndex - 1;
+      const newTabIndex = (tabIndex === 0) ? ui.tabStrip.tabsRoot.children.length - 1 : tabIndex - 1;
       onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
       return;
     }
@@ -1082,11 +1080,11 @@ function onActivatePreviousTab() {
 }
 
 function onActivateNextTab() {
-  let activeTabElt = ui.tabStrip.tabsRoot.querySelector(".active");
+  const activeTabElt = ui.tabStrip.tabsRoot.querySelector(".active");
   for (let tabIndex = 0; ui.tabStrip.tabsRoot.children.length; tabIndex++) {
-    let tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
+    const tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
     if (tabElt === activeTabElt) {
-      let newTabIndex = (tabIndex === ui.tabStrip.tabsRoot.children.length - 1) ? 0 : tabIndex + 1;
+      const newTabIndex = (tabIndex === ui.tabStrip.tabsRoot.children.length - 1) ? 0 : tabIndex + 1;
       onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
       return;
     }

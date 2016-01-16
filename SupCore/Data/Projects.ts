@@ -1,7 +1,7 @@
 import ListById from "./Base/ListById";
 import * as _ from "lodash";
 
-let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 export default class Projects extends ListById {
   static schema: SupCore.Data.Schema = {

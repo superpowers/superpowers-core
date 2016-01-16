@@ -7,8 +7,8 @@ export default function() {
   document.addEventListener("keydown", (event) => {
     if (document.querySelector(".dialog") != null) return;
 
-    let ctrlOrCmd = event.ctrlKey || event.metaKey;
-    let origin = window.location.origin;
+    const ctrlOrCmd = event.ctrlKey || event.metaKey;
+    const origin = window.location.origin;
     function sendMessage(action: string) {
       window.top.postMessage({ type: "hotkey", content: action }, origin);
     }
@@ -68,17 +68,17 @@ export default function() {
     return null;
   });
 
-  let hotkeyButtons = document.querySelectorAll("[data-hotkey]") as NodeListOf<HTMLButtonElement>;
+  const hotkeyButtons = document.querySelectorAll("[data-hotkey]") as NodeListOf<HTMLButtonElement>;
   for (let i = 0; i < hotkeyButtons.length; i++) {
-    let hotkeyButton = hotkeyButtons[i];
-    let hotkeys = hotkeyButton.dataset["hotkey"].split("+");
+    const hotkeyButton = hotkeyButtons[i];
+    const hotkeys = hotkeyButton.dataset["hotkey"].split("+");
     let hotkeyComplete = "";
-    for (let hotkey of hotkeys) {
+    for (const hotkey of hotkeys) {
       let hotkeyPartKey: string;
       if (hotkey === "control" && window.navigator.platform === "MacIntel") hotkeyPartKey = `common:hotkeys.command`;
       else hotkeyPartKey = `common:hotkeys.${hotkey}`;
 
-      let hotkeyPartString = SupClient.i18n.t(hotkeyPartKey);
+      const hotkeyPartString = SupClient.i18n.t(hotkeyPartKey);
       if (hotkeyComplete !== "") hotkeyComplete += "+";
       if (hotkeyPartString === hotkeyPartKey) hotkeyComplete += hotkey;
       else hotkeyComplete += hotkeyPartString;

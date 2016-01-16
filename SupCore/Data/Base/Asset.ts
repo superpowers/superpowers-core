@@ -23,7 +23,7 @@ export default class Asset extends Hash {
     fs.readFile(path.join(assetPath, "asset.json"), { encoding: "utf8" }, (err, json) => {
       if (err != null) throw err;
 
-      let pub = JSON.parse(json);
+      const pub = JSON.parse(json);
       this._onLoaded(assetPath, pub);
     });
   }
@@ -52,12 +52,12 @@ export default class Asset extends Hash {
   client_unload() { /* Override */ }
 
   save(assetPath: string, callback: (err: Error) => any) {
-    let json = JSON.stringify(this.pub, null, 2);
+    const json = JSON.stringify(this.pub, null, 2);
     fs.writeFile(path.join(assetPath, "asset.json"), json, { encoding: "utf8" }, callback);
   }
 
   publish(buildPath: string, callback: (err: Error) => any) {
-    let folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(this.id)}`;
+    const folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(this.id)}`;
     mkdirp(folderPath, (err) => { this.save(folderPath, callback); });
   }
 

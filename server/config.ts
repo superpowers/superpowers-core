@@ -12,7 +12,7 @@ let bcrypt = require("bcryptjs");
 let bcryptRegex = /^\$2a\$10\$/;
 
 if (fs.existsSync(paths.config)) {
-  let config = JSON.parse(fs.readFileSync(paths.config, { encoding: "utf8" }));
+  const config = JSON.parse(fs.readFileSync(paths.config, { encoding: "utf8" }));
   schemas.validate(config, "config");
 
   if (config.port != null) {

@@ -1,7 +1,7 @@
 import * as SupData from "./index";
 import * as path from "path";
 
-let roomRegex = /^[A-Za-z0-9_]{1,20}$/;
+const roomRegex = /^[A-Za-z0-9_]{1,20}$/;
 
 export default class Rooms extends SupData.Base.Dictionary {
   constructor(public server: ProjectServer) {
@@ -34,7 +34,7 @@ export default class Rooms extends SupData.Base.Dictionary {
   }
 
   _load(id: string) {
-    let room = new SupData.Room(null);
+    const room = new SupData.Room(null);
 
     room.load(path.join(this.server.projectPath, `rooms/${id}`));
 

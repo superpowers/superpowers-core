@@ -66,22 +66,22 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (name.length === 0) { callback("Entry name cannot be empty"); return; }
     if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
-    let entry: SupCore.Data.EntryNode = { id: null, name, type, badges: [], dependentAssetIds: [] };
+    const entry: SupCore.Data.EntryNode = { id: null, name, type, badges: [], dependentAssetIds: [] };
     if (options == null) options = {};
 
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
       if (err != null) { callback(err, null); return; }
 
-      let onEntryCreated = () => {
+      const onEntryCreated = () => {
         this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
         callback(null, entry.id);
       };
 
       if (entry.type != null) {
-        let assetClass = this.server.system.data.assetClasses[entry.type];
-        let asset = new assetClass(entry.id, null, this.server);
+        const assetClass = this.server.system.data.assetClasses[entry.type];
+        const asset = new assetClass(entry.id, null, this.server);
         asset.init({ name: entry.name }, () => {
-          let assetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
+          const assetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
           mkdirp(assetPath, () => { asset.save(assetPath, onEntryCreated); });
         });
       } else {
@@ -93,11 +93,11 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   private onDuplicateEntry = (newName: string, id: string, options: any, callback: (err: string, duplicatedId?: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let entryToDuplicate = this.server.data.entries.byId[id];
+    const entryToDuplicate = this.server.data.entries.byId[id];
     if (entryToDuplicate == null) { callback(`Entry ${id} doesn't exist`); return; }
     if (entryToDuplicate.type == null) { callback("Entry to duplicate must be an asset"); return; }
 
-    let entry: SupCore.Data.EntryNode = {
+    const entry: SupCore.Data.EntryNode = {
       id: null, name: newName, type: entryToDuplicate.type,
       badges: [], dependentAssetIds: []
     };
@@ -107,7 +107,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
       if (err != null) { callback(err); return; }
 
-      let newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
+      const newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
       this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
         mkdirp(newAssetPath, () => {
           referenceAsset.save(newAssetPath, (err: Error) => {
@@ -137,8 +137,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   private onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
-    let oldParent = this.server.data.entries.parentNodesById[id];
+    const oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
+    const oldParent = this.server.data.entries.parentNodesById[id];
 
     this.server.data.entries.move(id, parentId, index, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
@@ -146,7 +146,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       this.onEntryChangeFullPath(id, oldFullAssetPath, () => {
         if (oldParent == null || oldParent.children.length > 0) return;
 
-        let oldParentPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(oldParent.id)}`);
+        const oldParentPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(oldParent.id)}`);
         fs.readdir(oldParentPath, (err, files) => { if (files.length === 0) fs.rmdir(oldParentPath); });
       });
       this.server.io.in("sub:entries").emit("move:entries", id, parentId, actualIndex);
@@ -157,22 +157,22 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   private onTrashEntry = (id: string, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let trashEntryRecursively = (entry: SupCore.Data.EntryNode, callback: (err: Error) => void) => {
-      let finishTrashEntry = (err: Error) => {
+    const trashEntryRecursively = (entry: SupCore.Data.EntryNode, callback: (err: Error) => void) => {
+      const finishTrashEntry = (err: Error) => {
         if (err != null) { callback(err); return; }
 
         // Clear all dependencies for this entry
-        let dependentAssetIds = (entry != null) ? entry.dependentAssetIds : null;
+        const dependentAssetIds = (entry != null) ? entry.dependentAssetIds : null;
 
-        let dependencies = this.server.data.entries.dependenciesByAssetId[entry.id];
+        const dependencies = this.server.data.entries.dependenciesByAssetId[entry.id];
         if (dependencies != null) {
-          let removedDependencyEntryIds = <string[]>[];
-          for (let depId of dependencies) {
-            let depEntry = this.server.data.entries.byId[depId];
+          const removedDependencyEntryIds = [] as string[];
+          for (const depId of dependencies) {
+            const depEntry = this.server.data.entries.byId[depId];
             if (depEntry == null) continue;
 
-            let dependentAssetIds = depEntry.dependentAssetIds;
-            let index = dependentAssetIds.indexOf(entry.id);
+            const dependentAssetIds = depEntry.dependentAssetIds;
+            const index = dependentAssetIds.indexOf(entry.id);
             if (index !== -1) {
               dependentAssetIds.splice(index, 1);
               removedDependencyEntryIds.push(depId);
@@ -203,13 +203,13 @@ export default class RemoteProjectClient extends BaseRemoteClient {
               this.server.io.in("sub:entries").emit("trash:entries", entry.id);
 
               // Notify and clear all asset subscribers
-              let roomName = `sub:assets:${entry.id}`;
+              const roomName = `sub:assets:${entry.id}`;
               this.server.io.in(roomName).emit("trash:assets", entry.id);
 
               // NOTE: "SocketIO.Namespace.adapter" is not part of the official documented API
               // It does exist though: https://github.com/Automattic/socket.io/blob/3f72dd3322bcefff07b5976ab817766e421d237b/lib/namespace.js#L89
-              for (let socketId in (<any>this.server.io).adapter.rooms[roomName]) {
-                let remoteClient = this.server.clientsBySocketId[socketId];
+              for (const socketId in (this.server.io as any).adapter.rooms[roomName]) {
+                const remoteClient = this.server.clientsBySocketId[socketId];
                 remoteClient.socket.leave(roomName);
                 remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
               }
@@ -237,15 +237,15 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       } else finishTrashEntry(null);
     };
 
-    let trashedAssetFolder = this.server.data.entries.getStoragePathFromId(id);
-    let entry = this.server.data.entries.byId[id];
-    let gotChildren = entry.type == null && entry.children.length > 0;
-    let parentEntry = this.server.data.entries.parentNodesById[id];
+    const trashedAssetFolder = this.server.data.entries.getStoragePathFromId(id);
+    const entry = this.server.data.entries.byId[id];
+    const gotChildren = entry.type == null && entry.children.length > 0;
+    const parentEntry = this.server.data.entries.parentNodesById[id];
     trashEntryRecursively(entry, (err: Error) => {
       if (err != null) { callback(err.message); return; }
 
       // After the trash on memory, move folder to trashed assets and clean up empty folders
-      let deleteFolder = (folderPath: string, callback: (error: string) => void) => {
+      const deleteFolder = (folderPath: string, callback: (error: string) => void) => {
         fs.readdir(folderPath, (err, files) => {
           if (err != null) {
             if (err.code !== "ENOENT") callback(err.message);
@@ -278,7 +278,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (!this.errorIfCant("editAssets", callback)) return;
     if (key === "name" && value.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
-    let oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
+    const oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
 
     this.server.data.entries.setProperty(id, key, value, (err: string, actualValue: any) => {
       if (err != null) { callback(err); return; }
@@ -292,7 +292,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   private onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string, callback?: Function) => {
     let mustScheduleSave = false;
 
-    let scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${assetId}`];
+    const scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${assetId}`];
     if (scheduledSaveCallback != null && scheduledSaveCallback.timeoutId != null) {
       clearTimeout(scheduledSaveCallback.timeoutId);
       scheduledSaveCallback.timeoutId = null;
@@ -300,17 +300,17 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       mustScheduleSave = true;
     }
 
-    let assetPath = this.server.data.entries.getStoragePathFromId(assetId);
+    const assetPath = this.server.data.entries.getStoragePathFromId(assetId);
     async.series([
       (cb) => {
-        let index = assetPath.lastIndexOf("/");
+        const index = assetPath.lastIndexOf("/");
         if (index !== -1) {
-          let parentPath = assetPath.slice(0, index);
+          const parentPath = assetPath.slice(0, index);
           mkdirp(path.join(this.server.projectPath, `assets/${parentPath}`), cb);
         } else cb(null);
       }, (cb) => {
-        let oldDirPath = path.join(this.server.projectPath, `assets/${oldFullAssetPath}`);
-        let dirPath = path.join(this.server.projectPath, `assets/${assetPath}`);
+        const oldDirPath = path.join(this.server.projectPath, `assets/${oldFullAssetPath}`);
+        const dirPath = path.join(this.server.projectPath, `assets/${assetPath}`);
 
         fs.rename(oldDirPath, dirPath, (err) => {
           if (mustScheduleSave) this.server.scheduleAssetSave(assetId);
@@ -328,11 +328,11 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     if (!this.errorIfCant("editAssets", callback)) return;
 
-    let entry = this.server.data.entries.byId[id];
+    const entry = this.server.data.entries.byId[id];
     if (entry == null || entry.type == null) { callback("No such asset"); return; }
     if (command == null) { callback("Invalid command"); return; }
 
-    let commandMethod = this.server.system.data.assetClasses[entry.type].prototype[`server_${command}`];
+    const commandMethod = this.server.system.data.assetClasses[entry.type].prototype[`server_${command}`];
     if (commandMethod == null) { callback("Invalid command"); return; }
     // if (callback == null) { this.server.log("Ignoring edit:assets command, missing a callback"); return; }
 
@@ -362,7 +362,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     if (command == null) { callback("Invalid command"); return; }
 
-    let commandMethod = this.server.system.data.resourceClasses[id].prototype[`server_${command}`];
+    const commandMethod = this.server.system.data.resourceClasses[id].prototype[`server_${command}`];
     if (commandMethod == null) { callback("Invalid command"); return; }
     // if (callback == null) { this.server.log("Ignoring edit:assets command, missing a callback"); return; }
 
@@ -392,7 +392,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     if (command == null) { callback("Invalid command"); return; }
 
-    let commandMethod = (<any>SupCore.Data.Room.prototype)[`server_${command}`];
+    const commandMethod = (SupCore.Data.Room.prototype as any)[`server_${command}`];
     if (commandMethod == null) { callback("Invalid command"); return; }
     // if (callback == null) { this.server.log("Ignoring edit:rooms command, missing a callback"); return; }
 
@@ -415,12 +415,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     // this.server.log("Building project...");
 
-    let buildId = this.server.nextBuildId;
+    const buildId = this.server.nextBuildId;
     this.server.nextBuildId++;
 
-    let buildPath = `${this.server.buildsPath}/${buildId}`;
+    const buildPath = `${this.server.buildsPath}/${buildId}`;
 
-    let exportedProject = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
+    const exportedProject = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
 
     try { fs.mkdirSync(this.server.buildsPath); } catch (e) { /* Ignore */ }
     try { fs.mkdirSync(buildPath); }
@@ -428,7 +428,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     fs.mkdirSync(`${buildPath}/assets`);
 
-    let assetIdsToExport: string[] = [];
+    const assetIdsToExport: string[] = [];
     this.server.data.entries.walk((entry: SupCore.Data.EntryNode, parent: SupCore.Data.EntryNode) => {
       if (entry.type != null) assetIdsToExport.push(entry.id);
     });
@@ -455,7 +455,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       }, (err) => {
         if (err != null) { callback("Could not export all resources"); return; }
 
-        let json = JSON.stringify(exportedProject, null, 2);
+        const json = JSON.stringify(exportedProject, null, 2);
         fs.writeFile(`${buildPath}/project.json`, json, { encoding: "utf8" }, (err) => {
           if (err != null) { callback("Could not save project.json"); return; }
 
@@ -464,7 +464,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           // Collect paths to all build files
           let files: string[] = [];
           recursiveReaddir(buildPath, (err, entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
               let relativePath = path.relative(buildPath, entry);
               if (path.sep === "\\") relativePath = relativePath.replace(/\\/g, "/");
               files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
@@ -474,8 +474,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
             callback(null, buildId.toString(), files);
 
             // Remove an old build to avoid using too much disk space
-            let buildToDeleteId = buildId - config.maxRecentBuilds;
-            let buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
+            const buildToDeleteId = buildId - config.maxRecentBuilds;
+            const buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
             rimraf(buildToDeletePath, (err) => {
               if (err != null) {
                 this.server.log(`Failed to remove build ${buildToDeleteId}:`);
@@ -501,9 +501,9 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       let removedFolderCount = 0;
       async.each(trashedAssetFolders, (trashedAssetFolder, cb) => {
-        let folderPath = path.join(trashedAssetsPath, trashedAssetFolder);
+        const folderPath = path.join(trashedAssetsPath, trashedAssetFolder);
         rimraf(folderPath, (err) => {
-          if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(<any>err).stack}`);
+          if (err != null) SupCore.log(`Could not delete ${folderPath}.\n${(err as any).stack}`);
           else removedFolderCount++;
           cb();
         });

@@ -21,7 +21,7 @@ export default class ProjectHub {
   constructor(globalIO: SocketIO.Server, callback: (err: Error) => any) {
     this.globalIO = globalIO;
 
-    let serveProjects = (callback: ErrorCallback) => {
+    const serveProjects = (callback: ErrorCallback) => {
       async.eachSeries(fs.readdirSync(paths.projects), (folderName: string, cb: (err: Error) => any) => {
         if (folderName.indexOf(".") !== -1) { cb(null); return; }
         this.loadingProjectFolderName = folderName;
@@ -33,16 +33,16 @@ export default class ProjectHub {
       });
     };
 
-    let setupProjectsList = (callback: Function) => {
-      let data: SupCore.Data.ProjectManifestPub[] = [];
-      for (let id in this.serversById) data.push(this.serversById[id].data.manifest.pub);
+    const setupProjectsList = (callback: Function) => {
+      const data: SupCore.Data.ProjectManifestPub[] = [];
+      for (const id in this.serversById) data.push(this.serversById[id].data.manifest.pub);
 
       data.sort(SupCore.Data.Projects.sort);
       this.data.projects = new SupCore.Data.Projects(data);
       callback();
     };
 
-    let serve = (callback: Function) => {
+    const serve = (callback: Function) => {
       this.io = this.globalIO.of("/hub");
       this.io.use(authMiddleware);
 
@@ -60,7 +60,7 @@ export default class ProjectHub {
   }
 
   loadProject(folderName: string, callback: (err: Error) => any) {
-    let server = new ProjectServer(this.globalIO, folderName, (err) => {
+    const server = new ProjectServer(this.globalIO, folderName, (err) => {
       if (err != null) { callback(err); return; }
 
       if (this.serversById[server.data.manifest.pub.id] != null) {
@@ -80,7 +80,7 @@ export default class ProjectHub {
 
   private onAddSocket = (socket: SocketIO.Socket) => {
     /* tslint:disable:no-unused-variable */
-    let client = new RemoteHubClient(this, socket);
+    const client = new RemoteHubClient(this, socket);
     // this.clients.push(client);
     /* tslint:enable:no-unused-variable */
   };

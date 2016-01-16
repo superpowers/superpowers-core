@@ -11,13 +11,13 @@ import * as dialogs from "./dialogs/index";
 import * as i18n from "./i18n";
 /* tslint:enable:no-unused-variable */
 /* tslint:disable */
-let PerfectResize = require("perfect-resize");
+const PerfectResize = require("perfect-resize");
 /* tslint:enable */
 
 export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, dialogs, i18n };
 
-export let isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
-export let query = querystring.parse(window.location.search.slice(1));
+export const isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
+export const query = querystring.parse(window.location.search.slice(1));
 
 // Refuses filesystem-unsafe characters
 // See http://superuser.com/q/358855
@@ -27,7 +27,7 @@ export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
 SupCore.system = new SupCore.System("", "");
 
 export let activePluginPath: string;
-export let plugins: { [context: string]: { [name: string]: { path: string; content: any; } } } = {};
+export const plugins: { [context: string]: { [name: string]: { path: string; content: any; } } } = {};
 export function registerPlugin(context: string, name: string, content: any) {
   if (plugins[context] == null) plugins[context] = {};
 
@@ -44,10 +44,10 @@ export function connect(projectId: string, options?: { reconnection?: boolean; }
   if (options == null) options = {};
   if (options.reconnection == null) options.reconnection = false;
 
-  let namespace = (projectId != null) ? `project:${projectId}` : "hub";
+  const namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
-  let supServerAuth = cookies.get("supServerAuth");
-  let socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
+  const supServerAuth = cookies.get("supServerAuth");
+  const socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
     { transports: [ "websocket" ], reconnection: options.reconnection, query: { supServerAuth } }
   );
 
@@ -61,10 +61,10 @@ export function connect(projectId: string, options?: { reconnection?: boolean; }
 export function onAssetTrashed() {
   document.body.innerHTML = "";
 
-  let h1 = document.createElement("h1");
+  const h1 = document.createElement("h1");
   h1.textContent = "This asset has been trashed.";
 
-  let div = document.createElement("div");
+  const div = document.createElement("div");
   div.className = "superpowers-error";
   div.appendChild(h1);
   document.body.appendChild(div);
@@ -73,14 +73,14 @@ export function onAssetTrashed() {
 export function onDisconnected() {
   document.body.innerHTML = "";
 
-  let h1 = document.createElement("h1");
+  const h1 = document.createElement("h1");
   h1.textContent = "You were disconnected.";
 
-  let button = document.createElement("button");
+  const button = document.createElement("button");
   button.textContent = "Reconnect";
   button.addEventListener("click", () => { location.reload(); });
 
-  let div = document.createElement("div");
+  const div = document.createElement("div");
   div.className = "superpowers-error";
   div.appendChild(h1);
   div.appendChild(button);
@@ -116,7 +116,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
   let index: number;
 
   let parentNode: any;
-  let targetEntryId = dropInfo.target.dataset.id;
+  const targetEntryId = dropInfo.target.dataset.id;
 
   switch (dropInfo.where) {
     case "inside": {
@@ -125,7 +125,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
     } break;
     case "above":
     case "below": {
-      let targetNode = treeById.byId[targetEntryId];
+      const targetNode = treeById.byId[targetEntryId];
       parentNode = treeById.parentNodesById[targetNode.id];
 
       index = (parentNode != null) ? parentNode.children.indexOf(targetNode) : treeById.pub.indexOf(targetNode);
@@ -139,8 +139,8 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
 }
 
 export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed = false) {
-  let targetEntryId = dropInfo.target.dataset.id;
-  let targetNode = listById.byId[targetEntryId];
+  const targetEntryId = dropInfo.target.dataset.id;
+  const targetNode = listById.byId[targetEntryId];
 
   let index = listById.pub.indexOf(targetNode);
   if (!reversed && dropInfo.where === "below") index++;
@@ -149,7 +149,7 @@ export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.
 }
 
 export function findEntryByPath(entries: any, path: string|string[]) {
-  let parts = (typeof path === "string") ? path.split("/") : path;
+  const parts = (typeof path === "string") ? path.split("/") : path;
   let foundEntry: any;
 
   entries.every((entry: any) => {
@@ -170,18 +170,18 @@ export function findEntryByPath(entries: any, path: string|string[]) {
 }
 
 export function setupCollapsablePane(paneElt: HTMLDivElement, refreshCallback?: Function) {
-  let handle = new PerfectResize(paneElt, "bottom");
+  const handle = new PerfectResize(paneElt, "bottom");
   if (refreshCallback != null)
     handle.on("drag", () => { refreshCallback(); });
 
-  let statusElt = paneElt.querySelector(".header") as HTMLDivElement;
+  const statusElt = paneElt.querySelector(".header") as HTMLDivElement;
 
-  let buttonElt = document.createElement("button");
+  const buttonElt = document.createElement("button");
   buttonElt.classList.add("toggle");
   statusElt.appendChild(buttonElt);
 
-  let contentElt = paneElt.querySelector(".content") as HTMLDivElement;
-  let collaspe = (collapsed: boolean) => {
+  const contentElt = paneElt.querySelector(".content") as HTMLDivElement;
+  const collaspe = (collapsed: boolean) => {
     contentElt.hidden = collapsed;
     buttonElt.textContent = collapsed ? "+" : "–";
 

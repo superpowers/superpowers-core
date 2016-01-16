@@ -1,15 +1,19 @@
 import "../window";
 
-let port = (window.location.port.length === 0) ? "80" : window.location.port;
+const port = (window.location.port.length === 0) ? "80" : window.location.port;
 
-let serverPasswordElt = document.querySelector(".server-password") as HTMLInputElement;
-let usernameElt = document.querySelector(".username") as HTMLInputElement;
+const connectingElt = document.querySelector(".connecting") as HTMLDivElement;
+const formElt = document.querySelector(".login") as HTMLDivElement;
+const serverPasswordElt = document.querySelector(".server-password") as HTMLInputElement;
+const usernameElt = document.querySelector(".username") as HTMLInputElement;
+
+formElt.hidden = true;
 
 let supServerAuth = SupClient.cookies.getJSON("supServerAuth");
 
 // NOTE: Superpowers used to store auth info in local storage
 if (supServerAuth == null) {
-  let supServerAuthJSON = localStorage.getItem("supServerAuth");
+  const supServerAuthJSON = localStorage.getItem("supServerAuth");
   if (supServerAuthJSON != null) supServerAuth = JSON.parse(supServerAuthJSON);
 }
 
@@ -18,8 +22,7 @@ if (supServerAuth != null) {
   usernameElt.value = supServerAuth.username;
 }
 
-let redirect: string = (SupClient.query as any).redirect;
-if (redirect == null) redirect = "/";
+const redirect: string = (SupClient.query as any).redirect != null ? (SupClient.query as any).redirect : "/";
 
 SupClient.fetch("superpowers.json", "json", (err, data) => {
   serverPasswordElt.parentElement.parentElement.hidden = data.hasPassword === false;
@@ -27,6 +30,8 @@ SupClient.fetch("superpowers.json", "json", (err, data) => {
 });
 
 function start() {
+  formElt.hidden = false;
+  connectingElt.hidden = true;
   document.querySelector(".server-name").textContent = SupClient.i18n.t("hub:serverAddress", { hostname: window.location.hostname, port });
   document.querySelector("form.login").addEventListener("submit", onFormSubmit);
 }

@@ -4,7 +4,7 @@ import * as _ from "lodash";
 import config from "../../../server/configDefaults";
 import * as schemas from "../../../server/schemas";
 
-let fs = nodeRequire("fs");
+const fs = nodeRequire("fs");
 if (fs.existsSync(serverPaths.config)) {
   let userConfig: any;
   try {
@@ -21,10 +21,10 @@ if (fs.existsSync(serverPaths.config)) {
   _.merge(config, userConfig);
 }
 
-let mainPortInput = <HTMLInputElement>document.querySelector("input.main-server-port");
-let buildPortInput = <HTMLInputElement>document.querySelector("input.build-server-port");
-let passwordInput = <HTMLInputElement>document.querySelector("input.server-password");
-let maxRecentBuildsInput = <HTMLInputElement>document.querySelector("input.max-recent-builds");
+const mainPortInput = <HTMLInputElement>document.querySelector("input.main-server-port");
+const buildPortInput = <HTMLInputElement>document.querySelector("input.build-server-port");
+const passwordInput = <HTMLInputElement>document.querySelector("input.server-password");
+const maxRecentBuildsInput = <HTMLInputElement>document.querySelector("input.max-recent-builds");
 
 mainPortInput.value = config.mainPort.toString();
 buildPortInput.value = config.buildPort.toString();

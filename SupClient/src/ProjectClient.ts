@@ -74,7 +74,7 @@ export default class ProjectClient {
       this.socket.emit("sub", "assets", assetId, this.onAssetReceived.bind(this, assetId, assetType));
     }
     else {
-      let asset = this.assetsById[assetId];
+      const asset = this.assetsById[assetId];
       if (asset != null) subscriber.onAssetReceived(assetId, asset);
     }
 
@@ -82,10 +82,10 @@ export default class ProjectClient {
   }
 
   unsubAsset(assetId: string, subscriber: AssetSubscriber) {
-    let subscribers = this.subscribersByAssetId[assetId];
+    const subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    let index = subscribers.indexOf(subscriber);
+    const index = subscribers.indexOf(subscriber);
     if (index === -1) return;
 
     subscribers.splice(index, 1);
@@ -110,7 +110,7 @@ export default class ProjectClient {
       this.socket.emit("sub", "resources", resourceId, this.onResourceReceived.bind(this, resourceId));
     }
     else {
-      let resource = this.resourcesById[resourceId];
+      const resource = this.resourcesById[resourceId];
       if (resource != null) subscriber.onResourceReceived(resourceId, resource);
     }
 
@@ -118,10 +118,10 @@ export default class ProjectClient {
   }
 
   unsubResource(resourceId: string, subscriber: ResourceSubscriber) {
-    let subscribers = this.subscribersByResourceId[resourceId];
+    const subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
-    let index = subscribers.indexOf(subscriber);
+    const index = subscribers.indexOf(subscriber);
     if (index === -1) return;
 
     subscribers.splice(index, 1);
@@ -146,7 +146,7 @@ export default class ProjectClient {
       return;
     }
 
-    let subscribers = this.subscribersByAssetId[assetId];
+    const subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
     let asset: SupCore.Data.Base.Asset = null;
@@ -155,24 +155,24 @@ export default class ProjectClient {
       asset.client_load();
     }
 
-    for (let subscriber of subscribers) { subscriber.onAssetReceived(assetId, asset); }
+    for (const subscriber of subscribers) { subscriber.onAssetReceived(assetId, asset); }
   };
 
   private onAssetEdited = (assetId: string, command: string, ...args: any[]) => {
-    let subscribers = this.subscribersByAssetId[assetId];
+    const subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    let asset = this.assetsById[assetId];
+    const asset = this.assetsById[assetId];
     Object.getPrototypeOf(asset)[`client_${command}`].apply(asset, args);
 
-    for (let subscriber of subscribers) { subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args)); }
+    for (const subscriber of subscribers) { subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args)); }
   };
 
   private onAssetTrashed = (assetId: string) => {
-    let subscribers = this.subscribersByAssetId[assetId];
+    const subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    for (let subscriber of subscribers) { subscriber.onAssetTrashed(assetId); }
+    for (const subscriber of subscribers) { subscriber.onAssetTrashed(assetId); }
 
     this.assetsById[assetId].client_unload();
     delete this.assetsById[assetId];
@@ -185,23 +185,23 @@ export default class ProjectClient {
       return;
     }
 
-    let subscribers = this.subscribersByResourceId[resourceId];
+    const subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
     let resource: SupCore.Data.Base.Resource = null;
     if (resourceData != null) resource = this.resourcesById[resourceId] = new SupCore.system.data.resourceClasses[resourceId](resourceId, resourceData);
 
-    for (let subscriber of subscribers) { subscriber.onResourceReceived(resourceId, resource); }
+    for (const subscriber of subscribers) { subscriber.onResourceReceived(resourceId, resource); }
   };
 
   private onResourceEdited = (resourceId: string, command: string, ...args: any[]) => {
-    let subscribers = this.subscribersByResourceId[resourceId];
+    const subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
-    let resource = this.resourcesById[resourceId];
+    const resource = this.resourcesById[resourceId];
     Object.getPrototypeOf(resource)[`client_${command}`].apply(resource, args);
 
-    for (let subscriber of subscribers) { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); }
+    for (const subscriber of subscribers) { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); }
   };
 
   private onEntriesReceived = (err: string, entries: any) => {
@@ -212,33 +212,33 @@ export default class ProjectClient {
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
     this.socket.on("trash:entries", this.onEntryTrashed);
 
-    for (let subscriber of this.entriesSubscribers) { subscriber.onEntriesReceived(this.entries); }
+    for (const subscriber of this.entriesSubscribers) { subscriber.onEntriesReceived(this.entries); }
   };
 
   private onEntryAdded = (entry: any, parentId: string, index: number) => {
     this.entries.client_add(entry, parentId, index);
-    for (let subscriber of this.entriesSubscribers) {
+    for (const subscriber of this.entriesSubscribers) {
       subscriber.onEntryAdded(entry, parentId, index);
     }
   };
 
   private onEntryMoved = (id: string, parentId: string, index: number) => {
     this.entries.client_move(id, parentId, index);
-    for (let subscriber of this.entriesSubscribers) {
+    for (const subscriber of this.entriesSubscribers) {
       subscriber.onEntryMoved(id, parentId, index);
     }
   };
 
   private onSetEntryProperty = (id: string, key: string, value: any) => {
     this.entries.client_setProperty(id, key, value);
-    for (let subscriber of this.entriesSubscribers) {
+    for (const subscriber of this.entriesSubscribers) {
       subscriber.onSetEntryProperty(id, key, value);
     }
   };
 
   private onEntryTrashed = (id: string) => {
     this.entries.client_remove(id);
-    for (let subscriber of this.entriesSubscribers) {
+    for (const subscriber of this.entriesSubscribers) {
       subscriber.onEntryTrashed(id);
     }
   };

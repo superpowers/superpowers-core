@@ -17,9 +17,10 @@ exports.loadLocale = function(locale) {
   contexts["common"] = JSON.parse(fs.readFileSync(exports.rootLocalesPath + locale + "/common.json", { encoding: "utf8" }));
 
   if (defaultContexts != null) {
+    var missingKeys = [];
     function checkRecursively(defaultRoot, root, key, path) {
       if (root[key] == undefined) {
-        console.log("Missing key in " + locale + " translation: " + path);
+        missingKeys.push(path);
         root[key] = defaultRoot[key];
       
       } else if (typeof defaultRoot[key] === "object") {
@@ -32,7 +33,9 @@ exports.loadLocale = function(locale) {
     var keys = Object.keys(defaultContexts);
     for (var i = 0; i < keys.length; i++)
       checkRecursively(defaultContexts, contexts, keys[i], keys[i]);
+    if (missingKeys.length > 0) console.log("Missing keys in " + locale + " translation: " + missingKeys.join(", "));
   }
+  
   return contexts;
 }
 

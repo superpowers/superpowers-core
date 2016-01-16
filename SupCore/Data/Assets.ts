@@ -14,17 +14,17 @@ export default class Assets extends SupData.Base.Dictionary {
   }
 
   _load(id: string) {
-    let entry = this.server.data.entries.byId[id];
+    const entry = this.server.data.entries.byId[id];
 
-    let assetClass = this.server.system.data.assetClasses[entry.type];
+    const assetClass = this.server.system.data.assetClasses[entry.type];
     if (assetClass == null) throw new Error(`No data plugin for asset type "${entry.type}"`);
 
-    let asset = new assetClass(id, null, this.server);
+    const asset = new assetClass(id, null, this.server);
 
     // NOTE: The way assets are laid out on disk was changed in Superpowers 0.11
-    let oldDirPath = path.join(this.server.projectPath, `assets/${id}`);
+    const oldDirPath = path.join(this.server.projectPath, `assets/${id}`);
     fs.stat(oldDirPath, (err, stats) => {
-      let dirPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(id)}`);
+      const dirPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(id)}`);
 
       if (stats == null) asset.load(dirPath);
       else {

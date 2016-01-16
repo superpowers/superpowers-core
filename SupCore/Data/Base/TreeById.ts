@@ -37,14 +37,14 @@ export default class TreeById extends EventEmitter {
   }
 
   walk(callback: (node: TreeNode, parentNode?: TreeNode) => any) {
-    for (let node of this.pub) this.walkNode(node, null, callback);
+    for (const node of this.pub) this.walkNode(node, null, callback);
   }
 
   walkNode(node: TreeNode, parentNode: TreeNode, callback: (node: TreeNode, parentNode?: TreeNode) => any) {
     callback(node, parentNode);
 
     if (node.children != null) {
-      for (let child of node.children) this.walkNode(child, node, callback);
+      for (const child of node.children) this.walkNode(child, node, callback);
     }
   }
 
@@ -67,16 +67,16 @@ export default class TreeById extends EventEmitter {
     if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     if (siblings == null) { callback(`Invalid parent id: ${parentId}`); return; }
 
-    let missingKeys = Object.keys(this.schema);
-    for (let key in node) {
-      let value = node[key];
-      let rule = this.schema[key];
+    const missingKeys = Object.keys(this.schema);
+    for (const key in node) {
+      const value = node[key];
+      const rule = this.schema[key];
       if (rule == null) {
         if(key === "id" && value == null) continue;
         callback(`Invalid key: ${key}`);
         return;
       }
-      let violation = base.getRuleViolation(value, rule, true);
+      const violation = base.getRuleViolation(value, rule, true);
       if (violation != null) { callback(`Invalid value for ${key}: ${base.formatRuleViolation(violation)}`); return; }
 
       missingKeys.splice(missingKeys.indexOf(key), 1);
@@ -110,7 +110,7 @@ export default class TreeById extends EventEmitter {
 
 
   move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any) {
-    let node = this.byId[id];
+    const node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
     let parentNode: TreeNode = null;
@@ -120,11 +120,11 @@ export default class TreeById extends EventEmitter {
     }
 
     // Adjust insertion index if needed
-    let siblings = (parentNode != null) ? parentNode.children : this.pub;
+    const siblings = (parentNode != null) ? parentNode.children : this.pub;
     if (index == null || index < 0 || index > siblings.length) index = siblings.length;
 
-    let oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
-    let oldIndex = oldSiblings.indexOf(node);
+    const oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    const oldIndex = oldSiblings.indexOf(node);
     oldSiblings.splice(oldIndex, 1);
 
     let actualIndex = index;
@@ -138,13 +138,13 @@ export default class TreeById extends EventEmitter {
   }
 
   client_move(id: string, parentId: string, index: number) {
-    let node = this.byId[id];
+    const node = this.byId[id];
 
-    let parentNode = (parentId != null) ? this.byId[parentId] : null;
-    let siblings = (parentNode != null) ? this.byId[parentId].children : this.pub;
+    const parentNode = (parentId != null) ? this.byId[parentId] : null;
+    const siblings = (parentNode != null) ? this.byId[parentId].children : this.pub;
 
-    let oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
-    let oldIndex = oldSiblings.indexOf(node);
+    const oldSiblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    const oldIndex = oldSiblings.indexOf(node);
     oldSiblings.splice(oldIndex, 1);
 
     let actualIndex = index;
@@ -156,10 +156,10 @@ export default class TreeById extends EventEmitter {
 
 
   remove(id: string, callback: (err: string) => any) {
-    let node = this.byId[id];
+    const node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
-    let siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    const siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     siblings.splice(siblings.indexOf(node), 1);
 
     this.walkNode(node, null, (node: TreeNode, parentNode?: TreeNode) => {
@@ -172,9 +172,9 @@ export default class TreeById extends EventEmitter {
   }
 
   client_remove(id: string) {
-    let node = this.byId[id];
+    const node = this.byId[id];
 
-    let siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
+    const siblings = (this.parentNodesById[id] != null) ? this.parentNodesById[id].children : this.pub;
     siblings.splice(siblings.indexOf(node), 1);
 
     this.walkNode(node, null, (node: TreeNode, parentNode?: TreeNode) => {
@@ -189,21 +189,21 @@ export default class TreeById extends EventEmitter {
     let node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
 
-    let parts = path.split(".");
+    const parts = path.split(".");
 
     let rule = this.schema[parts[0]];
-    for (let part of parts.slice(1)) {
+    for (const part of parts.slice(1)) {
       rule = rule.properties[part];
       if (rule.type === "any") break;
     }
 
     if (rule == null) { callback(`Invalid key: ${path}`); return; }
     if (rule.type !== "any") {
-      let violation = base.getRuleViolation(value, rule);
+      const violation = base.getRuleViolation(value, rule);
       if (violation != null) { callback(`Invalid value for ${path}: ${base.formatRuleViolation(violation)}`); return; }
     }
 
-    for (let part of parts.slice(0, parts.length - 1)) node = node[part];
+    for (const part of parts.slice(0, parts.length - 1)) node = node[part];
     node[parts[parts.length - 1]] = value;
 
     callback(null, value);
@@ -211,10 +211,10 @@ export default class TreeById extends EventEmitter {
   }
 
   client_setProperty(id: string, path: string, value: any) {
-    let parts = path.split(".");
+    const parts = path.split(".");
 
     let node = this.byId[id];
-    for (let part of parts.slice(0, parts.length - 1)) node = node[part];
+    for (const part of parts.slice(0, parts.length - 1)) node = node[part];
     node[parts[parts.length - 1]] = value;
   }
 }

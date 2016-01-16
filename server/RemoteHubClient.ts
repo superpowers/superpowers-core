@@ -38,7 +38,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
       formatVersion = JSON.parse(fs.readFileSync(path.join(templatePath, `manifest.json`), { encoding: "utf8" })).formatVersion;
     }
 
-    let manifest: SupCore.Data.ProjectManifestPub = {
+    const manifest: SupCore.Data.ProjectManifestPub = {
       id: null,
       name: details.name,
       description: details.description,
@@ -47,25 +47,24 @@ export default class RemoteHubClient extends BaseRemoteClient {
     };
 
     let projectFolder = manifest.name.toLowerCase().slice(0, 32).replace(/[^a-z0-9]/g, "-");
-    let originalProjectFolder = projectFolder;
+    const originalProjectFolder = projectFolder;
     let projectFolderNumber = 1;
 
     while(true) {
-      try {
-        fs.mkdirSync(path.join(paths.projects, projectFolder));
-      } catch (e) {
+      try { fs.mkdirSync(path.join(paths.projects, projectFolder)); }
+      catch (e) {
         projectFolder = `${originalProjectFolder}-${projectFolderNumber++}`;
         continue;
       }
       break;
     }
-    let projectPath = path.join(paths.projects, projectFolder);
+    const projectPath = path.join(paths.projects, projectFolder);
 
-    let onFoldersCreated = (err: Error) => {
+    const onFoldersCreated = (err: Error) => {
       if (err != null) { callback(`The project could not be created, folders creation has failed: ${err.message}`); return; }
 
       let sortedIndex = 0;
-      for (let item of this.server.data.projects.pub) {
+      for (const item of this.server.data.projects.pub) {
         if (SupCore.Data.Projects.sort(manifest, item) < 0) break;
         sortedIndex++;
       }
@@ -73,8 +72,8 @@ export default class RemoteHubClient extends BaseRemoteClient {
       this.server.data.projects.add(manifest, sortedIndex, (err: string, actualIndex: number) => {
         if (err != null) { callback(err); return; }
 
-        let writeTemplate = (callback: (err?: NodeJS.ErrnoException) => any) => {
-          let copyRecursively = (currentPath: string, callback: ((err?: NodeJS.ErrnoException) => any)) => {
+        const writeTemplate = (callback: (err?: NodeJS.ErrnoException) => any) => {
+          const copyRecursively = (currentPath: string, callback: ((err?: NodeJS.ErrnoException) => any)) => {
             fs.readdir(path.join(templatePath, currentPath), (err, files) => {
               if (err != null) { callback(err); return; }
               async.each(files, (file, callback) => {
@@ -83,7 +82,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
                 fs.lstat(path.join(templatePath, currentPath, file), (err, stats) => {
                   if (err != null) { callback(err); return; }
 
-                  let filePath = path.join(currentPath, file);
+                  const filePath = path.join(currentPath, file);
                   if (stats.isDirectory()) {
                     fs.mkdir(path.join(projectPath, filePath), (err) => {
                       if (err != null) { callback(err); return; }
@@ -101,19 +100,19 @@ export default class RemoteHubClient extends BaseRemoteClient {
           copyRecursively("", callback);
         };
 
-        let writeEntries = (callback: (err?: NodeJS.ErrnoException) => any) => {
-          let entriesJSON = JSON.stringify([], null, 2);
+        const writeEntries = (callback: (err?: NodeJS.ErrnoException) => any) => {
+          const entriesJSON = JSON.stringify([], null, 2);
           fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
         };
 
-        let writeManifest = (callback: (err?: NodeJS.ErrnoException) => any) => {
-          let manifestJSON = JSON.stringify(manifest, null, 2);
+        const writeManifest = (callback: (err?: NodeJS.ErrnoException) => any) => {
+          const manifestJSON = JSON.stringify(manifest, null, 2);
           fs.writeFile(path.join(projectPath, "manifest.json"), manifestJSON, { encoding: "utf8" }, callback);
         };
 
-        let loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, callback); };
+        const loadProject = (callback: (err: Error) => any) => { this.server.loadProject(projectFolder, callback); };
 
-        let tasks = [ writeManifest, this.writeIcon.bind(this, projectPath, details.icon), loadProject ];
+        const tasks = [ writeManifest, this.writeIcon.bind(this, projectPath, details.icon), loadProject ];
         tasks.splice(0, 0, details.template != null ? writeTemplate : writeEntries);
 
         async.series(tasks, (err) => {
@@ -144,7 +143,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
   private onEditProject = (projectId: string, details: ProjectDetails, callback: (err: string) => any) => {
     if (!this.errorIfCant("editProjects", callback)) return;
 
-    let projectServer = this.server.serversById[projectId];
+    const projectServer = this.server.serversById[projectId];
     if (projectServer == null) { callback("Invalid project id"); return; }
 
     async.series([

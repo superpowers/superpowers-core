@@ -1,18 +1,18 @@
 import supFetch from "../../../SupClient/src/fetch";
 
-let electron: GitHubElectron.Electron = nodeRequire("electron");
+const electron: GitHubElectron.Electron = nodeRequire("electron");
 
 /* tslint:disable */
 // Must use require rather than fs so that it gets browserified
-let packageInfo = require("../../../package.json");
+const packageInfo = require("../../../package.json");
 /* tslint:enable */
 
-let splash = <HTMLDivElement>document.querySelector(".splash");
+const splash = document.querySelector(".splash") as HTMLDivElement;
 
 splash.addEventListener("click", (event) => {
-  if ((<Element>event.target).tagName === "A") {
+  if ((event.target as Element).tagName === "A") {
     event.preventDefault();
-    electron.shell.openExternal((<HTMLAnchorElement>event.target).href);
+    electron.shell.openExternal((event.target as HTMLAnchorElement).href);
     return;
   }
 
@@ -22,7 +22,7 @@ splash.addEventListener("click", (event) => {
 
 // Check for new releases
 document.querySelector(".splash .version").textContent = `v${packageInfo.version}`;
-let updateStatus = <HTMLDivElement>document.querySelector(".splash .update-status");
+const updateStatus = document.querySelector(".splash .update-status") as HTMLDivElement;
 
 supFetch("https://api.github.com/repos/superpowers/superpowers/releases/latest", "json", (err, lastRelease) => {
   if (err != null) {
@@ -30,7 +30,7 @@ supFetch("https://api.github.com/repos/superpowers/superpowers/releases/latest",
     return;
   }
 
-  let lastVersion = lastRelease.tag_name;
+  const lastVersion = lastRelease.tag_name;
   if (lastVersion === `v${packageInfo.version}`) updateStatus.textContent = "";
   else {
     updateStatus.innerHTML = `UPDATE: ${lastVersion} is available. ` +
