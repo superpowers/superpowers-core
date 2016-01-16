@@ -122,10 +122,10 @@ export default class RemoteProjectClient extends BaseRemoteClient {
             }
 
             this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
-              newAsset.restore();
               this.server.data.assets.release(entry.id, null);
 
               this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+              newAsset.restore();
               callback(null, entry.id);
             });
           });
