@@ -12,21 +12,21 @@ html
     .sidebar
       .project-management
         .project-icon
-          button(title= t("project:header.goToHub")).go-to-hub
+          button(title=t("project:header.goToHub")).go-to-hub
         .project-name= t("common:states.loading")
         .project-buttons
-          button(title= t("project:header.publish"),disabled).publish
-          button(title= t("project:header.stop"),disabled).stop
-          button(title= t("project:header.debug"),disabled).debug
-          button(title= t("project:header.run"),disabled).run
+          button(title=t("project:header.publish"),disabled).publish
+          button(title=t("project:header.stop"),disabled).stop
+          button(title=t("project:header.debug"),disabled).debug
+          button(title=t("project:header.run"),disabled).run
 
       .entries-buttons.flat-button-strip
-        button(title= t("project:treeView.newAsset.title"),disabled, data-hotkey="control+N").new-asset
-        button(title= t("project:treeView.newFolder.title"),disabled, data-hotkey="control+shift+N").new-folder
-        button(title= t("common:actions.rename"),disabled, data-hotkey="F2").rename-entry.single.edit
-        button(title= t("common:actions.duplicate"),disabled, data-hotkey="control+D").duplicate-entry.single.asset-only.edit
-        button(title= t("project:treeView.trash.title"),disabled, data-hotkey="delete").trash-entry.edit
-        button(title= t("common:actions.search"),disabled, data-hotkey="control+O").search
+        button(title=t("project:treeView.newAsset.title"),disabled,data-hotkey="control+N").new-asset
+        button(title=t("project:treeView.newFolder.title"),disabled,data-hotkey="control+shift+N").new-folder
+        button(title=t("common:actions.rename"),disabled,data-hotkey="F2").rename-entry.single.edit
+        button(title=t("common:actions.duplicate"),disabled,data-hotkey="control+D").duplicate-entry.single.asset-only.edit
+        button(title=t("project:treeView.trash.title"),disabled,data-hotkey="delete").trash-entry.edit
+        button(title=t("common:actions.search"),disabled,data-hotkey="control+O").search
       .entries-tree-view
         .connecting
           div= t("common:states.connecting")

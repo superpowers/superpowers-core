@@ -1,41 +1,46 @@
 @import "./Roboto"
 @import "./buttons"
 
-*
-  box-sizing border-box
-  min-width 0
-  min-height 0
-  font-family inherit
+* {
+  box-sizing border-box;
+  min-width: 0;
+  min-height: 0;
+  font-family: inherit;
+}
 
-*[hidden]
-  display none !important
+*[hidden] {
+  display: none !important;
+}
 
-html, body
-  height 100%
+html, body {
+  height: 100%;
+}
 
-body
-  margin 0
-  -webkit-user-select none
-  -moz-user-select none
-  user-select none
-  cursor default
-  font-family "Roboto", sans-serif
-  font-size 14px
+body {
+  margin: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  cursor: default;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+}
 
-.superpowers-error
-  position absolute
-  top 0
-  left 0
-  right 0
-  bottom 0
-  background #eee
-  padding 2em
-  color #444
+.superpowers-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #eee;
+  padding: 2em;
+  color: #444;
 
-  h1
-    margin-bottom 1em
+  h1 { margin-bottom: 1em; }
+}
 
-input[type=number]:not(:hover):not(:focus)
-  -moz-appearance textfield
+input[type=number]:not(:hover):not(:focus) {
+  -moz-appearance: textfield;
+}
 
 input:invalid { outline-color: red; }

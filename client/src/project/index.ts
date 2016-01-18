@@ -679,7 +679,7 @@ function onMessageChat(message: string) {
   const isHomeTabVisible = ui.homeTab.classList.contains("active");
   if (isHomeTabVisible && !document.hidden) return;
 
-  if (!isHomeTabVisible) ui.homeTab.classList.add("blink");
+  if (!isHomeTabVisible) ui.homeTab.classList.add("unread");
 
   if (localStorage.getItem("superpowers-disable-notifications") != null) return;
 
@@ -1024,7 +1024,7 @@ function createToolTabElement(toolName: string, tool: EditorManifest) {
   return tabElt;
 }
 
-function onTabActivate(tabElement: any) {
+function onTabActivate(tabElement: HTMLLIElement) {
   const activeTab = ui.tabStrip.tabsRoot.querySelector(".active");
   if (activeTab != null) {
     activeTab.classList.remove("active");
@@ -1035,12 +1035,12 @@ function onTabActivate(tabElement: any) {
   }
 
   tabElement.classList.add("active");
-  tabElement.classList.remove("blink");
+  tabElement.classList.remove("unread");
 
   const assetId = tabElement.dataset["assetId"];
   let tabIframe: HTMLIFrameElement;
   if (assetId != null) tabIframe = ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`) as HTMLIFrameElement;
-  else tabIframe = ui.panesElt.querySelector(`iframe[data-name='${tabElement.dataset.pane}']`) as HTMLIFrameElement;
+  else tabIframe = ui.panesElt.querySelector(`iframe[data-name='${tabElement.dataset["pane"]}']`) as HTMLIFrameElement;
 
   tabIframe.classList.add("active");
   tabIframe.contentWindow.focus();
@@ -1059,7 +1059,7 @@ function onTabClose(tabElement: HTMLLIElement) {
   }
 
   if (tabElement.classList.contains("active")) {
-    const activeTabElement = (tabElement.nextSibling != null) ? tabElement.nextSibling : tabElement.previousSibling;
+    const activeTabElement = (tabElement.nextElementSibling != null) ? tabElement.nextElementSibling as HTMLLIElement : tabElement.previousElementSibling as HTMLLIElement;
     if (activeTabElement != null) onTabActivate(activeTabElement);
   }
 

@@ -1,45 +1,53 @@
-button
-  background linear-gradient(#efefef, #e5e5e5)
-  padding 0.3em 0.6em
-  border 1px solid #999
-  border-radius 2px
-  box-shadow 0 0 1px 1px #fff inset
-  overflow hidden
-  color #222
-  line-height 1
+button {
+  background: linear-gradient(#efefef, #e5e5e5);
+  padding: 0.3em 0.6em;
+  border: 1px solid #999;
+  border-radius: 2px;
+  box-shadow: 0 0 1px 1px #fff inset;
+  overflow: hidden;
+  color: #222;
+  line-height: 1;
+}
 
-button:not(:disabled):hover
-  border-color #888
-  
-button:active
-  background linear-gradient(#dadada, #e5e5e5)
-  border-color #aaa
-  box-shadow 0 0 1px 1px #ccc inset
+button:not(:disabled):hover {
+  border-color: #888;
+}
 
-button:disabled
-  color #aaa
+button:active {
+  background: linear-gradient(#dadada, #e5e5e5);
+  border-color: #aaa;
+  box-shadow: 0 0 1px 1px #ccc inset;
+}
 
-.button-strip button:not(:last-child) { border-right: 0; border-radius: 0; }
-.button-strip button:first-child { border-radius: 2px 0 0 2px; }
-.button-strip button:last-child { border-radius: 0 2px 2px 0; }
+button:disabled {
+  color: #aaa;
+}
 
-.flat-button-strip
-  display flex
-  background rgba(0,0,0,0.05)
-  border-bottom 1px solid #acacac
+.button-strip button {
+  &:not(:last-child) { border-right: 0; border-radius: 0; }
+  &:first-child { border-radius: 2px 0 0 2px; }
+  &:last-child { border-radius: 0 2px 2px 0; }
+}
 
-.flat-button-strip button
-  flex 1
-  height 35px
-  border none
-  box-shadow none
-  background-color transparent
-  background-position center center
-  background-repeat no-repeat
+.flat-button-strip {
+  display: flex;
+  background: rgba(0,0,0,0.05);
+  border-bottom: 1px solid #acacac;
+}
 
-  opacity 0.5
-  cursor pointer
+.flat-button-strip button {
+  flex: 1;
+  height: 35px;
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  opacity: 0.5;
+  cursor: pointer;
 
   &:hover { background-color: rgba(0,0,0,0.1); opacity: 1; }
   &:active { background-color: #fff; }
   &:disabled { opacity: 0.2; cursor: default; }
+}
