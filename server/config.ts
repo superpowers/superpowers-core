@@ -9,7 +9,7 @@ export default configDefaults;
 /* tslint:disable */
 let bcrypt = require("bcryptjs");
 /* tslin:enable */
-let bcryptRegex = /^\$2a\$10\$/;
+let bcryptRegex = /^\$2a\$10\$.{53}$/;
 
 if (fs.existsSync(paths.config)) {
   const config = JSON.parse(fs.readFileSync(paths.config, { encoding: "utf8" }));
@@ -20,7 +20,7 @@ if (fs.existsSync(paths.config)) {
     delete config.port;
   }
 
-  if (!bcryptRegex.test(config.password) || config.password.length !== 60) {
+  if (!bcryptRegex.test(config.password)) {
     let hashPassword = bcrypt.hashSync(config.password, 10);
     config.password = hashPassword;
     fs.writeFileSync(paths.config, JSON.stringify(config, null, 2) + "\n", { encoding: "utf8" });
