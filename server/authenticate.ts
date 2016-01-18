@@ -33,7 +33,7 @@ function authentify(auth: any, socket: SocketIO.Socket, next: Function) {
   return;
 }
 
-function verifyServerPassword(password: string, hash: string, socket: SocketIO.Socket, next : Function) {
+function verifyServerPassword(password: string, hash: string, socket: SocketIO.Socket, next: Function) {
   if (config.password.length === 0) {
     next();
     return;
