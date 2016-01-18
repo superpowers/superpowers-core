@@ -36,7 +36,7 @@ function verifyServerPassword(password: string, hash: string, socket: SocketIO.S
     return;
   }
 
-  bcrypt.compare(password, hash, function(err : Error, res : boolean) {
+  bcrypt.compare(password, hash, function(err: Error, res: boolean) {
     if (res) {
       next();
       return;
