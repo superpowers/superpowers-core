@@ -1,8 +1,5 @@
 import config from "./config";
-
-/* tslint:disable */
-let bcrypt = require("bcryptjs");
-/* tslin:enable */
+import * as bcrypt from "bcryptjs";
 
 // NOTE: The regex must match the pattern and min/max lengths in client/src/login/index.jade
 const usernameRegex = /^[A-Za-z0-9_-]{3,20}$/;

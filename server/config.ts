@@ -3,12 +3,10 @@ import * as fs from "fs";
 import * as schemas from "./schemas";
 import * as paths from "./paths";
 import configDefaults from "./configDefaults";
+import * as bcrypt from "bcryptjs";
 
 export default configDefaults;
 
-/* tslint:disable */
-let bcrypt = require("bcryptjs");
-/* tslin:enable */
 let bcryptRegex = /^\$2a\$10\$.{53}$/;
 
 if (fs.existsSync(paths.config)) {
