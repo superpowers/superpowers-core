@@ -3,11 +3,32 @@
 import * as dummy_https from "https";
 import * as fs from "fs";
 import * as mkdirp from "mkdirp";
+import * as yargs from "yargs";
 
 /* tslint:disable */
 const https: typeof dummy_https = require("follow-redirects").https;
 const unzip = require("unzip");
 /* tslint:enable */
+
+const argv = yargs
+  .usage("Usage: $0 <command> [options]")
+  .demand(1, "Enter a command")
+  .command("start", "Start the server", (yargs) => {
+    yargs.demand(1, 1, "start command can't accept more arguments").argv;
+  })
+  .command("list", "List currently installed system and plugin", (yargs) => {
+    yargs.demand(1, 1, "list command can't accept more arguments").argv;
+  })
+  .command("registry", "List registry content", (yargs) => {
+    yargs.demand(1, 1, "list command can't accept more arguments").argv;
+  })
+  .command("install", "Install a system or a plugin", (yargs) => {
+    yargs.demand(2, 2, `install command take one argument "systemId" or "systemId:pluginAuthor/pluginName`).argv;
+  })
+  .command("init", "Init a system or a plugin", (yargs) => {
+    yargs.demand(2, 2, `install command take one argument "systemId" or "systemId:pluginAuthor/pluginName`).argv;
+  })
+  .argv;
 
 const folderNameRegex = /^[a-z0-9_-]+$/;
 const pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
@@ -51,8 +72,7 @@ for (const entry of fs.readdirSync(systemsPath)) {
   }
 }
 
-const command = process.argv[2];
-
+const command = argv._[0];
 switch (command) {
   case "start":
     /* tslint:disable */
@@ -60,11 +80,11 @@ switch (command) {
     /* tslint:enable */
     break;
   case "list": list(); break;
+  case "registry": showRegistry(); break;
   case "install": install(); break;
   case "init": init(); break;
   default:
-    if (command != null) console.error(`Unknown command: ${command}`);
-    console.log("Available commands: start, install, init");
+    yargs.showHelp();
     process.exit(1);
     break;
 }
@@ -115,6 +135,16 @@ function getRegistry(callback: (err: Error, registry: Registry) => any) {
 
   request.on("error", (err: Error) => {
     callback(err, null);
+  });
+}
+
+function showRegistry() {
+  getRegistry((err, registry) => {
+    for (const systemId in registry.systems) {
+      console.log(`----- ${systemId} -----`);
+      listAvailablePlugins(registry, systemId);
+      console.log(`\n`);
+    }
   });
 }
 
