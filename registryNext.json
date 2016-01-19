@@ -5,7 +5,7 @@
       "repository": "https://github.com/superpowers/superpowers-game",
       "plugins": {
         "demo": {
-          "customAPI": "https://github.com/superpowers-extra/superpowers-game-api-demo-plugin"
+          "custom-api": "https://github.com/superpowers-extra/superpowers-game-api-demo-plugin"
         }
       }
     },
