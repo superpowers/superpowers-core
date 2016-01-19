@@ -36,7 +36,7 @@ for (const entry of fs.readdirSync(systemsPath)) {
   if (pluginAuthors == null) continue;
 
   for (const pluginAuthor of pluginAuthors) {
-    if (pluginAuthor === "default" || pluginAuthor === "common") continue;
+    if (pluginAuthor === "default" || pluginAuthor === "common" || pluginAuthor === "extra") continue;
     if (!folderNameRegex.test(pluginAuthor)) continue;
 
     const pluginNames: string[] = [];
@@ -150,10 +150,7 @@ function getLatestRelease(repositoryURL: string, callback: (downloadURL: string)
     res.on("data", (chunk: string) => { content += chunk; });
     res.on("end", () => {
       const repositoryInfo = JSON.parse(content);
-      const downloadURL = (repositoryInfo.assets.length > 0) ?
-        repositoryInfo.assets[0].browser_download_url :
-        repositoryInfo.zipball_url;
-      callback(downloadURL);
+      callback(repositoryInfo.assets[0].browser_download_url);
     });
   });
 
@@ -217,9 +214,8 @@ function install() {
         process.exit(1);
       }
 
-      // console.log(`Installing plugin ${pluginPath} on system ${systemId}...`);
-      // installPlugin(systemId, pluginAuthor, registry.systems[systemId].plugins[pluginAuthor][pluginName]);
-      console.log(`Plugin installation isn't supported yet`);
+      console.log(`Installing plugin ${pluginPath} on system ${systemId}...`);
+      installPlugin(systemId, pluginAuthor, pluginName, registry.systems[systemId].plugins[pluginAuthor][pluginName]);
     } else {
       if (pluginPath != null) {
         console.error(`System ${systemId} is not installed.`);
@@ -251,11 +247,10 @@ function installSystem(repositoryURL: string) {
   });
 }
 
-function installPlugin(systemId: string, pluginAuthor: string, repositoryURL: string) {
+function installPlugin(systemId: string, pluginAuthor: string, pluginName: string, repositoryURL: string) {
   getLatestRelease(repositoryURL, (downloadURL) => {
     const pluginPath = `${systemsPath}/${systemsById[systemId].folderName}/plugins/${pluginAuthor}`;
     mkdirp.sync(pluginPath);
-    console.log(downloadURL);
 
     https.get({
       hostname: "github.com",
@@ -268,8 +263,18 @@ function installPlugin(systemId: string, pluginAuthor: string, repositoryURL: st
         console.error(err.stack);
         process.exit(1);
       }
-      res.pipe(unzip.Extract({ path: pluginPath }));
-      res.on("end", () => { console.log("Plugin successfully installed."); });
+
+      let folderName: string;
+      res.pipe(unzip.Parse())
+        .on("entry", (entry: any) => {
+          if (folderName == null) folderName = entry.path;
+          if (entry.type === "Directory") mkdirp.sync(`${pluginPath}/${entry.path}`);
+          else entry.pipe(fs.createWriteStream(`${pluginPath}/${entry.path}`));
+        })
+        .on("close", () => {
+          fs.renameSync(`${pluginPath}/${folderName}`, `${pluginPath}/${pluginName}`);
+          console.log("Plugin successfully installed.");
+        });
     });
   });
 }
