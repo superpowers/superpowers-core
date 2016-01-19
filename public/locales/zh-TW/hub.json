@@ -1,0 +1,20 @@
+{
+  "serverAddress": "${hostname} on port ${port}",
+  "newProject": {
+    "title": "新專案",
+    "prompt": "輸入專案名稱並選擇類別",
+    "namePlaceholder": "專案名稱",
+    "descriptionPlaceholder": "描述 (非必填)",
+    "emptyProject": {
+      "title": "空白專案",
+      "description": "建立一個空白專案"
+    },
+    "autoOpen": "建立後開啟"
+  },
+  "editDetails": {
+    "title": "編輯詳細訊息",
+    "prompt": "編輯專案的詳細訊息"
+  },
+  "openProject": "開啟專案",
+  "language": "語言"
+}
