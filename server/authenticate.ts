@@ -1,4 +1,5 @@
 import config from "./config";
+import * as bcrypt from "bcryptjs";
 
 // NOTE: The regex must match the pattern and min/max lengths in client/src/login/index.jade
 const usernameRegex = /^[A-Za-z0-9_-]{3,20}$/;
@@ -10,13 +11,38 @@ export default function(socket: SocketIO.Socket, next: Function) {
     try { auth = JSON.parse(authJSON); } catch (e) { /* Ignore */ }
   }
 
-  if (auth != null && (auth.serverPassword === config.password || config.password.length === 0) && typeof auth.username === "string" && usernameRegex.test(auth.username)) {
-    (socket as any).username = auth.username;
+  authentify(auth, socket, next);
+  return;
+}
+
+function authentify(auth: any, socket: SocketIO.Socket, next: Function) {
+  if (auth == null) {
+    next(new Error("invalidCredentials"));
+    return;
   }
 
-  if ((socket as any).username == null) {
-    if (config.password.length > 0) { next(new Error("invalidCredentials")); return; }
-    else { next(new Error("invalidUsername")); return; }
+  if (typeof auth.username !== "string" || !usernameRegex.test(auth.username)) {
+    next(new Error("invalidUsername"));
+    return;
   }
-  next();
+
+  verifyServerPassword(auth.serverPassword, config.password, socket, next);
+  return;
+}
+
+function verifyServerPassword(password: string, hash: string, socket: SocketIO.Socket, next: Function) {
+  if (config.password.length === 0) {
+    next();
+    return;
+  }
+
+  bcrypt.compare(password, hash, function(err: Error, res: boolean) {
+    if (res) {
+      next();
+      return;
+    }
+
+    next(new Error("invalidCredentials"));
+  });
+  return;
 }
