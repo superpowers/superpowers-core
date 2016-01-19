@@ -4,8 +4,8 @@
     "game": {
       "repository": "https://github.com/superpowers/superpowers-game",
       "plugins": {
-        "florentpoujol": {
-          "ftext": "https://github.com/florentpoujol/superpowers-game-ftext-plugin"
+        "demo": {
+          "customAPI": "https://github.com/superpowers-extra/superpowers-game-api-demo-plugin"
         }
       }
     },
