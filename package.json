@@ -33,8 +33,6 @@
   "dependencies": {
     "async": "^1.5.0",
     "cookie-parser": "^1.4.0",
-    "cookies-js": "^1.2.1",
-    "cson-parser": "^1.0.8",
     "dnd-tree-view": "^2.3.2",
     "express": "^4.11.2",
     "follow-redirects": "0.0.7",
@@ -49,7 +47,6 @@
     "socket.io-client": "~1.4.4",
     "tab-strip": "^1.1.0",
     "tv4": "^1.1.9",
-    "typedarray-to-buffer": "^3.0.1",
     "typescript": "1.6.2",
     "unzip": "^0.1.11",
     "yargs": "^3.6.0"
