@@ -46,7 +46,11 @@ export class System {
         if (shouldIgnoreFolder(pluginName)) continue;
 
         const completeFilePath = `${pluginAuthorPath}/${pluginName}/${filePath}`;
-        if (fs.existsSync(completeFilePath)) require(completeFilePath);
+        if (fs.existsSync(completeFilePath)) {
+          /* tslint:disable */
+          require(completeFilePath);
+          /* tslint:enable */
+        }
       }
     }
   }

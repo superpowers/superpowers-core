@@ -1,8 +1,8 @@
-import * as TreeView from "dnd-tree-view"; 
+import * as TreeView from "dnd-tree-view";
 import * as dialogs from "../../../SupClient/src/dialogs/index";
 import * as config from "../config";
 
-const serversTreeView = new TreeView(document.querySelector(".servers-tree-view"), { multipleSelection: false });
+const serversTreeView = new TreeView(document.querySelector(".servers-tree-view") as HTMLElement, { multipleSelection: false });
 export { serversTreeView };
 
 function start() {
@@ -61,10 +61,10 @@ function onRenameServerClick() {
   const node = serversTreeView.selectedNodes[0];
 
   /* tslint:disable:no-unused-expression */
-  new dialogs.PromptDialog("Enter a new name for the server.", { initialValue: node.dataset.name, validationLabel: "Rename" }, (name: string) => {
+  new dialogs.PromptDialog("Enter a new name for the server.", { initialValue: node.dataset["name"], validationLabel: "Rename" }, (name: string) => {
     /* tslint:enable:no-unused-expression */
     if (name == null) return;
-    node.dataset.name = name;
+    node.dataset["name"] = name;
     node.querySelector(".name").textContent = name;
   });
 }
@@ -75,10 +75,10 @@ function onEditAddressClick() {
   const node = serversTreeView.selectedNodes[0];
 
   /* tslint:disable:no-unused-expression */
-  new dialogs.PromptDialog("Enter the new server address.", { initialValue: node.dataset.address, validationLabel: "Update" }, (address: string) => {
+  new dialogs.PromptDialog("Enter the new server address.", { initialValue: node.dataset["address"], validationLabel: "Update" }, (address: string) => {
     /* tslint:enable:no-unused-expression */
     if (address == null) return;
-    node.dataset.address = address;
+    node.dataset["address"] = address;
     node.querySelector(".address").textContent = address;
  });
 }
@@ -89,7 +89,7 @@ function onRemoveAddressClick() {
   const node = serversTreeView.selectedNodes[0];
 
   /* tslint:disable:no-unused-expression */
-  new dialogs.ConfirmDialog(`Do you want to delete the server ${node.dataset.name}?`, "Delete", (confirmed: boolean) => {
+  new dialogs.ConfirmDialog(`Do you want to delete the server ${node.dataset["name"]}?`, "Delete", (confirmed: boolean) => {
     /* tslint:enable:no-unused-expression */
     if (!confirmed) return;
 
@@ -106,7 +106,7 @@ function onSelectionChange() {
 
 const ipcRenderer: GitHubElectron.IpcRenderer = nodeRequire("electron").ipcRenderer;
 function onServerActivate() {
-  const address = serversTreeView.selectedNodes[0].dataset.address;
+  const address = serversTreeView.selectedNodes[0].dataset["address"];
   ipcRenderer.send("new-server-window", address);
 }
 

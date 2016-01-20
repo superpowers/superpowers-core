@@ -111,7 +111,11 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
 
       // Load data module
       const dataModulePath = `${pluginPath}/data/index.js`;
-      if (fs.existsSync(dataModulePath)) require(dataModulePath);
+      if (fs.existsSync(dataModulePath)) {
+        /* tslint:disable */
+        require(dataModulePath);
+        /* tslint:enable */
+      }
 
       // Collect plugin info
       pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);

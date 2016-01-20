@@ -13,8 +13,10 @@ export let autoStartServer = (autoStartServerJSON != null) ? JSON.parse(autoStar
 
 export function save() {
   serverEntries.length = 0;
-  for (const liElt of servers.serversTreeView.treeRoot.children) {
-    serverEntries.push({ name: liElt.dataset.name, address: liElt.dataset.address});
+  const treeRoot = servers.serversTreeView.treeRoot;
+  for (let i = 0; i < treeRoot.children.length; i++) {
+    const  liElt = treeRoot.children[i] as HTMLLIElement;
+    serverEntries.push({ name: liElt.dataset["name"], address: liElt.dataset["address"] });
   }
 
   localStorage.setItem("superpowers.servers", JSON.stringify(serverEntries));
