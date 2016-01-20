@@ -14,19 +14,19 @@ const argv = yargs
   .usage("Usage: $0 <command> [options]")
   .demand(1, "Enter a command")
   .command("start", "Start the server", (yargs) => {
-    yargs.demand(1, 1, "start command can't accept more arguments").argv;
+    yargs.demand(1, 1, `The "start" command doesn't accept any arguments`).argv;
   })
-  .command("list", "List currently installed system and plugin", (yargs) => {
-    yargs.demand(1, 1, "list command can't accept more arguments").argv;
+  .command("list", "List currently installed systems and plugins", (yargs) => {
+    yargs.demand(1, 1, `The "list" command doesn't accept any arguments`).argv;
   })
   .command("registry", "List registry content", (yargs) => {
-    yargs.demand(1, 1, "list command can't accept more arguments").argv;
+    yargs.demand(1, 1, `The "registry" command doesn't accept any arguments`).argv;
   })
-  .command("install", "Install a system or a plugin", (yargs) => {
-    yargs.demand(2, 2, `install command take one argument "systemId" or "systemId:pluginAuthor/pluginName`).argv;
+  .command("install", "Install a system or plugin", (yargs) => {
+    yargs.demand(2, 2, `The "install" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
-  .command("init", "Init a system or a plugin", (yargs) => {
-    yargs.demand(2, 2, `install command take one argument "systemId" or "systemId:pluginAuthor/pluginName`).argv;
+  .command("init", "Generate a skeleton for a new system or plugin", (yargs) => {
+    yargs.demand(2, 2, `The "init" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
   .argv;
 
@@ -96,14 +96,14 @@ function list() {
 
     const pluginAuthors = Object.keys(system.plugins);
     if (pluginAuthors.length === 0) {
-      console.log("No external plugin installed.");
+      console.log("No external plugins installed.");
     } else {
       for (const pluginAuthor of pluginAuthors) {
         console.log(`|- ${pluginAuthor}`);
         for (const pluginName of system.plugins[pluginAuthor]) console.log(`   |- ${pluginName}`);
       }
     }
-    console.log("\n");
+    console.log("");
   }
 }
 
@@ -141,9 +141,8 @@ function getRegistry(callback: (err: Error, registry: Registry) => any) {
 function showRegistry() {
   getRegistry((err, registry) => {
     for (const systemId in registry.systems) {
-      console.log(`----- ${systemId} -----`);
       listAvailablePlugins(registry, systemId);
-      console.log(`\n`);
+      console.log("");
     }
   });
 }
@@ -152,12 +151,15 @@ function listAvailableSystems(registry: Registry) { console.log(`Available syste
 function listAvailablePlugins(registry: Registry, systemId: string) {
   const pluginAuthors = Object.keys(registry.systems[systemId].plugins);
   if (pluginAuthors.length === 0) {
-    console.log(`No available plugins in system ${systemId}.`);
+    console.log(`${systemId}: No plugins found.`);
   } else {
-    console.log(`Available plugins in system ${systemId}.`);
+    let pluginCount = 0;
+    for (const pluginAuthor of pluginAuthors) pluginCount += Object.keys(registry.systems[systemId].plugins[pluginAuthor]).length;
+
+    console.log(`${systemId}: ${pluginCount} plugin${pluginCount !== 1 ? "s" : ""} found.`);
     for (const pluginAuthor of pluginAuthors) {
-      console.log(`|- ${pluginAuthor}`);
-      for (const pluginName of Object.keys(registry.systems[systemId].plugins[pluginAuthor])) console.log(`   |- ${pluginName}`);
+      console.log(`  ${pluginAuthor}/`);
+      for (const pluginName of Object.keys(registry.systems[systemId].plugins[pluginAuthor])) console.log(`    ${pluginName}`);
     }
   }
 }
