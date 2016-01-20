@@ -1,0 +1,38 @@
+{
+  "header": {
+    "goToHub": "Aller au Hub",
+    "publish": "Publier le projet",
+    "publishDisabled": "Publier le projet (ne fonctionne que depuis l'application Superpowers pour des raisons techniques)",
+    "stop": "Stopper le projet",
+    "debug": "Déboguer le projet (F6)",
+    "run": "Lancer le projet (F5)",
+    "notifications": {
+      "enable": "Cliquez pour activer les notifications",
+      "disable": "Cliquez pour désactiver les notifications",
+      "new": "Nouveau message de chat dans le projet -${projectName}-"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "Ouvrir dans une nouvelle fenêtre",
+    "newAsset": {
+      "title": "Nouvel asset",
+      "prompt": "Sélectionnez le type et entrez un nom pour le nouvel asset.",
+      "placeholder": "Nom de l'asset (optionnel)",
+      "openAfterCreation": "Ouvrir après création"
+    },
+    "newFolder": {
+      "title": "Nouveau dossier",
+      "prompt": "Entrez le nom du nouveau dossier.",
+      "placeholder": "Entrez un nom",
+      "initialValue": "Dossier"
+    },
+    "renamePrompt": "Entrez un nouveau nom pour l'asset.",
+    "duplicatePrompt": "Entrez un nom pour le nouvel asset.",
+    "trash": {
+      "title": "Corbeille",
+      "prompt": "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?",
+      "warnBrokenDependency": "${entryName} est utilisé dans ${dependentEntryNames}."
+    },
+    "searchPlaceholder": "Rechercher des assets"
+  }
+}
