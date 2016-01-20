@@ -19,7 +19,7 @@
     "brfs": "^1.4.3",
     "browserify": "^13.0.0",
     "gulp": "^3.9.0",
-    "gulp-cssimport": "^2.1.2",
+    "gulp-concat-css": "^2.2.0",
     "gulp-jade": "^1.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-stylus": "^2.2.0",
