@@ -10,9 +10,8 @@ import * as table from "./table";
 import * as dialogs from "./dialogs/index";
 import * as i18n from "./i18n";
 /* tslint:enable:no-unused-variable */
-/* tslint:disable */
-const PerfectResize = require("perfect-resize");
-/* tslint:enable */
+
+import * as PerfectResize from "perfect-resize";
 
 export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, dialogs, i18n };
 

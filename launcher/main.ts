@@ -90,7 +90,7 @@ function setupOSXAppMenu() {
 
 interface OpenServer { window: GitHubElectron.BrowserWindow; address: string; closed: boolean; }
 const openServersById: { [id: string]: OpenServer } = {};
-electron.ipcMain.on("new-server-window", (event: Event, address: string) => {
+electron.ipcMain.on("new-server-window", (event: GitHubElectron.IPCMainEvent, address: string) => {
   const openServer = {
     window: new electron.BrowserWindow({
       title: "Superpowers", icon: `${__dirname}/public/images/icon.png`,
@@ -176,7 +176,7 @@ function connect(openServer: OpenServer) {
 }
 
 const standaloneWindowsById:  { [id: string]: GitHubElectron.BrowserWindow } = {};
-electron.ipcMain.on("new-standalone-window", (event: Event, address: string, title: string) => {
+electron.ipcMain.on("new-standalone-window", (event: GitHubElectron.IPCMainEvent, address: string, title: string) => {
   const standaloneWindow = new electron.BrowserWindow({
     title, icon: `${__dirname}/public/images/icon.png`,
     width: 1000, height: 600,
@@ -191,7 +191,7 @@ electron.ipcMain.on("new-standalone-window", (event: Event, address: string, tit
   standaloneWindow.loadURL(address);
 });
 
-electron.ipcMain.on("reconnect", (event: Event, id: string) => { connect(openServersById[id]); });
+electron.ipcMain.on("reconnect", (event: GitHubElectron.IPCMainEvent, id: string) => { connect(openServersById[id]); });
 
 electron.ipcMain.on("choose-export-folder", (event: { sender: any }) => {
   electron.dialog.showOpenDialog({ properties: ["openDirectory"] }, (directory: string[]) => {

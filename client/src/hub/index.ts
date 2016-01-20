@@ -2,9 +2,7 @@ import "../window";
 import CreateOrEditProjectDialog, { SystemsData } from "../dialogs/CreateOrEditProjectDialog";
 import * as async from "async";
 
-/* tslint:disable */
-const TreeView = require("dnd-tree-view");
-/* tslint:enable */
+import * as TreeView from "dnd-tree-view";
 
 const data: {
   projects: SupCore.Data.Projects;
@@ -21,7 +19,7 @@ if (localStorage.getItem("superpowers-dev-mode") != null) languageNamesById["non
 function start() {
   document.querySelector(".server-name").textContent = SupClient.i18n.t(`hub:serverAddress`, { hostname: window.location.hostname, port });
 
-  ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view"), { multipleSelection: false });
+  ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view") as HTMLElement, { multipleSelection: false });
   ui.projectsTreeView.on("selectionChange", onProjectSelectionChange);
   ui.projectsTreeView.on("activate", onProjectActivate);
 

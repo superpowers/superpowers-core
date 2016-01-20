@@ -4,11 +4,9 @@ import FindAssetDialog from "../dialogs/FindAssetDialog";
 import * as async from "async";
 
 const nodeRequire = require;
-/* tslint:disable */
-const TreeView = require("dnd-tree-view");
-const PerfectResize = require("perfect-resize");
-const TabStrip = require("tab-strip");
-/* tslint:enable */
+import * as TreeView from "dnd-tree-view";
+import * as PerfectResize from "perfect-resize";
+import * as TabStrip from "tab-strip";
 
 let socket: SocketIOClient.Socket;
 
@@ -86,7 +84,7 @@ function start() {
   });
 
   // Make sidebar resizable
-  new PerfectResize(document.querySelector(".sidebar"), "left");
+  new PerfectResize(document.querySelector(".sidebar") as HTMLElement, "left");
 
   // Project info
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
@@ -102,7 +100,7 @@ function start() {
   }
 
   // Entries tree view
-  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view"), { dropCallback: onEntryDrop });
+  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view") as HTMLElement, { dropCallback: onEntryDrop });
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
 
@@ -119,7 +117,7 @@ function start() {
   ui.openInNewWindowButton.addEventListener("click", onOpenInNewWindowClick);
 
   // Tab strip
-  const tabsBarElt = document.querySelector(".tabs-bar");
+  const tabsBarElt = document.querySelector(".tabs-bar") as HTMLElement;
   ui.tabStrip = new TabStrip(tabsBarElt);
   ui.tabStrip.on("activateTab", onTabActivate);
   ui.tabStrip.on("closeTab", onTabClose);

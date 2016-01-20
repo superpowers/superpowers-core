@@ -1,6 +1,4 @@
-/* tslint:disable */
-const TreeView = require("dnd-tree-view");
-/* tslint:enable */
+import * as TreeView from "dnd-tree-view"; 
 import * as dialogs from "../../../SupClient/src/dialogs/index";
 import * as config from "../config";
 

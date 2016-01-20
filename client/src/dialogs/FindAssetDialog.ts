@@ -1,10 +1,7 @@
 /// <reference path="./fuzzy.d.ts" />
 
 import * as fuzzy from "fuzzy";
-
-/* tslint:disable */
-const TreeView = require("dnd-tree-view");
-/* tslint:enable */
+import * as TreeView from "dnd-tree-view";
 
 export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
   private searchElt: HTMLInputElement;
