@@ -4,6 +4,8 @@ import * as dummy_https from "https";
 import * as fs from "fs";
 import * as mkdirp from "mkdirp";
 import * as yargs from "yargs";
+import * as rimraf from "rimraf";
+import * as readline from "readline";
 
 /* tslint:disable */
 const https: typeof dummy_https = require("follow-redirects").https;
@@ -25,6 +27,9 @@ const argv = yargs
   .command("install", "Install a system or plugin", (yargs) => {
     yargs.demand(2, 2, `The "install" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
+  .command("uninstall", "Uninstall a system or plugin", (yargs) => {
+    yargs.demand(2, 2, `The "uninstall" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
+  })
   .command("init", "Generate a skeleton for a new system or plugin", (yargs) => {
     yargs.demand(2, 2, `The "init" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
@@ -32,6 +37,7 @@ const argv = yargs
 
 const folderNameRegex = /^[a-z0-9_-]+$/;
 const pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
+const builtInPluginAuthors = ["default", "common", "extra"];
 
 const systemsById: { [id: string]: { folderName: string; plugins: { [author: string]: string[] } } } = {};
 const systemsPath = `${__dirname}/../systems`;
@@ -57,7 +63,7 @@ for (const entry of fs.readdirSync(systemsPath)) {
   if (pluginAuthors == null) continue;
 
   for (const pluginAuthor of pluginAuthors) {
-    if (pluginAuthor === "default" || pluginAuthor === "common" || pluginAuthor === "extra") continue;
+    if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) continue;
     if (!folderNameRegex.test(pluginAuthor)) continue;
 
     const pluginNames: string[] = [];
@@ -73,6 +79,7 @@ for (const entry of fs.readdirSync(systemsPath)) {
 }
 
 const command = argv._[0];
+const [ systemId, pluginPath ] = argv._[1] != null ? argv._[1].split(":") : [ null, null ];
 switch (command) {
   case "start":
     /* tslint:disable */
@@ -82,6 +89,7 @@ switch (command) {
   case "list": list(); break;
   case "registry": showRegistry(); break;
   case "install": install(); break;
+  case "uninstall": uninstall(); break;
   case "init": init(); break;
   default:
     yargs.showHelp();
@@ -92,15 +100,15 @@ switch (command) {
 function list() {
   for (const systemId in systemsById) {
     const system = systemsById[systemId];
-    console.log(`System ${systemId} installed in folder ${system.folderName}.`);
+    console.log(`System "${systemId}" installed in folder "${system.folderName}".`);
 
     const pluginAuthors = Object.keys(system.plugins);
     if (pluginAuthors.length === 0) {
       console.log("No external plugins installed.");
     } else {
       for (const pluginAuthor of pluginAuthors) {
-        console.log(`|- ${pluginAuthor}`);
-        for (const pluginName of system.plugins[pluginAuthor]) console.log(`   |- ${pluginName}`);
+        console.log(`  ${pluginAuthor}/`);
+        for (const pluginName of system.plugins[pluginAuthor]) console.log(`    ${pluginName}`);
       }
     }
     console.log("");
@@ -201,29 +209,13 @@ function install() {
       process.exit(1);
     }
 
-    const pattern = process.argv[3];
-    if (pattern == null) {
-      listAvailableSystems(registry);
-      process.exit(0);
-    }
-
-    let systemId: string;
-    let pluginPath: string;
-
-    if (pattern.indexOf(":") === -1) {
-      systemId = pattern;
-    } else {
-      [ systemId, pluginPath ] = pattern.split(":");
-    }
-
     if (registry.systems[systemId] == null) {
       console.error(`System ${systemId} doesn't exist.`);
       listAvailableSystems(registry);
       process.exit(1);
     }
 
-    const systemFolderName = systemsById[systemId].folderName;
-    if (systemFolderName != null) {
+    if (systemsById[systemId] != null) {
       if (pluginPath == null) {
         console.error(`System ${systemId} is already installed.`);
         listAvailableSystems(registry);
@@ -311,17 +303,62 @@ function installPlugin(systemId: string, pluginAuthor: string, pluginName: strin
   });
 }
 
-function init() {
-  const pattern = process.argv[3];
-  let systemId: string;
-  let pluginPath: string;
-
-  if (pattern.indexOf(":") === -1) {
-    systemId = pattern;
-  } else {
-    [ systemId, pluginPath ] = pattern.split(":");
+function uninstall() {
+  const system = systemsById[systemId];
+  if (system == null) {
+    console.error(`System ${systemId} is not installed.`);
+    process.exit(1);
   }
 
+  if (pluginPath == null) {
+    const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
+    r1.question(`Are you sure you want to uninstall the system ${systemId} ? (yes/no): `, (answer) => {
+      if (answer !== "yes") process.exit(0);
+
+      console.log(`Uninstalling system ${systemId}...`);
+      rimraf(`${systemsPath}/${system.folderName}`, (err) => {
+        if (err != null) {
+          console.error(`Failed to uninstalled system.`);
+          process.exit(1);
+        } else {
+          console.log("System successfully uninstalled.");
+        }
+      });
+    });
+
+  } else {
+    const [ pluginAuthor, pluginName ] = pluginPath.split("/");
+    if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) {
+      console.error(`Built-in plugins can not be uninstalled.`);
+      process.exit(1);
+    }
+
+    if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor].indexOf(pluginName) === -1) {
+      console.error(`Plugin ${pluginPath} is not installed.`);
+      process.exit(1);
+    }
+
+    const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
+    r1.question(`Are you sure you want to uninstall the plugin ${pluginPath} ? (yes/no): `, (answer) => {
+      if (answer !== "yes") process.exit(0);
+      console.log(`Uninstalling plugin ${pluginPath} from system ${systemId}...`);
+      rimraf(`${systemsPath}/${system.folderName}/plugins/${pluginPath}`, (err) => {
+        if (err != null) {
+          console.error(`Failed to uninstalled plugin.`);
+          process.exit(1);
+        } else {
+          if (fs.readdirSync(`${systemsPath}/${system.folderName}/plugins/${pluginAuthor}`).length === 0)
+            fs.rmdirSync(`${systemsPath}/${system.folderName}/plugins/${pluginAuthor}`);
+
+          console.log("Plugin successfully uninstalled.");
+          process.exit(0);
+        }
+      });
+    });
+  }
+}
+
+function init() {
   if (!folderNameRegex.test(systemId)) {
     console.error("Invalid system ID: only lowercase letters, numbers and dashes are allowed.");
     process.exit(1);
