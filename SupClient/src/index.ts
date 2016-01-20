@@ -26,16 +26,22 @@ export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
 SupCore.system = new SupCore.System("", "");
 
 export let activePluginPath: string;
-export const plugins: { [context: string]: { [name: string]: { path: string; content: any; } } } = {};
-export function registerPlugin(context: string, name: string, content: any) {
-  if (plugins[context] == null) plugins[context] = {};
 
-  if (plugins[context][name] != null) {
-    console.error(`SupClient.registerPlugin: Tried to register two or more plugins named "${name}"`);
+const plugins: { [contextName: string]: { [pluginName: string]: { path: string; content: any; } } } = {};
+export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
+  if (plugins[contextName] == null) plugins[contextName] = {};
+
+  if (plugins[contextName][pluginName] != null) {
+    console.error("SupClient.registerPlugin: Tried to register two or more plugins " +
+    `named "${pluginName}" in context "${contextName}"`);
     return;
   }
 
-  plugins[context][name] = { path: activePluginPath, content };
+  plugins[contextName][pluginName] = { path: activePluginPath, content: plugin };
+}
+
+export function getPlugins<T>(contextName: string): { [pluginName: string]: { path: string; content: T; } } {
+  return plugins[contextName];
 }
 
 // Plugins list

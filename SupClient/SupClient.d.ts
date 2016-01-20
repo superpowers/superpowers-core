@@ -11,8 +11,8 @@ declare namespace SupClient {
   export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => any): void;
 
   export let activePluginPath: string;
-  export const plugins: { [context: string]: { [name: string]: { path: string; content: any; } } };
-  export function registerPlugin(context: string, name: string, plugin: any): void;
+  export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
+  export function getPlugins<T>(contextName: string): { [pluginName: string]: { path: string; content: T; } };
 
   export function connect(projectId: string, options?: { reconnection: boolean; }): SocketIOClient.Socket;
   export function onAssetTrashed(): void;
