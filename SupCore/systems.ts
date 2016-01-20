@@ -59,7 +59,7 @@ export class System {
     if (this.plugins[contextName] == null) this.plugins[contextName] = {};
 
     if (this.plugins[contextName][pluginName] != null) {
-      console.error("SystemAPI.registerPlugin: Tried to register two or more plugins " +
+      console.error("SupCore.system.registerPlugin: Tried to register two or more plugins " +
       `named "${pluginName}" in context "${contextName}", system "${this.id}"`);
     }
 
