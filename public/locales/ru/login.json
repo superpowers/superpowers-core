@@ -2,5 +2,6 @@
   "welcome": "Привествуем на этом Superpowers сервере!",
   "password": "Пароль сервера",
   "username": "Имя пользователя",
+  "usernamePatternDescription": "Допустимые символы: буквы, цифры, тире и подчеркивания.",
   "logIn": "Войти"
 }
