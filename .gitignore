@@ -14,3 +14,4 @@ builds/
 public/*
 !public/locales
 config.json
+npm-debug.log
