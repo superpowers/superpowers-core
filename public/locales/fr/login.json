@@ -3,5 +3,5 @@
   "password": "Mot de passe du serveur",
   "username": "Nom d'utilisateur",
   "usernamePatternDescription": "Les caractères valides sont : les lettres, les chiffres, les traits d'union et les tirets bas.",
-  "logIn": "Se connecter"
+  "logIn": "Connexion"
 }
