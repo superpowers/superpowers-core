@@ -100,7 +100,7 @@ function start() {
   }
 
   // Entries tree view
-  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view") as HTMLElement, { dropCallback: onEntryDrop });
+  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view") as HTMLElement, { dragStartCallback: onEntryDragStart, dropCallback: onTreeViewDrop });
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
 
@@ -273,7 +273,7 @@ function setupTool(toolName: string) {
   toolElt.addEventListener("mouseleave", (event) => {
     if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
   });
-  nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
+  nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset["name"]); });
   ui.toolsElt.appendChild(toolElt);
 }
 
@@ -424,18 +424,7 @@ function onEntryMoved(id: string, parentId: string, index: number) {
   if (parentId != null) entryElt.dataset["parentId"] = parentId;
   else delete entryElt.dataset["parentId"];
 
-  updateEntryElementPath(id);
   refreshAssetTabElement(data.entries.byId[id]);
-}
-
-function updateEntryElementPath(id: string) {
-  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
-  entryElt.dataset["dndText"] = data.entries.getPathFromId(id);
-
-  const node = data.entries.byId[id];
-  if (node.children != null) {
-    for (const child of node.children) updateEntryElementPath(child.id);
-  }
 }
 
 function onEntryTrashed(id: string) {
@@ -462,7 +451,6 @@ function onSetEntryProperty(id: string, key: string, value: any) {
   switch (key) {
     case "name":
       entryElt.querySelector(".name").textContent = value;
-      updateEntryElementPath(id);
 
       const walk = (entry: SupCore.Data.EntryNode) => {
         refreshAssetTabElement(entry);
@@ -577,7 +565,6 @@ function toggleDevTools() {
 function createEntryElement(entry: SupCore.Data.EntryNode) {
   const liElt = document.createElement("li");
   liElt.dataset["id"] = entry.id;
-  liElt.dataset["dndText"] = data.entries.getPathFromId(entry.id);
   const parentEntry = data.entries.parentNodesById[entry.id];
   if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
@@ -622,11 +609,22 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
   return liElt;
 }
 
-function onEntryDrop(dropInfo: any, orderedNodes: any) {
-  const dropPoint = SupClient.getTreeViewDropPoint(dropInfo, data.entries);
+function onEntryDragStart(event: DragEvent, entryElt: HTMLLIElement) {
+  const id = entryElt.dataset["id"];
+  event.dataTransfer.setData("text/plain", data.entries.getPathFromId(id));
+  return true;
+}
+
+function onTreeViewDrop(event: DragEvent, dropLocation: TreeView.DropLocation, orderedNodes: HTMLLIElement[]) {
+  if (orderedNodes == null) {
+    // TODO: Support creating assets by importing some files
+    return false;
+  }
+
+  const dropPoint = SupClient.getTreeViewDropPoint(dropLocation, data.entries);
 
   const entryIds: string[] = [];
-  for (const entry of orderedNodes) entryIds.push(entry.dataset.id);
+  for (const entry of orderedNodes) entryIds.push(entry.dataset["id"]);
 
   const sourceParentNode = data.entries.parentNodesById[entryIds[0]];
   const sourceChildren = (sourceParentNode != null && sourceParentNode.children != null) ? sourceParentNode.children : data.entries.pub;
@@ -654,7 +652,7 @@ function updateSelectedEntry() {
 
 function onEntryActivate() {
   const activatedEntry = ui.entriesTreeView.selectedNodes[0];
-  openEntry(activatedEntry.dataset.id);
+  openEntry(activatedEntry.dataset["id"]);
 }
 
 function onMessage(event: any) {
@@ -833,7 +831,7 @@ function onTrashEntryClick() {
         if (!confirm) return;
 
         for (const selectedNode of ui.entriesTreeView.selectedNodes) {
-          const entry = data.entries.byId[selectedNode.dataset.id];
+          const entry = data.entries.byId[selectedNode.dataset["id"]];
           socket.emit("trash:entries", entry.id, (err: string) => {
             if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
           });
@@ -860,12 +858,12 @@ function onTrashEntryClick() {
     } else checkNextEntry();
   }
 
-  for (const selectedNode of ui.entriesTreeView.selectedNodes) selectedEntries.push(data.entries.byId[selectedNode.dataset.id]);
+  for (const selectedNode of ui.entriesTreeView.selectedNodes) selectedEntries.push(data.entries.byId[selectedNode.dataset["id"]]);
   warnBrokenDependency(selectedEntries[0]);
 }
 
 function onOpenInNewWindowClick(event: any) {
-  const id = event.target.parentElement.dataset.id;
+  const id = event.target.parentElement.dataset["id"];
   if (id != null) {
     const entry = data.entries.byId[id];
     const address = `${window.location.origin}/systems/${data.systemId}` +
@@ -880,7 +878,7 @@ function onOpenInNewWindowClick(event: any) {
       newWindow.addEventListener("load", () => { newWindow.document.title = title; });
     }
   } else {
-    const name = event.target.parentElement.dataset.name;
+    const name = event.target.parentElement.dataset["name"];
     const address = `${window.location.origin}/systems/${data.systemId}` +
     `/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/` +
     `?project=${SupClient.query.project}`;
@@ -893,7 +891,7 @@ function onRenameEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length !== 1) return;
 
   const selectedNode = ui.entriesTreeView.selectedNodes[0];
-  const entry = data.entries.byId[selectedNode.dataset.id];
+  const entry = data.entries.byId[selectedNode.dataset["id"]];
 
   const options = {
     initialValue: entry.name,
@@ -917,7 +915,7 @@ function onDuplicateEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length !== 1) return;
 
   const selectedNode = ui.entriesTreeView.selectedNodes[0];
-  const entry = data.entries.byId[selectedNode.dataset.id];
+  const entry = data.entries.byId[selectedNode.dataset["id"]];
   if (entry.type == null) return;
 
   const options = {

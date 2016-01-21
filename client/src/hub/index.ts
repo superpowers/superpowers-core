@@ -211,7 +211,7 @@ function onProjectSelectionChange() {
 }
 
 function onProjectActivate() {
-  const href = `/project/?project=${ui.projectsTreeView.selectedNodes[0].dataset.id}`;
+  const href = `/project/?project=${ui.projectsTreeView.selectedNodes[0].dataset["id"]}`;
 
   // When in the app, use location.replace to avoid creating an history item
   // which could lead to accidentally navigating back by pressing Backspace
@@ -247,7 +247,7 @@ function onEditProjectClick() {
   if (ui.projectsTreeView.selectedNodes.length !== 1) return;
 
   const selectedNode = ui.projectsTreeView.selectedNodes[0];
-  const existingProject = data.projects.byId[selectedNode.dataset.id];
+  const existingProject = data.projects.byId[selectedNode.dataset["id"]];
 
   /* tslint:disable:no-unused-expression */
   new CreateOrEditProjectDialog(data.systemsById, { existingProject }, (editedProject) => {
