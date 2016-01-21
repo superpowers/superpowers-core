@@ -1,15 +1,19 @@
 sudo: false
-
 language: node_js
 node_js:
-    - "4.2.4"
+- "4.2.4"
 before_install:
-    - npm install -g npm
-    - npm --version
-
+- npm install -g npm
+- npm --version
 cache:
   directories:
-    - node_modules
-
+  - node_modules
 script:
-  - npm run build
+- npm run build
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/44f5607466509af53a93
+    on_success: change
+    on_failure: always
+    on_start: never
