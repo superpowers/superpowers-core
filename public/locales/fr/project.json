@@ -1,6 +1,6 @@
 {
   "header": {
-    "goToHub": "Aller au Hub",
+    "goToHub": "Aller à l'accueil du serveur",
     "publish": "Publier le projet",
     "publishDisabled": "Publier le projet (ne fonctionne que depuis l'application Superpowers pour des raisons techniques)",
     "stop": "Stopper le projet",
