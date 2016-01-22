@@ -5,7 +5,7 @@ import * as TreeView from "dnd-tree-view";
 
 export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
   private searchElt: HTMLInputElement;
-  private treeView: any;
+  private treeView: TreeView;
 
   private entriesByPath: { [path: string]: SupCore.Data.EntryNode; } = {};
   private pathsList: string[] = [];
@@ -43,7 +43,7 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
       this.treeView.append(liElt, "item");
     });
 
-    this.treeView.addToSelection(this.treeView.treeRoot.firstChild);
+    this.treeView.addToSelection(this.treeView.treeRoot.firstChild as HTMLLIElement);
 
     this.searchElt.addEventListener("keydown", this.onSearchKeyDown);
     this.searchElt.focus();
@@ -81,7 +81,7 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
       this.treeView.append(liElt, "item");
     }
 
-    this.treeView.addToSelection(this.treeView.treeRoot.firstChild);
+    this.treeView.addToSelection(this.treeView.treeRoot.firstChild as HTMLLIElement);
   };
 
   private onSearchKeyDown = (event: KeyboardEvent) => {

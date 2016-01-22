@@ -93,7 +93,7 @@ export function onDisconnected() {
   document.body.appendChild(div);
 }
 
-export function getTreeViewInsertionPoint(treeView: any) {
+export function getTreeViewInsertionPoint(treeView: TreeView) {
   let selectedElt = treeView.selectedNodes[0];
   let parentId: string;
   let index: number;
@@ -104,12 +104,12 @@ export function getTreeViewInsertionPoint(treeView: any) {
     }
     else {
       if (selectedElt.parentElement.classList.contains("children")) {
-        parentId = selectedElt.parentElement.previousSibling.dataset["id"];
+        parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
       }
 
       index = 1;
-      while (selectedElt.previousSibling != null) {
-        selectedElt = selectedElt.previousSibling;
+      while (selectedElt.previousElementSibling != null) {
+        selectedElt = selectedElt.previousElementSibling as HTMLLIElement;
         if (selectedElt.tagName === "LI") index++;
       }
     }
