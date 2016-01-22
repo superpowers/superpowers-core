@@ -39,18 +39,21 @@ function createServerElement(entry: { name: string; address: string; }) {
 }
 
 function onAddServerClick() {
-  /* tslint:disable:no-unused-expression */
-  new dialogs.PromptDialog("Enter a name for the server.", { placeholder: "Enter a name", validationLabel: "Add server" }, (name: string) => {
-    /* tslint:enable:no-unused-expression */
-    if (name == null) return;
-
+  new dialogs.ConfirmDialog("Warning! Connecting to an unknown server can be dangerous. Do you still want to continue?", "Proceed", (accepted: boolean) => {
+    if (accepted !== true) return;
     /* tslint:disable:no-unused-expression */
-    new dialogs.PromptDialog("Enter the server address.", { initialValue: "127.0.0.1", validationLabel: "Add server" }, (address: string) => {
+    new dialogs.PromptDialog("Enter a name for the server.", { placeholder: "Enter a name", validationLabel: "Add server" }, (name: string) => {
       /* tslint:enable:no-unused-expression */
-      if (address == null) return;
+      if (name == null) return;
 
-      const liElt = createServerElement({ name, address });
-      serversTreeView.append(liElt, "item");
+      /* tslint:disable:no-unused-expression */
+      new dialogs.PromptDialog("Enter the server address.", { initialValue: "127.0.0.1", validationLabel: "Add server" }, (address: string) => {
+        /* tslint:enable:no-unused-expression */
+        if (address == null) return;
+
+        const liElt = createServerElement({ name, address });
+        serversTreeView.append(liElt, "item");
+      });
     });
   });
 }
