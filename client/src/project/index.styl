@@ -59,6 +59,17 @@ body
   .duplicate-entry { background-image: url(/images/actions/duplicate.svg); }
   .trash-entry { background-image: url(/images/actions/delete.svg); }
   .search { background-image: url(/images/actions/search.svg); }
+  .filter { background-image: url(/images/actions/filter.svg); }
+
+.filter-buttons {
+  flex-wrap: wrap;
+
+  img { padding: 2px; width: 28px; height: 28px; }
+  img.toggle-all { content: url(/images/entries/filter-all.svg); }
+  img:hover { background: #ccc; }
+  img.filtered { opacity: 0.3; }
+  img.filtered:hover { opacity: 0.5; }
+}
 
 .entries-tree-view
   flex 1
