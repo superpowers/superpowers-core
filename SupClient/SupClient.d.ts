@@ -21,8 +21,8 @@ declare namespace SupClient {
   export function setupHelpCallback(callback: Function): void;
   export function getTreeViewInsertionPoint(treeView: any): { parentId: string; index: number };
 
-  export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
-  export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
+  export function getTreeViewDropPoint(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
+  export function getListViewDropIndex(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
   export function findEntryByPath(entries: any, path: string|string[]): any;
 
   export function setupCollapsablePane(pane: HTMLDivElement, refreshCallback?: Function): void;

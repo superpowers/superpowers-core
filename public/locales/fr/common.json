@@ -1,7 +1,7 @@
 {
   "activeLanguage": "Français",
 
-  "namePatternDescription": "Les charactères suivants ne peuvent être utilisés: \\, /, :, *, ?, \", <, >, |, [ et ].",
+  "namePatternDescription": "Les caractères suivants ne peuvent être utilisés: \\, /, :, *, ?, \", <, >, |, [ et ].",
   "none": "(Vide)",
 
   "actions": {

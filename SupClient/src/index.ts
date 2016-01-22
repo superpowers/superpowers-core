@@ -12,6 +12,7 @@ import * as i18n from "./i18n";
 /* tslint:enable:no-unused-variable */
 
 import * as PerfectResize from "perfect-resize";
+import * as TreeView from "dnd-tree-view";
 
 export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, dialogs, i18n };
 
@@ -99,11 +100,11 @@ export function getTreeViewInsertionPoint(treeView: any) {
 
   if (selectedElt != null) {
     if (selectedElt.classList.contains("group")) {
-      parentId = selectedElt.dataset.id;
+      parentId = selectedElt.dataset["id"];
     }
     else {
       if (selectedElt.parentElement.classList.contains("children")) {
-        parentId = selectedElt.parentElement.previousSibling.dataset.id;
+        parentId = selectedElt.parentElement.previousSibling.dataset["id"];
       }
 
       index = 1;
@@ -116,14 +117,14 @@ export function getTreeViewInsertionPoint(treeView: any) {
   return { parentId, index };
 }
 
-export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.TreeById) {
+export function getTreeViewDropPoint(dropLocation: TreeView.DropLocation, treeById: SupCore.Data.Base.TreeById) {
   let parentId: string;
   let index: number;
 
   let parentNode: any;
-  const targetEntryId = dropInfo.target.dataset.id;
+  const targetEntryId = dropLocation.target.dataset["id"];
 
-  switch (dropInfo.where) {
+  switch (dropLocation.where) {
     case "inside": {
       parentNode = treeById.byId[targetEntryId];
       index = parentNode.children.length;
@@ -135,7 +136,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
 
       index = (parentNode != null) ? parentNode.children.indexOf(targetNode) : treeById.pub.indexOf(targetNode);
 
-      if (dropInfo.where === "below") index++;
+      if (dropLocation.where === "below") index++;
     } break;
   }
 
@@ -143,13 +144,13 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
   return { parentId, index };
 }
 
-export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed = false) {
-  const targetEntryId = dropInfo.target.dataset.id;
+export function getListViewDropIndex(dropLocation: TreeView.DropLocation, listById: SupCore.Data.Base.ListById, reversed = false) {
+  const targetEntryId = dropLocation.target.dataset["id"];
   const targetNode = listById.byId[targetEntryId];
 
   let index = listById.pub.indexOf(targetNode);
-  if (!reversed && dropInfo.where === "below") index++;
-  if ( reversed && dropInfo.where === "above") index++;
+  if (!reversed && dropLocation.where === "below") index++;
+  if ( reversed && dropLocation.where === "above") index++;
   return index;
 }
 
