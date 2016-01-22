@@ -31,6 +31,7 @@ const ui: {
   entriesTreeView?: any;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
+  entriesFilterView?: any;
 
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
@@ -104,12 +105,15 @@ function start() {
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
 
+  ui.entriesFilterView = (document.querySelector(".filter-buttons") as HTMLElement);
+
   document.querySelector(".entries-buttons .new-asset").addEventListener("click", onNewAssetClick);
   document.querySelector(".entries-buttons .new-folder").addEventListener("click", onNewFolderClick);
   document.querySelector(".entries-buttons .search").addEventListener("click", onSearchEntryDialog);
   document.querySelector(".entries-buttons .rename-entry").addEventListener("click", onRenameEntryClick);
   document.querySelector(".entries-buttons .duplicate-entry").addEventListener("click", onDuplicateEntryClick);
   document.querySelector(".entries-buttons .trash-entry").addEventListener("click", onTrashEntryClick);
+  document.querySelector(".entries-buttons .filter").addEventListener("click", onFilterEntryClick);
 
   ui.openInNewWindowButton = document.createElement("button");
   ui.openInNewWindowButton.className = "open-in-new-window";
@@ -298,6 +302,7 @@ function onDisconnected() {
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".filter-buttons") as HTMLDivElement).hidden = true;
   (document.querySelector(".connecting") as HTMLDivElement).hidden = false;
 }
 
@@ -342,6 +347,8 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".entries-buttons .filter") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".filter-buttons") as HTMLButtonElement).hidden = true;
 
   function walk(entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode, parentElt: HTMLLIElement) {
     const liElt = createEntryElement(entry);
@@ -353,6 +360,7 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
     if (entry.children != null) for (const child of entry.children) walk(child, entry, liElt);
   }
   for (const entry of entries) walk(entry, null, null);
+  createFilterElements();
 }
 
 function onSetManifestProperty(key: string, value: any) {
@@ -622,6 +630,42 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
   return liElt;
 }
 
+function createFilterElements() {
+  const assetTypes = data.assetTypesByTitle;
+
+  const filterElt = ui.entriesFilterView;
+  while (filterElt.hasChildNodes()) {
+    filterElt.removeChild(filterElt.lastChild);
+  } 
+
+  const selectAllElt = document.createElement("img");
+  selectAllElt.draggable = false;
+  selectAllElt.addEventListener("click", () => {
+      toggleSelectAllFilter();
+  });
+  selectAllElt.src = "/images/tabs/close.svg"; // TODO: Replae with real image for select all
+  filterElt.appendChild(selectAllElt);
+  let assetTitle = "";
+  for (const assetType in assetTypes) {
+    const iconElt = document.createElement("img");
+    iconElt.draggable = false;
+    assetTitle = assetTypes[assetType];
+    iconElt.addEventListener("click", () => { toggleFilter(assetTitle); });
+    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[assetTitle].pluginPath}/editors/${assetTitle}/icon.svg`;
+    filterElt.appendChild(iconElt);
+  }
+}
+
+function toggleFilter(assetTitle: string) {
+  // toggle the filter for this specfic asset type
+  alert("toggle asset filter for: " + assetTitle);
+}
+
+function toggleSelectAllFilter() {
+  // toggle the select all filter
+  alert("toggle select all filter");
+}
+
 function onEntryDrop(dropInfo: any, orderedNodes: any) {
   const dropPoint = SupClient.getTreeViewDropPoint(dropInfo, data.entries);
 
@@ -709,6 +753,7 @@ function onMessageHotKey(action: string) {
     case "newAsset":     onNewAssetClick(); break;
     case "newFolder":    onNewFolderClick(); break;
     case "searchEntry":  onSearchEntryDialog(); break;
+    case "filter":       onFilterEntryClick(); break;
     case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
     case "previousTab":  onActivatePreviousTab(); break;
     case "nextTab":      onActivateNextTab(); break;
@@ -911,6 +956,16 @@ function onRenameEntryClick() {
       if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
     });
   });
+}
+
+function onFilterEntryClick() {
+  // toggle the visibilty of the asset filter
+  const div = (document.querySelector(".filter-buttons") as HTMLDivElement);
+  div.hidden = !div.hidden;
+}
+
+function onAssetFilter(typeName: string) {
+  alert(typeName);
 }
 
 function onDuplicateEntryClick() {
