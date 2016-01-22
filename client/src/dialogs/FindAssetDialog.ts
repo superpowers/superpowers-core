@@ -88,11 +88,11 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
     if (event.keyCode === 38 /* Up */) {
       event.stopPropagation();
       event.preventDefault();
-      this.treeView._moveVertically(-1);
+      this.treeView.moveVertically(-1);
     } else if (event.keyCode === 40 /* Down */) {
       event.stopPropagation();
       event.preventDefault();
-      this.treeView._moveVertically(1);
+      this.treeView.moveVertically(1);
     }
   };
 
