@@ -30,6 +30,9 @@ const argv = yargs
   .command("uninstall", "Uninstall a system or plugin", (yargs) => {
     yargs.demand(2, 2, `The "uninstall" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
+  .command("update", "Update the server, a system or a plugin", (yargs) => {
+    yargs.demand(2, 2, `The "update" command requires a single argument: server, "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
+  })
   .command("init", "Generate a skeleton for a new system or plugin", (yargs) => {
     yargs.demand(2, 2, `The "init" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
@@ -79,7 +82,7 @@ for (const entry of fs.readdirSync(systemsPath)) {
 }
 
 const command = argv._[0];
-const [ systemId, pluginPath ] = argv._[1] != null ? argv._[1].split(":") : [ null, null ];
+const [ systemId, pluginFullName ] = argv._[1] != null ? argv._[1].split(":") : [ null, null ];
 switch (command) {
   case "start":
     /* tslint:disable */
@@ -90,6 +93,7 @@ switch (command) {
   case "registry": showRegistry(); break;
   case "install": install(); break;
   case "uninstall": uninstall(); break;
+  case "update": update(); break;
   case "init": init(); break;
   default:
     yargs.showHelp();
@@ -172,7 +176,7 @@ function listAvailablePlugins(registry: Registry, systemId: string) {
   }
 }
 
-function getLatestRelease(repositoryURL: string, callback: (downloadURL: string) => void) {
+function getLatestRelease(repositoryURL: string, callback: (version: string, downloadURL: string) => void) {
   const repositoryPath = `${repositoryURL.replace("https://github.com", "/repos")}/releases/latest`;
   const request = https.get({
     hostname: "api.github.com",
@@ -190,7 +194,7 @@ function getLatestRelease(repositoryURL: string, callback: (downloadURL: string)
     res.on("data", (chunk: string) => { content += chunk; });
     res.on("end", () => {
       const repositoryInfo = JSON.parse(content);
-      callback(repositoryInfo.assets[0].browser_download_url);
+      callback(repositoryInfo.tag_name.slice(1), repositoryInfo.assets[0].browser_download_url);
     });
   });
 
@@ -198,6 +202,36 @@ function getLatestRelease(repositoryURL: string, callback: (downloadURL: string)
     console.error(`Couldn't get latest release from repository at ${repositoryURL}:`);
     console.error(err.stack);
     process.exit(1);
+  });
+}
+
+function downloadRelease(downloadURL: string, downloadPath: string, callback: () => void) {
+  mkdirp.sync(downloadPath);
+  https.get({
+    hostname: "github.com",
+    path: downloadURL,
+    headers: { "user-agent": "Superpowers" }
+  }, (res) => {
+    if (res.statusCode !== 200) {
+      console.error("Couldn't download the release:");
+      const err = new Error(`Unexpected status code: ${res.statusCode}`);
+      console.error(err.stack);
+      process.exit(1);
+    }
+
+    let rootFolderName: string;
+    res.pipe(unzip.Parse())
+      .on("entry", (entry: any) => {
+        if (rootFolderName == null) {
+          rootFolderName = entry.path;
+          return;
+        }
+
+        const entryPath = `${downloadPath}/${entry.path.replace(rootFolderName, "")}`;
+        if (entry.type === "Directory") mkdirp.sync(entryPath);
+        else entry.pipe(fs.createWriteStream(entryPath));
+      })
+      .on("close", () => { callback(); });
   });
 }
 
@@ -210,95 +244,62 @@ function install() {
     }
 
     if (registry.systems[systemId] == null) {
-      console.error(`System ${systemId} doesn't exist.`);
+      console.error(`System ${systemId} is not on the registry.`);
       listAvailableSystems(registry);
       process.exit(1);
     }
 
     if (systemsById[systemId] != null) {
-      if (pluginPath == null) {
+      if (pluginFullName == null) {
         console.error(`System ${systemId} is already installed.`);
         listAvailableSystems(registry);
         process.exit(1);
-      } else if (pluginPath === "") {
+      } else if (pluginFullName === "") {
         listAvailablePlugins(registry, systemId);
         process.exit(0);
       }
 
-      const [ pluginAuthor, pluginName ] = pluginPath.split("/");
+      const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
       if (registry.systems[systemId].plugins[pluginAuthor] == null || registry.systems[systemId].plugins[pluginAuthor][pluginName] == null) {
-        console.error(`Plugin ${pluginPath} doesn't exist.`);
+        console.error(`Plugin ${pluginFullName} is not on the registry.`);
         listAvailablePlugins(registry, systemId);
         process.exit(1);
       }
 
       if (systemsById[systemId].plugins[pluginAuthor] != null && systemsById[systemId].plugins[pluginAuthor].indexOf(pluginName) !== -1) {
-        console.error(`Plugin ${pluginPath} is already installed.`);
+        console.error(`Plugin ${pluginFullName} is already installed.`);
         listAvailablePlugins(registry, systemId);
         process.exit(1);
       }
 
-      console.log(`Installing plugin ${pluginPath} on system ${systemId}...`);
-      installPlugin(systemId, pluginAuthor, pluginName, registry.systems[systemId].plugins[pluginAuthor][pluginName]);
+      installPlugin(registry.systems[systemId].plugins[pluginAuthor][pluginName]);
     } else {
-      if (pluginPath != null) {
+      if (pluginFullName != null) {
         console.error(`System ${systemId} is not installed.`);
         process.exit(1);
       }
 
-      console.log(`Installing system ${systemId}...`);
       installSystem(registry.systems[systemId].repository);
     }
   });
 }
 
 function installSystem(repositoryURL: string) {
-  getLatestRelease(repositoryURL, (downloadURL) => {
-    https.get({
-      hostname: "github.com",
-      path: downloadURL,
-      headers: { "user-agent": "Superpowers" }
-    }, (res) => {
-      if (res.statusCode !== 200) {
-        console.error("Couldn't download the system:");
-        const err = new Error(`Unexpected status code: ${res.statusCode}`);
-        console.error(err.stack);
-        process.exit(1);
-      }
-      res.pipe(unzip.Extract({ path: systemsPath }));
-      res.on("end", () => { console.log("System successfully installed."); });
+  console.log(`Installing system ${systemId}...`);
+  getLatestRelease(repositoryURL, (version, downloadURL) => {
+    const systemPath = `${systemsPath}/${systemId}`;
+    downloadRelease(downloadURL, systemPath, () => {
+      console.log("System successfully installed.");
     });
   });
 }
 
-function installPlugin(systemId: string, pluginAuthor: string, pluginName: string, repositoryURL: string) {
-  getLatestRelease(repositoryURL, (downloadURL) => {
-    const pluginPath = `${systemsPath}/${systemsById[systemId].folderName}/plugins/${pluginAuthor}`;
-    mkdirp.sync(pluginPath);
-
-    https.get({
-      hostname: "github.com",
-      path: downloadURL,
-      headers: { "user-agent": "Superpowers" }
-    }, (res) => {
-      if (res.statusCode !== 200) {
-        console.error("Couldn't download the plugin:");
-        const err = new Error(`Unexpected status code: ${res.statusCode}`);
-        console.error(err.stack);
-        process.exit(1);
-      }
-
-      let folderName: string;
-      res.pipe(unzip.Parse())
-        .on("entry", (entry: any) => {
-          if (folderName == null) folderName = entry.path;
-          if (entry.type === "Directory") mkdirp.sync(`${pluginPath}/${entry.path}`);
-          else entry.pipe(fs.createWriteStream(`${pluginPath}/${entry.path}`));
-        })
-        .on("close", () => {
-          fs.renameSync(`${pluginPath}/${folderName}`, `${pluginPath}/${pluginName}`);
-          console.log("Plugin successfully installed.");
-        });
+function installPlugin(repositoryURL: string) {
+  console.log(`Installing plugin ${pluginFullName} on system ${systemId}...`);
+  getLatestRelease(repositoryURL, (version, downloadURL) => {
+    const pluginPath = `${systemsPath}/${systemsById[systemId].folderName}/plugins/${pluginFullName}`;
+    downloadRelease(downloadURL, pluginPath, () => {
+      console.log("Plugin successfully installed.");
     });
   });
 }
@@ -310,52 +311,198 @@ function uninstall() {
     process.exit(1);
   }
 
-  if (pluginPath == null) {
+  if (pluginFullName == null) {
     const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
     r1.question(`Are you sure you want to uninstall the system ${systemId} ? (yes/no): `, (answer) => {
-      if (answer !== "yes") process.exit(0);
-
-      console.log(`Uninstalling system ${systemId}...`);
-      rimraf(`${systemsPath}/${system.folderName}`, (err) => {
-        if (err != null) {
-          console.error(`Failed to uninstalled system.`);
-          process.exit(1);
-        } else {
-          console.log("System successfully uninstalled.");
-        }
-      });
+      if (answer === "yes") uninstallSystem(system.folderName);
+      else process.exit(0);
     });
 
   } else {
-    const [ pluginAuthor, pluginName ] = pluginPath.split("/");
+    const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
     if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) {
       console.error(`Built-in plugins can not be uninstalled.`);
       process.exit(1);
     }
 
     if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor].indexOf(pluginName) === -1) {
-      console.error(`Plugin ${pluginPath} is not installed.`);
+      console.error(`Plugin ${pluginFullName} is not installed.`);
       process.exit(1);
     }
 
     const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
-    r1.question(`Are you sure you want to uninstall the plugin ${pluginPath} ? (yes/no): `, (answer) => {
-      if (answer !== "yes") process.exit(0);
-      console.log(`Uninstalling plugin ${pluginPath} from system ${systemId}...`);
-      rimraf(`${systemsPath}/${system.folderName}/plugins/${pluginPath}`, (err) => {
-        if (err != null) {
-          console.error(`Failed to uninstalled plugin.`);
-          process.exit(1);
-        } else {
-          if (fs.readdirSync(`${systemsPath}/${system.folderName}/plugins/${pluginAuthor}`).length === 0)
-            fs.rmdirSync(`${systemsPath}/${system.folderName}/plugins/${pluginAuthor}`);
-
-          console.log("Plugin successfully uninstalled.");
-          process.exit(0);
-        }
-      });
+    r1.question(`Are you sure you want to uninstall the plugin ${pluginFullName} ? (yes/no): `, (answer) => {
+      if (answer === "yes") uninstallPlugin(system.folderName, pluginAuthor);
+      else process.exit(0);
     });
   }
+}
+
+function uninstallSystem(systemFolderName: string) {
+  console.log(`Uninstalling system ${systemId}...`);
+  rimraf(`${systemsPath}/${systemFolderName}`, (err) => {
+    if (err != null) {
+      console.error(`Failed to uninstalled system.`);
+      process.exit(1);
+    } else {
+      console.log("System successfully uninstalled.");
+    }
+  });
+}
+
+function uninstallPlugin(systemFolderName: string, pluginAuthor: string) {
+  console.log(`Uninstalling plugin ${pluginFullName} from system ${systemId}...`);
+  rimraf(`${systemsPath}/${systemFolderName}/plugins/${pluginFullName}`, (err) => {
+    if (err != null) {
+      console.error(`Failed to uninstalled plugin.`);
+      process.exit(1);
+    } else {
+      if (fs.readdirSync(`${systemsPath}/${systemFolderName}/plugins/${pluginAuthor}`).length === 0)
+        fs.rmdirSync(`${systemsPath}/${systemFolderName}/plugins/${pluginAuthor}`);
+
+      console.log("Plugin successfully uninstalled.");
+      process.exit(0);
+    }
+  });
+}
+
+function update() {
+  if (argv._[1] === "server") {
+    // FIXME: Remove the 2 following lines once we have a release ready
+    console.log("The server can't be updated yet.");
+    process.exit(0);
+    updateServer();
+    return;
+  }
+
+  const system = systemsById[systemId];
+  if (system == null) {
+    console.error(`System ${systemId} is not installed.`);
+    process.exit(1);
+  }
+
+  if (pluginFullName == null) {
+    updateSystem(system.folderName);
+
+  } else {
+    const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
+    if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) {
+      console.error(`Built-in plugins can not be update on their own. You must update the system instad.`);
+      process.exit(1);
+    }
+
+    if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor].indexOf(pluginName) === -1) {
+      console.error(`Plugin ${pluginFullName} is not installed.`);
+      process.exit(1);
+    }
+    updatePlugin(system.folderName);
+  }
+}
+
+function updateServer() {
+  const packageData = fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" });
+  const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
+
+  getLatestRelease("https://github.com/superpowers/superpowers", (version, downloadURL) => {
+    const [ latestMajor, latestMinor ] = version.split(".");
+
+    if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
+      console.log("Updating the server...");
+
+      for (let path of ["server", "SupClient", "SupCore", "package.json", "public", "node_modues"]) rimraf.sync(`${__dirname}/../${path}`);
+      downloadRelease(downloadURL, `${__dirname}/..`, () => {
+        console.log("Server sucessfully updated.");
+      });
+    } else {
+      console.log("No updates available for the server.");
+    }
+  });
+}
+
+function updateSystem(systemFolderName: string) {
+  const systemPath = `${systemsPath}/${systemFolderName}`;
+  const packageData = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
+  const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
+
+  getRegistry((err, registry) => {
+    if (err) {
+      console.error("Error while fetching registry:");
+      console.error(err.stack);
+      process.exit(1);
+    }
+
+    const system = registry.systems[systemId];
+    if (system == null) {
+      console.error(`System ${systemId} is not on the registry.`);
+      listAvailableSystems(registry);
+      process.exit(1);
+    }
+
+    getLatestRelease(system.repository, (version, downloadURL) => {
+      const [ latestMajor, latestMinor ] = version.split(".");
+      if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
+        console.log(`Updating system ${systemId}...`);
+
+        const folders = fs.readdirSync(systemPath);
+        for (let folder of folders) {
+          if (folder === "plugins") {
+            for (const pluginAuthor of fs.readdirSync(`${systemPath}/plugins`)) {
+              if (builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
+              rimraf.sync(`${systemPath}/plugins/${pluginAuthor}`);
+            }
+          } else rimraf.sync(`${systemPath}/${folder}`);
+        }
+
+        downloadRelease(downloadURL, systemPath, () => {
+          console.log(`System successfully updated to version ${latestMajor}.${latestMinor}.`);
+        });
+      } else {
+        console.log(`No updates available for system ${systemId}`);
+      }
+    });
+  });
+}
+
+function updatePlugin(systemFolderName: string) {
+  const pluginPath = `${systemsPath}/${systemFolderName}/plugins/${pluginFullName}`;
+  const packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
+  const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
+
+  getRegistry((err, registry) => {
+    if (err) {
+      console.error("Error while fetching registry:");
+      console.error(err.stack);
+      process.exit(1);
+    }
+
+    const system = registry.systems[systemId];
+    if (system == null) {
+      console.error(`System ${systemId} is not on the registry.`);
+      listAvailableSystems(registry);
+      process.exit(1);
+    }
+
+    const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
+    if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor][pluginName] == null) {
+      console.error(`Plugin ${pluginFullName} is not on the registry.`);
+      listAvailablePlugins(registry, systemId);
+      process.exit(1);
+    }
+
+    getLatestRelease(system.plugins[pluginAuthor][pluginName], (version, downloadURL) => {
+      const [ latestMajor, latestMinor ] = version.split(".");
+      if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
+        console.log(`Updating plugin ${pluginFullName}...`);
+
+        rimraf.sync(pluginPath);
+        downloadRelease(downloadURL, pluginPath, () => {
+          console.log(`Plugin successfully updated to version ${latestMajor}.${latestMinor}.`);
+        });
+      } else {
+        console.log(`No updates available for plugin ${pluginFullName}`);
+      }
+    });
+  });
 }
 
 function init() {
@@ -364,17 +511,17 @@ function init() {
     process.exit(1);
   }
 
-  if (pluginPath != null && !pluginNameRegex.test(pluginPath)) {
+  if (pluginFullName != null && !pluginNameRegex.test(pluginFullName)) {
     console.error("Invalid plugin name: only two sets of letters and numbers separated by a slash are allowed.");
     process.exit(1);
   }
 
   let systemFolderName = systemsById[systemId].folderName;
 
-  if (pluginPath == null && systemFolderName != null) {
+  if (pluginFullName == null && systemFolderName != null) {
     console.error(`You already have a system with the ID ${systemId} installed as systems/${systemFolderName}.`);
     process.exit(1);
-  } else if (pluginPath != null && systemFolderName == null) {
+  } else if (pluginFullName != null && systemFolderName == null) {
     console.error(`You don't have a system with the ID ${systemId} installed.`);
     process.exit(1);
   }
@@ -384,7 +531,7 @@ function init() {
   let systemStats: fs.Stats;
   try { systemStats = fs.lstatSync(`${systemsPath}/${systemFolderName}`); } catch (err) { /* Ignore */ }
 
-  if (pluginPath == null) {
+  if (pluginFullName == null) {
     if (systemStats != null) {
       console.error(`systems/${systemFolderName} already exists.`);
       process.exit(1);
@@ -396,28 +543,28 @@ function init() {
     }
 
     let pluginStats: fs.Stats;
-    try { pluginStats = fs.lstatSync(`${systemsPath}/${systemFolderName}/plugins/${pluginPath}`); } catch (err) { /* Ignore */ }
+    try { pluginStats = fs.lstatSync(`${systemsPath}/${systemFolderName}/plugins/${pluginFullName}`); } catch (err) { /* Ignore */ }
     if (pluginStats != null) {
-      console.error(`systems/${systemFolderName}/plugins/${pluginPath} already exists.`);
+      console.error(`systems/${systemFolderName}/plugins/${pluginFullName} already exists.`);
       process.exit(1);
     }
   }
 
   getRegistry((err, registry) => {
     const registrySystemEntry = registry.systems[systemId];
-    if (pluginPath == null && registrySystemEntry != null) {
+    if (pluginFullName == null && registrySystemEntry != null) {
       console.error(`System ${systemId} already exists.`);
       process.exit(1);
-    } else if (pluginPath != null && registrySystemEntry != null) {
-      const [ pluginAuthor, pluginName ] = pluginPath.split("/");
+    } else if (pluginFullName != null && registrySystemEntry != null) {
+      const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
       if (registrySystemEntry.plugins[pluginAuthor][pluginName] != null) {
-        console.error(`Plugin ${pluginPath} on system ${systemId} already exists.`);
+        console.error(`Plugin ${pluginFullName} on system ${systemId} already exists.`);
         process.exit(1);
       }
     }
 
-    if (pluginPath == null) initSystem(systemId);
-    else initPlugin(systemFolderName, systemId, pluginPath);
+    if (pluginFullName == null) initSystem(systemId);
+    else initPlugin(systemFolderName, systemId, pluginFullName);
   });
 }
 
