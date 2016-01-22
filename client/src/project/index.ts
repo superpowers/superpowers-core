@@ -28,7 +28,7 @@ let data: {
 };
 
 const ui: {
-  entriesTreeView?: any;
+  entriesTreeView?: TreeView;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
 
@@ -377,7 +377,7 @@ function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: nu
 
   let parentElt: HTMLLIElement;
   if (parentId != null) {
-    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
+    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`) as HTMLLIElement;
     const parentEntry = data.entries.byId[parentId];
     const childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
@@ -391,7 +391,7 @@ function onEntryAddedAck(err: string, id: string) {
   if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
 
   ui.entriesTreeView.clearSelection();
-  ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`));
+  ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`) as HTMLLIElement);
   updateSelectedEntry();
 
   if (autoOpenAsset) openEntry(id);
@@ -414,7 +414,7 @@ function onEntryMoved(id: string, parentId: string, index: number) {
 
   let parentElt: HTMLLIElement;
   if (parentId != null) {
-    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
+    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`) as HTMLLIElement;
     const parentEntry = data.entries.byId[parentId];
     const childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
@@ -430,7 +430,7 @@ function onEntryMoved(id: string, parentId: string, index: number) {
 function onEntryTrashed(id: string) {
   data.entries.client_remove(id);
 
-  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`) as HTMLLIElement;
 
   const oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
@@ -739,6 +739,21 @@ function onSearchEntryDialog() {
     /* tslint:enable:no-unused-expression */
     if (entryId == null) return;
     openEntry(entryId);
+
+    ui.entriesTreeView.clearSelection();
+    let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${entryId}']`) as HTMLLIElement;
+    ui.entriesTreeView.addToSelection(entryElt);
+
+    let revealParent = (entryElt: HTMLLIElement) => {
+      let parentId = entryElt.dataset["parentId"];
+      if (parentId != null) {
+        let parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`) as HTMLLIElement;
+        parentElt.classList.toggle("collapsed", false);
+        revealParent(parentElt);
+      }
+    };
+    revealParent(entryElt);
+    ui.entriesTreeView.scrollIntoView(entryElt);
   });
 }
 
