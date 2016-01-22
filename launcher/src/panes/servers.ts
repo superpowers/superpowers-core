@@ -39,7 +39,7 @@ function createServerElement(entry: { name: string; address: string; }) {
 }
 
 function onAddServerClick() {
-  new dialogs.ConfirmDialog("Warning!", "Connecting to an unknown server can be dangerous. Do you still want to continue?", (accepted: boolean) => {
+  new dialogs.ConfirmDialog("Warning! Connecting to an unknown server can be dangerous. Do you still want to continue?", "Proceed", (accepted: boolean) => {
     if (accepted !== true) return;
     /* tslint:disable:no-unused-expression */
     new dialogs.PromptDialog("Enter a name for the server.", { placeholder: "Enter a name", validationLabel: "Add server" }, (name: string) => {
