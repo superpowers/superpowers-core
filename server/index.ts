@@ -516,7 +516,7 @@ function init() {
     process.exit(1);
   }
 
-  let systemFolderName = systemsById[systemId].folderName;
+  let systemFolderName = (systemsById[systemId] != null) ? systemsById[systemId].folderName : null;
 
   if (pluginFullName == null && systemFolderName != null) {
     console.error(`You already have a system with the ID ${systemId} installed as systems/${systemFolderName}.`);
