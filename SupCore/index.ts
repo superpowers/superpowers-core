@@ -15,3 +15,7 @@ export function log(message: string): void {
   if (process != null && process.send != null) process.send(text);
   return;
 }
+
+export class LocalizedError {
+  constructor(public key: string, public variables: { [key: string]: string; }) {}
+}

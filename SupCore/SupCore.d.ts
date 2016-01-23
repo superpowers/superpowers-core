@@ -4,6 +4,13 @@
 declare namespace SupCore {
   export function log(message: string): void;
 
+  export class LocalizedError {
+    key: string;
+    variables: { [key: string]: string; };
+
+    constructor(key: string, variables: { [key: string]: string; });
+  }
+
   namespace Data {
     export function hasDuplicateName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): boolean;
     export function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string;

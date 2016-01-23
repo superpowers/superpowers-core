@@ -53,7 +53,7 @@ export function load(files: File[], callback: Function) {
   }
 }
 
-export function t(key: string, variables: { [key: string]: string } = {}) {
+export function t(key: string, variables: { [key: string]: string; } = {}) {
   if (language === "none") return key;
 
   const [ context, keys ] = key.split(":");
@@ -70,7 +70,7 @@ export function t(key: string, variables: { [key: string]: string } = {}) {
   return insertVariables(locals as string, variables);
 }
 
-function fallbackT(key: string, variables: { [key: string]: string } = {}) {
+function fallbackT(key: string, variables: { [key: string]: string; } = {}) {
   const [ context, keys ] = key.split(":");
   const keyParts = keys.split(".");
 
