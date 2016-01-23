@@ -612,6 +612,7 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
 function onEntryDragStart(event: DragEvent, entryElt: HTMLLIElement) {
   const id = entryElt.dataset["id"];
   event.dataTransfer.setData("text/plain", data.entries.getPathFromId(id));
+  event.dataTransfer.setData("application/vnd.superpowers.entry", id);
   return true;
 }
 
