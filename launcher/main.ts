@@ -8,6 +8,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as http from "http";
 import * as mkdirp from "mkdirp";
+import * as url from "url";
 
 const { superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
 
@@ -30,6 +31,7 @@ electron.app.on("ready", function() {
   if (process.platform !== "darwin") mainWindow.setMenuBarVisibility(false);
   else setupOSXAppMenu();
   mainWindow.loadURL(`file://${__dirname}/public/index.html`);
+  mainWindow.webContents.on("will-navigate", (event: Event) => { event.preventDefault(); });
   mainWindow.on("closed", function() { mainWindow = null; });
 });
 
@@ -110,6 +112,7 @@ electron.ipcMain.on("new-server-window", (event: GitHubElectron.IPCMainEvent, ad
     delete openServersById[openServer.window.id];
   });
 
+
   const status = `Connecting to ${openServer.address}...`;
   openServer.window.loadURL(`file://${__dirname}/public/connectionStatus.html?status=${encodeURIComponent(status)}&address=${encodeURIComponent(openServer.address)}`);
 
@@ -118,6 +121,12 @@ electron.ipcMain.on("new-server-window", (event: GitHubElectron.IPCMainEvent, ad
     openServer.window.webContents.removeListener("did-finish-load", onServerWindowLoaded);
     connect(openServersById[openServer.window.id]);
   }
+
+  openServer.window.webContents.on("will-navigate", (event: Event, newURL: string) => {
+    let newParsedURL = url.parse(newURL);
+    let oldParsedURL = url.parse(openServer.window.webContents.getURL());
+    if (newParsedURL.host !== oldParsedURL.host) event.preventDefault();
+  });
 });
 
 function connect(openServer: OpenServer) {
@@ -188,6 +197,7 @@ electron.ipcMain.on("new-standalone-window", (event: GitHubElectron.IPCMainEvent
   standaloneWindowsById[windowId] = standaloneWindow;
 
   standaloneWindow.on("closed", () => { delete standaloneWindowsById[windowId]; });
+  standaloneWindow.webContents.on("will-navigate", (event: Event) => { event.preventDefault(); });
   standaloneWindow.loadURL(address);
 });
 
