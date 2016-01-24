@@ -1,4 +1,4 @@
-## Superpowers, the HTML5 2D+3D game maker  
+## [Superpowers](http://superpowers-html5.com/), the HTML5 2D+3D game maker  
 
 [![License](https://img.shields.io/badge/license-ISC-blue.svg)](https://github.com/superpowers/superpowers/blob/master/LICENSE.txt)
 [![Build Status](https://travis-ci.org/superpowers/superpowers.svg?branch=master)](https://travis-ci.org/superpowers/superpowers)
