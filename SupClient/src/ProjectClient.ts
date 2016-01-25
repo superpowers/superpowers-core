@@ -100,6 +100,18 @@ export default class ProjectClient {
   }
 
   editAsset(assetId: string, command: string, ...args: any[]) {
+    let callback: Function;
+    if (typeof args[args.length - 1] === "function") callback = args.pop();
+
+    args.push((err: string, id: string) => {
+      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+      if (callback != null) callback(id);
+    });
+
+    this.socket.emit("edit:assets", assetId, command, ...args);
+  }
+
+  editAssetNoErrorHandling(assetId: string, command: string, ...args: any[]) {
     this.socket.emit("edit:assets", assetId, command, ...args);
   }
 
@@ -135,7 +147,15 @@ export default class ProjectClient {
   }
 
   editResource(resourceId: string, command: string, ...args: any[]) {
-    this.socket.emit("edit:assets", resourceId, command, ...args);
+    let callback: Function;
+    if (typeof args[args.length - 1] === "function") callback = args.pop();
+
+    args.push((err: string, id: string) => {
+      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+      if (callback != null) callback(err, id);
+    });
+
+    this.socket.emit("edit:resources", resourceId, command, ...args);
   }
 
 
