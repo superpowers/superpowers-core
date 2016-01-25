@@ -10,7 +10,6 @@ declare namespace SupClient {
 
   export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => any): void;
 
-  export let activePluginPath: string;
   export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
   export function getPlugins<T>(contextName: string): { [pluginName: string]: { path: string; content: T; } };
 

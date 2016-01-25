@@ -1,4 +1,5 @@
 import * as io from "socket.io-client";
+import * as url from "url";
 import * as querystring from "querystring";
 import * as cookies from "js-cookie";
 
@@ -26,9 +27,9 @@ export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
 // Initialize empty system
 SupCore.system = new SupCore.System("", "");
 
-export let activePluginPath: string;
-
 const plugins: { [contextName: string]: { [pluginName: string]: { path: string; content: any; } } } = {};
+
+const scriptPathRegex = /^\/systems\/([^\/])+\/plugins\/([^\/])+\/([^\/])+/;
 export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
   if (plugins[contextName] == null) plugins[contextName] = {};
 
@@ -38,7 +39,9 @@ export function registerPlugin<T>(contextName: string, pluginName: string, plugi
     return;
   }
 
-  plugins[contextName][pluginName] = { path: activePluginPath, content: plugin };
+  const scriptURL = url.parse((document as any).currentScript.src);
+  const pluginPath = scriptPathRegex.exec(scriptURL.pathname)[0];
+  plugins[contextName][pluginName] = { path: pluginPath, content: plugin };
 }
 
 export function getPlugins<T>(contextName: string): { [pluginName: string]: { path: string; content: T; } } {
