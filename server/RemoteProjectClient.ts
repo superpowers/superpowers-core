@@ -1,6 +1,6 @@
 import BaseRemoteClient from "./BaseRemoteClient";
 import ProjectServer from "./ProjectServer";
-import config from "./config";
+import { server as serverConfig } from "./config";
 import { buildFilesBySystem } from "./loadSystems";
 import * as path from "path";
 import * as fs from "fs";
@@ -17,7 +17,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   constructor(server: ProjectServer, id: string, socket: SocketIO.Socket) {
     super(server, socket);
     this.id = id;
-    this.socket.emit("welcome", this.id, { buildPort: config.buildPort, systemId: this.server.system.id });
+    this.socket.emit("welcome", this.id, { buildPort: serverConfig.buildPort, systemId: this.server.system.id });
 
     // Manifest
     this.socket.on("setProperty:manifest", this.onSetManifestProperty);
@@ -475,7 +475,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
             callback(null, buildId.toString(), files);
 
             // Remove an old build to avoid using too much disk space
-            const buildToDeleteId = buildId - config.maxRecentBuilds;
+            const buildToDeleteId = buildId - serverConfig.maxRecentBuilds;
             const buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
             rimraf(buildToDeletePath, (err) => {
               if (err != null) {

@@ -1,24 +1,19 @@
 import * as serverPaths from "./serverPaths";
-import * as _ from "lodash";
-
-import config from "../../../server/configDefaults";
+import { defaults as configDefaults, Config } from "../../../server/config";
 import * as schemas from "../../../server/schemas";
 
 const fs = nodeRequire("fs");
-if (fs.existsSync(serverPaths.config)) {
-  let userConfig: any;
-  try {
-    userConfig = JSON.parse(fs.readFileSync(serverPaths.config, { encoding: "utf8" }));
-    schemas.validate(userConfig, "config");
-  } catch (e) {
-    userConfig = {};
-  }
 
-  if(userConfig.port != null) {
-    userConfig.mainPort = userConfig.port;
-    delete userConfig.port;
-  }
-  _.merge(config, userConfig);
+let config: Config = {} as any;
+if (fs.existsSync(serverPaths.config)) {
+  try {
+    config = JSON.parse(fs.readFileSync(serverPaths.config, { encoding: "utf8" }));
+    schemas.validate(config, "config");
+  } catch (e) { /* Ignore */ }
+}
+
+for (const key in configDefaults) {
+  if (config[key] == null) config[key] = configDefaults[key];
 }
 
 const mainPortInput = <HTMLInputElement>document.querySelector("input.main-server-port");

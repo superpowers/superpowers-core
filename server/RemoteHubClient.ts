@@ -2,7 +2,6 @@ import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
 
-import * as paths from "./paths";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
@@ -51,14 +50,14 @@ export default class RemoteHubClient extends BaseRemoteClient {
     let projectFolderNumber = 1;
 
     while(true) {
-      try { fs.mkdirSync(path.join(paths.projects, projectFolder)); }
+      try { fs.mkdirSync(path.join(this.server.projectsPath, projectFolder)); }
       catch (e) {
         projectFolder = `${originalProjectFolder}-${projectFolderNumber++}`;
         continue;
       }
       break;
     }
-    const projectPath = path.join(paths.projects, projectFolder);
+    const projectPath = path.join(this.server.projectsPath, projectFolder);
 
     const onFoldersCreated = (err: Error) => {
       if (err != null) { callback(`The project could not be created, folders creation has failed: ${err.message}`); return; }

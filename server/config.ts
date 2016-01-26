@@ -1,21 +1,17 @@
-import * as _ from "lodash";
-import * as fs from "fs";
-import * as schemas from "./schemas";
-import * as paths from "./paths";
-import configDefaults from "./configDefaults";
-
-export default configDefaults;
-
-if (fs.existsSync(paths.config)) {
-  const config = JSON.parse(fs.readFileSync(paths.config, { encoding: "utf8" }));
-  schemas.validate(config, "config");
-
-  if (config.port != null) {
-    config.mainPort = config.port;
-    delete config.port;
-  }
-
-  _.merge(configDefaults, config);
-} else {
-  fs.writeFileSync(paths.config, JSON.stringify(configDefaults, null, 2) + "\n", { encoding: "utf8" });
+export interface Config {
+  mainPort: number;
+  buildPort: number;
+  password: string;
+  maxRecentBuilds: number;
+  [key: string]: any;
 }
+
+export const defaults: Config = {
+  mainPort: 4237,
+  buildPort: 4238,
+  password: "",
+  maxRecentBuilds: 10
+};
+
+// Loaded by start.ts
+export let server: Config = null;

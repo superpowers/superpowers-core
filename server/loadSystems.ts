@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as express from "express";
 import * as async from "async";
 import * as readdirRecursive from "recursive-readdir";
-import { getLocalizedFilename } from "./paths";
+import getLocalizedFilename from "./getLocalizedFilename";
 
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 const systemsPath = path.resolve(`${__dirname}/../systems`);
