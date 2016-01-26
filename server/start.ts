@@ -64,7 +64,7 @@ export default function start(customUserDataPath: string) {
   mainApp.use("/", express.static(`${__dirname}/../public`));
 
   mainHttpServer = http.createServer(mainApp);
-  mainHttpServer.on("error", onHttpServerError);
+  mainHttpServer.on("error", onHttpServerError.bind(null, config.server.mainPort));
 
   io = socketio(mainHttpServer, { transports: [ "websocket" ] });
 
@@ -85,6 +85,7 @@ export default function start(customUserDataPath: string) {
   });
 
   buildHttpServer = http.createServer(buildApp);
+  buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
 
   loadSystems(mainApp, buildApp, onSystemsLoaded);
 
@@ -188,9 +189,9 @@ function serveProjectWildcard(req: express.Request, res: express.Response) {
   });
 }
 
-function onHttpServerError(err: NodeJS.ErrnoException) {
+function onHttpServerError(port: number, err: NodeJS.ErrnoException) {
   if (err.code === "EADDRINUSE") {
-    SupCore.log(`Could not start the server: another application is already listening on port ${config.server.mainPort}.`);
+    SupCore.log(`Could not start the server: another application is already listening on port ${port}.`);
     process.exit(1);
   } else throw(err);
 }
