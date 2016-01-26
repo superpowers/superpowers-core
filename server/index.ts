@@ -16,7 +16,10 @@ const argv = yargs
   .usage("Usage: $0 <command> [options]")
   .demand(1, "Enter a command")
   .command("start", "Start the server", (yargs) => {
-    yargs.demand(1, 1, `The "start" command doesn't accept any arguments`).argv;
+    yargs
+      .demand(1, 1, `The "start" command doesn't accept any arguments`)
+      .describe("data-path", "Path to store/read data files from, including config and projects")
+      .argv;
   })
   .command("list", "List currently installed systems and plugins", (yargs) => {
     yargs.demand(1, 1, `The "list" command doesn't accept any arguments`).argv;
@@ -36,6 +39,7 @@ const argv = yargs
   .command("init", "Generate a skeleton for a new system or plugin", (yargs) => {
     yargs.demand(2, 2, `The "init" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
+  .help("h").alias("h", "help")
   .argv;
 
 const folderNameRegex = /^[a-z0-9_-]+$/;
