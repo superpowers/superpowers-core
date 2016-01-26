@@ -236,6 +236,11 @@ function onExit() {
   mainHttpServer.close();
   buildHttpServer.close();
 
+  if (hub == null) {
+    process.exit(0);
+    return;
+  }
+
   SupCore.log("Saving all projects...");
 
   hub.saveAll((err: Error) => {
