@@ -1,5 +1,6 @@
 "use strict";
 
+const yargs = require("yargs");
 const startTime = Date.now();
 
 const path = require("path");
@@ -31,13 +32,17 @@ try {
 const async = require("async");
 let buildPaths = require("./getBuildPaths")(rootPath).map((buildPath) => path.sep + path.relative(rootPath, buildPath));
 
-// Filter
-if (process.argv.length > 2) {
-  const filter = process.argv[2];
+// Arguments
+const argv = yargs.option("verbose", { alias: "v", describe: "Verbose mode" }).argv;
+
+if (argv._.length > 0) {
+  const filter = argv._[0];
   const oldPathCount = buildPaths.length;
   buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
   log(`Rebuilding "${filter}", leaving out ${oldPathCount - buildPaths.length} paths`);
 }
+
+const filter = process.argv[2];
 
 // Build
 log(`Build paths: ${buildPaths.join(", ")}`);
@@ -81,7 +86,9 @@ async.eachSeries(buildPaths, (relBuildPath, callback) => {
     (packageJSON, cb) => {
       // Check if the package has a build script
       if (absBuildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
-        const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, [ "run", "build" ], spawnOptions);
+        const args = [ "run", "build" ];
+        if (!argv.verbose) args.push("-s", "--", "--silent");
+        const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
   
         npm.on("close", (status) => {
           if (status !== 0) errors.push(`${relBuildPath}: "npm run build" exited with status code ${status}`);
@@ -92,7 +99,9 @@ async.eachSeries(buildPaths, (relBuildPath, callback) => {
 
       // Check if the package has a gulpfile instead
       if (fs.existsSync(`${absBuildPath}/gulpfile.js`)) {
-        const gulp = child_process.spawn(`gulp${execSuffix ? ".cmd" : ""}`, [], spawnOptions);
+        const args = [];
+        if (!argv.verbose) args.push("--silent");
+        const gulp = child_process.spawn(`gulp${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
 
         gulp.on("close", (status) => {
           if (status !== 0) errors.push(`${relBuildPath}: "gulp" exited with status code ${status}`);

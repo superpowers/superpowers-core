@@ -1,5 +1,7 @@
 "use strict";
 
+const yargs = require("yargs");
+
 const fs = require("fs");
 exports.rootLocalesPath = `${__dirname}/../public/locales`;
 exports.relativeLocalesPath = "./public/locales";
@@ -56,5 +58,7 @@ function reportMissingKeys(languageCode, locale) {
   const rootKeys = Object.keys(fallbackLocale);
   for (const rootKey of rootKeys) checkRecursively(fallbackLocale, locale, rootKey, rootKey);
 
-  if (missingKeys.length > 0) console.log(`Missing keys in ${languageCode} locale: ${missingKeys.join(", ")}`);
+  if (missingKeys.length > 0 && yargs.silent) {
+    console.log(`Missing keys in ${languageCode} locale: ${missingKeys.join(", ")}`);
+  }
 }

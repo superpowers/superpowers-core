@@ -5,7 +5,6 @@ const tasks = [];
 const fs = require("fs");
 
 let editors = [];
-console.log(process.cwd());
 try { editors = fs.readdirSync("./editors"); } catch (err) { /* Ignore */ }
 
 if (editors.length > 0) {
