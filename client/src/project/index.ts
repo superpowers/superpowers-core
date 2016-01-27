@@ -5,7 +5,7 @@ import * as async from "async";
 
 const nodeRequire = require;
 import * as TreeView from "dnd-tree-view";
-import * as PerfectResize from "perfect-resize";
+import * as ResizeHandle from "resize-handle";
 import * as TabStrip from "tab-strip";
 
 let socket: SocketIOClient.Socket;
@@ -84,7 +84,7 @@ function start() {
   });
 
   // Make sidebar resizable
-  new PerfectResize(document.querySelector(".sidebar") as HTMLElement, "left");
+  new ResizeHandle(document.querySelector(".sidebar") as HTMLElement, "left");
 
   // Project info
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });

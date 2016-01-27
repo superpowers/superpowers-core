@@ -12,7 +12,7 @@ import * as dialogs from "./dialogs/index";
 import * as i18n from "./i18n";
 /* tslint:enable:no-unused-variable */
 
-import * as PerfectResize from "perfect-resize";
+import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";
 
 export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, dialogs, i18n };
@@ -179,7 +179,7 @@ export function findEntryByPath(entries: any, path: string|string[]) {
 }
 
 export function setupCollapsablePane(paneElt: HTMLDivElement, refreshCallback?: Function) {
-  const handle = new PerfectResize(paneElt, "bottom");
+  const handle = new ResizeHandle(paneElt, "bottom");
   if (refreshCallback != null)
     handle.on("drag", () => { refreshCallback(); });
 
