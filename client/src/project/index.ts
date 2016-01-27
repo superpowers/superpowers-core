@@ -21,6 +21,7 @@ let data: {
   systemId?: string;
   manifest?: SupCore.Data.ProjectManifest;
   entries?: SupCore.Data.Entries;
+  filteredAssetTitles?: {[type: string]: boolean};
 
   assetTypesByTitle?: { [title: string]: string; };
   editorsByAssetType?: { [assetType: string]: EditorManifest };
@@ -573,6 +574,7 @@ function toggleDevTools() {
 function createEntryElement(entry: SupCore.Data.EntryNode) {
   const liElt = document.createElement("li");
   liElt.dataset["id"] = entry.id;
+  liElt.dataset["class"] = entry.type;
   const parentEntry = data.entries.parentNodesById[entry.id];
   if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
@@ -619,38 +621,82 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
 
 function createFilterElements() {
   const assetTypes = data.assetTypesByTitle;
-
+  data.filteredAssetTitles = {};
   const filterElt = ui.entriesFilterView;
   while (filterElt.hasChildNodes()) {
     filterElt.removeChild(filterElt.lastChild);
-  } 
+  }
 
   const selectAllElt = document.createElement("img");
+  const selectAllClassName = "selectAllFilter";
   selectAllElt.draggable = false;
-  selectAllElt.addEventListener("click", () => {
-      toggleSelectAllFilter();
-  });
+  selectAllElt.classList.add("enabled");
+  selectAllElt.classList.add(selectAllClassName);
+  data.filteredAssetTitles[selectAllClassName] = true;
+  selectAllElt.addEventListener("click", toggleSelectAllFilter);
   selectAllElt.src = "/images/tabs/close.svg"; // TODO: Replae with real image for select all
   filterElt.appendChild(selectAllElt);
-  let assetTitle = "";
   for (const assetType in assetTypes) {
-    const iconElt = document.createElement("img");
+    const assetTitle = assetTypes[assetType];
+    const iconElt: any = document.createElement("img");
     iconElt.draggable = false;
-    assetTitle = assetTypes[assetType];
-    iconElt.addEventListener("click", () => { toggleFilter(assetTitle); });
+    iconElt.test = assetTitle;
+    iconElt.addEventListener("click", toggleFilter);
+    iconElt.classList.add(assetTitle);
+    iconElt.classList.add("enabled");
     iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[assetTitle].pluginPath}/editors/${assetTitle}/icon.svg`;
     filterElt.appendChild(iconElt);
+    data.filteredAssetTitles[assetTitle] = true;
   }
 }
 
-function toggleFilter(assetTitle: string) {
+function toggleFilter(/*assetTitle: string*/) {
+  const assetTitle = this.test;
   // toggle the filter for this specfic asset type
-  alert("toggle asset filter for: " + assetTitle);
+  data.filteredAssetTitles[assetTitle] = !data.filteredAssetTitles[assetTitle];
+  const filterElm = (ui.entriesFilterView.querySelector("." + assetTitle) as HTMLElement);
+  filterElm.classList.remove("disabled");
+  filterElm.classList.remove("enabled");
+  if (data.filteredAssetTitles[assetTitle]) {
+    filterElm.classList.add("enabled");
+  }
+  else {
+    filterElm.classList.add("disabled");
+  }
+  const entries: any = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetTitle}']`) as HTMLCollection);
+  for (const entry in entries) {
+    entries[entry].hidden = !entries[entry].hidden;
+  }
 }
 
 function toggleSelectAllFilter() {
   // toggle the select all filter
-  alert("toggle select all filter");
+  const selectAllClassName = "selectAllFilter";
+  const selectAllElm = (ui.entriesFilterView.querySelector("." + selectAllClassName) as HTMLElement);
+  selectAllElm.classList.remove("disabled");
+  selectAllElm.classList.remove("enabled");
+  const selectAll = !data.filteredAssetTitles[selectAllClassName];
+
+  // then go update the rest of the filters
+  const assetTypes = data.filteredAssetTitles;
+
+  for (const assetType in assetTypes) {
+    const filterElm = (ui.entriesFilterView.querySelector("." + assetType) as HTMLElement);
+    filterElm.classList.remove("disabled");
+    filterElm.classList.remove("enabled");
+    if (selectAll) {
+      filterElm.classList.add("enabled");
+    }
+    else {
+      filterElm.classList.add("disabled");
+    }
+    data.filteredAssetTitles[assetType] = selectAll;
+
+    const entries: any = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetType}']`) as HTMLCollection);
+    for (const entry in entries) {
+      entries[entry].hidden = !selectAll;
+    }
+  }
 }
 
 
@@ -977,10 +1023,6 @@ function onFilterEntryClick() {
   // toggle the visibilty of the asset filter
   const div = (document.querySelector(".filter-buttons") as HTMLDivElement);
   div.hidden = !div.hidden;
-}
-
-function onAssetFilter(typeName: string) {
-  alert(typeName);
 }
 
 function onDuplicateEntryClick() {
