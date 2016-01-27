@@ -1,20 +1,22 @@
-var path = require("path");
-var fs = require("fs");
-var child_process = require("child_process");
-var execSuffix = process.platform == "win32";
-var rootPath = path.resolve(__dirname + "/..");
+"use strict";
+
+const path = require("path");
+const fs = require("fs");
+const child_process = require("child_process");
+const execSuffix = process.platform == "win32";
+const rootPath = path.resolve(`${__dirname}/..`);
 
 function log(message) {
-  var text = new Date().toISOString() + " - " + message;
-  console.log(text);
+  const date = new Date();
+  console.log(`${date.toLocaleDateString()} ${date.toLocaleTimeString()} - ${message}`);
 }
 
 try {
   require.resolve("async");
 } catch (err) {
-  var spawnOptions = { cwd: rootPath, env: process.env, stdio: "inherit" };
-  var result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async" ], spawnOptions);
-  
+  const spawnOptions = { cwd: rootPath, env: process.env, stdio: "inherit" };
+  const result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async" ], spawnOptions);
+
   if (result.error != null) {
     log("Failed to install async");
     console.log(result.error);
@@ -22,38 +24,37 @@ try {
   }
 }
 
-var async = require("async");
-var getBuildPaths = require("./getBuildPaths");
-var buildPaths = getBuildPaths(rootPath);
+const async = require("async");
+let buildPaths = require("./getBuildPaths")(rootPath).map((buildPath) => path.sep + path.relative(rootPath, buildPath));
 
 // Filter
 if (process.argv.length > 2) {
-  var filter = process.argv[2];
-  var oldPathCount = buildPaths.length;
-  buildPaths = buildPaths.filter(function(buildPath) { return path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1; });
-  log("Rebuilding \"" + filter + "\", leaving out " + (oldPathCount - buildPaths.length) + " paths");
+  const filter = process.argv[2];
+  const oldPathCount = buildPaths.length;
+  buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
+  log(`Rebuilding "${filter}", leaving out ${oldPathCount - buildPaths.length} paths`);
 }
 
 // Build
-var errors = [];
+log(`Build paths: ${buildPaths.join(", ")}`);
 
-log("Build paths: " + buildPaths.map(function(buildPath) { return path.sep + path.relative(rootPath, buildPath); }).join(", "));
+const errors = [];
+let progress = 0;
 
-var progress = 0;
-async.eachSeries(buildPaths, function(buildPath, callback) {
-  log("Building " + path.sep + path.relative(rootPath, buildPath) + " (" + (++progress) + "/" + buildPaths.length + ")");
-
-  var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
+async.eachSeries(buildPaths, (relBuildPath, callback) => {
+  log(`Building ${relBuildPath} (${++progress}/${buildPaths.length})`);
+  const absBuildPath = path.resolve(path.join(rootPath, relBuildPath));
+  const spawnOptions = { cwd: absBuildPath, env: process.env, stdio: "inherit" };
 
   async.waterfall([
 
-    function (cb) {
-      if (!fs.existsSync(buildPath + "/package.json")) { cb(null, null); return; }
-      var packageJSON = require(buildPath + "/package.json");
+    (cb) => {
+      if (!fs.existsSync(`${absBuildPath}/package.json`)) { cb(null, null); return; }
+      const packageJSON = require(`${absBuildPath}/package.json`);
       cb(null, packageJSON);
     },
 
-    function(packageJSON, cb) {
+    (packageJSON, cb) => {
       // Skip if the package doesn't need to be installed
       if (packageJSON == null || packageJSON.dependencies == null && packageJSON.devDependencies == null) {
         if (packageJSON == null || packageJSON.scripts == null ||
@@ -65,50 +66,47 @@ async.eachSeries(buildPaths, function(buildPath, callback) {
         }
       }
 
-      var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "install" ], spawnOptions);
+      const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, [ "install" ], spawnOptions);
 
-      npm.on("close", function(status) {
-        if (status !== 0) errors.push("[" + buildPath + "] `npm install` exited with status code " + status);
+      npm.on("close", (status) => {
+        if (status !== 0) errors.push(`${relBuildPath}: "npm install" exited with status code ${status}`);
         cb(null, packageJSON);
       });
     },
 
-    function(packageJSON, cb) {
+    (packageJSON, cb) => {
       // Check if the package has a build script
-      if (buildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
-        var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "run", "build" ], spawnOptions);
+      if (absBuildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
+        const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, [ "run", "build" ], spawnOptions);
   
-        npm.on("close", function(status) {
-          if (status !== 0) errors.push("[" + buildPath + "] `npm run build` exited with status code " + status);
+        npm.on("close", (status) => {
+          if (status !== 0) errors.push(`${relBuildPath}: "npm run build" exited with status code ${status}`);
           cb();
         });
         return;
       }
 
       // Check if the package has a gulpfile instead
-      if (fs.existsSync(buildPath + "/gulpfile.js")) {
-        var gulp = child_process.spawn("gulp" + (execSuffix ? ".cmd" : ""), [], spawnOptions);
+      if (fs.existsSync(`${absBuildPath}/gulpfile.js`)) {
+        const gulp = child_process.spawn(`gulp${execSuffix ? ".cmd" : ""}`, [], spawnOptions);
 
-        gulp.on("close", function(status) {
-          if (status !== 0) errors.push("[" + buildPath + "] gulp exited with status code " + status);
+        gulp.on("close", (status) => {
+          if (status !== 0) errors.push(`${relBuildPath}: "gulp" exited with status code ${status}`);
           cb();
         });
         return;
       }
 
       cb();
-      return;
     }
 
   ], callback);
-}, function() {
+}, () => {
   console.log("");
 
   if (errors.length > 0) {
-    log("There were errors:");
-    errors.forEach(function(error) {
-      console.log(error);
-    });
+    log("There were build errors:");
+    for (const error of errors) console.log(error);
     process.exit(1);
   } else log("Build complete.");
 });
