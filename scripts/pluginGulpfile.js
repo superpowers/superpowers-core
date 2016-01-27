@@ -1,51 +1,51 @@
-var gulp = require("gulp");
-var tasks = [];
-var fs = require("fs");
+"use strict";
 
-var editors = [];
+const gulp = require("gulp");
+const tasks = [];
+const fs = require("fs");
+
+let editors = [];
+console.log(process.cwd());
 try { editors = fs.readdirSync("./editors"); } catch (err) { /* Ignore */ }
 
 if (editors.length > 0) {
   // Jade
-  var jade = require("gulp-jade");
-  var rename = require("gulp-rename");
-  var pluginI18n = require("./pluginI18n");
-  var locales = [ "en" ];
-  try { locales = fs.readdirSync(pluginI18n.rootLocalesPath); } catch (err) { /* Ignore */ }
+  const jade = require("gulp-jade");
+  const rename = require("gulp-rename");
 
-  locales.forEach(function(locale) {
-    var contexts = pluginI18n.loadLocale(locale);
-    gulp.task("jade-" + locale, function() {
-      var result = gulp.src("./editors/**/index.jade").pipe(jade({ locals: { t: pluginI18n.makeT(contexts) } }));
-      if (locale !== "en") result.pipe(rename({ extname: "." + locale + ".html" }));
+  const i18n = require("./i18n");
+  const languageCodes = fs.readdirSync(i18n.rootLocalesPath);
+
+  for (const languageCode of languageCodes) {
+    const locale = i18n.loadLocale(languageCode, true);
+    gulp.task(`jade-${languageCode}`, () => {
+      const result = gulp.src("./editors/**/index.jade").pipe(jade({ locals: { t: i18n.makeT(locale) } }));
+      if (languageCode !== "en") result.pipe(rename({ extname: `.${languageCode}.html` }));
       return result.pipe(gulp.dest("./public/editors"));
     });
-    tasks.push("jade-" + locale);
-  });
+    tasks.push(`jade-${languageCode}`);
+  }
 
-  gulp.task("jade-none", function() {
-    return gulp.src("./editors/**/index.jade")
-      .pipe(jade({ locals: { t: function(path) { return path; } } }))
-      .pipe(rename({ extname: ".none.html" }))
-      .pipe(gulp.dest("./public/editors"));
-  });
+  gulp.task("jade-none", () => gulp.src("./editors/**/index.jade")
+    .pipe(jade({ locals: { t: (path) => path } }))
+    .pipe(rename({ extname: ".none.html" }))
+    .pipe(gulp.dest("./public/editors"))
+  );
   tasks.push("jade-none");
 
   // Stylus
-  var stylus = require("gulp-stylus");
-  gulp.task("stylus", function() {
-    return gulp.src("./editors/**/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("./public/editors"));
-  });
+  const stylus = require("gulp-stylus");
+  gulp.task("stylus", () => gulp.src("./editors/**/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("./public/editors")));
   tasks.push("stylus");
 }
 
 // TypeScript
-var ts = require("gulp-typescript");
-var tsProject = ts.createProject("./tsconfig.json");
+const ts = require("gulp-typescript");
+const tsProject = ts.createProject("./tsconfig.json");
 
 gulp.task("typescript", function() {
-  var failed = false;
-  var tsResult = tsProject.src()
+  let failed = false;
+  const tsResult = tsProject.src()
     .pipe(ts(tsProject))
     .on("error", () => { failed = true; })
     .on("end", () => { if (failed) throw new Error("There were TypeScript errors."); });
@@ -54,34 +54,34 @@ gulp.task("typescript", function() {
 tasks.push("typescript");
 
 // Browserify
-var browserify = require("browserify");
-var vinylSourceStream = require("vinyl-source-stream");
-function makeBrowserify(source, destination, output) {
-  gulp.task(output + "-browserify", [ "typescript" ], function() {
-    if (!fs.existsSync(source)) return;
+const browserify = require("browserify");
+const source = require("vinyl-source-stream");
 
-    var bundler = browserify(source);
-    bundler.transform("brfs");
-    function bundle() { return bundler.bundle().pipe(vinylSourceStream(output + ".js")).pipe(gulp.dest(destination)); };
-    return bundle();
+function makeBrowserify(src, dest, output) {
+  gulp.task(`${output}-browserify`, [ "typescript" ], () => {
+    if (!fs.existsSync(src)) return;
+
+    return browserify(src)
+      .transform("brfs").bundle()
+      .pipe(source(`${output}.js`))
+      .pipe(gulp.dest(dest));
   });
-  tasks.push(output + "-browserify");
+  tasks.push(`${output}-browserify`);
 }
 
 if (fs.existsSync("./public/bundles")) {
-  var bundles = fs.readdirSync("./public/bundles");
-  bundles.forEach(function(bundle) { fs.unlinkSync("./public/bundles/" + bundle); });
+  for (const bundle of fs.readdirSync("./public/bundles")) fs.unlinkSync(`./public/bundles/${bundle}`);
 }
 
-var folders = fs.readdirSync("./");
-folders.forEach(function(folder) {
-  if (folder === "public" || folder === "editors" || folder === "node_modules" || folder === "typings") return;
-  
-  if (fs.existsSync("./" + folder + "/index.ts") || fs.existsSync("./" + folder + "/index.js"))
-    makeBrowserify("./" + folder + "/index.js", "./public/bundles", folder);
-})
+const nonBundledFolders = [ "public", "editors", "node_modules", "typings" ]; 
+for (const folder of fs.readdirSync("./")) {
+  if (nonBundledFolders.indexOf(folder) !== -1) continue;
 
-editors.forEach(function(editor) { makeBrowserify("./editors/" + editor + "/index.js", "./public/editors", editor + "/index"); });
+  if (fs.existsSync(`./${folder}/index.ts`) || fs.existsSync(`./${folder}/index.js`))
+    makeBrowserify(`./${folder}/index.js`, "./public/bundles", folder);
+}
+
+for (const editor of editors) makeBrowserify(`./editors/${editor}/index.js`, "./public/editors", `${editor}/index`);
 
 // All
 gulp.task("default", tasks);

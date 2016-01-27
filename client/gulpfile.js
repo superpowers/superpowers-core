@@ -1,91 +1,49 @@
-var gulp = require("gulp");
-var tasks = [];
-var fs = require("fs");
+"use strict";
+
+const gulp = require("gulp");
+const tasks = [];
 
 // Jade
-var jade = require("gulp-jade");
-var rename = require("gulp-rename");
-var localesFolder = "../public/locales/";
-var locales = fs.readdirSync(localesFolder);
+const jade = require("gulp-jade");
+const rename = require("gulp-rename");
+const fs = require("fs");
 
-function loadLocales(locale) {
-  var localsByContext = {};
-  var files = fs.readdirSync(localesFolder + locale);
-  files.forEach(function(fileName) {
-    var file = fs.readFileSync(localesFolder + locale + "/" + fileName, { encoding: "utf8" } );
-    localsByContext[fileName.slice(0, fileName.lastIndexOf("."))] = JSON.parse(file);
-  });
+const i18n = require("../scripts/i18n.js");
+const languageCodes = fs.readdirSync(i18n.rootLocalesPath);
 
-  if (defaultLocals != null) {
-    function checkRecursively(defaultRoot, root, key, path) {
-      if (root[key] == undefined) {
-        console.log("Missing key in " + locale + " translation: " + path)
-        root[key] = defaultRoot[key];
-
-      } else if (typeof defaultRoot[key] === "object") {
-        var keys = Object.keys(defaultRoot[key]);
-        for (var i = 0; i < keys.length; i++) {
-          checkRecursively(defaultRoot[key], root[key], keys[i], path + "." + keys[i]);
-        }
-      }
-    }
-    var keys = Object.keys(defaultLocals);
-    for (var i = 0; i < keys.length; i++)
-      checkRecursively(defaultLocals, localsByContext, keys[i], keys[i]);
-  }
-  return localsByContext;
-}
-
-var defaultLocals = loadLocales("en");
-locales.forEach(function(locale) {
-  var localsByContext = loadLocales(locale);
-
-  gulp.task("jade-" + locale, function() {
-    var result = gulp.src("./src/**/index.jade")
-      .pipe(jade({ locals: { t: function(path) {
-          var parts = path.split(":");
-          var local = localsByContext[parts[0]];
-          if (local == null) return path;
-          
-          var keys = parts[1].split(".");
-          for (var i = 0; i < keys.length; i++) {
-            local = local[keys[i]];
-            if (local == null) return path;
-          }
-          return local;
-        }}
-      }));
-
-    if (locale !== "en") result.pipe(rename({ extname: "." + locale + ".html" }))
+for (const languageCode of languageCodes) {
+  const locale = i18n.loadLocale(languageCode);
+  gulp.task(`jade-${languageCode}`, () => {
+    const result = gulp.src("./src/**/index.jade").pipe(jade({ locals: { t: i18n.makeT(locale) } }));
+    if (languageCode !== "en") result.pipe(rename({ extname: `.${languageCode}.html` }));
     return result.pipe(gulp.dest("../public"));
   });
-  tasks.push("jade-" + locale);
-})
+  tasks.push(`jade-${languageCode}`);
+}
 
-gulp.task("jade-none", function() {
-  return gulp.src("./src/**/index.jade")
-    .pipe(jade({ locals: { t: function(path) { return path; } } }))
-    .pipe(rename({ extname: ".none.html" }))
-    .pipe(gulp.dest("../public"));
-});
+gulp.task("jade-none", () => gulp.src("./src/**/index.jade")
+  .pipe(jade({ locals: { t: (path) => path } }))
+  .pipe(rename({ extname: ".none.html" }))
+  .pipe(gulp.dest("../public"))
+);
 tasks.push("jade-none");
 
-gulp.task("jade-build", function() { return gulp.src("./src/build.jade").pipe(jade()).pipe(gulp.dest("../public")); });
+gulp.task("jade-build", () => gulp.src("./src/build.jade").pipe(jade()).pipe(gulp.dest("../public")));
 tasks.push("jade-build");
 
 // Stylus
-var stylus = require("gulp-stylus");
-gulp.task("stylus", function() { return gulp.src("./src/**/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public")); });
+const stylus = require("gulp-stylus");
+gulp.task("stylus", () => gulp.src("./src/**/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public")));
 tasks.push("stylus");
 
 // TypeScript
-var ts = require("gulp-typescript");
-var tsProject = ts.createProject("./tsconfig.json");
-var tslint = require("gulp-tslint");
+const ts = require("gulp-typescript");
+const tsProject = ts.createProject("./tsconfig.json");
+const tslint = require("gulp-tslint");
 
-gulp.task("typescript", function() {
-  var failed = false;
-  var tsResult = tsProject.src()
+gulp.task("typescript", () => {
+  let failed = false;
+  const tsResult = tsProject.src()
     .pipe(tslint({ tslint: require("tslint") }))
     .pipe(tslint.report("prose", { emitError: false }))
     .pipe(ts(tsProject))
@@ -96,29 +54,13 @@ gulp.task("typescript", function() {
 tasks.push("typescript");
 
 // Browserify
-var browserify = require("browserify");
-var source = require("vinyl-source-stream");
+const browserify = require("browserify");
+const source = require("vinyl-source-stream");
 
-gulp.task("browserify-login", [ "typescript" ], function() {
-  var bundler = browserify("./src/login/index.js");
-  function bundle() { return bundler.bundle().pipe(source("index.js")).pipe(gulp.dest("../public/login")); }
-  return bundle();
-});
-tasks.push("browserify-login");
-
-gulp.task("browserify-hub", [ "typescript" ], function() {
-  var bundler = browserify("./src/hub/index.js");
-  function bundle() { return bundler.bundle().pipe(source("index.js")).pipe(gulp.dest("../public/hub")); }
-  return bundle();
-});
-tasks.push("browserify-hub");
-
-gulp.task("browserify-project", [ "typescript" ], function() {
-  var bundler = browserify("./src/project/index.js");
-  function bundle() { return bundler.bundle().pipe(source("index.js")).pipe(gulp.dest("../public/project")); }
-  return bundle();
-});
-tasks.push("browserify-project");
+gulp.task("browserify-login", [ "typescript" ], () => browserify("./src/login/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/login")));
+gulp.task("browserify-hub", [ "typescript" ], () => browserify("./src/hub/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/hub")));
+gulp.task("browserify-project", [ "typescript" ], () => browserify("./src/project/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/project")));
+tasks.push("browserify-login", "browserify-hub", "browserify-project");
 
 // All
 gulp.task("default", tasks);
