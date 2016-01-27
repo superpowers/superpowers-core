@@ -7,6 +7,8 @@ const fs = require("fs");
 const child_process = require("child_process");
 const execSuffix = process.platform == "win32";
 const rootPath = path.resolve(`${__dirname}/..`);
+const chalk = require("chalk");
+const styleBuildPath = chalk.bgWhite.black;
 
 function log(message) {
   const date = new Date();
@@ -44,7 +46,7 @@ const errors = [];
 let progress = 0;
 
 async.eachSeries(buildPaths, (relBuildPath, callback) => {
-  log(`Building ${relBuildPath} (${++progress}/${buildPaths.length})`);
+  log(styleBuildPath(`Building ${relBuildPath} (${++progress}/${buildPaths.length})`));
   const absBuildPath = path.resolve(path.join(rootPath, relBuildPath));
   const spawnOptions = { cwd: absBuildPath, env: process.env, stdio: "inherit" };
 
