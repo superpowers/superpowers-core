@@ -1,5 +1,7 @@
 "use strict";
 
+const startTime = Date.now();
+
 const path = require("path");
 const fs = require("fs");
 const child_process = require("child_process");
@@ -108,5 +110,10 @@ async.eachSeries(buildPaths, (relBuildPath, callback) => {
     log("There were build errors:");
     for (const error of errors) console.log(error);
     process.exit(1);
-  } else log("Build complete.");
+  } else {
+    const duration = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    log(`Build completed in ${minutes}mn ${seconds}s.`);
+  }
 });
