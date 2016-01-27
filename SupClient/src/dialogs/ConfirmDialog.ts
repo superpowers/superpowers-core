@@ -1,9 +1,15 @@
 import BaseDialog from "./BaseDialog";
-import * as i18n from "../i18n";
 
-export default class ConfirmDialog extends BaseDialog {
-  constructor(label: string, validationLabel: string, private callback: (confirmed: boolean) => any) {
-    super();
+interface ConfirmOptions {
+  validationLabel?: string;
+  cancelLabel?: string;
+}
+type ConfirmResult = boolean;
+
+export default class ConfirmDialog extends BaseDialog<ConfirmResult> {
+  constructor(label: string, options?: ConfirmOptions, callback?: (confirmed: ConfirmResult) => void) {
+    super(callback);
+    if (options == null) options = {};
 
     const labelElt = document.createElement("label");
     labelElt.textContent = label;
@@ -16,33 +22,25 @@ export default class ConfirmDialog extends BaseDialog {
 
     const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = i18n.t("common:actions.cancel");
+    cancelButtonElt.textContent = options.cancelLabel != null ? options.cancelLabel : BaseDialog.defaultLabels.cancel;
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
-    const validateButtonElt = document.createElement("button");
-    validateButtonElt.textContent = validationLabel;
-    validateButtonElt.className = "validate-button";
+    this.validateButtonElt = document.createElement("button");
+    this.validateButtonElt.textContent = options.validationLabel != null ? options.validationLabel : BaseDialog.defaultLabels.validate;
+    this.validateButtonElt.className = "validate-button";
 
     if (navigator.platform === "Win32") {
-      buttonsElt.appendChild(validateButtonElt);
+      buttonsElt.appendChild(this.validateButtonElt);
       buttonsElt.appendChild(cancelButtonElt);
     } else {
       buttonsElt.appendChild(cancelButtonElt);
-      buttonsElt.appendChild(validateButtonElt);
+      buttonsElt.appendChild(this.validateButtonElt);
     }
 
-    validateButtonElt.focus();
+    this.validateButtonElt.focus();
   }
 
-  submit() {
-    if (!super.submit()) return false;
-    this.callback(true);
-    return true;
-  }
-
-  cancel() {
-    super.cancel();
-    this.callback(false);
-  }
+  submit() { super.submit(true); }
+  cancel() { super.cancel(false); }
 }

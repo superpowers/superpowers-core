@@ -89,7 +89,7 @@ function onRemoveAddressClick() {
   const node = serversTreeView.selectedNodes[0];
 
   /* tslint:disable:no-unused-expression */
-  new dialogs.ConfirmDialog(`Do you want to delete the server ${node.dataset["name"]}?`, "Delete", (confirmed: boolean) => {
+  new dialogs.ConfirmDialog(`Do you want to delete the server ${node.dataset["name"]}?`, { validationLabel: "Delete" }, (confirmed: boolean) => {
     /* tslint:enable:no-unused-expression */
     if (!confirmed) return;
 

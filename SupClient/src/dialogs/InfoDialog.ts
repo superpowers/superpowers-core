@@ -1,8 +1,13 @@
 import BaseDialog from "./BaseDialog";
 
-export default class InfoDialog extends BaseDialog {
-  constructor(label: string, validationLabel: string, private callback?: () => any) {
-    super();
+interface InfoOptions {
+  closeLabel?: string;
+}
+
+export default class InfoDialog extends BaseDialog<any> {
+  constructor(label: string, options?: InfoOptions, callback?: () => void) {
+    super(callback);
+    if (options == null) options = {};
 
     const labelElt = document.createElement("label");
     labelElt.textContent = label;
@@ -14,16 +19,10 @@ export default class InfoDialog extends BaseDialog {
     this.formElt.appendChild(buttonsElt);
 
     this.validateButtonElt = document.createElement("button");
-    this.validateButtonElt.textContent = validationLabel;
+    this.validateButtonElt.textContent = options.closeLabel != null ? options.closeLabel : BaseDialog.defaultLabels.close;
     this.validateButtonElt.className = "validate-button";
     buttonsElt.appendChild(this.validateButtonElt);
 
     this.validateButtonElt.focus();
-  }
-
-  submit() {
-    if (!super.submit()) return false;
-    if (this.callback != null) this.callback();
-    return true;
   }
 }

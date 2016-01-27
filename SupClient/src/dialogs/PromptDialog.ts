@@ -1,27 +1,22 @@
 import BaseDialog from "./BaseDialog";
-import * as i18n from "../i18n";
 
 interface PromptOptions {
-   type?: string;
-   initialValue?: string;
-   placeholder?: string;
-   pattern?: string;
-   title?: string;
-   required?: boolean;
-   validationLabel?: string;
-   cancelLabel?: string;
+  validationLabel?: string;
+  cancelLabel?: string;
+  type?: string;
+  initialValue?: string;
+  placeholder?: string;
+  pattern?: string;
+  title?: string;
+  required?: boolean;
 }
+type PromptResult = string;
 
-interface PromptCallback {
-  (value: string): void;
-}
-
-export default class PromptDialog extends BaseDialog {
+export default class PromptDialog extends BaseDialog<PromptResult> {
   inputElt: HTMLInputElement;
 
-  constructor(label: string, options?: PromptOptions, private callback?: PromptCallback) {
-    super();
-
+  constructor(label: string, options?: PromptOptions, callback?: (result: PromptResult) => void) {
+    super(callback);
     if (options == null) options = {};
 
     const labelElt = document.createElement("label");
@@ -44,12 +39,12 @@ export default class PromptDialog extends BaseDialog {
 
     const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = (options.cancelLabel != null) ? options.cancelLabel : i18n.t("common:actions.cancel");
+    cancelButtonElt.textContent = options.cancelLabel != null ? options.cancelLabel : BaseDialog.defaultLabels.cancel;
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
     this.validateButtonElt = document.createElement("button");
-    this.validateButtonElt.textContent = options.validationLabel;
+    this.validateButtonElt.textContent = options.validationLabel != null ? options.validationLabel : BaseDialog.defaultLabels.validate;
     this.validateButtonElt.className = "validate-button";
 
     if (navigator.platform === "Win32") {
@@ -63,14 +58,5 @@ export default class PromptDialog extends BaseDialog {
     this.inputElt.select();
   }
 
-  submit() {
-    if (!super.submit()) return false;
-    if (this.callback != null) this.callback(this.inputElt.value);
-    return true;
-  }
-
-  cancel() {
-    super.cancel();
-    if (this.callback != null) this.callback(null);
-  }
+  submit() { super.submit(this.inputElt.value); }
 }

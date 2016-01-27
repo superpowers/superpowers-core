@@ -104,7 +104,12 @@ export default class ProjectClient {
     if (typeof args[args.length - 1] === "function") callback = args.pop();
 
     args.push((err: string, id: string) => {
-      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
       if (callback != null) callback(id);
     });
 
@@ -151,8 +156,13 @@ export default class ProjectClient {
     if (typeof args[args.length - 1] === "function") callback = args.pop();
 
     args.push((err: string, id: string) => {
-      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
-      if (callback != null) callback(err, id);
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
+      if (callback != null) callback(id);
     });
 
     this.socket.emit("edit:resources", resourceId, command, ...args);
@@ -175,7 +185,9 @@ export default class ProjectClient {
       asset.client_load();
     }
 
-    for (const subscriber of subscribers) { subscriber.onAssetReceived(assetId, asset); }
+    for (const subscriber of subscribers) {
+      if (subscriber.onAssetReceived != null) subscriber.onAssetReceived(assetId, asset);
+    }
   };
 
   private onAssetEdited = (assetId: string, command: string, ...args: any[]) => {
@@ -185,14 +197,18 @@ export default class ProjectClient {
     const asset = this.assetsById[assetId];
     Object.getPrototypeOf(asset)[`client_${command}`].apply(asset, args);
 
-    for (const subscriber of subscribers) { subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args)); }
+    for (const subscriber of subscribers) {
+      if (subscriber.onAssetEdited != null) subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args));
+    }
   };
 
   private onAssetTrashed = (assetId: string) => {
     const subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
-    for (const subscriber of subscribers) { subscriber.onAssetTrashed(assetId); }
+    for (const subscriber of subscribers) {
+      if (subscriber.onAssetTrashed != null) subscriber.onAssetTrashed(assetId);
+    }
 
     this.assetsById[assetId].client_unload();
     delete this.assetsById[assetId];
@@ -211,7 +227,9 @@ export default class ProjectClient {
     let resource: SupCore.Data.Base.Resource = null;
     if (resourceData != null) resource = this.resourcesById[resourceId] = new SupCore.system.data.resourceClasses[resourceId](resourceId, resourceData);
 
-    for (const subscriber of subscribers) { subscriber.onResourceReceived(resourceId, resource); }
+    for (const subscriber of subscribers) {
+      if (subscriber.onResourceReceived != null) subscriber.onResourceReceived(resourceId, resource);
+    }
   };
 
   private onResourceEdited = (resourceId: string, command: string, ...args: any[]) => {
@@ -221,7 +239,9 @@ export default class ProjectClient {
     const resource = this.resourcesById[resourceId];
     Object.getPrototypeOf(resource)[`client_${command}`].apply(resource, args);
 
-    for (const subscriber of subscribers) { subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args)); }
+    for (const subscriber of subscribers) {
+      if (subscriber.onResourceEdited != null) subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args));
+    }
   };
 
   private onEntriesReceived = (err: string, entries: any) => {
@@ -232,34 +252,36 @@ export default class ProjectClient {
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
     this.socket.on("trash:entries", this.onEntryTrashed);
 
-    for (const subscriber of this.entriesSubscribers) { subscriber.onEntriesReceived(this.entries); }
+    for (const subscriber of this.entriesSubscribers) {
+      if (subscriber.onEntriesReceived != null) subscriber.onEntriesReceived(this.entries);
+    }
   };
 
   private onEntryAdded = (entry: any, parentId: string, index: number) => {
     this.entries.client_add(entry, parentId, index);
     for (const subscriber of this.entriesSubscribers) {
-      subscriber.onEntryAdded(entry, parentId, index);
+      if (subscriber.onEntryAdded != null) subscriber.onEntryAdded(entry, parentId, index);
     }
   };
 
   private onEntryMoved = (id: string, parentId: string, index: number) => {
     this.entries.client_move(id, parentId, index);
     for (const subscriber of this.entriesSubscribers) {
-      subscriber.onEntryMoved(id, parentId, index);
+      if (subscriber.onEntryMoved != null) subscriber.onEntryMoved(id, parentId, index);
     }
   };
 
   private onSetEntryProperty = (id: string, key: string, value: any) => {
     this.entries.client_setProperty(id, key, value);
     for (const subscriber of this.entriesSubscribers) {
-      subscriber.onSetEntryProperty(id, key, value);
+      if (subscriber.onSetEntryProperty != null) subscriber.onSetEntryProperty(id, key, value);
     }
   };
 
   private onEntryTrashed = (id: string) => {
     this.entries.client_remove(id);
     for (const subscriber of this.entriesSubscribers) {
-      subscriber.onEntryTrashed(id);
+      if (subscriber.onEntryTrashed != null) subscriber.onEntryTrashed(id);
     }
   };
 }

@@ -19,7 +19,13 @@ const i18nContexts: I18nContext = {};
 let commonLocalesLoaded = false;
 
 export function load(files: File[], callback: Function) {
-  if (language === "none") { callback(); return; }
+  function onLoadFinished() {
+    for (let label in SupClient.dialogs.BaseDialog.defaultLabels)
+      SupClient.dialogs.BaseDialog.defaultLabels[label] = t(`common:actions.${label}`);
+    callback();
+  }
+
+  if (language === "none") { onLoadFinished(); return; }
 
   if (!commonLocalesLoaded) {
     files.unshift({ root: "/", name: "common" });
@@ -27,7 +33,7 @@ export function load(files: File[], callback: Function) {
   }
 
   let filesToLoad = files.length;
-  if (filesToLoad === 0) { callback(); return; }
+  if (filesToLoad === 0) { onLoadFinished(); return; }
   if (language !== "en") filesToLoad *= 2;
 
   const loadFile = (language: string, file: File, root: I18nContext) => {
@@ -35,14 +41,14 @@ export function load(files: File[], callback: Function) {
     SupClient.fetch(filePath, "json", (err, response) => {
       if (err != null) {
         filesToLoad -= 1;
-        if (filesToLoad === 0) callback();
+        if (filesToLoad === 0) onLoadFinished();
       } else {
         const context = file.context != null ? file.context : file.name;
         if (root[context] == null) root[context] = response;
         else root[context] = _.merge(root[context], response) as any;
 
         filesToLoad -= 1;
-        if (filesToLoad === 0) callback();
+        if (filesToLoad === 0) onLoadFinished();
       }
     });
   };
@@ -67,7 +73,8 @@ export function t(key: string, variables: { [key: string]: string; } = {}) {
     if (locals == null) return fallbackT(key, variables);
   }
 
-  return insertVariables(locals as string, variables);
+  if (typeof locals === "string") return insertVariables(locals, variables);
+  else return key;
 }
 
 function fallbackT(key: string, variables: { [key: string]: string; } = {}) {
@@ -82,7 +89,8 @@ function fallbackT(key: string, variables: { [key: string]: string; } = {}) {
     if (locals == null) return key;
   }
 
-  return insertVariables(locals as string, variables);
+  if (typeof locals === "string") return insertVariables(locals, variables);
+  else return key;
 }
 
 function insertVariables(locals: string, variables: { [key: string]: string }) {

@@ -1,11 +1,16 @@
-abstract class BaseDialog {
+abstract class BaseDialog<T> {
   dialogElt: HTMLDivElement;
   formElt: HTMLFormElement;
   validateButtonElt: HTMLButtonElement;
 
-  static activeDialog: BaseDialog;
+  static activeDialog: BaseDialog<any>;
+  static defaultLabels = {
+    "validate": "Validate",
+    "cancel": "Cancel",
+    "close": "Close"
+  };
 
-  constructor() {
+  constructor(private callback: (result: T) => any) {
     if (BaseDialog.activeDialog != null) throw new Error("Cannot open two dialogs at the same time.");
 
     BaseDialog.activeDialog = this;
@@ -24,21 +29,20 @@ abstract class BaseDialog {
     document.body.appendChild(this.dialogElt);
   }
 
-  // OVERRIDE and check super.submit()'s return value
-  submit() {
+  submit(result?: T) {
     if (!this.formElt.checkValidity()) {
       // Trigger form validation
       this.validateButtonElt.click();
-      return false;
+      return;
     }
 
     this.dismiss();
-    return true;
+    if (this.callback != null) this.callback(result);
   }
 
-  // OVERRIDE
-  cancel() {
+  cancel(result?: T) {
     this.dismiss();
+    if (this.callback != null) this.callback(result);
   }
 
   protected onDocumentKeyDown = (event: KeyboardEvent) => {

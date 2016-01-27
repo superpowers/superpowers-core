@@ -5,20 +5,21 @@ interface ExistingProject {
   systemId: string;
 }
 
-interface NewProjectCallback {
-  (project: {
+type NewProjectResult = {
+  project: {
     name: string;
     description: string;
     systemId: string;
     icon: File;
-  }, open: boolean): any;
+  };
+  open: boolean;
 }
 
 export interface SystemsData {
   [value: string]: string[];
 }
 
-export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDialog {
+export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDialog<NewProjectResult> {
   private systemsById: SystemsData;
 
   private nameInputElt: HTMLInputElement;
@@ -36,8 +37,8 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
   private openCheckboxElt: HTMLInputElement;
 
   constructor(systemsById: SystemsData,
-  options: { autoOpen?: boolean, existingProject?: ExistingProject }, private callback: NewProjectCallback) {
-    super();
+  options: { autoOpen?: boolean, existingProject?: ExistingProject }, callback: (result: NewProjectResult) => void) {
+    super(callback);
 
     this.systemsById = systemsById;
 
@@ -216,8 +217,6 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
   }
 
   submit() {
-    if (!super.submit()) return false;
-
     let systemId: string = null;
     let templateName: string = null;
     if (this.projectTypeSelectElt != null) [ systemId, templateName ] = this.projectTypeSelectElt.value.split(".");
@@ -230,13 +229,7 @@ export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDia
       icon: this.iconFile
     };
 
-    this.callback(project, (this.openCheckboxElt != null) ? this.openCheckboxElt.checked : null);
-    return true;
-  }
-
-  cancel() {
-    super.cancel();
-    if (this.callback != null) this.callback(null, null);
+    super.submit({ project, open: (this.openCheckboxElt != null) ? this.openCheckboxElt.checked : null });
   }
 
   private onIconChange = (event: UIEvent) => {

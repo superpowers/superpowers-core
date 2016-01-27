@@ -222,17 +222,22 @@ function onProjectActivate() {
 let autoOpenProject = true;
 function onNewProjectClick() {
   /* tslint:disable:no-unused-expression */
-  new CreateOrEditProjectDialog(data.systemsById, { autoOpen: autoOpenProject }, (project, open) => {
+  new CreateOrEditProjectDialog(data.systemsById, { autoOpen: autoOpenProject }, (result) => {
     /* tslint:enable:no-unused-expression */
-    if (project == null) return;
-    autoOpenProject = open;
+    if (result == null) return;
+    autoOpenProject = result.open;
 
-    socket.emit("add:projects", project, onProjectAddedAck);
+    socket.emit("add:projects", result.project, onProjectAddedAck);
   });
 }
 
 function onProjectAddedAck(err: string, id: string) {
-  if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+  if (err != null) {
+    /* tslint:disable:no-unused-expression */
+    new SupClient.dialogs.InfoDialog(err);
+    /* tslint:enable:no-unused-expression */
+    return;
+  }
 
   ui.projectsTreeView.clearSelection();
 
@@ -250,15 +255,21 @@ function onEditProjectClick() {
   const existingProject = data.projects.byId[selectedNode.dataset["id"]];
 
   /* tslint:disable:no-unused-expression */
-  new CreateOrEditProjectDialog(data.systemsById, { existingProject }, (editedProject) => {
+  new CreateOrEditProjectDialog(data.systemsById, { existingProject }, (result) => {
     /* tslint:enable:no-unused-expression */
-    if (editedProject == null) return;
+    if (result == null) return;
+    autoOpenProject = result.open;
 
-    delete editedProject.systemId;
-    if (editedProject.icon == null) delete editedProject.icon;
+    delete result.project.systemId;
+    if (result.project.icon == null) delete result.project.icon;
 
-    socket.emit("edit:projects", existingProject.id, editedProject, (err: string) => {
-      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+    socket.emit("edit:projects", existingProject.id, result.project, (err: string) => {
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
     });
   });
 }

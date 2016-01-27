@@ -388,7 +388,12 @@ function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: nu
 
 let autoOpenAsset = true;
 function onEntryAddedAck(err: string, id: string) {
-  if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+  if (err != null) {
+    /* tslint:disable:no-unused-expression */
+    new SupClient.dialogs.InfoDialog(err);
+    /* tslint:enable:no-unused-expression */
+    return;
+  }
 
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`) as HTMLLIElement);
@@ -521,7 +526,12 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
   } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
-    if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+    if (err != null) {
+      /* tslint:disable:no-unused-expression */
+      new SupClient.dialogs.InfoDialog(err);
+      /* tslint:enable:no-unused-expression */
+      return;
+    }
 
     let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemId}/?project=${SupClient.query.project}&build=${buildId}`;
     if (options.debug) url += "&debug";
@@ -549,7 +559,11 @@ function publishProject() {
 }
 
 if (SupClient.isApp) {
-  electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => { new SupClient.dialogs.InfoDialog(message, SupClient.i18n.t("common:actions.close")); });
+  electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => {
+    /* tslint:disable:no-unused-expression */
+    new SupClient.dialogs.InfoDialog(message);
+    /* tslint:enable:no-unused-expression */
+  });
   electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
       const address = `${window.location.protocol}//${window.location.hostname}`;
@@ -633,7 +647,14 @@ function onTreeViewDrop(event: DragEvent, dropLocation: TreeView.DropLocation, o
 
   let i = 0;
   for (const id of entryIds) {
-    socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => { if (err != null) new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); });
+    socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => {
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
+    });
     if (!sameParent || sourceChildren.indexOf(data.entries.byId[id]) >= dropPoint.index) i++;
   }
   return false;
@@ -804,14 +825,15 @@ function openTool(name: string, state?: {[name: string]: any}) {
 
 function onNewAssetClick() {
   /* tslint:disable:no-unused-expression */
-  new CreateAssetDialog(data.assetTypesByTitle, autoOpenAsset, (name, type, open) => {
+  new CreateAssetDialog(data.assetTypesByTitle, autoOpenAsset, (result) => {
     /* tslint:enable:no-unused-expression */
-    if (name == null) return;
-    if (name === "")
-      name = SupClient.i18n.t(`${data.editorsByAssetType[type].pluginPath}:editors.${type}.title`);
+    if (result == null) return;
 
-    autoOpenAsset = open;
-    socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
+    if (result.name === "")
+      result.name = SupClient.i18n.t(`${data.editorsByAssetType[result.type].pluginPath}:editors.${result.type}.title`);
+
+    autoOpenAsset = result.open;
+    socket.emit("add:entries", result.name, result.type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
   });
 }
 
@@ -841,15 +863,23 @@ function onTrashEntryClick() {
   function checkNextEntry() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
+      const confirmLabel = SupClient.i18n.t("project:treeView.trash.prompt");
+      const validationLabel = SupClient.i18n.t("project:treeView.trash.title");
+
       /* tslint:disable:no-unused-expression */
-      new SupClient.dialogs.ConfirmDialog(SupClient.i18n.t("project:treeView.trash.prompt"), SupClient.i18n.t("project:treeView.trash.title"), (confirm) => {
+      new SupClient.dialogs.ConfirmDialog(confirmLabel, { validationLabel }, (confirm) => {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
         for (const selectedNode of ui.entriesTreeView.selectedNodes) {
           const entry = data.entries.byId[selectedNode.dataset["id"]];
           socket.emit("trash:entries", entry.id, (err: string) => {
-            if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+            if (err != null) {
+              /* tslint:disable:no-unused-expression */
+              new SupClient.dialogs.InfoDialog(err);
+              /* tslint:enable:no-unused-expression */
+              return;
+            }
           });
         }
         ui.entriesTreeView.clearSelection();
@@ -865,11 +895,10 @@ function onTrashEntryClick() {
       const dependentAssetNames: string[] = [];
       for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
       /* tslint:disable:no-unused-expression */
-      const promptString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
+      const infoLabel = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
         entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
       });
-      const validateString = SupClient.i18n.t("common:actions.close");
-      new SupClient.dialogs.InfoDialog(promptString, validateString, () => { checkNextEntry(); });
+      new SupClient.dialogs.InfoDialog(infoLabel, null, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
     } else checkNextEntry();
   }
@@ -922,7 +951,12 @@ function onRenameEntryClick() {
     if (newName == null || newName === entry.name) return;
 
     socket.emit("setProperty:entries", entry.id, "name", newName, (err: string) => {
-      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
     });
   });
 }

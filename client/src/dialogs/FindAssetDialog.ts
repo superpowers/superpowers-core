@@ -3,7 +3,9 @@
 import * as fuzzy from "fuzzy";
 import * as TreeView from "dnd-tree-view";
 
-export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
+type FindAssetResult = string;
+
+export default class FindAssetDialog extends SupClient.dialogs.BaseDialog<FindAssetResult> {
   private searchElt: HTMLInputElement;
   private treeView: TreeView;
 
@@ -12,8 +14,8 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
   private pathsWithoutSlashesList: string[] = [];
   private entryElts: HTMLLIElement[] = [];
 
-  constructor(private entries: SupCore.Data.Entries, private editorsByAssetType: { [assetType: string]: { pluginPath: string; } }, private callback: (value: string) => any) {
-    super();
+  constructor(private entries: SupCore.Data.Entries, private editorsByAssetType: { [assetType: string]: { pluginPath: string; } }, callback: (result: FindAssetResult) => void) {
+    super(callback);
 
     this.dialogElt.classList.add("find-asset-dialog");
 
@@ -97,14 +99,7 @@ export default class FindAssetDialog extends SupClient.dialogs.BaseDialog {
   };
 
   submit() {
-    if (this.treeView.selectedNodes.length === 0) return false;
-    if (!super.submit()) return false;
-    this.callback(this.treeView.selectedNodes[0].dataset["id"]);
-    return true;
-  }
-
-  cancel() {
-    super.cancel();
-    this.callback(null);
+    if (this.treeView.selectedNodes.length === 0) return;
+    super.submit(this.treeView.selectedNodes[0].dataset["id"]);
   }
 }

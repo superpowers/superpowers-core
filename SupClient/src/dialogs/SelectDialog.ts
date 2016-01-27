@@ -1,21 +1,17 @@
 import BaseDialog from "./BaseDialog";
-import * as i18n from "../i18n";
 
 interface SelectOptions {
+  validationLabel?: string;
+  cancelLabel?: string;
   size?: number;
 }
+type SelectResult = string;
 
-interface SelectCallback {
-  (value: string): void;
-}
-
-export default class SelectDialog extends BaseDialog {
+export default class SelectDialog extends BaseDialog<SelectResult> {
   selectElt: HTMLSelectElement;
 
-  constructor(label: string, choices: { [value: string]: string; },
-  validationLabel: string, options?: SelectOptions, private callback?: SelectCallback) {
-    super();
-
+  constructor(label: string, choices: { [value: string]: string; }, options?: SelectOptions, callback?: (result: SelectResult) => void) {
+    super(callback);
     if (options == null) options = {};
 
     // Label
@@ -47,12 +43,12 @@ export default class SelectDialog extends BaseDialog {
 
     const cancelButtonElt = document.createElement("button");
     cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = i18n.t("common:actions.cancel");
+    cancelButtonElt.textContent = options.cancelLabel != null ? options.cancelLabel : BaseDialog.defaultLabels.cancel;
     cancelButtonElt.className = "cancel-button";
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
     this.validateButtonElt = document.createElement("button");
-    this.validateButtonElt.textContent = validationLabel;
+    this.validateButtonElt.textContent = options.validationLabel != null ? options.validationLabel : BaseDialog.defaultLabels.validate;
     this.validateButtonElt.className = "validate-button";
 
     if (navigator.platform === "Win32") {
@@ -66,14 +62,5 @@ export default class SelectDialog extends BaseDialog {
     this.selectElt.focus();
   }
 
-  submit() {
-    if (!super.submit()) return false;
-    if (this.callback != null) this.callback((this.selectElt.value !== "") ? this.selectElt.value : null);
-    return true;
-  }
-
-  cancel() {
-    super.cancel();
-    if (this.callback != null) this.callback(null);
-  }
+  submit() { super.submit((this.selectElt.value !== "") ? this.selectElt.value : null); }
 }

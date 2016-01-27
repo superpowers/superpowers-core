@@ -1,14 +1,12 @@
-interface CreateAssetCallback {
-  (name: string, type: string, open: boolean): any;
-}
+type CreateAssetResult = { name: string; type: string; open: boolean; };
 
-export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
+export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog<CreateAssetResult> {
   private nameInputElt: HTMLInputElement;
   private typeSelectElt: HTMLSelectElement;
   private openCheckboxElt: HTMLInputElement;
 
-  constructor(typeLabels: { [value: string]: string }, open: boolean, private callback: CreateAssetCallback) {
-    super();
+  constructor(typeLabels: { [value: string]: string }, open: boolean, callback: (result: CreateAssetResult) => void) {
+    super(callback);
 
     // Prompt name
     const labelElt = document.createElement("label");
@@ -81,14 +79,5 @@ export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog {
     this.typeSelectElt.focus();
   }
 
-  submit() {
-    if (!super.submit()) return false;
-    this.callback(this.nameInputElt.value, this.typeSelectElt.value, this.openCheckboxElt.checked);
-    return true;
-  }
-
-  cancel() {
-    super.cancel();
-    this.callback(null, null, null);
-  }
+  submit() { super.submit({ name: this.nameInputElt.value, type: this.typeSelectElt.value, open: this.openCheckboxElt.checked }); }
 }
