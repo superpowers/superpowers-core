@@ -22,17 +22,6 @@ try {
   }
 }
 
-// Rename system folders
-var oldNames = ["supGame", "supWeb", "markSlide"];
-var newNames = ["game"   , "web"   , "markslide"];
-for (var i = 0; i < oldNames.length; i++) {
-  var oldSystemPath = rootPath + "/systems/" + oldNames[i];
-  if (!fs.existsSync(oldSystemPath) || !fs.statSync(oldSystemPath).isDirectory()) continue;
-
-  var newSystemPath = rootPath + "/systems/" + newNames[i];
-  fs.renameSync(oldSystemPath, newSystemPath);
-}
-
 var async = require("async");
 var getBuildPaths = require("./getBuildPaths");
 var buildPaths = getBuildPaths(rootPath);
