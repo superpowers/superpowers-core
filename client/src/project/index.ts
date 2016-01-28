@@ -653,9 +653,10 @@ function toggleFilter(/*assetTitle: string*/) {
   // toggle the filter for this specfic asset type
   data.filteredAssetTitles[assetTitle] = !data.filteredAssetTitles[assetTitle];
   const filterElm = (ui.entriesFilterView.querySelector("." + assetTitle) as HTMLElement);
-  filterElm.classList.remove("disabled");
   if (!data.filteredAssetTitles[assetTitle]) {
-    filterElm.classList.add("disabled");
+    filterElm.classList.add("disabled-filter");
+  } else {
+    filterElm.classList.remove("disabled-filter");
   }
   const entries: any = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetTitle}']`) as HTMLCollection);
   for (const entry in entries) {
@@ -666,18 +667,18 @@ function toggleFilter(/*assetTitle: string*/) {
 function toggleSelectAllFilter() {
   // toggle the select all filter
   const selectAllClassName = "selectAllFilter";
-  const selectAllElm = (ui.entriesFilterView.querySelector("." + selectAllClassName) as HTMLElement);
-  selectAllElm.classList.remove("disabled");
   const selectAll = !data.filteredAssetTitles[selectAllClassName];
 
-  // then go update the rest of the filters
+  // then go update the rest of the filters based on new value
   const assetTypes = data.filteredAssetTitles;
 
   for (const assetType in assetTypes) {
     const filterElm = (ui.entriesFilterView.querySelector("." + assetType) as HTMLElement);
-    filterElm.classList.remove("disabled");
     if (!selectAll) {
-      filterElm.classList.add("disabled");
+      filterElm.classList.add("disabled-filter");
+    }
+    else {
+      filterElm.classList.remove("disabled-filter");
     }
     data.filteredAssetTitles[assetType] = selectAll;
 
