@@ -1,5 +1,5 @@
 import * as TreeView from "dnd-tree-view";
-import * as dialogs from "../../../SupClient/src/dialogs/index";
+import * as dialogs from "simple-dialogs";
 import * as config from "../config";
 
 const serversTreeView = new TreeView(document.querySelector(".servers-tree-view") as HTMLElement, { multipleSelection: false });
