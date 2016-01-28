@@ -630,7 +630,6 @@ function createFilterElements() {
   const selectAllElt = document.createElement("img");
   const selectAllClassName = "selectAllFilter";
   selectAllElt.draggable = false;
-  selectAllElt.classList.add("enabled");
   selectAllElt.classList.add(selectAllClassName);
   data.filteredAssetTitles[selectAllClassName] = true;
   selectAllElt.addEventListener("click", toggleSelectAllFilter);
@@ -643,7 +642,6 @@ function createFilterElements() {
     iconElt.test = assetTitle;
     iconElt.addEventListener("click", toggleFilter);
     iconElt.classList.add(assetTitle);
-    iconElt.classList.add("enabled");
     iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[assetTitle].pluginPath}/editors/${assetTitle}/icon.svg`;
     filterElt.appendChild(iconElt);
     data.filteredAssetTitles[assetTitle] = true;
@@ -656,11 +654,7 @@ function toggleFilter(/*assetTitle: string*/) {
   data.filteredAssetTitles[assetTitle] = !data.filteredAssetTitles[assetTitle];
   const filterElm = (ui.entriesFilterView.querySelector("." + assetTitle) as HTMLElement);
   filterElm.classList.remove("disabled");
-  filterElm.classList.remove("enabled");
-  if (data.filteredAssetTitles[assetTitle]) {
-    filterElm.classList.add("enabled");
-  }
-  else {
+  if (!data.filteredAssetTitles[assetTitle]) {
     filterElm.classList.add("disabled");
   }
   const entries: any = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetTitle}']`) as HTMLCollection);
@@ -674,7 +668,6 @@ function toggleSelectAllFilter() {
   const selectAllClassName = "selectAllFilter";
   const selectAllElm = (ui.entriesFilterView.querySelector("." + selectAllClassName) as HTMLElement);
   selectAllElm.classList.remove("disabled");
-  selectAllElm.classList.remove("enabled");
   const selectAll = !data.filteredAssetTitles[selectAllClassName];
 
   // then go update the rest of the filters
@@ -683,11 +676,7 @@ function toggleSelectAllFilter() {
   for (const assetType in assetTypes) {
     const filterElm = (ui.entriesFilterView.querySelector("." + assetType) as HTMLElement);
     filterElm.classList.remove("disabled");
-    filterElm.classList.remove("enabled");
-    if (selectAll) {
-      filterElm.classList.add("enabled");
-    }
-    else {
+    if (!selectAll) {
       filterElm.classList.add("disabled");
     }
     data.filteredAssetTitles[assetType] = selectAll;
