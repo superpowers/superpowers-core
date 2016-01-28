@@ -10,6 +10,7 @@ const fs = require("fs");
 
 const i18n = require("../scripts/i18n.js");
 const languageCodes = fs.readdirSync(i18n.rootLocalesPath);
+languageCodes.push("none");
 
 for (const languageCode of languageCodes) {
   const locale = i18n.loadLocale(languageCode);
@@ -20,13 +21,6 @@ for (const languageCode of languageCodes) {
   });
   tasks.push(`jade-${languageCode}`);
 }
-
-gulp.task("jade-none", () => gulp.src("./src/**/index.jade")
-  .pipe(jade({ locals: { t: (path) => path } }))
-  .pipe(rename({ extname: ".none.html" }))
-  .pipe(gulp.dest("../public"))
-);
-tasks.push("jade-none");
 
 gulp.task("jade-build", () => gulp.src("./src/build.jade").pipe(jade()).pipe(gulp.dest("../public")));
 tasks.push("jade-build");
