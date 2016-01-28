@@ -1098,9 +1098,8 @@ function onTabClose(tabElement: HTMLLIElement) {
   let frameElt: HTMLIFrameElement;
   if (assetId != null) frameElt = ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`) as HTMLIFrameElement;
   else {
+    if (tabElement.classList.contains("pinned")) return;
     const toolName = tabElement.dataset["pane"];
-    if (toolName === "main") return;
-
     frameElt = ui.panesElt.querySelector(`iframe[data-name='${toolName}']`) as HTMLIFrameElement;
   }
 
