@@ -19,7 +19,7 @@ export interface SystemsData {
   [value: string]: string[];
 }
 
-export default class CreateOrEditProjectDialog extends SupClient.dialogs.BaseDialog<NewProjectResult> {
+export default class CreateOrEditProjectDialog extends SupClient.Dialogs.BaseDialog<NewProjectResult> {
   private systemsById: SystemsData;
 
   private nameInputElt: HTMLInputElement;

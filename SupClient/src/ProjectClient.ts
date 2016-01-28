@@ -106,7 +106,7 @@ export default class ProjectClient {
     args.push((err: string, id: string) => {
       if (err != null) {
         /* tslint:disable:no-unused-expression */
-        new SupClient.dialogs.InfoDialog(err);
+        new SupClient.Dialogs.InfoDialog(err);
         /* tslint:enable:no-unused-expression */
         return;
       }
@@ -158,7 +158,7 @@ export default class ProjectClient {
     args.push((err: string, id: string) => {
       if (err != null) {
         /* tslint:disable:no-unused-expression */
-        new SupClient.dialogs.InfoDialog(err);
+        new SupClient.Dialogs.InfoDialog(err);
         /* tslint:enable:no-unused-expression */
         return;
       }

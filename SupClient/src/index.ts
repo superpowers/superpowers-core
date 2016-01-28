@@ -8,14 +8,14 @@ import fetch from "./fetch";
 import ProjectClient from "./ProjectClient";
 import setupHotkeys, { setupHelpCallback } from "./setupHotkeys";
 import * as table from "./table";
-import * as dialogs from "./dialogs/index";
+import * as Dialogs from "simple-dialogs";
 import * as i18n from "./i18n";
 /* tslint:enable:no-unused-variable */
 
 import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";
 
-export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, dialogs, i18n };
+export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n };
 
 export const isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 export const query = querystring.parse(window.location.search.slice(1));

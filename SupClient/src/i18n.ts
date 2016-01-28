@@ -20,8 +20,8 @@ let commonLocalesLoaded = false;
 
 export function load(files: File[], callback: Function) {
   function onLoadFinished() {
-    for (let label in SupClient.dialogs.BaseDialog.defaultLabels)
-      SupClient.dialogs.BaseDialog.defaultLabels[label] = t(`common:actions.${label}`);
+    for (let label in SupClient.Dialogs.BaseDialog.defaultLabels)
+      SupClient.Dialogs.BaseDialog.defaultLabels[label] = t(`common:actions.${label}`);
     callback();
   }
 

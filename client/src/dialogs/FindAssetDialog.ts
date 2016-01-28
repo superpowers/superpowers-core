@@ -5,7 +5,7 @@ import * as TreeView from "dnd-tree-view";
 
 type FindAssetResult = string;
 
-export default class FindAssetDialog extends SupClient.dialogs.BaseDialog<FindAssetResult> {
+export default class FindAssetDialog extends SupClient.Dialogs.BaseDialog<FindAssetResult> {
   private searchElt: HTMLInputElement;
   private treeView: TreeView;
 

@@ -1,6 +1,6 @@
 type CreateAssetResult = { name: string; type: string; open: boolean; };
 
-export default class CreateAssetDialog extends SupClient.dialogs.BaseDialog<CreateAssetResult> {
+export default class CreateAssetDialog extends SupClient.Dialogs.BaseDialog<CreateAssetResult> {
   private nameInputElt: HTMLInputElement;
   private typeSelectElt: HTMLSelectElement;
   private openCheckboxElt: HTMLInputElement;

@@ -284,7 +284,7 @@ function onConnectionError() {
 }
 
 function onDisconnected() {
-  SupClient.dialogs.cancelDialogIfAny();
+  SupClient.Dialogs.cancelDialogIfAny();
 
   data = null;
   ui.entriesTreeView.clearSelection();
@@ -390,7 +390,7 @@ let autoOpenAsset = true;
 function onEntryAddedAck(err: string, id: string) {
   if (err != null) {
     /* tslint:disable:no-unused-expression */
-    new SupClient.dialogs.InfoDialog(err);
+    new SupClient.Dialogs.InfoDialog(err);
     /* tslint:enable:no-unused-expression */
     return;
   }
@@ -528,7 +528,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) {
       /* tslint:disable:no-unused-expression */
-      new SupClient.dialogs.InfoDialog(err);
+      new SupClient.Dialogs.InfoDialog(err);
       /* tslint:enable:no-unused-expression */
       return;
     }
@@ -561,7 +561,7 @@ function publishProject() {
 if (SupClient.isApp) {
   electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => {
     /* tslint:disable:no-unused-expression */
-    new SupClient.dialogs.InfoDialog(message);
+    new SupClient.Dialogs.InfoDialog(message);
     /* tslint:enable:no-unused-expression */
   });
   electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
@@ -650,7 +650,7 @@ function onTreeViewDrop(event: DragEvent, dropLocation: TreeView.DropLocation, o
     socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => {
       if (err != null) {
         /* tslint:disable:no-unused-expression */
-        new SupClient.dialogs.InfoDialog(err);
+        new SupClient.Dialogs.InfoDialog(err);
         /* tslint:enable:no-unused-expression */
         return;
       }
@@ -847,7 +847,7 @@ function onNewFolderClick() {
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.newFolder.prompt"), options, (name) => {
+  new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.newFolder.prompt"), options, (name) => {
     /* tslint:enable:no-unused-expression */
     if (name == null) return;
 
@@ -867,7 +867,7 @@ function onTrashEntryClick() {
       const validationLabel = SupClient.i18n.t("project:treeView.trash.title");
 
       /* tslint:disable:no-unused-expression */
-      new SupClient.dialogs.ConfirmDialog(confirmLabel, { validationLabel }, (confirm) => {
+      new SupClient.Dialogs.ConfirmDialog(confirmLabel, { validationLabel }, (confirm) => {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
@@ -876,7 +876,7 @@ function onTrashEntryClick() {
           socket.emit("trash:entries", entry.id, (err: string) => {
             if (err != null) {
               /* tslint:disable:no-unused-expression */
-              new SupClient.dialogs.InfoDialog(err);
+              new SupClient.Dialogs.InfoDialog(err);
               /* tslint:enable:no-unused-expression */
               return;
             }
@@ -898,7 +898,7 @@ function onTrashEntryClick() {
       const infoLabel = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
         entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
       });
-      new SupClient.dialogs.InfoDialog(infoLabel, null, () => { checkNextEntry(); });
+      new SupClient.Dialogs.InfoDialog(infoLabel, null, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
     } else checkNextEntry();
   }
@@ -946,14 +946,14 @@ function onRenameEntryClick() {
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.renamePrompt"), options, (newName) => {
+  new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.renamePrompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null || newName === entry.name) return;
 
     socket.emit("setProperty:entries", entry.id, "name", newName, (err: string) => {
       if (err != null) {
         /* tslint:disable:no-unused-expression */
-        new SupClient.dialogs.InfoDialog(err);
+        new SupClient.Dialogs.InfoDialog(err);
         /* tslint:enable:no-unused-expression */
         return;
       }
@@ -976,7 +976,7 @@ function onDuplicateEntryClick() {
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {
+  new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null) return;
 

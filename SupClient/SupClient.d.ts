@@ -64,7 +64,7 @@ declare namespace SupClient {
     export function appendAssetField(parent: HTMLElement, value: string): { textField: HTMLInputElement; buttonElt: HTMLButtonElement; };
   }
 
-  namespace dialogs {
+  namespace Dialogs {
     export function cancelDialogIfAny(): void;
     export abstract class BaseDialog<T> {
       static defaultLabels: { [key: string]: string };
@@ -85,7 +85,7 @@ declare namespace SupClient {
     }
     type ConfirmResult = boolean;
     export class ConfirmDialog extends BaseDialog<ConfirmResult> {
-      constructor(label: string, options?: ConfirmOptions, callback?: (confirmed: ConfirmResult) => any);
+      constructor(label: string, options?: ConfirmOptions, callback?: (result: ConfirmResult) => any);
     }
 
     interface InfoOptions {

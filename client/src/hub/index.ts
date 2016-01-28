@@ -114,7 +114,7 @@ function onConnected() {
 }
 
 function onDisconnected() {
-  SupClient.dialogs.cancelDialogIfAny();
+  SupClient.Dialogs.cancelDialogIfAny();
 
   data.projects = null;
 
@@ -234,7 +234,7 @@ function onNewProjectClick() {
 function onProjectAddedAck(err: string, id: string) {
   if (err != null) {
     /* tslint:disable:no-unused-expression */
-    new SupClient.dialogs.InfoDialog(err);
+    new SupClient.Dialogs.InfoDialog(err);
     /* tslint:enable:no-unused-expression */
     return;
   }
@@ -266,7 +266,7 @@ function onEditProjectClick() {
     socket.emit("edit:projects", existingProject.id, result.project, (err: string) => {
       if (err != null) {
         /* tslint:disable:no-unused-expression */
-        new SupClient.dialogs.InfoDialog(err);
+        new SupClient.Dialogs.InfoDialog(err);
         /* tslint:enable:no-unused-expression */
         return;
       }
