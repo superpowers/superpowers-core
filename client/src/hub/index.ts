@@ -211,11 +211,12 @@ function onProjectSelectionChange() {
 }
 
 function onProjectActivate() {
-  const href = `/project/?project=${ui.projectsTreeView.selectedNodes[0].dataset["id"]}`;
+  const projectId = ui.projectsTreeView.selectedNodes[0].dataset["id"];
+  const href = `/project/?project=${projectId}`;
 
   // When in the app, use location.replace to avoid creating an history item
   // which could lead to accidentally navigating back by pressing Backspace
-  if (SupClient.isApp) window.location.replace(`${window.location.origin}${href}`);
+  if (SupClient.isApp) window.top.postMessage({ type: "open-project", address: `${window.location.origin}${href}`, name: data.projects.byId[projectId].name }, "file://");
   else window.location.href = href;
 }
 

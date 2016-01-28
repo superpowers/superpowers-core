@@ -1,4 +1,3 @@
-import "../window";
 import CreateAssetDialog from "../dialogs/CreateAssetDialog";
 import FindAssetDialog from "../dialogs/FindAssetDialog";
 import * as async from "async";
