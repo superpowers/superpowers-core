@@ -23,7 +23,7 @@
     "gulp-concat-css": "^2.2.0",
     "gulp-jade": "^1.1.0",
     "gulp-rename": "^1.2.2",
-    "gulp-stylus": "^2.2.0",
+    "gulp-stylus": "^2.3.0",
     "gulp-tslint": "^4.3.1",
     "gulp-typescript": "^2.10.0",
     "gulp-util": "^3.0.7",
