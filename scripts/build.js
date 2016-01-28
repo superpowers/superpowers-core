@@ -1,6 +1,5 @@
 "use strict";
 
-const yargs = require("yargs");
 const startTime = Date.now();
 
 const path = require("path");
@@ -8,8 +7,6 @@ const fs = require("fs");
 const child_process = require("child_process");
 const execSuffix = process.platform == "win32";
 const rootPath = path.resolve(`${__dirname}/..`);
-const chalk = require("chalk");
-const styleBuildPath = chalk.bgWhite.black;
 
 function log(message) {
   const date = new Date();
@@ -18,12 +15,14 @@ function log(message) {
 
 try {
   require.resolve("async");
+  require.resolve("yargs");
+  require.resolve("chalk");
 } catch (err) {
   const spawnOptions = { cwd: rootPath, env: process.env, stdio: "inherit" };
-  const result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async" ], spawnOptions);
+  const result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async", "yargs", "chalk" ], spawnOptions);
 
   if (result.error != null) {
-    log("Failed to install async");
+    log("Failed to install async, args and chalk");
     console.log(result.error);
     process.exit(1);
   }
@@ -33,6 +32,8 @@ const async = require("async");
 let buildPaths = require("./getBuildPaths")(rootPath).map((buildPath) => path.sep + path.relative(rootPath, buildPath));
 
 // Arguments
+const yargs = require("yargs");
+
 const argv = yargs.option("verbose", { alias: "v", describe: "Verbose mode" }).argv;
 
 if (argv._.length > 0) {
@@ -49,6 +50,9 @@ log(`Build paths: ${buildPaths.join(", ")}`);
 
 const errors = [];
 let progress = 0;
+
+const chalk = require("chalk");
+const styleBuildPath = chalk.bgWhite.black;
 
 async.eachSeries(buildPaths, (relBuildPath, callback) => {
   log(styleBuildPath(`Building ${relBuildPath} (${++progress}/${buildPaths.length})`));
