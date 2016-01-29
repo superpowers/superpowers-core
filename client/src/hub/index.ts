@@ -214,10 +214,10 @@ function onProjectActivate() {
   const projectId = ui.projectsTreeView.selectedNodes[0].dataset["id"];
   const href = `/project/?project=${projectId}`;
 
-  // When in the app, use location.replace to avoid creating an history item
-  // which could lead to accidentally navigating back by pressing Backspace
-  if (SupClient.isApp) window.top.postMessage({ type: "open-project", address: `${window.location.origin}${href}`, name: data.projects.byId[projectId].name }, "file://");
-  else window.location.href = href;
+  if (SupClient.isApp) {
+    const url = `${window.location.origin}${href}`;
+    window.top.postMessage({ type: "new-standalone-window", url, title: data.projects.byId[projectId].name }, "file://");
+  } else window.location.href = href;
 }
 
 let autoOpenProject = true;

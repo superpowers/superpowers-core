@@ -565,8 +565,11 @@ if (SupClient.isApp) {
   });
   electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
     socket.emit("build:project", (err: string, buildId: string, files: any) => {
-      const address = `${window.location.protocol}//${window.location.hostname}`;
-      electron.ipcRenderer.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
+      const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+      electron.ipcRenderer.send("export", {
+        projectId: SupClient.query.project, buildId,
+        baseURL, mainPort: window.location.port, buildPort: data.buildPort,
+        outputFolder, files });
     });
   });
 }
@@ -910,15 +913,15 @@ function onOpenInNewWindowClick(event: any) {
   const id = event.target.parentElement.dataset["id"];
   if (id != null) {
     const entry = data.entries.byId[id];
-    const address = `${window.location.origin}/systems/${data.systemId}` +
+    const url = `${window.location.origin}/systems/${data.systemId}` +
     `/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
     `?project=${SupClient.query.project}&asset=${entry.id}`;
 
     const entryPath = data.entries.getPathFromId(id);
     const title = (entryPath !== entry.name) ? `${entry.name} - ${entryPath}` : entry.name;
-    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address, title);
+    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", url, title);
     else {
-      const newWindow: any = window.open(address);
+      const newWindow: any = window.open(url);
       newWindow.addEventListener("load", () => { newWindow.document.title = title; });
     }
   } else {
