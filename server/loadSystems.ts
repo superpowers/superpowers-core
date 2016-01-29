@@ -129,9 +129,9 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
           }
 
           mainApp.get(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
-            const language = req.cookies["supLanguage"];
+            const languageCode = req.cookies["supLanguage"];
             const editorPath = path.join(pluginPath, "public/editors", editorName);
-            const localizedIndexFilename = getLocalizedFilename("index.html", language);
+            const localizedIndexFilename = getLocalizedFilename("index.html", languageCode);
             fs.exists(path.join(editorPath, localizedIndexFilename), (exists) => {
               if (exists) res.sendFile(path.join(editorPath, localizedIndexFilename));
               else res.sendFile(path.join(editorPath, `index.html`));

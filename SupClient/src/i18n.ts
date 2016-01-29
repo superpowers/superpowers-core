@@ -13,7 +13,7 @@ interface File {
 interface I18nValue { [key: string]: I18nValue|string; }
 interface I18nContext { [context: string]: I18nValue; }
 
-const language = cookies.get("supLanguage");
+const languageCode = cookies.get("supLanguage");
 const i18nFallbackContexts: I18nContext = {};
 const i18nContexts: I18nContext = {};
 let commonLocalesLoaded = false;
@@ -25,7 +25,7 @@ export function load(files: File[], callback: Function) {
     callback();
   }
 
-  if (language === "none") { onLoadFinished(); return; }
+  if (languageCode === "none") { onLoadFinished(); return; }
 
   if (!commonLocalesLoaded) {
     files.unshift({ root: "/", name: "common" });
@@ -34,10 +34,10 @@ export function load(files: File[], callback: Function) {
 
   let filesToLoad = files.length;
   if (filesToLoad === 0) { onLoadFinished(); return; }
-  if (language !== "en") filesToLoad *= 2;
+  if (languageCode !== "en") filesToLoad *= 2;
 
-  const loadFile = (language: string, file: File, root: I18nContext) => {
-    const filePath = path.join(file.root, `locales/${language}`, `${file.name}.json`);
+  const loadFile = (languageCode: string, file: File, root: I18nContext) => {
+    const filePath = path.join(file.root, `locales/${languageCode}`, `${file.name}.json`);
     SupClient.fetch(filePath, "json", (err, response) => {
       if (err != null) {
         filesToLoad -= 1;
@@ -54,26 +54,26 @@ export function load(files: File[], callback: Function) {
   };
 
   for (const file of files) {
-    loadFile(language, file, i18nContexts);
-    if (language !== "en" && language !== "none") loadFile("en", file, i18nFallbackContexts);
+    loadFile(languageCode, file, i18nContexts);
+    if (languageCode !== "en" && languageCode !== "none") loadFile("en", file, i18nFallbackContexts);
   }
 }
 
 export function t(key: string, variables: { [key: string]: string; } = {}) {
-  if (language === "none") return key;
+  if (languageCode === "none") return key;
 
   const [ context, keys ] = key.split(":");
   const keyParts = keys.split(".");
 
-  let locals: I18nValue|string = i18nContexts[context];
-  if (locals == null) return fallbackT(key, variables);
+  let value: I18nValue|string = i18nContexts[context];
+  if (value == null) return fallbackT(key, variables);
 
   for (const keyPart of keyParts) {
-    locals = (locals as I18nValue)[keyPart];
-    if (locals == null) return fallbackT(key, variables);
+    value = (value as I18nValue)[keyPart];
+    if (value == null) return fallbackT(key, variables);
   }
 
-  if (typeof locals === "string") return insertVariables(locals, variables);
+  if (typeof value === "string") return insertVariables(value, variables);
   else return key;
 }
 
@@ -81,30 +81,30 @@ function fallbackT(key: string, variables: { [key: string]: string; } = {}) {
   const [ context, keys ] = key.split(":");
   const keyParts = keys.split(".");
 
-  let locals: I18nValue|string = i18nFallbackContexts[context];
-  if (locals == null) return key;
+  let valueOrText: I18nValue|string = i18nFallbackContexts[context];
+  if (valueOrText == null) return key;
 
   for (const keyPart of keyParts) {
-    locals = (locals as I18nValue)[keyPart];
-    if (locals == null) return key;
+    valueOrText = (valueOrText as I18nValue)[keyPart];
+    if (valueOrText == null) return key;
   }
 
-  if (typeof locals === "string") return insertVariables(locals, variables);
+  if (typeof valueOrText === "string") return insertVariables(valueOrText, variables);
   else return key;
 }
 
-function insertVariables(locals: string, variables: { [key: string]: string }) {
+function insertVariables(text: string, variables: { [key: string]: string }) {
   let index = 0;
   do {
-    index = locals.indexOf("${", index);
+    index = text.indexOf("${", index);
     if (index !== -1) {
-      const endIndex = locals.indexOf("}", index);
-      const key = locals.slice(index + 2, endIndex);
+      const endIndex = text.indexOf("}", index);
+      const key = text.slice(index + 2, endIndex);
       const value = variables[key] != null ? variables[key] : `"${key}" is missing`;
-      locals = locals.slice(0, index) + value + locals.slice(endIndex + 1);
+      text = text.slice(0, index) + value + text.slice(endIndex + 1);
       index += 1;
     }
   } while (index !== -1);
 
-  return locals;
+  return text;
 }
