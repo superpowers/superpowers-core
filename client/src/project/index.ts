@@ -630,7 +630,7 @@ function createFilterElements() {
   selectAllElt.draggable = false;
   selectAllElt.classList.add(selectAllClassName);
   selectAllElt.addEventListener("click", toggleSelectAllFilter);
-  selectAllElt.src = "/images/tabs/close.svg"; // TODO: Replae with real image for select all
+  selectAllElt.src = "/images/controls/filter-all.svg";
   filterElt.appendChild(selectAllElt);
   for (const assetType in assetTypes) {
     const assetTitle = assetTypes[assetType];

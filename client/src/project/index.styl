@@ -62,8 +62,14 @@ body
   .filter { background-image: url(/images/actions/filter.svg); }
 
 .filter-buttons
+  img.selectAllFilter
+    opacity: 0.5
   img.disabled-filter
-    opacity: 0.4
+    opacity: 0.5
+  img
+    &:hover 
+      background: #ccc; 
+      opacity: 1
 
 .entries-tree-view
   flex 1
