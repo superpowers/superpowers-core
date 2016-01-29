@@ -31,7 +31,7 @@ const ui: {
   entriesTreeView?: TreeView;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
-  entriesFilterView?: any;
+  entriesFilterView?: HTMLElement;
 
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
@@ -360,6 +360,7 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
     if (entry.children != null) for (const child of entry.children) walk(child, entry, liElt);
   }
   for (const entry of entries) walk(entry, null, null);
+
   createFilterElements();
 }
 
@@ -630,30 +631,29 @@ function createFilterElements() {
   selectAllElt.draggable = false;
   selectAllElt.classList.add(selectAllClassName);
   selectAllElt.addEventListener("click", toggleSelectAllFilter);
-  selectAllElt.src = "/images/controls/filter-all.svg";
   filterElt.appendChild(selectAllElt);
-  for (const assetType in assetTypes) {
-    const assetTitle = assetTypes[assetType];
+  for (const type in assetTypes) {
+    const assetType = assetTypes[type];
     const iconElt: any = document.createElement("img");
     iconElt.draggable = false;
-    iconElt.test = assetTitle;
+    iconElt.type = assetType;
     iconElt.addEventListener("click", toggleFilter);
-    iconElt.classList.add(assetTitle);
-    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[assetTitle].pluginPath}/editors/${assetTitle}/icon.svg`;
+    iconElt.classList.add(assetType);
+    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[assetType].pluginPath}/editors/${assetType}/icon.svg`;
     filterElt.appendChild(iconElt);
   }
 }
 
-function toggleFilter(/*assetTitle: string*/) {
-  const assetTitle = this.test;
+function toggleFilter() {
+  const assetType = this.type;
   // toggle the filter for this specfic asset type
-  const filterElm = (ui.entriesFilterView.querySelector("." + assetTitle) as HTMLElement);
+  const filterElm = (ui.entriesFilterView.querySelector("." + assetType) as HTMLElement);
   if (filterElm.classList.contains("disabled-filter")) {
     filterElm.classList.remove("disabled-filter");
   } else {
     filterElm.classList.add("disabled-filter");
   }
-  const entries: any = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetTitle}']`) as HTMLCollection);
+  const entries: any = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetType}']`) as HTMLCollection);
   for (const entry in entries) {
     entries[entry].hidden = !entries[entry].hidden;
   }
@@ -695,7 +695,6 @@ function onTreeViewDrop(event: DragEvent, dropLocation: TreeView.DropLocation, o
   }
 
   const dropPoint = SupClient.getTreeViewDropPoint(dropLocation, data.entries);
-
 
   const entryIds: string[] = [];
   for (const entry of orderedNodes) entryIds.push(entry.dataset["id"]);
