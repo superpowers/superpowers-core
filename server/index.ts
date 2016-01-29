@@ -90,7 +90,7 @@ const [ systemId, pluginFullName ] = argv._[1] != null ? argv._[1].split(":") : 
 switch (command) {
   case "start":
     /* tslint:disable */
-    require("./start").default();
+    require("./start").default(argv["data-path"]);
     /* tslint:enable */
     break;
   case "list": list(); break;

@@ -1,5 +1,5 @@
-export default function getLocalizedFilename(filename: string, language: string) {
-  if (language === "en") return filename;
+export default function getLocalizedFilename(filename: string, languageCode: string) {
+  if (languageCode === "en") return filename;
   const [ basename, extension ] = filename.split(".");
-  return `${basename}.${language}.${extension}`;
+  return `${basename}.${languageCode}.${extension}`;
 }

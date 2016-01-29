@@ -141,17 +141,17 @@ function loadConfig() {
 
 function handleLanguage(req: express.Request, res: express.Response, next: Function) {
   if (req.cookies["supLanguage"] == null) {
-    let language = req.header("Accept-Language");
+    let languageCode = req.header("Accept-Language");
 
-    if (language != null) {
-      language = language.split(",")[0];
-      if (languageIds.indexOf(language) === -1 && language.indexOf("-") !== -1) {
-        language = language.split("-")[0];
+    if (languageCode != null) {
+      languageCode = languageCode.split(",")[0];
+      if (languageIds.indexOf(languageCode) === -1 && languageCode.indexOf("-") !== -1) {
+        languageCode = languageCode.split("-")[0];
       }
     }
 
-    if (languageIds.indexOf(language) === -1) language = "en";
-    res.cookie("supLanguage", language);
+    if (languageIds.indexOf(languageCode) === -1) languageCode = "en";
+    res.cookie("supLanguage", languageCode);
   }
 
   next();

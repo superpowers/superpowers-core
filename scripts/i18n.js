@@ -9,6 +9,7 @@ exports.relativeLocalesPath = "./public/locales";
 let fallbackLocale = null;
 
 exports.loadLocale = (languageCode, relative) => {
+  if (languageCode === "none") return {};
   if (fallbackLocale == null && languageCode !== "en") fallbackLocale = exports.loadLocale("en", relative);
 
   const localePath = relative ? exports.relativeLocalesPath : exports.rootLocalesPath;

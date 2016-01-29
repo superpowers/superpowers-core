@@ -14,6 +14,7 @@ if (editors.length > 0) {
 
   const i18n = require("./i18n");
   const languageCodes = fs.readdirSync(i18n.rootLocalesPath);
+  languageCodes.push("none");
 
   for (const languageCode of languageCodes) {
     const locale = i18n.loadLocale(languageCode, true);
@@ -24,13 +25,6 @@ if (editors.length > 0) {
     });
     tasks.push(`jade-${languageCode}`);
   }
-
-  gulp.task("jade-none", () => gulp.src("./editors/**/index.jade")
-    .pipe(jade({ locals: { t: (path) => path } }))
-    .pipe(rename({ extname: ".none.html" }))
-    .pipe(gulp.dest("./public/editors"))
-  );
-  tasks.push("jade-none");
 
   // Stylus
   const stylus = require("gulp-stylus");
