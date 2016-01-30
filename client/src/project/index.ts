@@ -396,10 +396,12 @@ function onEntryAddedAck(err: string, id: string) {
   }
 
   ui.entriesTreeView.clearSelection();
-  ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`) as HTMLLIElement);
+  let entry = ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`) as HTMLLIElement;
+  ui.entriesTreeView.addToSelection(entry);
   updateSelectedEntry();
 
   if (autoOpenAsset) openEntry(id);
+  if (data.entries.byId[id].type == null) entry.classList.remove("collapsed");
 }
 
 function onEntryMoved(id: string, parentId: string, index: number) {
