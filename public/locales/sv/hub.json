@@ -2,7 +2,7 @@
   "serverAddress": "${hostname} på port ${port}",
   "newProject": {
     "title": "Nytt projekt",
-    "prompt": "Fyll i namn och välj typ för det nya projektet.",
+    "prompt": "Fyll i namn och välj typ för ditt nya projekt.",
     "namePlaceholder": "Projektnamn",
     "descriptionPlaceholder": "Beskrivning (valfritt)",
     "emptyProject": {

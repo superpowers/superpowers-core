@@ -28,7 +28,7 @@
   },
 
   "states": { 
-    "disabled": "Inaktiverad",
+    "disabled": "Avaktiverad",
     "enabled": "Aktiverad",
     "loading": "Laddar...",
     "connecting": "Kopplar upp...",
