@@ -59,6 +59,18 @@ body
   .duplicate-entry { background-image: url(/images/actions/duplicate.svg); }
   .trash-entry { background-image: url(/images/actions/delete.svg); }
   .search { background-image: url(/images/actions/search.svg); }
+  .filter { background-image: url(/images/actions/filter.svg); }
+
+.filter-buttons
+  img.selectAllFilter
+    opacity: 0.5
+    content: url(/images/controls/filter-all.svg)
+  img.disabled-filter
+    opacity: 0.5
+  img
+    &:hover 
+      background: #ccc; 
+      opacity: 1
 
 .entries-tree-view
   flex 1

@@ -31,6 +31,7 @@ const ui: {
   entriesTreeView?: TreeView;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
+  entriesFilterView?: HTMLElement;
 
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
@@ -104,12 +105,15 @@ function start() {
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
 
+  ui.entriesFilterView = (document.querySelector(".filter-buttons") as HTMLElement);
+
   document.querySelector(".entries-buttons .new-asset").addEventListener("click", onNewAssetClick);
   document.querySelector(".entries-buttons .new-folder").addEventListener("click", onNewFolderClick);
   document.querySelector(".entries-buttons .search").addEventListener("click", onSearchEntryDialog);
   document.querySelector(".entries-buttons .rename-entry").addEventListener("click", onRenameEntryClick);
   document.querySelector(".entries-buttons .duplicate-entry").addEventListener("click", onDuplicateEntryClick);
   document.querySelector(".entries-buttons .trash-entry").addEventListener("click", onTrashEntryClick);
+  document.querySelector(".entries-buttons .filter").addEventListener("click", onFilterEntryClick);
 
   ui.openInNewWindowButton = document.createElement("button");
   ui.openInNewWindowButton.className = "open-in-new-window";
@@ -298,6 +302,7 @@ function onDisconnected() {
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".filter-buttons") as HTMLDivElement).hidden = true;
   (document.querySelector(".connecting") as HTMLDivElement).hidden = false;
 }
 
@@ -342,6 +347,8 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".entries-buttons .filter") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".filter-buttons") as HTMLButtonElement).hidden = true;
 
   function walk(entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode, parentElt: HTMLLIElement) {
     const liElt = createEntryElement(entry);
@@ -353,6 +360,8 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
     if (entry.children != null) for (const child of entry.children) walk(child, entry, liElt);
   }
   for (const entry of entries) walk(entry, null, null);
+
+  createFilterElements();
 }
 
 function onSetManifestProperty(key: string, value: any) {
@@ -581,6 +590,7 @@ function toggleDevTools() {
 function createEntryElement(entry: SupCore.Data.EntryNode) {
   const liElt = document.createElement("li");
   liElt.dataset["id"] = entry.id;
+  liElt.dataset["class"] = entry.type;
   const parentEntry = data.entries.parentNodesById[entry.id];
   if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
@@ -624,6 +634,69 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
   }
   return liElt;
 }
+
+function createFilterElements() {
+  const assetTypes = data.assetTypesByTitle;
+  const filterElt = ui.entriesFilterView;
+  while (filterElt.hasChildNodes()) {
+    filterElt.removeChild(filterElt.lastChild);
+  }
+
+  const selectAllElt = document.createElement("img");
+  const selectAllClassName = "selectAllFilter";
+  selectAllElt.draggable = false;
+  selectAllElt.classList.add(selectAllClassName);
+  selectAllElt.addEventListener("click", toggleSelectAllFilter);
+  filterElt.appendChild(selectAllElt);
+  for (const type in assetTypes) {
+    const assetType = assetTypes[type];
+    const iconElt: any = document.createElement("img");
+    iconElt.draggable = false;
+    iconElt.type = assetType;
+    iconElt.addEventListener("click", toggleFilter);
+    iconElt.classList.add(assetType);
+    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[assetType].pluginPath}/editors/${assetType}/icon.svg`;
+    filterElt.appendChild(iconElt);
+  }
+}
+
+function toggleFilter() {
+  const assetType = this.type;
+  // toggle the filter for this specfic asset type
+  const filterElm = (ui.entriesFilterView.querySelector("." + assetType) as HTMLElement);
+  if (filterElm.classList.contains("disabled-filter")) {
+    filterElm.classList.remove("disabled-filter");
+  } else {
+    filterElm.classList.add("disabled-filter");
+  }
+  const entries: any = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetType}']`) as HTMLCollection);
+  for (const entry in entries) {
+    entries[entry].hidden = !entries[entry].hidden;
+  }
+}
+
+function toggleSelectAllFilter() {
+  // toggle the select all filter
+  const selectAllClassName = "selectAllFilter";
+  const selectAllDisabled = (ui.entriesFilterView.querySelector("." + selectAllClassName) as HTMLElement).classList.contains("disabled-filter");
+  const filterElms = (ui.entriesFilterView.querySelectorAll("img") as HTMLCollection);
+  for (let i = 0; i < filterElms.length; i++) {
+    // remove the disaled-filter class
+    filterElms[i].classList.remove("disabled-filter");
+
+    // now the only class on the element is the asset type
+    const assetType = filterElms[i].classList[0];
+    const entries = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-class='${assetType}']`) as HTMLCollection);
+    for (let j = 0; j < entries.length; j++) {
+      (entries[j] as HTMLDivElement).hidden = !selectAllDisabled;
+    }
+    // add the disabled-filter class if neccessary
+    if (!selectAllDisabled) {
+      filterElms[i].classList.add("disabled-filter");
+    }
+  }
+}
+
 
 function onEntryDragStart(event: DragEvent, entryElt: HTMLLIElement) {
   const id = entryElt.dataset["id"];
@@ -731,6 +804,7 @@ function onMessageHotKey(action: string) {
     case "newAsset":     onNewAssetClick(); break;
     case "newFolder":    onNewFolderClick(); break;
     case "searchEntry":  onSearchEntryDialog(); break;
+    case "filter":       onFilterEntryClick(); break;
     case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
     case "previousTab":  onActivatePreviousTab(); break;
     case "nextTab":      onActivateNextTab(); break;
@@ -961,6 +1035,12 @@ function onRenameEntryClick() {
       }
     });
   });
+}
+
+function onFilterEntryClick() {
+  // toggle the visibilty of the asset filter
+  const div = (document.querySelector(".filter-buttons") as HTMLDivElement);
+  div.hidden = !div.hidden;
 }
 
 function onDuplicateEntryClick() {
