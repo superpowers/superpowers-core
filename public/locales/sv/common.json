@@ -1,0 +1,45 @@
+{
+  "activeLanguage": "Svenska",
+
+  "namePatternDescription": "Följande tecken kan ej användas: \\, /, :, *, ?, \", <, >, |, [ and ].",
+  "none": "(Inget)",
+
+  "actions": {
+    "applyChanges": "Spara ändringar",
+    "applyChangesWithErrors": "Spara ändringar med fel",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "create": "Skapa",
+    "delete": "Radera",
+    "download": "Ladda ner",
+    "duplicate": "Diuplicera",
+    "new": "Ny",
+    "open": "Öppna",
+    "rename": "Ändra namn",
+    "save": "Spara",
+    "search": "Sök",
+    "skip": "Hoppa över",
+    "update": "Uppdatera",
+    "upload": "Ladda upp",
+
+    "cut": "Klipp ut",
+    "copy": "Kopiera",
+    "paste": "Klistra in"
+  },
+
+  "states": { 
+    "disabled": "Inaktiverad",
+    "enabled": "Aktiverad",
+    "loading": "Laddar...",
+    "connecting": "Kopplar upp...",
+    "saving": "Sparar..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Skift",
+    "delete": "Del",
+    "return": "Retur"
+  }
+}
