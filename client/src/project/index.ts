@@ -966,14 +966,21 @@ function onDuplicateEntryClick() {
 
   const selectedNode = ui.entriesTreeView.selectedNodes[0];
   const entry = data.entries.byId[selectedNode.dataset["id"]];
-  if (entry.type == null) return;
-
   const options = {
     initialValue: entry.name,
     validationLabel: SupClient.i18n.t("common:actions.duplicate"),
     pattern: SupClient.namePattern,
     title: SupClient.i18n.t("common:namePatternDescription")
   };
+
+  if (entry.type == null) {
+    /* tslint:disable:no-unused-expression */
+    new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {
+      /* tslint:enable:no-unused-expression */
+      socket.emit("duplicate:entries", newName, entry.id, SupClient.getTreeViewSiblingInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
+    });
+    return;
+  }
 
   /* tslint:disable:no-unused-expression */
   new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {

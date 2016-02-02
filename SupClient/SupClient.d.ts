@@ -19,6 +19,7 @@ declare namespace SupClient {
   export function setupHotkeys(): void;
   export function setupHelpCallback(callback: Function): void;
   export function getTreeViewInsertionPoint(treeView: any /* TreeView */): { parentId: string; index: number };
+  export function getTreeViewSiblingInsertionPoint(treeView: any): { parentId: string, index: number };
 
   export function getTreeViewDropPoint(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
   export function getListViewDropIndex(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
