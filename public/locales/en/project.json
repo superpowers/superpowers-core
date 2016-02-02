@@ -27,7 +27,7 @@
       "initialValue": "Folder"
     },
     "renamePrompt": "Enter a new name for the asset.",
-    "duplicatePrompt": "Enter a name for the new asset.",
+    "duplicatePrompt": "Enter a name for the new asset or folder.",
     "trash": {
       "title": "Trash",
       "prompt": "Are you sure you want to trash the selected entries?",

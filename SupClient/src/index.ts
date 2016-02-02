@@ -127,6 +127,14 @@ export function getTreeViewInsertionPoint(treeView: TreeView) {
   return { parentId, index };
 }
 
+export function getTreeViewSiblingInsertionPoint(treeView: TreeView) {
+  let selectedElt = treeView.selectedNodes[0];
+  let parentId: string;
+  let index: number;
+  parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
+  return { parentId, index };
+}
+
 export function getTreeViewDropPoint(dropLocation: TreeView.DropLocation, treeById: SupCore.Data.Base.TreeById) {
   let parentId: string;
   let index: number;

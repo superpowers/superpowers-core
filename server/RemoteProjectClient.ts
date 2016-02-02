@@ -100,43 +100,57 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     const entryToDuplicate = this.server.data.entries.byId[id];
     if (entryToDuplicate == null) { callback(`Entry ${id} doesn't exist`); return; }
-    if (entryToDuplicate.type == null) { callback("Entry to duplicate must be an asset"); return; }
-
     const entry: SupCore.Data.EntryNode = {
       id: null, name: newName, type: entryToDuplicate.type,
       badges: [], dependentAssetIds: []
     };
-
     if (options == null) options = {};
 
-    this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
-      if (err != null) { callback(err); return; }
+    if (entryToDuplicate.type == null) {
+      this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
+        if (err != null) { callback(err, null); return; }
+        this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
 
-      const newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
-      this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
-        mkdirp(newAssetPath, () => {
-          referenceAsset.save(newAssetPath, (err: Error) => {
-            this.server.data.assets.release(id, null);
+        async.each(entryToDuplicate.children, (child, cb) => {
+          this.onDuplicateEntry(child.name, child.id, {parentId: entry.id, index: entryToDuplicate.children.indexOf(child)}, (err: string, duplicatedId?: string) => {
+            if(err == null) cb(null);
+            else cb(new Error(err));
+          });
+        }, (err) => {
+          if (err != null) callback(err.message, null);
+          else callback(null, entry.id);
+        });
+      });
+    } else {
+      this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
+        if (err != null) { callback(err); return; }
 
-            if (err != null) {
-              this.server.log(`Failed to save duplicated asset at ${newAssetPath} (duplicating ${id})`);
-              this.server.log(err.toString());
-              this.server.data.entries.remove(entry.id, (err) => { if (err != null) this.server.log(err); });
-              callback("Could not save asset");
-              return;
-            }
+        const newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
+        this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
+          mkdirp(newAssetPath, () => {
+            referenceAsset.save(newAssetPath, (err: Error) => {
+              this.server.data.assets.release(id, null);
 
-            this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
-              this.server.data.assets.release(entry.id, null);
+              if (err != null) {
+                this.server.log(`Failed to save duplicated asset at ${newAssetPath} (duplicating ${id})`);
+                this.server.log(err.toString());
+                this.server.data.entries.remove(entry.id, (err) => { if (err != null) this.server.log(err); });
+                callback("Could not save asset");
+                return;
+              }
 
-              this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
-              newAsset.restore();
-              callback(null, entry.id);
+              this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
+                this.server.data.assets.release(entry.id, null);
+
+                this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+                newAsset.restore();
+                callback(null, entry.id);
+              });
             });
           });
         });
       });
-    });
+    }
   };
 
   private onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
