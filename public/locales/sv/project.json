@@ -15,9 +15,9 @@
   "treeView": {
     "openInNewWindow": "Öppna i nytt fönster",
     "newAsset": {
-      "title": "Ny tillgång",
-      "prompt": "Välj typ och ge namn till den nya tillgången.",
-      "placeholder": "Tillgångsnamn (valfritt)",
+      "title": "Ny resurs",
+      "prompt": "Välj typ och ge namn till resursen.",
+      "placeholder": "Resursnamn (valfritt)",
       "openAfterCreation": "Öppna direkt"
     },
     "newFolder": {
@@ -26,13 +26,13 @@
       "placeholder": "Fyll i namn",
       "initialValue": "Mapp"
     },
-    "renamePrompt": "Välj ett nytt namn för tillgången.",
-    "duplicatePrompt": "Välj ett nytt namn för tillgången.",
+    "renamePrompt": "Välj ett nytt namn för resursen",
+    "duplicatePrompt": "Välj ett nytt namn för resursen",
     "trash": {
       "title": "Soptunna",
       "prompt": "Är du säker på att du vill slänga valda poster?",
       "warnBrokenDependency": "${entryName} används i ${dependentEntryNames}."
     },
-    "searchPlaceholder": "Sök tillgångar"
+    "searchPlaceholder": "Sök resurser"
   }
 }
