@@ -960,10 +960,10 @@ function onTrashEntryClick() {
 
     if (entry.dependentAssetIds != null && entry.dependentAssetIds.length > 0) {
       const dependentAssetNames: string[] = [];
-      for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
+      for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.getPathFromId(usingId));
       /* tslint:disable:no-unused-expression */
       const infoLabel = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
-        entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
+        entryName: data.entries.getPathFromId(entry.id), dependentEntryNames: dependentAssetNames.join(", ")
       });
       new SupClient.Dialogs.InfoDialog(infoLabel, null, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
