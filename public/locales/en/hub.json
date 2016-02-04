@@ -16,5 +16,6 @@
     "prompt": "Edit the project's details."
   },
   "openProject": "Open project",
-  "language": "Language"
+  "language": "Language",
+  "deleteProject": "Delete project"
 }
