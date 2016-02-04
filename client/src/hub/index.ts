@@ -27,6 +27,11 @@ function start() {
   document.querySelector(".projects-buttons .open-project").addEventListener("click", onProjectActivate);
   if ("ontouchstart" in window) (document.querySelector(".projects-buttons .open-project") as HTMLButtonElement).hidden = false;
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
+  document.querySelector(".projects-buttons .delete-project").addEventListener("click", onDeleteProjectClick);
+
+  SupClient.fetch("superpowers.json", "json", (err, data) => {
+    if(data.hasPassword) (document.querySelector(".projects-buttons .delete-project") as HTMLButtonElement).remove();
+  });
 
   const selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
   const languageIds = Object.keys(languageNamesById);
@@ -228,6 +233,20 @@ function onNewProjectClick() {
     autoOpenProject = result.open;
 
     socket.emit("add:projects", result.project, onProjectAddedAck);
+  });
+}
+
+function onDeleteProjectClick() {
+  const selectedNode = ui.projectsTreeView.selectedNodes[0];
+  const existingProject = data.projects.byId[selectedNode.dataset["id"]];
+  socket.emit("delete:projects", existingProject.id, (err: string) => {
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.Dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
+      selectedNode.remove();
   });
 }
 

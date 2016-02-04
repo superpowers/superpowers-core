@@ -21,6 +21,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     // Projects
     this.socket.on("add:projects", this.onAddProject);
     this.socket.on("edit:projects", this.onEditProject);
+    this.socket.on("delete:projects", this.onDeleteProject);
   }
 
   // TODO: Implement roles and capabilities
@@ -186,6 +187,22 @@ export default class RemoteHubClient extends BaseRemoteClient {
     ], (err) => {
       if (err != null) callback(err.message);
       else callback(null);
+    });
+  };
+
+  private onDeleteProject = (projectId: string, callback: (err: string) => void) => {
+    if (!this.errorIfCant("editProjects", callback)) return;
+
+    const projectServer = this.server.serversById[projectId];
+    if (projectServer == null) { callback("Invalid project id"); return; }
+
+    fs.rename(projectServer.projectPath, projectServer.projectPath + ".deleted", (err) => {
+      if(err != null) callback("Error while deleting project");
+
+      this.server.data.projects.remove(projectId, (err) => {
+        if(err != null) callback(err);
+        else callback(null);
+      });
     });
   };
 }
