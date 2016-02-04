@@ -16,5 +16,6 @@
     "prompt": "Éditez les informations du projet."
   },
   "openProject": "Ouvrir le projet",
-  "language": "Langue"
+  "language": "Langue",
+  "deleteProject": "Supprimer le projet"
 }
