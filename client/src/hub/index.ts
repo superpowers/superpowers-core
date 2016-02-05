@@ -11,7 +11,7 @@ const data: {
 
 const ui: { projectsTreeView?: any } = {};
 let socket: SocketIOClient.Socket;
-const port = (window.location.port.length === 0) ? "80" : window.location.port;
+const port = (window.location.port.length === 0) ? (window.location.protocol === "https:" ? "443" : "80")  : window.location.port;
 
 const languageNamesById: { [id: string]: string; } = {};
 if (localStorage.getItem("superpowers-dev-mode") != null) languageNamesById["none"] = "None";

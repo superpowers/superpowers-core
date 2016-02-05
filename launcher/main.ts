@@ -135,7 +135,7 @@ function connect(openServer: OpenServer) {
     res.on("data", (chunk: string) => { content += chunk; });
 
     res.on("end", () => {
-      let serverInfo: { version: string; appApiVersion: number; } = null;
+      let serverInfo: { version: string; appApiVersion: number; useSSL: boolean } = null;
       if (res.statusCode === 200) {
         try { serverInfo = JSON.parse(content); } catch (err) { /* Ignore */ }
       }
@@ -150,8 +150,8 @@ function connect(openServer: OpenServer) {
         `(got app API version ${serverInfo.appApiVersion}, expected ${appApiVersion}).`);
         return;
       }
-
-      openServer.window.loadURL(`http://${openServer.address}`);
+      let protocol = serverInfo.useSSL?"https":"http";
+      openServer.window.loadURL(`${protocol}://${openServer.address}`);
       openServer.window.webContents.addListener("did-finish-load", onServerLoaded);
       openServer.window.webContents.addListener("did-fail-load", onServerFailed);
     });

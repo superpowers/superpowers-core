@@ -42,7 +42,7 @@ export default function start(customUserDataPath: string) {
 
   const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
   SupCore.log(`Server v${version} starting...`);
-  fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.server.password.length !== 0 }, null, 2));
+  fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.server.password.length !== 0, useSSL : config.server.mainPort === 443 }, null, 2));
 
   (global as any).SupCore = SupCore;
 
@@ -69,12 +69,13 @@ export default function start(customUserDataPath: string) {
   io = socketio(mainHttpServer, { transports: [ "websocket" ] });
 
   // Build HTTP server
-  buildApp = express();
-
-  buildApp.get("/", redirectToHub);
+  let createBuildApp = config.server.mainPort !== config.server.buildPort;
+  buildApp = createBuildApp ? express() : mainApp;
+  
+  if(createBuildApp) buildApp.get("/", redirectToHub);
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
 
-  buildApp.use("/", express.static(`${__dirname}/../public`));
+  if(createBuildApp) buildApp.use("/", express.static(`${__dirname}/../public`));
 
   buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
     const projectServer = hub.serversById[req.params.projectId];
@@ -84,10 +85,12 @@ export default function start(customUserDataPath: string) {
     res.sendFile(path.join(projectServer.buildsPath, buildId, req.params[0]));
   });
 
-  buildHttpServer = http.createServer(buildApp);
-  buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
+  if(createBuildApp) {
+    buildHttpServer = http.createServer(buildApp);
+    buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
+  }
 
-  loadSystems(mainApp, buildApp, onSystemsLoaded);
+  loadSystems(mainApp, createBuildApp ? buildApp : null, onSystemsLoaded);
 
   // Save on exit and handle crashes
   process.on("SIGINT", onExit);
@@ -217,12 +220,20 @@ function onSystemsLoaded() {
     const hostname = (config.server.password.length === 0) ? "localhost" : "";
 
     mainHttpServer.listen(config.server.mainPort, hostname, () => {
-      buildHttpServer.listen(config.server.buildPort, hostname, () => {
-        SupCore.log(`Main server started on port ${config.server.mainPort}, build server started on port ${config.server.buildPort}.`);
-        if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
-      });
+        if(buildHttpServer != null){
+            buildHttpServer.listen(config.server.buildPort, hostname, () => {
+                logServerStart(hostname);
+            });
+        }
+        else
+            logServerStart(hostname);
     });
   });
+}
+
+function logServerStart(hostname: string){
+    SupCore.log(`Main server started on port ${config.server.mainPort}, build server started on port ${config.server.buildPort}.`);
+                if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
 }
 
 function handle404(err: any, req: express.Request, res: express.Response, next: Function) {
@@ -234,7 +245,7 @@ function onExit() {
   if (isQuitting) return;
   isQuitting = true;
   mainHttpServer.close();
-  buildHttpServer.close();
+  if(buildHttpServer != null) buildHttpServer.close();
 
   if (hub == null) {
     process.exit(0);
