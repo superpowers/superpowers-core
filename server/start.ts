@@ -136,7 +136,7 @@ function loadConfig() {
 
     for (const key in config.defaults) {
       if (config.server[key] == null) config.server[key] = config.defaults[key];
-      else if (config.server[key] === "env.port") config.server[key] = process.env.port || config.defaults[key];
+      else if (config.server[key] === "env.port") config.server[key] = process.env.PORT || config.defaults[key];
     }
   } else {
     fs.writeFileSync(serverConfigPath, JSON.stringify(config.defaults, null, 2) + "\n", { encoding: "utf8" });
