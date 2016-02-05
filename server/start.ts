@@ -42,7 +42,10 @@ export default function start(customUserDataPath: string) {
 
   const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
   SupCore.log(`Server v${version} starting...`);
-  fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.server.password.length !== 0, useSSL : config.server.mainPort === 443 }, null, 2));
+  fs.writeFileSync(
+      `${__dirname}/../public/superpowers.json`,
+      JSON.stringify({version, appApiVersion, hasPassword: config.server.password.length !== 0, useSSL : config.server.mainPort === 443 },
+      null, 2));
 
   (global as any).SupCore = SupCore;
 
@@ -71,7 +74,7 @@ export default function start(customUserDataPath: string) {
   // Build HTTP server
   let createBuildApp = config.server.mainPort !== config.server.buildPort;
   buildApp = createBuildApp ? express() : mainApp;
-  
+
   if(createBuildApp) buildApp.get("/", redirectToHub);
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
 
