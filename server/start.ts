@@ -44,7 +44,7 @@ export default function start(customUserDataPath: string) {
   SupCore.log(`Server v${version} starting...`);
   fs.writeFileSync(
       `${__dirname}/../public/superpowers.json`,
-      JSON.stringify({version, appApiVersion, hasPassword: config.server.password.length !== 0, useSSL : config.server.mainPort === 443 },
+      JSON.stringify({version, appApiVersion, hasPassword: config.server.password.length !== 0, useSSL: config.server.mainPort === 443 },
       null, 2));
 
   (global as any).SupCore = SupCore;
@@ -139,7 +139,7 @@ function loadConfig() {
 
     for (const key in config.defaults) {
       if (config.server[key] == null) config.server[key] = config.defaults[key];
-      else if (config.server[key] === "env.port") config.server[key] = process.env.PORT || config.defaults[key];
+      else if (config.server[key] === "env.PORT") config.server[key] = process.env.PORT || config.defaults[key];
     }
   } else {
     fs.writeFileSync(serverConfigPath, JSON.stringify(config.defaults, null, 2) + "\n", { encoding: "utf8" });

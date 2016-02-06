@@ -150,7 +150,7 @@ function connect(openServer: OpenServer) {
         `(got app API version ${serverInfo.appApiVersion}, expected ${appApiVersion}).`);
         return;
       }
-      let protocol = serverInfo.useSSL ? "https" : "http";
+      const protocol = serverInfo.useSSL ? "https" : "http";
       openServer.window.loadURL(`${protocol}://${openServer.address}`);
       openServer.window.webContents.addListener("did-finish-load", onServerLoaded);
       openServer.window.webContents.addListener("did-fail-load", onServerFailed);
