@@ -1,7 +1,7 @@
 .tab-strip {
   height: 35px;
   display: flex;
-  margin: 0;
+  margin: 0 -1px;
   padding: 0;
 
   * {
@@ -12,24 +12,33 @@
 }
 
 .tab-strip > li {
+  flex: 0 1 160px;
   display: flex;
   align-items: center;
   width: 160px;
   height: 35px;
+  border-left: 1px solid #bbb;
   border-right: 1px solid #bbb;
+  margin-right: -1px;
   background: #ddd;
   -webkit-app-region: no-drag;
 
+  &.pinned {
+    flex: 0 1 40px;
+    width: 40px;
+    justify-content: center;
+  }
+
   &.dragged {
+    flex: 0 0 0;
     position: absolute;
     z-index: 1000;
-    border-left: 1px solid #bbb;
-    margin-left: -1px;
   }
 
   &.drop-placeholder {
     background: none;
-    &:nth-last-child(1) { border-right: none; }
+    border-left: 1px solid rgba(0,0,0,0);
+    border-right: 1px solid rgba(0,0,0,0);
   }
 
   &:not(.active) { color: #888; }
@@ -48,11 +57,6 @@
   0% { background: #fff; }
   50% { background: #f7c9ae; }
   100% { background: #fff; }
-}
-
-.tab-strip > li.pinned {
-  width: 40px;
-  justify-content: center;
 }
 
 .tab-strip > li .icon {
