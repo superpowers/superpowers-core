@@ -45,7 +45,7 @@ function onAddServerClick() {
     if (name == null) return;
 
     /* tslint:disable:no-unused-expression */
-    new dialogs.PromptDialog("Enter the server address.", { initialValue: "127.0.0.1", validationLabel: "Add server" }, (address: string) => {
+    new dialogs.PromptDialog("Enter the server address.", { initialValue: "127.0.0.1:4237", validationLabel: "Add server" }, (address: string) => {
       /* tslint:enable:no-unused-expression */
       if (address == null) return;
 

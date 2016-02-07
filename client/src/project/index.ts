@@ -21,6 +21,7 @@ let data: {
   manifest?: SupCore.Data.ProjectManifest;
   entries?: SupCore.Data.Entries;
 
+  assetTypes?: string[];
   assetTypesByTitle?: { [title: string]: string; };
   editorsByAssetType?: { [assetType: string]: EditorManifest };
   toolsByName?: { [name: string]: EditorManifest };
@@ -30,6 +31,7 @@ const ui: {
   entriesTreeView?: TreeView;
   openInNewWindowButton?: HTMLButtonElement;
   tabStrip?: any;
+  entriesFilterStrip?: HTMLElement;
 
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
@@ -103,12 +105,15 @@ function start() {
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
 
+  ui.entriesFilterStrip = (document.querySelector(".filter-buttons") as HTMLElement);
+
   document.querySelector(".entries-buttons .new-asset").addEventListener("click", onNewAssetClick);
   document.querySelector(".entries-buttons .new-folder").addEventListener("click", onNewFolderClick);
   document.querySelector(".entries-buttons .search").addEventListener("click", onSearchEntryDialog);
   document.querySelector(".entries-buttons .rename-entry").addEventListener("click", onRenameEntryClick);
   document.querySelector(".entries-buttons .duplicate-entry").addEventListener("click", onDuplicateEntryClick);
   document.querySelector(".entries-buttons .trash-entry").addEventListener("click", onTrashEntryClick);
+  document.querySelector(".entries-buttons .filter").addEventListener("click", onToggleFilterStripClick);
 
   ui.openInNewWindowButton = document.createElement("button");
   ui.openInNewWindowButton.className = "open-in-new-window";
@@ -190,16 +195,17 @@ function loadPluginLocales(pluginsPaths: string[], cb: Function) {
 }
 
 function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback: Function) {
+  data.assetTypes = Object.keys(editorPaths);
   data.editorsByAssetType = {};
   data.assetTypesByTitle = {};
 
   for (const assetType in editorPaths)
     data.editorsByAssetType[assetType] = { pluginPath: editorPaths[assetType] };
 
-  const assetTypes = Object.keys(data.editorsByAssetType);
+  const assetTypes = Object.keys(editorPaths);
   assetTypes.sort((a, b) => {
-    const titleA = SupClient.i18n.t(`${data.editorsByAssetType[a].pluginPath}:editors.${a}.title`);
-    const titleB = SupClient.i18n.t(`${data.editorsByAssetType[b].pluginPath}:editors.${b}.title`);
+    const titleA = SupClient.i18n.t(`${editorPaths[a]}:editors.${a}.title`);
+    const titleB = SupClient.i18n.t(`${editorPaths[b]}:editors.${b}.title`);
     return titleA.localeCompare(titleB);
   });
 
@@ -297,6 +303,7 @@ function onDisconnected() {
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".filter-buttons") as HTMLDivElement).hidden = true;
   (document.querySelector(".connecting") as HTMLDivElement).hidden = false;
 }
 
@@ -341,6 +348,8 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".entries-buttons .filter") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".filter-buttons") as HTMLButtonElement).hidden = true;
 
   function walk(entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode, parentElt: HTMLLIElement) {
     const liElt = createEntryElement(entry);
@@ -352,6 +361,8 @@ function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
     if (entry.children != null) for (const child of entry.children) walk(child, entry, liElt);
   }
   for (const entry of entries) walk(entry, null, null);
+
+  setupFilterStrip();
 }
 
 function onSetManifestProperty(key: string, value: any) {
@@ -395,10 +406,12 @@ function onEntryAddedAck(err: string, id: string) {
   }
 
   ui.entriesTreeView.clearSelection();
-  ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`) as HTMLLIElement);
+  let entry = ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`) as HTMLLIElement;
+  ui.entriesTreeView.addToSelection(entry);
   updateSelectedEntry();
 
   if (autoOpenAsset) openEntry(id);
+  if (data.entries.byId[id].type == null) entry.classList.remove("collapsed");
 }
 
 function onEntryMoved(id: string, parentId: string, index: number) {
@@ -585,6 +598,8 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
   if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
   if (entry.type != null) {
+    liElt.dataset["assetType"] = entry.type;
+
     const iconElt = document.createElement("img");
     iconElt.draggable = false;
     iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
@@ -623,6 +638,57 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
     liElt.addEventListener("mouseleave", (event) => { childrenElt.style.display = "none"; });
   }
   return liElt;
+}
+
+function setupFilterStrip() {
+  const filterElt = ui.entriesFilterStrip;
+  filterElt.innerHTML = "";
+
+  const toggleAllElt = document.createElement("img");
+  toggleAllElt.draggable = false;
+  toggleAllElt.classList.add("toggle-all");
+  toggleAllElt.addEventListener("click", onToggleAllFilterClick);
+  filterElt.appendChild(toggleAllElt);
+
+  for (const assetType of data.assetTypes) {
+    const iconElt = document.createElement("img");
+    iconElt.draggable = false;
+    iconElt.addEventListener("click", onToggleAssetTypeFilterClick);
+    iconElt.dataset["assetType"] = assetType;
+    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[assetType].pluginPath}/editors/${assetType}/icon.svg`;
+    filterElt.appendChild(iconElt);
+  }
+}
+
+function onToggleAssetTypeFilterClick(event: MouseEvent) {
+  const filterElt = event.target as HTMLElement;
+  const filtered = filterElt.classList.toggle("filtered");
+
+  const assetType = filterElt.dataset["assetType"];
+  const entryElts = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-asset-type='${assetType}']`) as any as HTMLElement[]);
+
+  for (const entryElt of entryElts) entryElt.hidden = filtered;
+
+  let allAssetTypesFiltered = true;
+  for (const assetType of data.assetTypes) {
+    const filtered = ui.entriesFilterStrip.querySelector(`[data-asset-type='${assetType}']`).classList.contains("filtered");
+    if (!filtered) { allAssetTypesFiltered = false; break; }
+  }
+
+  ui.entriesFilterStrip.querySelector(`.toggle-all`).classList.toggle("filtered", allAssetTypesFiltered);
+}
+
+function onToggleAllFilterClick() {
+  const enableAllFilters = !(ui.entriesFilterStrip.querySelector(".toggle-all") as HTMLElement).classList.contains("filtered");
+  const filterElts = ui.entriesFilterStrip.querySelectorAll("img") as any as HTMLImageElement[];
+
+  for (const filterElt of filterElts) {
+    filterElt.classList.toggle("filtered", enableAllFilters);
+
+    const assetType = filterElt.dataset["assetType"];
+    const entryElts = ui.entriesTreeView.treeRoot.querySelectorAll(`[data-asset-type='${assetType}']`) as any as HTMLElement[];
+    for (const entryElt of entryElts) entryElt.hidden = enableAllFilters;
+  }
 }
 
 function onEntryDragStart(event: DragEvent, entryElt: HTMLLIElement) {
@@ -731,6 +797,7 @@ function onMessageHotKey(action: string) {
     case "newAsset":     onNewAssetClick(); break;
     case "newFolder":    onNewFolderClick(); break;
     case "searchEntry":  onSearchEntryDialog(); break;
+    case "filter":       onToggleFilterStripClick(); break;
     case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
     case "previousTab":  onActivatePreviousTab(); break;
     case "nextTab":      onActivateNextTab(); break;
@@ -895,10 +962,10 @@ function onTrashEntryClick() {
 
     if (entry.dependentAssetIds != null && entry.dependentAssetIds.length > 0) {
       const dependentAssetNames: string[] = [];
-      for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
+      for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.getPathFromId(usingId));
       /* tslint:disable:no-unused-expression */
       const infoLabel = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
-        entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
+        entryName: data.entries.getPathFromId(entry.id), dependentEntryNames: dependentAssetNames.join(", ")
       });
       new SupClient.Dialogs.InfoDialog(infoLabel, null, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
@@ -984,6 +1051,21 @@ function onDuplicateEntryClick() {
 
     socket.emit("duplicate:entries", newName, entry.id, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
   });
+}
+
+function onToggleFilterStripClick() {
+  ui.entriesFilterStrip.hidden = !ui.entriesFilterStrip.hidden;
+
+  if (ui.entriesFilterStrip.hidden) {
+    const hiddenEntryElts = ui.entriesTreeView.treeRoot.querySelectorAll("li.item[hidden]") as any as HTMLLIElement[];
+    for (const hiddenEntryElt of hiddenEntryElts) hiddenEntryElt.hidden = false;
+  } else {
+    for (const assetType of data.assetTypes) {
+      const filtered = ui.entriesFilterStrip.querySelector(`[data-asset-type='${assetType}']`).classList.contains("filtered");
+      const entryElts = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-asset-type='${assetType}']`) as any as HTMLElement[]);
+      for (const entryElt of entryElts) entryElt.hidden = filtered;
+    }
+  }
 }
 
 function refreshAssetTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLIElement) {

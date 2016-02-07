@@ -1,0 +1,20 @@
+{
+  "serverAddress": "${hostname} på port ${port}",
+  "newProject": {
+    "title": "Nytt projekt",
+    "prompt": "Fyll i namn och välj typ för ditt nya projekt.",
+    "namePlaceholder": "Projektnamn",
+    "descriptionPlaceholder": "Beskrivning (valfritt)",
+    "emptyProject": {
+      "title": "Tomt projekt",
+      "description": "Ett tomt projekt för att börja från noll."
+    },
+    "autoOpen": "Öppna direkt"
+  },
+  "editDetails": {
+    "title": "Redigera detaljer",
+    "prompt": "Redigera projektets detaljer."
+  },
+  "openProject": "Öppna projekt",
+  "language": "Språk"
+}
