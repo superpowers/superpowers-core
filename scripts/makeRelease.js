@@ -28,7 +28,6 @@ function shouldIgnore(file) {
 
   if (templateRegex.test(file)) return false;
   if (_.endsWith(file, "gulpfile.js") || _.endsWith(file, "Gulpfile.js") || _.endsWith(file, "tsconfig.json")) return true;
-  if (_.endsWith(file, "launcher.cmd")) return true;
   if (file.indexOf("node_modules/") === -1) {
     if (_.endsWith(file, ".jade")) return true;
     if (_.endsWith(file, ".styl")) return true;
@@ -42,7 +41,6 @@ function shouldIgnore(file) {
   if (_.startsWith(file, "node_modules/vinyl-source-stream")) return true;
   if (_.startsWith(file, "node_modules/watchify")) return true;
   if (_.startsWith(file, "node_modules/gulp")) return true;
-  if (_.startsWith(file, "launcher/src")) return true;
   if (_.startsWith(file, "bin")) return true;
   if (_.startsWith(file, "workbench")) return true;
   if (_.startsWith(file, "builds") || _.startsWith(file, "projects")) return true;
@@ -79,14 +77,9 @@ readdirRecursive(sourceRootPath, [ shouldIgnore ], function(err, files) {
       cb();
     });
   }, function() {
-    log("Updating package.json to start the launcher...");
-    rootPackage.name = "superpowers-launcher";
-    rootPackage.main =  "launcher/main.js";
+    log("Removing development dependencies from package.json...");
     delete rootPackage.devDependencies;
     fs.writeFileSync(targetRootPath + "/package.json", JSON.stringify(rootPackage, null, 2), { encoding: "utf8" });
-
-    // Remove the launcher's own package.json
-    fs.unlinkSync(targetRootPath + "/launcher/package.json");
 
     log("Release complete: " + targetRootPath);
   });

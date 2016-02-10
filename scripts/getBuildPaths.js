@@ -9,8 +9,7 @@ module.exports = function(rootPath) {
     rootPath + "/SupCore",
     rootPath + "/SupClient",
     rootPath + "/server",
-    rootPath + "/client",
-    rootPath + "/launcher",
+    rootPath + "/client"
   ];
 
   // Systems and plugins
