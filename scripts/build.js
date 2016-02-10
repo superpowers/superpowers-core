@@ -13,11 +13,17 @@ function log(message) {
   console.log(`${date.toLocaleDateString()} ${date.toLocaleTimeString()} - ${message}`);
 }
 
+let anyRequireFailed = false;
+
 try {
   require.resolve("async");
   require.resolve("yargs");
   require.resolve("chalk");
 } catch (err) {
+  anyRequireFailed = true;
+}
+
+if (anyRequireFailed) {
   const spawnOptions = { cwd: rootPath, env: process.env, stdio: "inherit" };
   const result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async", "yargs", "chalk" ], spawnOptions);
 
@@ -26,109 +32,113 @@ try {
     console.log(result.error);
     process.exit(1);
   }
-}
 
-const async = require("async");
-let buildPaths = require("./getBuildPaths")(rootPath).map((buildPath) => path.sep + path.relative(rootPath, buildPath));
+  // NOTE: Without a small delay after npm exits,
+  // installation sometimes fails since Node.js 5.x.
+  setTimeout(build, 1000);
+} else build();
 
-// Arguments
-const yargs = require("yargs");
+function build() {
+  const async = require("async");
+  let buildPaths = require("./getBuildPaths")(rootPath).map((buildPath) => path.sep + path.relative(rootPath, buildPath));
 
-const argv = yargs.option("verbose", { alias: "v", describe: "Verbose mode" }).argv;
+  // Arguments
+  const yargs = require("yargs");
 
-if (argv._.length > 0) {
-  const filter = argv._[0].replace(/[\\/]/g, path.sep);
-  const oldPathCount = buildPaths.length;
-  buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
-  log(`Rebuilding "${filter}", leaving out ${oldPathCount - buildPaths.length} paths`);
-}
+  const argv = yargs.option("verbose", { alias: "v", describe: "Verbose mode" }).argv;
 
-const filter = process.argv[2];
+  if (argv._.length > 0) {
+    const filter = argv._[0].replace(/[\\/]/g, path.sep);
+    const oldPathCount = buildPaths.length;
+    buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
+    log(`Rebuilding "${filter}", leaving out ${oldPathCount - buildPaths.length} paths`);
+  }
 
-// Build
-log(`Build paths: ${buildPaths.join(", ")}`);
+  // Build
+  log(`Build paths: ${buildPaths.join(", ")}`);
 
-const errors = [];
-let progress = 0;
+  const errors = [];
+  let progress = 0;
 
-const chalk = require("chalk");
-const styleBuildPath = chalk.bgWhite.black;
+  const chalk = require("chalk");
+  const styleBuildPath = chalk.bgWhite.black;
 
-async.eachSeries(buildPaths, (relBuildPath, callback) => {
-  log(styleBuildPath(`Building ${relBuildPath} (${++progress}/${buildPaths.length})`));
-  const absBuildPath = path.resolve(path.join(rootPath, relBuildPath));
-  const spawnOptions = { cwd: absBuildPath, env: process.env, stdio: "inherit" };
+  async.eachSeries(buildPaths, (relBuildPath, callback) => {
+    log(styleBuildPath(`Building ${relBuildPath} (${++progress}/${buildPaths.length})`));
+    const absBuildPath = path.resolve(path.join(rootPath, relBuildPath));
+    const spawnOptions = { cwd: absBuildPath, env: process.env, stdio: "inherit" };
 
-  async.waterfall([
+    async.waterfall([
 
-    (cb) => {
-      if (!fs.existsSync(`${absBuildPath}/package.json`)) { cb(null, null); return; }
-      const packageJSON = require(`${absBuildPath}/package.json`);
-      cb(null, packageJSON);
-    },
+      (cb) => {
+        if (!fs.existsSync(`${absBuildPath}/package.json`)) { cb(null, null); return; }
+        const packageJSON = require(`${absBuildPath}/package.json`);
+        cb(null, packageJSON);
+      },
 
-    (packageJSON, cb) => {
-      // Skip if the package doesn't need to be installed
-      if (packageJSON == null || packageJSON.dependencies == null && packageJSON.devDependencies == null) {
-        if (packageJSON == null || packageJSON.scripts == null ||
-        (packageJSON.scripts.preinstall == null &&
-        packageJSON.scripts.install == null &&
-        packageJSON.scripts.postinstall == null)) {
+      (packageJSON, cb) => {
+        // Skip if the package doesn't need to be installed
+        if (packageJSON == null || packageJSON.dependencies == null && packageJSON.devDependencies == null) {
+          if (packageJSON == null || packageJSON.scripts == null ||
+          (packageJSON.scripts.preinstall == null &&
+          packageJSON.scripts.install == null &&
+          packageJSON.scripts.postinstall == null)) {
+            cb(null, packageJSON);
+            return;
+          }
+        }
+
+        const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, [ "install" ], spawnOptions);
+
+        npm.on("close", (status) => {
+          if (status !== 0) errors.push(`${relBuildPath}: "npm install" exited with status code ${status}`);
           cb(null, packageJSON);
+        });
+      },
+
+      (packageJSON, cb) => {
+        // Check if the package has a build script
+        if (absBuildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
+          const args = [ "run", "build" ];
+          if (!argv.verbose) args.push("-s", "--", "--silent");
+          const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
+    
+          npm.on("close", (status) => {
+            if (status !== 0) errors.push(`${relBuildPath}: "npm run build" exited with status code ${status}`);
+            cb();
+          });
           return;
         }
+
+        // Check if the package has a gulpfile instead
+        if (fs.existsSync(`${absBuildPath}/gulpfile.js`)) {
+          const args = [];
+          if (!argv.verbose) args.push("--silent");
+          const gulp = child_process.spawn(`gulp${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
+
+          gulp.on("close", (status) => {
+            if (status !== 0) errors.push(`${relBuildPath}: "gulp" exited with status code ${status}`);
+            cb();
+          });
+          return;
+        }
+
+        cb();
       }
 
-      const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, [ "install" ], spawnOptions);
+    ], callback);
+  }, () => {
+    console.log("");
 
-      npm.on("close", (status) => {
-        if (status !== 0) errors.push(`${relBuildPath}: "npm install" exited with status code ${status}`);
-        cb(null, packageJSON);
-      });
-    },
-
-    (packageJSON, cb) => {
-      // Check if the package has a build script
-      if (absBuildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
-        const args = [ "run", "build" ];
-        if (!argv.verbose) args.push("-s", "--", "--silent");
-        const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
-  
-        npm.on("close", (status) => {
-          if (status !== 0) errors.push(`${relBuildPath}: "npm run build" exited with status code ${status}`);
-          cb();
-        });
-        return;
-      }
-
-      // Check if the package has a gulpfile instead
-      if (fs.existsSync(`${absBuildPath}/gulpfile.js`)) {
-        const args = [];
-        if (!argv.verbose) args.push("--silent");
-        const gulp = child_process.spawn(`gulp${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
-
-        gulp.on("close", (status) => {
-          if (status !== 0) errors.push(`${relBuildPath}: "gulp" exited with status code ${status}`);
-          cb();
-        });
-        return;
-      }
-
-      cb();
+    if (errors.length > 0) {
+      log("There were build errors:");
+      for (const error of errors) console.log(error);
+      process.exit(1);
+    } else {
+      const duration = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(duration / 60);
+      const seconds = duration % 60;
+      log(`Build completed in ${minutes}mn ${seconds}s.`);
     }
-
-  ], callback);
-}, () => {
-  console.log("");
-
-  if (errors.length > 0) {
-    log("There were build errors:");
-    for (const error of errors) console.log(error);
-    process.exit(1);
-  } else {
-    const duration = Math.floor((Date.now() - startTime) / 1000);
-    const minutes = Math.floor(duration / 60);
-    const seconds = duration % 60;
-    log(`Build completed in ${minutes}mn ${seconds}s.`);
-  }
-});
+  });
+}
