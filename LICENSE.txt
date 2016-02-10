@@ -3,7 +3,7 @@ in the hope of making it as useful as possible for everyone.
 https://en.wikipedia.org/wiki/ISC_license
 
 We are a welcoming community and we'd love to have you contributing!
-https://github.com/superpowers/superpowers
+https://github.com/superpowers
 
 ------------------------------------------------------------------------------
 
