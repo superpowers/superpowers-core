@@ -1,4 +1,4 @@
-## [Superpowers](http://superpowers-html5.com/), the HTML5 2D+3D game maker  
+## Superpowers — The extensible, real-time collaborative IDE
 
 [![License](https://img.shields.io/badge/license-ISC-blue.svg)](https://github.com/superpowers/superpowers/blob/master/LICENSE.txt)
 [![Build Status](https://travis-ci.org/superpowers/superpowers.svg?branch=master)](https://travis-ci.org/superpowers/superpowers)
@@ -15,7 +15,7 @@
 
 ### Powerful, extensible, collaborative game development.
 
-Superpowers is a downloadable HTML5 app. You can use it solo like a regular offline game maker,
+Superpowers is a [downloadable HTML5 app](http://superpowers-html5.com/). You can use it solo like a regular offline game maker,
 or setup a password and let friends join in on your project through their Web browser.
 It's great for working together over long periods of time, for jamming over a weekend,
 or just for helping each other out with debugging!
