@@ -1,12 +1,6 @@
 sudo: false
 language: node_js
-node_js:
-- "4.2.4"
-# We need npm 3 and Node.js 4.x ships with npm 2
-# so install the latest version
-before_install:
-- npm install -g npm
-- npm --version
+node_js: "node"
 # Skip "npm install" since "npm run build" takes care of it below
 install: true
 cache:
