@@ -6,7 +6,7 @@
     "max-line-length": [ true, 200 ],
     "class-name": true,
     "variable-name": true,
-    "comment-format": [ true, "check-space", "check-upercase" ],
+    "comment-format": [ true, "check-space" ],
     "no-trailing-whitespace": true,
     "no-unreachable": true,
     "no-unused-expression": true,
@@ -16,7 +16,6 @@
     "quotemark": [ true, "double" ],
     "radix": true,
     "triple-equals": [ true, "allow-null-check" ],
-    "use-strict": [ true, "check-module" ],
     "whitespace": [
       "check-branch",
       "check-decl",
