@@ -6,18 +6,17 @@ import * as readdirRecursive from "recursive-readdir";
 import getLocalizedFilename from "./getLocalizedFilename";
 
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
-const systemsPath = path.resolve(`${__dirname}/../systems`);
 
 export const buildFilesBySystem: { [systemId: string]: string[]; } = {};
 
 export default function(mainApp: express.Express, buildApp: express.Express, callback: Function) {
-  async.eachSeries(fs.readdirSync(systemsPath), (systemFolderName, cb) => {
+  async.eachSeries(fs.readdirSync(SupCore.systemsPath), (systemFolderName, cb) => {
     if (systemFolderName.indexOf(".") !== -1) { cb(); return; }
 
-    const systemPath = path.join(systemsPath, systemFolderName);
+    const systemPath = path.join(SupCore.systemsPath, systemFolderName);
     if (!fs.statSync(systemPath).isDirectory()) { cb(); return; }
 
-    const systemId = JSON.parse(fs.readFileSync(path.join(systemsPath, systemFolderName, "package.json"), { encoding: "utf8" })).superpowers.systemId;
+    const systemId = JSON.parse(fs.readFileSync(path.join(SupCore.systemsPath, systemFolderName, "package.json"), { encoding: "utf8" })).superpowers.systemId;
     SupCore.system = SupCore.systems[systemId] = new SupCore.System(systemId, systemFolderName);
 
     // Expose public stuff

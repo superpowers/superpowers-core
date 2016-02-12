@@ -32,8 +32,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     let formatVersion = SupCore.Data.ProjectManifest.currentFormatVersion;
     let templatePath: string;
     if (details.template != null) {
-      // FIXME: Use paths.userData once we move /systems/ to the user data folder
-      templatePath = path.join(__dirname, `../systems/${details.systemId}/public/templates/${details.template}`);
+      templatePath = path.join(__dirname, `${SupCore.systemsPath}/${details.systemId}/public/templates/${details.template}`);
       formatVersion = JSON.parse(fs.readFileSync(path.join(templatePath, `manifest.json`), { encoding: "utf8" })).formatVersion;
     }
 

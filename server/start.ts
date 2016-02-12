@@ -12,9 +12,13 @@ import * as SupCore from "../SupCore";
 import loadSystems from "./loadSystems";
 import ProjectHub from "./ProjectHub";
 
-import * as mkdirp from "mkdirp";
+// NOTE: We explicitly add core path to NODE_PATH so systems can load modules from core
+process.env["NODE_PATH"] = path.resolve(`${__dirname}/../node_modules`);
+/* tslint:disable */
+require("module").Module._initPaths();
+/* tslint:enable */
 
-let userDataPath: string;
+let dataPath: string;
 let hub: ProjectHub = null;
 let mainApp: express.Express = null;
 let mainHttpServer: http.Server;
@@ -33,9 +37,9 @@ function onUncaughtException(err: Error) {
   process.exit(1);
 }
 
-export default function start(customUserDataPath: string) {
-  setupUserData(customUserDataPath);
-  SupCore.log(`Using data from ${userDataPath}.`);
+export default function start(serverDataPath: string) {
+  dataPath = serverDataPath;
+  SupCore.log(`Using data from ${dataPath}.`);
   process.on("uncaughtException", onUncaughtException);
 
   loadConfig();
@@ -44,8 +48,11 @@ export default function start(customUserDataPath: string) {
   SupCore.log(`Server v${version} starting...`);
   fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.server.password.length !== 0 }, null, 2));
 
+  // SupCore
   (global as any).SupCore = SupCore;
+  SupCore.systemsPath = path.join(dataPath, "systems");
 
+  // List available languages
   languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
   languageIds.unshift("none");
 
@@ -94,39 +101,8 @@ export default function start(customUserDataPath: string) {
   process.on("message", (msg: string) => { if (msg === "stop") onExit(); });
 }
 
-function setupUserData(customUserDataPath: string) {
-  if (customUserDataPath != null) {
-    userDataPath = path.resolve(customUserDataPath);
-  } else {
-    userDataPath = path.resolve(path.join(__dirname, ".."));
-
-    if (!fs.existsSync(path.join(userDataPath, "config.json"))) {
-      switch (process.platform) {
-        case "win32":
-          if (process.env.APPDATA != null) userDataPath = path.join(process.env.APPDATA, "Superpowers");
-          else SupCore.log("Warning: Could not find APPDATA environment variable.");
-          break;
-        case "darwin":
-          if (process.env.HOME != null) userDataPath = path.join(process.env.HOME, "Library", "Superpowers");
-          else SupCore.log("Warning: Could not find HOME environment variable.");
-          break;
-        default:
-          if (process.env.XDG_DATA_HOME != null) userDataPath = path.join(process.env.XDG_DATA_HOME, "Superpowers");
-          else if (process.env.HOME != null) userDataPath = path.join(process.env.HOME, ".local/share", "Superpowers");
-          else SupCore.log("Warning: Could not find neither XDG_DATA_HOME nor HOME environment variables.");
-      }
-    }
-  }
-
-  try { mkdirp.sync(userDataPath); } catch (err) { if (err.code !== "EEXIST") throw err; }
-  try { mkdirp.sync(path.join(userDataPath, "projects")); } catch (err) { if (err.code !== "EEXIST") throw err; }
-  try { mkdirp.sync(path.join(userDataPath, "builds")); } catch (err) { if (err.code !== "EEXIST") throw err; }
-
-  return userDataPath;
-}
-
 function loadConfig() {
-  const serverConfigPath = `${userDataPath}/config.json`;
+  const serverConfigPath = `${dataPath}/config.json`;
   if (fs.existsSync(serverConfigPath)) {
     config.server = JSON.parse(fs.readFileSync(serverConfigPath, { encoding: "utf8" }));
     schemas.validate(config, "config");
@@ -209,7 +185,7 @@ function onSystemsLoaded() {
   buildApp.use(handle404);
 
   // Project hub
-  hub = new ProjectHub(io, userDataPath, (err: Error) => {
+  hub = new ProjectHub(io, dataPath, (err: Error) => {
     if (err != null) { SupCore.log(`Failed to start server:\n${(err as any).stack}`); return; }
 
     SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${hub.projectsPath}.`);

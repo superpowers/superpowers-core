@@ -323,6 +323,7 @@ declare namespace SupCore {
 
   // All loaded systems (server-side only)
   export const systems: { [system: string]: System };
+  export const systemsPath: string;
   // The currently active system
   export let system: System;
 

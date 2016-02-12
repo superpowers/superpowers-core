@@ -1,6 +1,7 @@
 /// <reference path="index.d.ts" />
 
 import * as dummy_https from "https";
+import * as path from "path";
 import * as fs from "fs";
 import * as mkdirp from "mkdirp";
 import * as yargs from "yargs";
@@ -12,6 +13,8 @@ const https: typeof dummy_https = require("follow-redirects").https;
 const unzip = require("unzip");
 /* tslint:enable */
 
+
+// Command line interface
 const argv = yargs
   .usage("Usage: $0 <command> [options]")
   .demand(1, "Enter a command")
@@ -42,13 +45,20 @@ const argv = yargs
   .help("h").alias("h", "help")
   .argv;
 
+// Data path
+const dataPath = argv["data-path"] != null ? path.resolve(argv["data-path"]) : path.resolve(`${__dirname}/..`);
+mkdirp.sync(dataPath);
+mkdirp.sync(`${dataPath}/projects`);
+mkdirp.sync(`${dataPath}/builds`);
+const systemsPath = `${dataPath}/systems`;
+mkdirp.sync(systemsPath);
+
+// Systems and plugins
 const folderNameRegex = /^[a-z0-9_-]+$/;
 const pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
-const builtInPluginAuthors = ["default", "common", "extra"];
+const builtInPluginAuthors = [ "default", "common", "extra" ];
 
 const systemsById: { [id: string]: { folderName: string; plugins: { [author: string]: string[] } } } = {};
-const systemsPath = `${__dirname}/../systems`;
-try { fs.mkdirSync(systemsPath); } catch (err) { /* Ignore */ }
 
 for (const entry of fs.readdirSync(systemsPath)) {
   if (!folderNameRegex.test(entry)) continue;
@@ -90,7 +100,7 @@ const [ systemId, pluginFullName ] = argv._[1] != null ? argv._[1].split(":") : 
 switch (command) {
   case "start":
     /* tslint:disable */
-    require("./start").default(argv["data-path"]);
+    require("./start").default(dataPath);
     /* tslint:enable */
     break;
   case "list": list(); break;

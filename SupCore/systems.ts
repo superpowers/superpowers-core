@@ -1,31 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 
+export let systemsPath: string;
+export let systems: { [system: string]: System } = {};
+
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
-
-class SystemData {
-  assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
-  resourceClasses: { [resourceId: string]: SupCore.Data.ResourceClass; } = {};
-
-  constructor(public system: System) {}
-
-  registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass) {
-    if (this.assetClasses[name] != null) {
-      console.log(`SystemData.registerAssetClass: Tried to register two or more asset classes named "${name}" in system "${this.system.id}"`);
-      return;
-    }
-    this.assetClasses[name] = assetClass;
-    return;
-  }
-
-  registerResource(id: string, resourceClass: SupCore.Data.ResourceClass) {
-    if (this.resourceClasses[id] != null) {
-      console.log(`SystemData.registerResource: Tried to register two or more plugin resources named "${id}" in system "${this.system.id}"`);
-      return;
-    }
-    this.resourceClasses[id] = resourceClass;
-  }
-}
 
 export class System {
   data: SystemData;
@@ -36,7 +15,7 @@ export class System {
   }
 
   requireForAllPlugins(filePath: string) {
-    const pluginsPath = path.resolve(`${__dirname}/../systems/${this.folderName}/plugins`);
+    const pluginsPath = path.resolve(`${SupCore.systemsPath}/${this.folderName}/plugins`);
 
     for (const pluginAuthor of fs.readdirSync(pluginsPath)) {
       const pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
@@ -71,4 +50,26 @@ export class System {
   }
 }
 
-export var systems: { [system: string]: System } = {};
+class SystemData {
+  assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
+  resourceClasses: { [resourceId: string]: SupCore.Data.ResourceClass; } = {};
+
+  constructor(public system: System) {}
+
+  registerAssetClass(name: string, assetClass: SupCore.Data.AssetClass) {
+    if (this.assetClasses[name] != null) {
+      console.log(`SystemData.registerAssetClass: Tried to register two or more asset classes named "${name}" in system "${this.system.id}"`);
+      return;
+    }
+    this.assetClasses[name] = assetClass;
+    return;
+  }
+
+  registerResource(id: string, resourceClass: SupCore.Data.ResourceClass) {
+    if (this.resourceClasses[id] != null) {
+      console.log(`SystemData.registerResource: Tried to register two or more plugin resources named "${id}" in system "${this.system.id}"`);
+      return;
+    }
+    this.resourceClasses[id] = resourceClass;
+  }
+}
