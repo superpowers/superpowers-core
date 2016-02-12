@@ -1,7 +1,7 @@
 ## Superpowers — The extensible, real-time collaborative IDE
 
-[![License](https://img.shields.io/badge/license-ISC-blue.svg)](https://github.com/superpowers/superpowers/blob/master/LICENSE.txt)
-[![Build Status](https://travis-ci.org/superpowers/superpowers.svg?branch=master)](https://travis-ci.org/superpowers/superpowers)
+[![License](https://img.shields.io/badge/license-ISC-blue.svg)](https://github.com/superpowers/superpowers-core/blob/master/LICENSE.txt)
+[![Build Status](https://travis-ci.org/superpowers/superpowers-core.svg?branch=master)](https://travis-ci.org/superpowers/superpowers-core)
 [![Gitter](https://img.shields.io/gitter/room/superpowers/dev.svg)](https://gitter.im/superpowers/dev)  
 [![Patreon](https://img.shields.io/badge/patreon-support%20us-brightgreen.svg)](https://www.patreon.com/SparklinLabs)
 [![Twitter](https://img.shields.io/twitter/follow/SuperpowersDev.svg?style=social)](https://twitter.com/SuperpowersDev)

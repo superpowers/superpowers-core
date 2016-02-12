@@ -6,7 +6,7 @@
   "main": "./server/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/superpowers/superpowers.git"
+    "url": "https://github.com/superpowers/superpowers-core.git"
   },
   "scripts": {
     "build": "node scripts/build.js"

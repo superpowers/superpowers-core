@@ -137,7 +137,7 @@ const currentRegistryVersion = 1;
 type Registry = { version: number; systems: { [sytemId: string]: { repository: string; plugins: { [author: string]: { [name: string]: string } } } } };
 function getRegistry(callback: (err: Error, registry: Registry) => any) {
   // FIXME: Use registry.json instead once the next release is out
-  const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers/master/registryNext.json";
+  const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers-core/master/registryNext.json";
   const request = https.get(registryUrl, (res) => {
     if (res.statusCode !== 200) {
       callback(new Error(`Unexpected status code: ${res.statusCode}`), null);
@@ -417,7 +417,7 @@ function updateServer() {
   const packageData = fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" });
   const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
 
-  getLatestRelease("https://github.com/superpowers/superpowers", (version, downloadURL) => {
+  getLatestRelease("https://github.com/superpowers/superpowers-core", (version, downloadURL) => {
     const [ latestMajor, latestMinor ] = version.split(".");
 
     if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
