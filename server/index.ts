@@ -423,9 +423,9 @@ function updateServer() {
     if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
       console.log("Updating the server...");
 
-      for (let path of ["server", "SupClient", "SupCore", "package.json", "public", "node_modues"]) rimraf.sync(`${__dirname}/../${path}`);
+      for (let path of ["server", "SupClient", "SupCore", "package.json", "public", "node_modules"]) rimraf.sync(`${__dirname}/../${path}`);
       downloadRelease(downloadURL, `${__dirname}/..`, () => {
-        console.log("Server sucessfully updated.");
+        console.log("Server successfully updated.");
       });
     } else {
       console.log("No updates available for the server.");
