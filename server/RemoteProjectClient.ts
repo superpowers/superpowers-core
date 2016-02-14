@@ -215,6 +215,14 @@ export default class RemoteProjectClient extends BaseRemoteClient {
                 }
               }
 
+              // Cancel any scheduled save for this asset
+              let scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${entry.id}`];
+              if (scheduledSaveCallback) {
+                clearTimeout(scheduledSaveCallback.timeoutId);
+                scheduledSaveCallback.timeoutId = null;
+                scheduledSaveCallback.callback = null;
+              }
+
               // Generate badges for any assets depending on this entry
               if (dependentAssetIds != null) this.server.markMissingDependency(dependentAssetIds, id);
 
