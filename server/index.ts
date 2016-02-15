@@ -571,7 +571,7 @@ function init() {
       process.exit(1);
     } else if (pluginFullName != null && registrySystemEntry != null) {
       const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
-      if (registrySystemEntry.plugins[pluginAuthor][pluginName] != null) {
+      if (registrySystemEntry.plugins[pluginAuthor] != null && registrySystemEntry.plugins[pluginAuthor][pluginName] != null) {
         console.error(`Plugin ${pluginFullName} on system ${systemId} already exists.`);
         process.exit(1);
       }
