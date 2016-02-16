@@ -198,6 +198,7 @@ function onSystemsLoaded() {
       buildHttpServer.listen(config.server.buildPort, hostname, () => {
         SupCore.log(`Main server started on port ${config.server.mainPort}, build server started on port ${config.server.buildPort}.`);
         if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
+        if (process != null && process.send != null) process.send({ type: "started" });
       });
     });
   });
