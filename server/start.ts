@@ -112,6 +112,8 @@ function loadConfig() {
     }
   } else {
     fs.writeFileSync(serverConfigPath, JSON.stringify(config.defaults, null, 2) + "\n", { encoding: "utf8" });
+    config.server = {} as any;
+    for (const key in config.defaults) config.server[key] = config.defaults[key];
   }
 }
 
