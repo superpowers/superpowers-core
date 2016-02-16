@@ -32,7 +32,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     let formatVersion = SupCore.Data.ProjectManifest.currentFormatVersion;
     let templatePath: string;
     if (details.template != null) {
-      templatePath = path.join(__dirname, `${SupCore.systemsPath}/${details.systemId}/public/templates/${details.template}`);
+      templatePath = `${SupCore.systemsPath}/${details.systemId}/public/templates/${details.template}`;
       formatVersion = JSON.parse(fs.readFileSync(path.join(templatePath, `manifest.json`), { encoding: "utf8" })).formatVersion;
     }
 
