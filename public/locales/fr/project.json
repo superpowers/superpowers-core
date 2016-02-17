@@ -27,7 +27,7 @@
       "initialValue": "Dossier"
     },
     "renamePrompt": "Entrez un nouveau nom pour l'asset.",
-    "duplicatePrompt": "Entrez un nom pour le nouvel asset.",
+    "duplicatePrompt": "Entrez un nom pour le nouvel asset ou dossier.",
     "trash": {
       "title": "Supprimer",
       "prompt": "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?",
