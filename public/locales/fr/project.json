@@ -2,10 +2,10 @@
   "header": {
     "goToHub": "Aller à l'accueil du serveur",
     "publish": "Publier le projet",
-    "publishDisabled": "Publier le projet (ne fonctionne que depuis l'application Superpowers pour des raisons techniques)",
-    "stop": "Stopper le projet",
+    "publishDisabled": "Publier le projet (uniquement disponible dans l'application Superpowers pour des raisons techniques)",
+    "stop": "Arrêter le projet",
     "debug": "Déboguer le projet (F6)",
-    "run": "Lancer le projet (F5)",
+    "run": "Tester le projet (F5)",
     "notifications": {
       "enable": "Cliquez pour activer les notifications",
       "disable": "Cliquez pour désactiver les notifications",
@@ -16,18 +16,18 @@
     "openInNewWindow": "Ouvrir dans une nouvelle fenêtre",
     "newAsset": {
       "title": "Nouvel asset",
-      "prompt": "Sélectionnez le type et entrez un nom pour le nouvel asset.",
+      "prompt": "Sélectionnez le type d'asset et son nom",
       "placeholder": "Nom de l'asset (optionnel)",
       "openAfterCreation": "Ouvrir après création"
     },
     "newFolder": {
       "title": "Nouveau dossier",
-      "prompt": "Entrez le nom du nouveau dossier.",
-      "placeholder": "Entrez un nom",
+      "prompt": "Nommez le nouveau dossier.",
+      "placeholder": "Nom du dossier",
       "initialValue": "Dossier"
     },
     "renamePrompt": "Entrez un nouveau nom pour l'asset.",
-    "duplicatePrompt": "Entrez un nom pour le nouvel asset.",
+    "duplicatePrompt": "Nommez le nouvel asset.",
     "trash": {
       "title": "Supprimer",
       "prompt": "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?",

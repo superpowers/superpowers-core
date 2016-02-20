@@ -7,7 +7,7 @@
     "descriptionPlaceholder": "Description (optionnelle)",
     "emptyProject": {
       "title": "Projet vide",
-      "description": "Un projet vide pour partir de 0."
+      "description": "Un projet vide pour partir de zéro."
     },
     "autoOpen": "Ouvrir après création"
   },

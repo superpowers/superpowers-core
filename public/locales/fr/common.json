@@ -1,30 +1,30 @@
 {
   "activeLanguage": "Français",
 
-  "namePatternDescription": "Les caractères suivants ne peuvent être utilisés: \\, /, :, *, ?, \", <, >, |, [ et ].",
+  "namePatternDescription": "Les caractères suivants ne peuvent pas être utilisés : \\, /, :, *, ?, \", <, >, |, [ et ].",
   "none": "(Vide)",
 
   "actions": {
-      "applyChanges": "Appliquer les changements",
-      "applyChangesWithErrors": "Appliquer les changements avec erreurs",
-      "cancel": "Annuler",
-      "close": "Fermer",
-      "create": "Créer",
-      "delete": "Supprimer",
-      "download": "Télécharger",
-      "duplicate": "Dupliquer",
-      "new": "Nouveau",
-      "open": "Ouvrir",
-      "rename": "Renommer",
-      "save": "Sauvegarder",
-      "search": "Chercher",
-      "skip": "Passer",
-      "update": "Mettre à jour",
-      "upload": "Uploader",
+    "applyChanges": "Appliquer les modifications",
+    "applyChangesWithErrors": "Appliquer les modifications avec erreurs",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "create": "Créer",
+    "delete": "Supprimer",
+    "download": "Télécharger",
+    "duplicate": "Dupliquer",
+    "new": "Nouveau",
+    "open": "Ouvrir",
+    "rename": "Renommer",
+    "save": "Sauvegarder",
+    "search": "Chercher",
+    "skip": "Ignorer",
+    "update": "Mettre à jour",
+    "upload": "Uploader",
 
-      "cut": "Couper",
-      "copy": "Copier",
-      "paste": "Coller"
+    "cut": "Couper",
+    "copy": "Copier",
+    "paste": "Coller"
   },
 
   "states": {
