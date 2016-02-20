@@ -5,6 +5,7 @@ SupClient/**/*.js
 server/**/*.js
 client/**/*.js
 workbench/
+packages/
 systems/
 projects/
 builds/
