@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "node scripts/build.js",
-    "start": "node server start"
+    "start": "node server start",
+    "package": "node scripts/package.js"
   },
   "superpowers": {
     "appApiVersion": 2

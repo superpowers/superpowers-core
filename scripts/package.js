@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 const yargs = require("yargs");
 const fs = require("fs");
