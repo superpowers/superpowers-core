@@ -9,7 +9,7 @@
     "notifications": {
       "enable": "Haz click para habilitar las notificaciones",
       "disable": "Haz click para deshabilitar las notificaciones",
-      "new": "Nuevo mensaje de chat en el proyecto -${projectName}-"
+      "new": "Nuevo mensaje de chat en el proyecto \"${projectName}\""
     }
   },
   "treeView": {

@@ -9,7 +9,7 @@
     "notifications": {
       "enable": "Klicke um Benachrichtigungen zu aktivieren",
       "disable": "Klicke um Benachrichtigungen zu deaktivieren",
-      "new": "Neue Chatnachricht beim Projekt -${projectName}-"
+      "new": "Neue Chatnachricht beim Projekt \"${projectName}\""
     }
   },
   "treeView": {

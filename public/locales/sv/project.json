@@ -9,7 +9,7 @@
     "notifications": {
       "enable": "Klicka för att activera notifikationer",
       "disable": "Klicka för att avaktivera notifikationer",
-      "new": "Nytt chatmeddelande i -${projectName}- projektet"
+      "new": "Nytt chatmeddelande i \"${projectName}\" projektet"
     }
   },
   "treeView": {

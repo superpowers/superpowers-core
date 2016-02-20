@@ -9,7 +9,7 @@
     "notifications": {
       "enable": "開啟通知",
       "disable": "關閉通知",
-      "new": "新聊天訊息在 -${projectName}- 專案"
+      "new": "新聊天訊息在 \"${projectName}\" 專案"
     }
   },
   "treeView": {
