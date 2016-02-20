@@ -23,7 +23,7 @@
     "newFolder": {
       "title": "New folder",
       "prompt": "Enter a name for the new folder.",
-      "placeholder": "Enter a name",
+      "placeholder": "Folder name",
       "initialValue": "Folder"
     },
     "renamePrompt": "Enter a new name for the asset.",
