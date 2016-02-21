@@ -9,7 +9,8 @@
     "url": "https://github.com/superpowers/superpowers-core.git"
   },
   "scripts": {
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "start": "node server start"
   },
   "superpowers": {
     "appApiVersion": 2
