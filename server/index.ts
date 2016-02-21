@@ -625,7 +625,11 @@ function initPlugin(systemFolderName: string, systemId: string, pluginName: stri
       "module": "commonjs",
       "target": "es5",
       "noImplicitAny": true
-    }
+    },
+    "exclude": [
+      "node_modules",
+      "typings"
+    ]
   }, null, 2) + "\n";
   fs.writeFileSync(`${pluginPath}/tsconfig.json`, tsconfigJSON);
 
