@@ -50,7 +50,11 @@ function build() {
   if (argv._.length > 0) {
     const filter = argv._[0].replace(/[\\/]/g, path.sep);
     const oldPathCount = buildPaths.length;
-    buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
+    if (filter[0] === "!") {
+      buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.slice(1).toLowerCase()) === -1);
+    } else {
+      buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
+    }
     log(`Rebuilding "${filter}", leaving out ${oldPathCount - buildPaths.length} paths`);
   }
 
