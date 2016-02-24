@@ -8,7 +8,8 @@ declare namespace SupClient {
   export const query: { project: string, asset: string; [key: string]: string; };
   export const cookies: Cookies.CookiesStatic;
 
-  export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => any): void;
+  export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => void): void;
+  export function readFile(file: File, type: string, callback: (err: Error, data: any) => void): void;
 
   export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
   export function getPlugins<T>(contextName: string): { [pluginName: string]: { path: string; content: T; } };

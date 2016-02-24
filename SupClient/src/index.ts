@@ -5,6 +5,7 @@ import * as cookies from "js-cookie";
 
 /* tslint:disable:no-unused-variable */
 import fetch from "./fetch";
+import readFile from "./readFile";
 import ProjectClient from "./ProjectClient";
 import setupHotkeys, { setupHelpCallback } from "./setupHotkeys";
 import * as table from "./table";
@@ -15,7 +16,7 @@ import * as i18n from "./i18n";
 import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";
 
-export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n };
+export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n };
 
 export const isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 export const query = querystring.parse(window.location.search.slice(1));
