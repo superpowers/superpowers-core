@@ -832,18 +832,8 @@ function onSearchEntryDialog() {
     openEntry(entryId);
 
     ui.entriesTreeView.clearSelection();
-    let entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${entryId}']`) as HTMLLIElement;
+    const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${entryId}']`) as HTMLLIElement;
     ui.entriesTreeView.addToSelection(entryElt);
-
-    let revealParent = (entryElt: HTMLLIElement) => {
-      let parentId = entryElt.dataset["parentId"];
-      if (parentId != null) {
-        let parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`) as HTMLLIElement;
-        parentElt.classList.toggle("collapsed", false);
-        revealParent(parentElt);
-      }
-    };
-    revealParent(entryElt);
     ui.entriesTreeView.scrollIntoView(entryElt);
   });
 }
