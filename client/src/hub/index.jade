@@ -31,10 +31,6 @@ html
     a(href="http://superpowers-html5.com/",target="_blank").server-footer
       | Superpowers — HTML5 2D+3D game maker
 
-    script.
-      // We want to apply this class before the first render
-      // to avoid having the window borders flashing
-      if (window.navigator.userAgent.indexOf("Electron") === -1) document.body.classList.add("browser");
     script(src="/SupCore.js")
     script(src="/SupClient.js")
     script(src="/hub/index.js")
