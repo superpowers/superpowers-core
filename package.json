@@ -31,7 +31,7 @@
     "simple-dialogs": "^1.0.1",
     "socket.io-client": "^1.4.4",
     "tslint": "^3.2.2",
-    "typescript": "^1.7.5",
+    "typescript": "~1.7.5",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"
   },
