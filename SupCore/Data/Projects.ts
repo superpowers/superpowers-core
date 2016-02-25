@@ -19,10 +19,11 @@ export default class Projects extends ListById {
   byId: { [id: string]: SupCore.Data.ProjectManifestPub; };
 
   constructor(pub: SupCore.Data.ProjectManifestPub[]) {
-    super(pub, Projects.schema, this.generateProjectId);
+    super(pub, Projects.schema);
+    this.generateNextId = this.generateProjectId;
   }
 
-  generateProjectId(): string {
+  private generateProjectId = () => {
     let id: string = null;
 
     while (true) {
@@ -32,5 +33,5 @@ export default class Projects extends ListById {
     }
 
     return id;
-  }
+  };
 }
