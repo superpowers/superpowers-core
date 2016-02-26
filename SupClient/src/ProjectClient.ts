@@ -1,33 +1,14 @@
-interface EntriesSubscriber {
-  onEntriesReceived(entries: SupCore.Data.Entries): void;
-  onEntryAdded(entry: any, parentId: string, index: number): void;
-  onEntryMoved(id: string, parentId: string, index: number): void;
-  onSetEntryProperty(id: string, key: string, value: any): void;
-  onEntryTrashed(id: string): void;
-}
-
-interface AssetSubscriber {
-  onAssetReceived(assetId: string, asset: any): void;
-  onAssetEdited(assetId: string, command: string, ...args: any[]): void;
-  onAssetTrashed(assetId: string): void;
-}
-
-interface ResourceSubscriber {
-  onResourceReceived(resourceId: string, resource: any): void;
-  onResourceEdited(resourceId: string, command: string, ...args: any[]): void;
-}
-
 export default class ProjectClient {
   socket: SocketIOClient.Socket;
 
   entries: SupCore.Data.Entries;
-  entriesSubscribers: EntriesSubscriber[] = [];
+  entriesSubscribers: SupClient.EntriesSubscriber[] = [];
 
   assetsById: { [assetId: string]: SupCore.Data.Base.Asset } = {};
-  subscribersByAssetId: { [assetId: string]: AssetSubscriber[] } = {};
+  subscribersByAssetId: { [assetId: string]: SupClient.AssetSubscriber[] } = {};
 
   resourcesById: { [resourceId: string]: any} = {};
-  subscribersByResourceId: { [assetId: string]: ResourceSubscriber[] } = {};
+  subscribersByResourceId: { [assetId: string]: SupClient.ResourceSubscriber[] } = {};
 
   private keepEntriesSubscription: boolean;
 
@@ -43,7 +24,7 @@ export default class ProjectClient {
     if (this.keepEntriesSubscription) this.socket.emit("sub", "entries", null, this.onEntriesReceived);
   }
 
-  subEntries(subscriber: EntriesSubscriber) {
+  subEntries(subscriber: SupClient.EntriesSubscriber) {
     this.entriesSubscribers.push(subscriber);
 
     if (this.entriesSubscribers.length === 1 && !this.keepEntriesSubscription) {
@@ -52,7 +33,7 @@ export default class ProjectClient {
     else if (this.entries != null) subscriber.onEntriesReceived(this.entries);
   }
 
-  unsubEntries(subscriber: EntriesSubscriber) {
+  unsubEntries(subscriber: SupClient.EntriesSubscriber) {
     this.entriesSubscribers.splice(this.entriesSubscribers.indexOf(subscriber), 1);
 
     if (this.entriesSubscribers.length === 0 && !this.keepEntriesSubscription) {
@@ -67,7 +48,7 @@ export default class ProjectClient {
     }
   }
 
-  subAsset(assetId: string, assetType: string, subscriber: AssetSubscriber) {
+  subAsset(assetId: string, assetType: string, subscriber: SupClient.AssetSubscriber) {
     let subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) {
       subscribers = this.subscribersByAssetId[assetId] = [];
@@ -81,7 +62,7 @@ export default class ProjectClient {
     subscribers.push(subscriber);
   }
 
-  unsubAsset(assetId: string, subscriber: AssetSubscriber) {
+  unsubAsset(assetId: string, subscriber: SupClient.AssetSubscriber) {
     const subscribers = this.subscribersByAssetId[assetId];
     if (subscribers == null) return;
 
@@ -120,7 +101,7 @@ export default class ProjectClient {
     this.socket.emit("edit:assets", assetId, command, ...args);
   }
 
-  subResource(resourceId: string, subscriber: ResourceSubscriber) {
+  subResource(resourceId: string, subscriber: SupClient.ResourceSubscriber) {
     let subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) {
       subscribers = this.subscribersByResourceId[resourceId] = [];
@@ -134,7 +115,7 @@ export default class ProjectClient {
     subscribers.push(subscriber);
   }
 
-  unsubResource(resourceId: string, subscriber: ResourceSubscriber) {
+  unsubResource(resourceId: string, subscriber: SupClient.ResourceSubscriber) {
     const subscribers = this.subscribersByResourceId[resourceId];
     if (subscribers == null) return;
 
