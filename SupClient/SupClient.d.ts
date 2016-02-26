@@ -173,13 +173,13 @@ declare namespace SupClient {
   }
 
   interface AssetSubscriber {
-    onAssetReceived(assetId: string, asset: any): void;
-    onAssetEdited(assetId: string, command: string, ...args: any[]): void;
-    onAssetTrashed(assetId: string): void;
+    onAssetReceived?(assetId: string, asset: any): void;
+    onAssetEdited?: (assetId: string, command: string, ...args: any[]) => void;
+    onAssetTrashed?(assetId: string): void;
   }
 
   interface ResourceSubscriber {
-    onResourceReceived(resourceId: string, resource: any): void;
-    onResourceEdited(resourceId: string, command: string, ...args: any[]): void;
+    onResourceReceived?(resourceId: string, resource: any): void;
+    onResourceEdited?: (resourceId: string, command: string, ...args: any[]) => void;
   }
 }

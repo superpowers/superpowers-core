@@ -56,7 +56,7 @@ export default class ProjectClient {
     }
     else {
       const asset = this.assetsById[assetId];
-      if (asset != null) subscriber.onAssetReceived(assetId, asset);
+      if (asset != null && subscriber.onAssetReceived != null) subscriber.onAssetReceived(assetId, asset);
     }
 
     subscribers.push(subscriber);
@@ -109,7 +109,7 @@ export default class ProjectClient {
     }
     else {
       const resource = this.resourcesById[resourceId];
-      if (resource != null) subscriber.onResourceReceived(resourceId, resource);
+      if (resource != null && subscriber.onResourceReceived != null) subscriber.onResourceReceived(resourceId, resource);
     }
 
     subscribers.push(subscriber);
