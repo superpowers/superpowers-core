@@ -153,7 +153,7 @@ export default class ProjectClient {
   private onAssetReceived = (assetId: string, assetType: string, err: string, assetData: any) => {
     // FIXME: The asset was probably trashed in the meantime, handle that
     if (err != null) {
-      console.warn(`Got an error in ProjectClient._onAssetReceived: ${err}`);
+      console.warn(`Got an error in ProjectClient.onAssetReceived: ${err}`);
       return;
     }
 
@@ -198,7 +198,7 @@ export default class ProjectClient {
 
   private onResourceReceived = (resourceId: string, err: string, resourceData: any) => {
     if (err != null) {
-      console.warn(`Got an error in ProjectClient._onResourceReceived: ${err}`);
+      console.warn(`Got an error in ProjectClient.onResourceReceived: ${err}`);
       return;
     }
 
