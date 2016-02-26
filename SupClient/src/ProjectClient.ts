@@ -179,7 +179,7 @@ export default class ProjectClient {
     Object.getPrototypeOf(asset)[`client_${command}`].apply(asset, args);
 
     for (const subscriber of subscribers) {
-      if (subscriber.onAssetEdited != null) subscriber.onAssetEdited.apply(subscriber, [assetId, command].concat(args));
+      if (subscriber.onAssetEdited != null) subscriber.onAssetEdited(assetId, command, ...args);
     }
   };
 
@@ -221,7 +221,7 @@ export default class ProjectClient {
     Object.getPrototypeOf(resource)[`client_${command}`].apply(resource, args);
 
     for (const subscriber of subscribers) {
-      if (subscriber.onResourceEdited != null) subscriber.onResourceEdited.apply(subscriber, [resourceId, command].concat(args));
+      if (subscriber.onResourceEdited != null) subscriber.onResourceEdited(resourceId, command, ...args);
     }
   };
 
