@@ -118,13 +118,16 @@ body
     text-overflow ellipsis
     overflow-x hidden
 
-  .badges
+  .badges {
     &:empty { padding: 0; }
 
-    span
-      background rgba(0,0,0,0.2)
-      color rgba(0,0,0,0.8)
-      font-size 80%
+    span {
+      background: rgba(0,0,0,0.2);
+      color: rgba(0,0,0,0.8);
+      font-size: 80%;
+      margin-left: 0.25em;
+    }
+  }
 
 .find-asset-dialog
   form
