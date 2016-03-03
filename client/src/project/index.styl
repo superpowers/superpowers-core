@@ -1,5 +1,4 @@
-body
-  display flex
+body { display: flex; }
 
 .sidebar
   min-width 240px
@@ -26,7 +25,6 @@ body
 .project-name
   font-weight bold
   padding 1em 0
-  -webkit-app-region drag
   flex 1
   text-overflow ellipsis
   white-space nowrap
@@ -202,31 +200,56 @@ body
         text-decoration underline
         cursor pointer
 
-.main
-  flex 1
-  display flex
-  flex-flow column
+.main {
+  flex: 1;
+  display: flex;
+  flex-flow: column;
 
-  .top
-    display flex
-    flex-shrink 0
-    background #eee
-    border-bottom 1px solid #aaa
+  .top {
+    display: flex;
+    flex-shrink: 0;
+    background: #eee;
+    border-bottom: 1px solid #aaa;
+  }
 
-  .tabs-bar
-    flex 1
-    height 35px
-    -webkit-app-region drag
+  .tabs-bar {
+    flex: 1;
+    height: 35px;
     @import "tabsBar"
+  }
 
-  .panes
-    flex 1
-    display flex
+  .panes {
+    flex: 1;
+    display: flex;
 
-    iframe
-      border none
-      flex 1
+    iframe {
+      border: none;
+      flex: 1;
       // NOTE: Workaround for Microsoft Edge
       // (iframes seem to ignore flex: 1)
-      min-height 100%
+      min-height: 100%;
       &:not(.active) { display: none; }
+    }
+  }
+}
+
+.top .controls {
+  button {
+    width: 30px;
+    height: 25px;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    outline: none;
+  }
+
+  .toggle-notifications {
+    background: url(/images/controls/notifications-enabled.svg);
+    &:hover { background: url(/images/controls/notifications-enabled-hover.svg); }
+    &:active { background: url(/images/controls/notifications-enabled-active.svg); }
+
+    &.disabled { background: url(/images/controls/notifications-disabled.svg); }
+    &.disabled:hover { background: url(/images/controls/notifications-disabled-hover.svg); }
+    &.disabled:active { background: url(/images/controls/notifications-disabled-active.svg); }
+  }
+}
