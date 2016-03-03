@@ -1,4 +1,3 @@
-import "../window";
 import CreateOrEditProjectDialog, { SystemsData } from "../dialogs/CreateOrEditProjectDialog";
 import * as async from "async";
 

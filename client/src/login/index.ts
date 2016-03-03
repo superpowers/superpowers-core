@@ -1,5 +1,3 @@
-import "../window";
-
 const port = (window.location.port.length === 0) ? "80" : window.location.port;
 
 const connectingElt = document.querySelector(".connecting") as HTMLDivElement;

@@ -33,6 +33,11 @@ html
     a(href="http://superpowers-html5.com/",target="_blank").server-footer
       | Superpowers — HTML5 2D+3D game maker
 
+    script.
+      if (window.navigator.userAgent.indexOf("Electron") !== -1) {
+        document.body.querySelector(".server-header") .hidden = true;
+        document.body.querySelector(".server-footer") .hidden = true;
+      }
     script(src="/SupCore.js")
     script(src="/SupClient.js")
     script(src="/login/index.js")
