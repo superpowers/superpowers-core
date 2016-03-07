@@ -257,7 +257,7 @@ declare namespace SupCore {
         save(assetPath: string, callback: (err: Error) => any): void;
         publish(buildPath: string, callback: (err: Error) => any): void;
 
-        server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any): void;
+        server_setProperty(client: RemoteClient, path: string, value: any, callback: (err: string, path?: string, value?: any) => any): void;
       }
 
       class Resource extends Hash {
@@ -283,9 +283,13 @@ declare namespace SupCore {
         save(resourcePath: string, callback: (err: Error) => any): void;
         publish(buildPath: string, callback: (err: Error) => any): void;
 
-        server_setProperty(client: any, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
+        server_setProperty(client: RemoteClient, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
       }
     }
+  }
+
+  interface RemoteClient {
+    id: string;
   }
 
   interface PluginsInfo {

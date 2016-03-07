@@ -139,6 +139,7 @@ declare namespace SupClient {
   }
 
   class ProjectClient {
+    id: string;
     socket: SocketIOClient.Socket;
 
     entries: SupCore.Data.Entries;

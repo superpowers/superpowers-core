@@ -1,5 +1,6 @@
 export default class ProjectClient {
   socket: SocketIOClient.Socket;
+  id: string;
 
   entries: SupCore.Data.Entries;
   entriesSubscribers: SupClient.EntriesSubscriber[] = [];
@@ -12,8 +13,9 @@ export default class ProjectClient {
 
   private keepEntriesSubscription: boolean;
 
-  constructor(socket: SocketIOClient.Socket, options?: {subEntries: boolean}) {
+  constructor(socket: SocketIOClient.Socket, options?: { subEntries: boolean; }) {
     this.socket = socket;
+    this.socket.on("welcome", this.onWelcome);
     this.socket.on("edit:assets", this.onAssetEdited);
     this.socket.on("trash:assets", this.onAssetTrashed);
     this.socket.on("edit:resources", this.onResourceEdited);
@@ -149,6 +151,10 @@ export default class ProjectClient {
     this.socket.emit("edit:resources", resourceId, command, ...args);
   }
 
+
+  private onWelcome = (clientId: string) => {
+    this.id = clientId;
+  };
 
   private onAssetReceived = (assetId: string, assetType: string, err: string, assetData: any) => {
     // FIXME: The asset was probably trashed in the meantime, handle that

@@ -10,7 +10,6 @@ import * as async from "async";
 import * as recursiveReaddir from "recursive-readdir";
 
 export default class RemoteProjectClient extends BaseRemoteClient {
-
   server: ProjectServer;
   id: string;
 
