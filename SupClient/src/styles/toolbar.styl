@@ -1,0 +1,43 @@
+.toolbar {
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-bottom: -1px;
+
+  > div {
+    background: #eee;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1px;
+  }
+
+  > div:not(:last-of-type) {
+    padding-right: 0.5em;
+  }
+
+  > div > div {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding-right: 0.25em;
+    flex: auto 0 0;
+  }
+
+  > div > .title {
+    text-transform: uppercase;
+    color: #666;
+    padding: 0.5em;
+    margin-right: 0.25em;
+    background: #ddd;
+  }
+
+  > div > div:not(.radio-strip) > label {
+    padding-right: 0.5em;
+  }
+
+  input[type=number] { width: 50px; }
+  input[type=color] { margin-right: 0.5em; }
+}
