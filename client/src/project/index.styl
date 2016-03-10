@@ -209,13 +209,13 @@ body { display: flex; }
     display: flex;
     flex-shrink: 0;
     background: #eee;
-    border-bottom: 1px solid #aaa;
+    height: 36px;
   }
 
   .tabs-bar {
     flex: 1;
-    height: 35px;
-    @import "tabsBar"
+    background: #eee;
+    border-bottom: 1px solid #aaa;
   }
 
   .panes {
@@ -234,6 +234,8 @@ body { display: flex; }
 }
 
 .top .controls {
+  border-bottom: 1px solid #aaa;
+  
   button {
     width: 30px;
     height: 25px;
