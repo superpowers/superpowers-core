@@ -13,9 +13,15 @@ button:not(:disabled):hover, .radio-strip input[type=radio]:not(:disabled) + lab
   border-color: #888;
 }
 
-button:active, .radio-strip input[type=radio]:checked + label {
+button:active {
   background: linear-gradient(#dadada, #e5e5e5);
   border-color: #aaa;
+  box-shadow: 0 0 1px 1px #ccc inset;
+}
+
+.radio-strip input[type=radio]:checked + label {
+  background: linear-gradient(#dadada, #d5d5d5);
+  border-color: #888;
   box-shadow: 0 0 1px 1px #ccc inset;
 }
 
