@@ -10,10 +10,10 @@ button, .radio-strip label {
 }
 
 button:not(:disabled):hover, .radio-strip input[type=radio]:not(:disabled) + label:hover {
-  border-color: #888;
+  border-color: #777;
 }
 
-button:active {
+button:active, .radio-strip input[type=radio] + label:active {
   background: linear-gradient(#dadada, #e5e5e5);
   border-color: #aaa;
   box-shadow: 0 0 1px 1px #ccc inset;
