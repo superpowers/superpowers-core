@@ -34,9 +34,11 @@
     background: #ddd;
   }
 
-  > div > div:not(.radio-strip) > label {
-    padding-right: 0.5em;
-    &:first-child { padding-left: 0.25em; }
+  > div > div:not(.radio-strip) {
+    & > label, & > select {
+      margin-right: 0.5em;
+      &:first-child { margin-left: 0.25em; }
+    }
   }
 
   input[type=number] { width: 50px; }
