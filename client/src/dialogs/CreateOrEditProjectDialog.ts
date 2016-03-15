@@ -46,163 +46,142 @@ export default class CreateOrEditProjectDialog extends SupClient.Dialogs.BaseDia
     if (options.autoOpen == null) options.autoOpen = true;
     this.existingProject = options.existingProject;
 
-    // Prompt name
-    const labelElt = document.createElement("label");
-    if (this.existingProject == null) labelElt.textContent = SupClient.i18n.t("hub:newProject.prompt");
-    else labelElt.textContent = SupClient.i18n.t("hub:editDetails.prompt");
-    this.formElt.appendChild(labelElt);
+    // Prompt
+    SupClient.html("div", "group", {
+      parent: this.formElt,
+      textContent: SupClient.i18n.t(this.existingProject == null ? "hub:newProject.prompt" : "hub:editDetails.prompt")
+    });
 
-    const containerElt = document.createElement("div");
-    containerElt.className = "group";
-    containerElt.style.display = "flex";
-    this.formElt.appendChild(containerElt);
+    const containerElt = SupClient.html("div", "group", { parent: this.formElt, style: { display: "flex" }});
 
     // Icon
-    this.iconInputElt = document.createElement("input");
-    this.iconInputElt.hidden = true;
-    this.iconInputElt.type = "file";
-    this.iconInputElt.accept = "image/png";
-    containerElt.appendChild(this.iconInputElt);
+    this.iconInputElt = SupClient.html("input", { type: "file", hidden: true, accept: "image/png", parent: containerElt });
 
-    const iconButtonElt = document.createElement("button");
-    iconButtonElt.type = "button";
-    iconButtonElt.style.cursor = "pointer";
-    iconButtonElt.style.border = "0";
-    iconButtonElt.style.background = "transparent";
-    iconButtonElt.style.width = "72px";
-    iconButtonElt.style.height = "72px";
-    iconButtonElt.style.margin = "0";
-    iconButtonElt.style.padding = "0";
-    iconButtonElt.style.fontSize = "0";
-    containerElt.appendChild(iconButtonElt);
-
+    const iconButtonElt = SupClient.html("button", {
+      type: "button", parent: containerElt,
+      style: {
+        cursor: "pointer",
+        background: "transparent",
+        width: "72px", height: "72px",
+        margin: "0", padding: "0", border: "0",
+        fontSize: "0"
+      }
+    });
     iconButtonElt.addEventListener("click", () => this.iconInputElt.click());
 
-    this.iconElt = new Image();
-    if (options.existingProject == null) this.iconElt.src = "/images/default-project-icon.png";
-    else this.iconElt.src = `/projects/${options.existingProject.id}/icon.png`;
-    this.iconElt.draggable = false;
-    this.iconElt.style.width = "72px";
-    this.iconElt.style.height = "72px";
-    this.iconElt.style.border = "1px solid rgba(0,0,0,0.2)";
-    this.iconElt.style.borderRadius = "4px";
-    this.iconElt.style.background = "#eee";
-    iconButtonElt.appendChild(this.iconElt);
+    const iconSrc = options.existingProject == null ? "/images/default-project-icon.png" : (`/projects/${options.existingProject.id}/icon.png`);
+    this.iconElt = SupClient.html("img", {
+      src: iconSrc, draggable: false, parent: iconButtonElt,
+      style: {
+        width: "72px", height: "72px",
+        border: "1px solid rgba(0,0,0,0.2)",
+        borderRadius: "4px",
+        background: "#eee"
+      }
+    });
     this.iconInputElt.addEventListener("change", this.onIconChange);
 
-    const textContainerElt = document.createElement("div");
+    const textContainerElt = SupClient.html("div", { parent: containerElt });
     textContainerElt.style.flex = "1";
     textContainerElt.style.display = "flex";
     textContainerElt.style.flexFlow = "column";
     textContainerElt.style.marginLeft = "0.5em";
-    containerElt.appendChild(textContainerElt);
 
     // Name
-    this.nameInputElt = document.createElement("input");
-    this.nameInputElt.required = true;
-    this.nameInputElt.placeholder = SupClient.i18n.t("hub:newProject.namePlaceholder");
-    this.nameInputElt.pattern = SupClient.namePattern;
-    this.nameInputElt.title = SupClient.i18n.t("common:namePatternDescription");
-    textContainerElt.appendChild(this.nameInputElt);
+    this.nameInputElt = SupClient.html("input", {
+      parent: textContainerElt,
+      required: true,
+      placeholder: SupClient.i18n.t("hub:newProject.namePlaceholder"),
+      pattern: SupClient.namePattern,
+      title: SupClient.i18n.t("common:namePatternDescription")
+    });
+    this.nameInputElt.style.marginBottom = "0.5em";
 
     // Description
-    this.descriptionInputElt = document.createElement("textarea");
-    this.descriptionInputElt.style.flex = "1";
-    (this.descriptionInputElt.style as any).resize = "none";
-    this.descriptionInputElt.placeholder = SupClient.i18n.t("hub:newProject.descriptionPlaceholder");
+    this.descriptionInputElt = SupClient.html("textarea", {
+      parent: textContainerElt, placeholder: SupClient.i18n.t("hub:newProject.descriptionPlaceholder"),
+      style: { flex: "1", resize: "none" }
+    });
     this.descriptionInputElt.addEventListener("keypress", this.onFieldKeyDown);
-    textContainerElt.appendChild(this.descriptionInputElt);
 
     // Down
-    const downElt = document.createElement("div");
-    downElt.style.display = "flex";
-    downElt.style.alignItems = "center";
+    const downElt = SupClient.html("div", { style: { display: "flex", alignItems: "center" } });
 
     if (options.existingProject == null) {
       // Project type
-      this.projectTypeSelectElt = document.createElement("select");
+      this.projectTypeSelectElt = SupClient.html("select", { parent: this.formElt, style: { marginBottom: "0.5em" } });
       for (const systemId in systemsById) {
         const systemInfo = systemsById[systemId];
 
-        const optGroupElt = document.createElement("optgroup");
-        optGroupElt.label = SupClient.i18n.t(`system-${systemId}:title`);
-        this.projectTypeSelectElt.appendChild(optGroupElt);
+        const optGroupElt = SupClient.html("optgroup", {
+          parent: this.projectTypeSelectElt,
+          label: SupClient.i18n.t(`system-${systemId}:title`)
+        });
 
-        const emptyOptionElt = document.createElement("option");
-        emptyOptionElt.value = `${systemId}.empty`;
-        emptyOptionElt.textContent = SupClient.i18n.t("hub:newProject.emptyProject.title");
-        optGroupElt.appendChild(emptyOptionElt);
+        SupClient.html("option", {
+          parent: optGroupElt, value: `${systemId}.empty`,
+          textContent: SupClient.i18n.t("hub:newProject.emptyProject.title")
+        });
 
         for (const templateName of systemInfo) {
-          const optionElt = document.createElement("option");
-          optionElt.value = `${systemId}.${templateName}`;
-          optionElt.textContent = SupClient.i18n.t(`${systemId}-${templateName}:title`);
-          optGroupElt.appendChild(optionElt);
+          SupClient.html("option", {
+            parent: optGroupElt, value: `${systemId}.${templateName}`,
+            textContent: SupClient.i18n.t(`${systemId}-${templateName}:title`)
+          });
         }
       }
-      this.formElt.appendChild(this.projectTypeSelectElt);
 
       // Template description
-      const descriptionContainerElt = document.createElement("div");
-      descriptionContainerElt.style.backgroundColor = "#eee";
-      descriptionContainerElt.style.border = "1px solid #ccc";
-      descriptionContainerElt.style.padding = "0.5em";
-      descriptionContainerElt.style.color = "#444";
-      descriptionContainerElt.style.marginBottom = "0.5em";
+      const descriptionContainerElt = SupClient.html("div", {
+        parent: this.formElt,
+        style: {
+          backgroundColor: "#eee",
+          border: "1px solid #ccc",
+          padding: "0.5em",
+          color: "#444",
+          marginBottom: "0.5em"
+        }
+      });
 
-      this.templateDescriptionElt = document.createElement("div");
-      this.templateDescriptionElt.className = "template-description";
-      descriptionContainerElt.appendChild(this.templateDescriptionElt);
-
-      this.systemDescriptionElt = document.createElement("div");
-      this.systemDescriptionElt.className = "system-description";
-      descriptionContainerElt.appendChild(this.systemDescriptionElt);
-
-      this.formElt.appendChild(descriptionContainerElt);
+      this.templateDescriptionElt = SupClient.html("div", "template-description", { parent: descriptionContainerElt });
+      this.systemDescriptionElt = SupClient.html("div", "system-description", { parent: descriptionContainerElt });
       this.onProjectTypeChange();
 
       // Auto-open checkbox
-      this.openCheckboxElt = document.createElement("input");
-      this.openCheckboxElt.id = "auto-open-checkbox";
-      this.openCheckboxElt.type = "checkbox";
-      this.openCheckboxElt.checked = options.autoOpen;
-      this.openCheckboxElt.style.margin = "0 0.5em 0 0";
-      downElt.appendChild(this.openCheckboxElt);
+      this.openCheckboxElt = SupClient.html("input", {
+        parent: downElt,
+        type: "checkbox", id: "auto-open-checkbox",
+        checked: options.autoOpen,
+        style: { margin: "0 0.5em 0 0" }
+      });
 
-      const openLabelElt = document.createElement("label");
-      openLabelElt.textContent = SupClient.i18n.t("hub:newProject.autoOpen");
-      openLabelElt.setAttribute("for", "auto-open-checkbox");
-      openLabelElt.style.flex = "1";
-      openLabelElt.style.margin = "0";
-      downElt.appendChild(openLabelElt);
+      SupClient.html("label", {
+        parent: downElt,
+        textContent: SupClient.i18n.t("hub:newProject.autoOpen"),
+        htmlFor: "auto-open-checkbox",
+        style: { flex: "1", margin: "0" }
+      });
     }
 
     this.formElt.appendChild(downElt);
 
     // Buttons
-    const buttonsElt = document.createElement("div");
+    const buttonsElt = SupClient.html("div", "buttons", { parent: downElt });
     if (options.existingProject != null) buttonsElt.style.flex = "1";
     buttonsElt.className = "buttons";
-    downElt.appendChild(buttonsElt);
 
-    const cancelButtonElt = document.createElement("button");
-    cancelButtonElt.type = "button";
-    cancelButtonElt.textContent = SupClient.i18n.t("common:actions.cancel");
-    cancelButtonElt.className = "cancel-button";
+    const cancelButtonElt = SupClient.html("button", "cancel-button", {
+      parent: buttonsElt,
+      type: "button", textContent: SupClient.i18n.t("common:actions.cancel")
+    });
     cancelButtonElt.addEventListener("click", (event) => { event.preventDefault(); this.cancel(); });
 
-    this.validateButtonElt = document.createElement("button");
-    if (options.existingProject == null) this.validateButtonElt.textContent = SupClient.i18n.t("common:actions.create");
-    else this.validateButtonElt.textContent = SupClient.i18n.t("common:actions.update");
-    this.validateButtonElt.className = "validate-button";
+    this.validateButtonElt = SupClient.html("button", "validate-button", {
+      textContent: SupClient.i18n.t(options.existingProject == null ? "common:actions.create" : "common:actions.update"),
+    });
 
-    if (navigator.platform === "Win32") {
-      buttonsElt.appendChild(this.validateButtonElt);
-      buttonsElt.appendChild(cancelButtonElt);
-    } else {
-      buttonsElt.appendChild(cancelButtonElt);
-      buttonsElt.appendChild(this.validateButtonElt);
-    }
+    if (navigator.platform === "Win32") buttonsElt.insertBefore(this.validateButtonElt, cancelButtonElt);
+    else buttonsElt.appendChild(this.validateButtonElt);
 
     // Existing project
     if (options.existingProject != null) {

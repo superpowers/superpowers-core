@@ -10,11 +10,12 @@ import setupHotkeys, { setupHelpCallback } from "./setupHotkeys";
 import * as table from "./table";
 import * as Dialogs from "simple-dialogs";
 import * as i18n from "./i18n";
+import html from "./html";
 
 import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";
 
-export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n };
+export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
 
 export const isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 export const query = querystring.parse(window.location.search.slice(1));

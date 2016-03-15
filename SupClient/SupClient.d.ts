@@ -1,5 +1,6 @@
 /// <reference path="../SupCore/SupCore.d.ts" />
 /// <reference path="./typings/socket.io-client/socket.io-client.d.ts" />
+/// <reference path="./typings/SupClient.html.d.ts" />
 
 declare namespace SupClient {
   export const namePattern: string;
