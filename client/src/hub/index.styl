@@ -1,70 +1,80 @@
 @import "../shared"
 
-body
-  background #eee
-  display flex
-  flex-flow column
+body {
+  background: #eee;
+  display: flex;
+  flex-flow: column;
+}
 
-.projects-header
-  margin 0.5em
-  display flex
-  justify-content space-between
+.projects-header {
+  margin: 0.5em;
+  display: flex;
+  justify-content: space-between;
+}
 
-.language-container > span
-  margin-right 0.5em
+.language-container > span { margin-right: 0.5em; }
 
-.projects-tree-view
-  flex 1
-  margin 0 0.5em
-  border 1px solid #aaa
-  background #fff
-  overflow-y auto
-  position relative
+.projects-tree-view {
+  flex: 1;
+  margin: 0 0.5em;
+  margin-bottom: 0.5em;
+  border: 1px solid #aaa;
+  background: #fff;
+  overflow-y: auto;
+  position: relative;
 
-  .connecting
-    position absolute
-    top 0
-    bottom 0
-    left 0
-    right 0
-    z-index 1
-    display flex
-    flex-flow column
-    align-items center
-    justify-content center
-    text-align center
-    text-transform uppercase
-    opacity 0.5
+  .connecting {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
 
-  ol.tree
-    position absolute
-    font-size 1.5em
-    line-height 1.25
+  ol.tree {
+    position: absolute;
+    font-size: 1.5em;
+    line-height: 1.25;
+  }
 
-  ol.tree li.item span, ol.tree li.group span
-    padding 0
+  ol.tree li.item span,
+  ol.tree li.group span {
+    padding: 0;
+  }
 
-  ol.tree li
-    display flex
-    white-space nowrap
-    padding 0.5em
-    align-items flex-start
-    height auto
+  ol.tree li {
+    display: flex;
+    white-space: nowrap;
+    padding: 0.5em;
+    align-items: flex-start;
+    height: auto;
+  }
 
-  img
-    width 48px
-    height 48px
-    margin-right 0.5em
-    border 1px solid rgba(0,0,0,0.2)
-    border-radius 4px
-    background #eee
+  img {
+    width: 48px;
+    height: 48px;
+    margin-right: 0.5em;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 4px;
+    background: #eee;
+  }
 
-  .info
-    flex 1
+  .info {
+    flex: 1;
 
-    > div
-      overflow hidden
-      text-overflow ellipsis
+    > div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 
   .name {
     font-weight: bold;
@@ -80,6 +90,7 @@ body
   ol.tree li:hover {
     .project-type { visibility: visible; }
   }
+}
 
 .dialog .template-description:not(:empty) + .system-description:not(:empty) {
   margin-top: 0.5em;
