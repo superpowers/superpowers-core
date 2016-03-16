@@ -10,6 +10,9 @@ declare namespace SupClient {
   export function html(tag: "select", options?: HTMLInputOptions): HTMLSelectElement;
   export function html(tag: "option", options?: HTMLOptionOptions): HTMLOptGroupElement;
   export function html(tag: "optgroup", options?: HTMLOptionOptions): HTMLOptGroupElement;
+  export function html(tag: "ol", options?: HTMLOptions): HTMLOListElement;
+  export function html(tag: "ul", options?: HTMLOptions): HTMLUListElement;
+  export function html(tag: "li", options?: HTMLOptions): HTMLLIElement;
 
   export function html(tag: string, classList?: string|string[], options?: HTMLOptions): HTMLElement;
   export function html(tag: "div", classList?: string|string[], options?: HTMLOptions): HTMLDivElement;
@@ -22,6 +25,9 @@ declare namespace SupClient {
   export function html(tag: "select", classList?: string|string[], options?: HTMLInputOptions): HTMLSelectElement;
   export function html(tag: "option", classList?: string|string[], options?: HTMLOptionOptions): HTMLOptGroupElement;
   export function html(tag: "optgroup", classList?: string|string[], options?: HTMLOptionOptions): HTMLOptGroupElement;
+  export function html(tag: "ol", classList?: string|string[], options?: HTMLOptions): HTMLOListElement;
+  export function html(tag: "ul", classList?: string|string[], options?: HTMLOptions): HTMLUListElement;
+  export function html(tag: "li", classList?: string|string[], options?: HTMLOptions): HTMLLIElement;
 
   interface HTMLOptions {
     id?: string;
