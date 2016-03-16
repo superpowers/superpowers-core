@@ -14,3 +14,4 @@
 /// <reference path="js-cookie/js-cookie.d.ts" />
 /// <reference path="mkdirp/mkdirp.d.ts" />
 /// <reference path="github-electron/github-electron.d.ts" />
+/// <reference path="async-lock/async-lock.d.ts" />

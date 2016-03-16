@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "async": "^1.5.2",
+    "async-lock": "^0.3.8",
     "cookie-parser": "^1.4.1",
     "dnd-tree-view": "^3.0.6",
     "express": "^4.13.3",
