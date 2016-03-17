@@ -24,8 +24,8 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     // Entries
     this.socket.on("add:entries", this.onAddEntry);
     this.socket.on("duplicate:entries", this.onDuplicateEntry);
-    this.socket.on("move:entries", this.onMoveEntry);
-    this.socket.on("trash:entries", this.onTrashEntry);
+    this.socket.on("move:entries", this.onMoveEntries);
+    this.socket.on("trash:entries", this.onTrashEntries);
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
 
     // Assets
@@ -133,14 +133,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  private onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
-    if (!this.errorIfCant("editAssets", callback)) return;
-
+  private moveEntry = (id: string, parentId: string, index: number, callback: (err: Error) => any) => {
     const oldFullAssetPath = this.server.data.entries.getStoragePathFromId(id);
     const oldParent = this.server.data.entries.parentNodesById[id];
 
     this.server.data.entries.move(id, parentId, index, (err, actualIndex) => {
-      if (err != null) { callback(err); return; }
+      if (err != null) { callback(new Error(err)); return; }
 
       this.onEntryChangeFullPath(id, oldFullAssetPath, () => {
         if (oldParent == null || oldParent.children.length > 0) return;
@@ -153,9 +151,23 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     });
   };
 
-  private onTrashEntry = (id: string, callback: (err: string) => any) => {
+  private onMoveEntries = (ids: string[], parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
 
+    async.eachSeries(ids, this.trashEntry, (err) => {
+      callback(err != null ? err.message : null);
+    });
+  };
+
+  private onTrashEntries = (ids: string[], callback: (err: string) => any) => {
+    if (!this.errorIfCant("editAssets", callback)) return;
+
+    async.eachSeries(ids, this.trashEntry, (err) => {
+      callback(err != null ? err.message : null);
+    });
+  };
+
+  private trashEntry = (id: string, callback: (err: Error) => any) => {
     const trashEntryRecursively = (entry: SupCore.Data.EntryNode, callback: (err: Error) => void) => {
       const finishTrashEntry = (err: Error) => {
         if (err != null) { callback(err); return; }
@@ -242,20 +254,20 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     const gotChildren = entry.type == null && entry.children.length > 0;
     const parentEntry = this.server.data.entries.parentNodesById[id];
     trashEntryRecursively(entry, (err: Error) => {
-      if (err != null) { callback(err.message); return; }
+      if (err != null) { callback(err); return; }
 
       // After the trash on memory, move folder to trashed assets and clean up empty folders
-      const deleteFolder = (folderPath: string, callback: (error: string) => void) => {
+      const deleteFolder = (folderPath: string, callback: (error: Error) => void) => {
         fs.readdir(folderPath, (err, files) => {
           if (err != null) {
-            if (err.code !== "ENOENT") callback(err.message);
+            if (err.code !== "ENOENT") callback(err);
             else callback(null);
             return;
           }
 
           if (files.length === 0) {
             fs.rmdir(folderPath, (err) => {
-              if (err != null) { callback(err.message); return; }
+              if (err != null) { callback(err); return; }
               callback(null);
             });
           } else callback(null);
@@ -264,7 +276,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
       if (entry.type != null || gotChildren) {
         this.server.moveAssetFolderToTrash(trashedAssetFolder, (err) => {
-          if (err != null) { callback(err.message); return; }
+          if (err != null) { callback(err); return; }
 
           if (parentEntry != null && parentEntry.children.length === 0)
             deleteFolder(path.join(this.server.projectPath, "assets", this.server.data.entries.getStoragePathFromId(parentEntry.id)), callback);

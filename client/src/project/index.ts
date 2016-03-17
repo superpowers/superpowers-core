@@ -173,7 +173,7 @@ function connect() {
 
   socket.on("add:entries", onEntryAdded);
   socket.on("move:entries", onEntryMoved);
-  socket.on("trash:entries", onEntryTrashed);
+  socket.on("trash:entries", onEntriesTrashed);
   socket.on("setProperty:entries", onSetEntryProperty);
 
   socket.on("set:badges", onBadgeSet);
@@ -444,20 +444,22 @@ function onEntryMoved(id: string, parentId: string, index: number) {
   refreshAssetTabElement(data.entries.byId[id]);
 }
 
-function onEntryTrashed(id: string) {
-  data.entries.client_remove(id);
+function onEntriesTrashed(ids: string[]) {
+  for (const id of ids) {
+    data.entries.client_remove(id);
 
-  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`) as HTMLLIElement;
+    const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`) as HTMLLIElement;
 
-  const oldParentId: string = entryElt.dataset["parentId"];
-  if (oldParentId != null) {
-    const oldParentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`) as HTMLLIElement;
-    const parentEntry = data.entries.byId[oldParentId];
-    const childrenElt = oldParentElt.querySelector("span.children");
-    childrenElt.textContent = `(${parentEntry.children.length})`;
+    const oldParentId: string = entryElt.dataset["parentId"];
+    if (oldParentId != null) {
+      const oldParentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`) as HTMLLIElement;
+      const parentEntry = data.entries.byId[oldParentId];
+      const childrenElt = oldParentElt.querySelector("span.children");
+      childrenElt.textContent = `(${parentEntry.children.length})`;
+    }
+
+    ui.entriesTreeView.remove(entryElt);
   }
-
-  ui.entriesTreeView.remove(entryElt);
 }
 
 function onSetEntryProperty(id: string, key: string, value: any) {
@@ -705,26 +707,16 @@ function onTreeViewDrop(event: DragEvent, dropLocation: TreeView.DropLocation, o
   }
 
   const dropPoint = SupClient.getTreeViewDropPoint(dropLocation, data.entries);
+  const entryIds = orderedNodes.map((node) => node.dataset["id"]);
 
-  const entryIds: string[] = [];
-  for (const entry of orderedNodes) entryIds.push(entry.dataset["id"]);
-
-  const sourceParentNode = data.entries.parentNodesById[entryIds[0]];
-  const sourceChildren = (sourceParentNode != null && sourceParentNode.children != null) ? sourceParentNode.children : data.entries.pub;
-  const sameParent = (sourceParentNode != null && dropPoint.parentId === sourceParentNode.id);
-
-  let i = 0;
-  for (const id of entryIds) {
-    socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => {
-      if (err != null) {
-        /* tslint:disable:no-unused-expression */
-        new SupClient.Dialogs.InfoDialog(err);
-        /* tslint:enable:no-unused-expression */
-        return;
-      }
-    });
-    if (!sameParent || sourceChildren.indexOf(data.entries.byId[id]) >= dropPoint.index) i++;
-  }
+  socket.emit("move:entries", entryIds, dropPoint.parentId, dropPoint.index, (err: string) => {
+    if (err != null) {
+      /* tslint:disable:no-unused-expression */
+      new SupClient.Dialogs.InfoDialog(err);
+      /* tslint:enable:no-unused-expression */
+      return;
+    }
+  });
   return false;
 }
 
@@ -930,17 +922,15 @@ function onTrashEntryClick() {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
-        for (const selectedNode of ui.entriesTreeView.selectedNodes) {
-          const entry = data.entries.byId[selectedNode.dataset["id"]];
-          socket.emit("trash:entries", entry.id, (err: string) => {
-            if (err != null) {
-              /* tslint:disable:no-unused-expression */
-              new SupClient.Dialogs.InfoDialog(err);
-              /* tslint:enable:no-unused-expression */
-              return;
-            }
-          });
-        }
+        const entryIds = ui.entriesTreeView.selectedNodes.map((node) => node.dataset["id"]);
+        socket.emit("trash:entries", entryIds, (err: string) => {
+          if (err != null) {
+            /* tslint:disable:no-unused-expression */
+            new SupClient.Dialogs.InfoDialog(err);
+            /* tslint:enable:no-unused-expression */
+            return;
+          }
+        });
         ui.entriesTreeView.clearSelection();
       });
 

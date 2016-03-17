@@ -42,9 +42,9 @@ export default class ProjectClient {
       this.socket.emit("unsub", "entries");
 
       this.socket.off("add:entries", this.onEntryAdded);
-      this.socket.off("move:entries", this.onEntryMoved);
+      this.socket.off("move:entries", this.onEntriesMoved);
+      this.socket.off("trash:entries", this.onEntriesTrashed);
       this.socket.off("setProperty:entries", this.onSetEntryProperty);
-      this.socket.off("trash:entries", this.onEntryTrashed);
 
       this.entries = null;
     }
@@ -235,9 +235,9 @@ export default class ProjectClient {
     this.entries = new SupCore.Data.Entries(entries);
 
     this.socket.on("add:entries", this.onEntryAdded);
-    this.socket.on("move:entries", this.onEntryMoved);
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
-    this.socket.on("trash:entries", this.onEntryTrashed);
+    this.socket.on("move:entries", this.onEntriesMoved);
+    this.socket.on("trash:entries", this.onEntriesTrashed);
 
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onEntriesReceived != null) subscriber.onEntriesReceived(this.entries);
@@ -251,10 +251,10 @@ export default class ProjectClient {
     }
   };
 
-  private onEntryMoved = (id: string, parentId: string, index: number) => {
-    this.entries.client_move(id, parentId, index);
+  private onEntriesMoved = (ids: string[], parentId: string, index: number) => {
+    this.entries.client_move(ids, parentId, index);
     for (const subscriber of this.entriesSubscribers) {
-      if (subscriber.onEntryMoved != null) subscriber.onEntryMoved(id, parentId, index);
+      if (subscriber.onEntriesMoved != null) subscriber.onEntriesMoved(ids, parentId, index);
     }
   };
 
@@ -265,10 +265,10 @@ export default class ProjectClient {
     }
   };
 
-  private onEntryTrashed = (id: string) => {
-    this.entries.client_remove(id);
+  private onEntriesTrashed = (ids: string[]) => {
+    this.entries.client_remove(ids);
     for (const subscriber of this.entriesSubscribers) {
-      if (subscriber.onEntryTrashed != null) subscriber.onEntryTrashed(id);
+      if (subscriber.onEntriesTrashed != null) subscriber.onEntriesTrashed(id);
     }
   };
 }
