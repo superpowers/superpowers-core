@@ -694,7 +694,12 @@ function onToggleAllFilterClick() {
 function onEntryDragStart(event: DragEvent, entryElt: HTMLLIElement) {
   const id = entryElt.dataset["id"];
   event.dataTransfer.setData("text/plain", data.entries.getPathFromId(id));
-  event.dataTransfer.setData("application/vnd.superpowers.entry", id);
+
+  const entryIds = [ id ];
+  for (const node of ui.entriesTreeView.selectedNodes) {
+    if (node.dataset["id"] !== id) entryIds.push(node.dataset["id"]);
+  }
+  event.dataTransfer.setData("application/vnd.superpowers.entry", entryIds.join(","));
   return true;
 }
 
