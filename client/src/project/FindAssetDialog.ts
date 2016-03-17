@@ -19,16 +19,17 @@ export default class FindAssetDialog extends SupClient.Dialogs.BaseDialog<FindAs
 
     this.dialogElt.classList.add("find-asset-dialog");
 
-    this.searchElt = document.createElement("input");
-    this.searchElt.type = "search";
-    this.searchElt.placeholder = SupClient.i18n.t("project:treeView.searchPlaceholder");
-    this.formElt.appendChild(this.searchElt);
+    const searchGroup = SupClient.html("div", "group", { parent: this.formElt, style: { display: "flex" } });
+    this.searchElt = SupClient.html("input", {
+      parent: searchGroup, type: "search",
+      placeholder: SupClient.i18n.t("project:treeView.searchPlaceholder"),
+      style: { flex: "1 1 0" }
+    });
     this.searchElt.addEventListener("input", this.onSearchInput);
+    this.searchElt.addEventListener("keydown", this.onSearchKeyDown);
+    this.searchElt.focus();
 
-    const treeViewContainer = document.createElement("div");
-    treeViewContainer.className = "assets-tree-view";
-    this.formElt.appendChild(treeViewContainer);
-
+    const treeViewContainer = SupClient.html("div", "assets-tree-view", { parent: this.formElt });
     this.treeView = new TreeView(treeViewContainer, { multipleSelection: false });
     this.treeView.on("activate", () => { this.submit(); });
 
@@ -46,9 +47,6 @@ export default class FindAssetDialog extends SupClient.Dialogs.BaseDialog<FindAs
     });
 
     this.treeView.addToSelection(this.treeView.treeRoot.firstChild as HTMLLIElement);
-
-    this.searchElt.addEventListener("keydown", this.onSearchKeyDown);
-    this.searchElt.focus();
   }
 
   private createEntryElement(entry: SupCore.Data.EntryNode) {

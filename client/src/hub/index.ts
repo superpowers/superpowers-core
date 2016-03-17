@@ -1,4 +1,4 @@
-import CreateOrEditProjectDialog, { SystemsData } from "../dialogs/CreateOrEditProjectDialog";
+import CreateOrEditProjectDialog, { SystemsData } from "./CreateOrEditProjectDialog";
 import * as async from "async";
 
 import * as TreeView from "dnd-tree-view";
