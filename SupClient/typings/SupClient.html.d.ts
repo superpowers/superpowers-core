@@ -33,6 +33,7 @@ declare namespace SupClient {
     id?: string;
     parent?: HTMLElement;
     style?: HTMLStyleOptions;
+    dataset?: { [key: string]: string; };
     textContent?: string;
     title?: string;
     hidden?: boolean;

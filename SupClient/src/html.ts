@@ -1,4 +1,4 @@
-const specialOptionKeys = [ "parent", "style" ];
+const specialOptionKeys = [ "parent", "style", "dataset" ];
 
 export default function html(tag: string, classList: string|string[], options?: SupClient.HTMLInputOptions) {
   if (options == null) {
@@ -25,12 +25,8 @@ export default function html(tag: string, classList: string|string[], options?: 
   }
 
   if (options.parent != null) options.parent.appendChild(elt);
-  if (options.style != null) {
-    for (const key in options.style) {
-      const value = (options.style as any)[key];
-      (elt.style as any)[key] = value;
-    }
-  }
+  if (options.style != null) for (const key in options.style) (elt.style as any)[key] = (options.style as any)[key];
+  if (options.dataset != null) for (const key in options.dataset) elt.dataset[key] = options.dataset[key];
 
   return elt;
 }
