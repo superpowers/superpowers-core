@@ -38,7 +38,7 @@
     "async": "^1.5.2",
     "async-lock": "^0.3.8",
     "cookie-parser": "^1.4.1",
-    "dnd-tree-view": "^3.1.0",
+    "dnd-tree-view": "^3.1.1",
     "express": "^4.13.3",
     "follow-redirects": "0.0.7",
     "fuzzy": "^0.1.1",
