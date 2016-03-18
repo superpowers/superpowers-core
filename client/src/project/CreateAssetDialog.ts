@@ -20,7 +20,7 @@ export default class CreateAssetDialog extends SupClient.Dialogs.BaseDialog<Crea
     const treeViewContainer = SupClient.html("div", [ "asset-types-tree-view", "group" ], {
       parent: this.formElt,
       style: {
-        border: "1px solid #ccc",
+        border: "1px solid #aaa",
         overflowY: "auto",
         height: "300px"
       }
