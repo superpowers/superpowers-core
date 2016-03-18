@@ -12,6 +12,14 @@ ol.tree {
     user-select: none;
   }
 
+  &.drop-inside:before {
+    position: absolute;
+    content: "";
+    border-top: 1px solid #888;
+    left: 0;
+    right: 0;
+  }
+
   ol {
     list-style: none;
     margin: 0;
