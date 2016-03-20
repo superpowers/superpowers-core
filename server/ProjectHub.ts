@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as path from "path";
 import * as async from "async";
 
 import authMiddleware from "./authenticate";
@@ -21,8 +22,8 @@ export default class ProjectHub {
 
   constructor(globalIO: SocketIO.Server, dataPath: string, callback: (err: Error) => any) {
     this.globalIO = globalIO;
-    this.projectsPath = `${dataPath}/projects`;
-    this.buildsPath = `${dataPath}/builds`;
+    this.projectsPath = path.join(dataPath, "projects");
+    this.buildsPath = path.join(dataPath, "builds");
 
     const serveProjects = (callback: ErrorCallback) => {
       async.eachSeries(fs.readdirSync(this.projectsPath), (folderName: string, cb: (err: Error) => any) => {
