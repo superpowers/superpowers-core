@@ -33,7 +33,7 @@ export default function() {
       event.preventDefault(); sendMessage("closeTab");
     }
 
-    if (event.keyCode === 9 && event.ctrlKey) { // Ctrl+TAB
+    if (event.keyCode === 9 && event.ctrlKey) { // Ctrl+Tab
       event.preventDefault();
       if (event.shiftKey) sendMessage("previousTab");
       else sendMessage("nextTab");
