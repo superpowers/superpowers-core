@@ -27,7 +27,7 @@ export let toolsByName: { [name: string]: EditorManifest };
 const ui: {
   entriesTreeView?: TreeView;
   openInNewWindowButton?: HTMLButtonElement;
-  tabStrip?: any;
+  tabStrip?: TabStrip;
   entriesFilterStrip?: HTMLElement;
 
   homeTab?: HTMLLIElement;
@@ -786,7 +786,7 @@ function onMessageHotKey(action: string) {
     case "newFolder":    onNewFolderClick(); break;
     case "searchEntry":  onSearchEntryDialog(); break;
     case "filter":       onToggleFilterStripClick(); break;
-    case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
+    case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active") as HTMLLIElement); break;
     case "previousTab":  onActivatePreviousTab(); break;
     case "nextTab":      onActivateNextTab(); break;
     case "run":          runProject(); break;
@@ -832,7 +832,7 @@ function openEntry(id: string, state?: {[name: string]: any}) {
   // Just toggle folders
   if (entry.type == null) { ui.entriesTreeView.selectedNodes[0].classList.toggle("collapsed"); return; }
 
-  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`);
+  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`) as HTMLLIElement;
   let iframe = ui.panesElt.querySelector(`iframe[data-asset-id='${id}']`) as HTMLIFrameElement;
 
   if (tab == null) {
@@ -851,7 +851,7 @@ function openEntry(id: string, state?: {[name: string]: any}) {
 }
 
 function openTool(name: string, state?: {[name: string]: any}) {
-  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`);
+  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`) as HTMLLIElement;
   let iframe = ui.panesElt.querySelector(`iframe[data-name='${name}']`) as HTMLIFrameElement;
 
   if (tab == null) {
@@ -1047,7 +1047,7 @@ function onToggleFilterStripClick() {
 }
 
 function refreshAssetTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLIElement) {
-  if (tabElt == null) tabElt = ui.tabStrip.tabsRoot.querySelector(`[data-asset-id='${entry.id}']`);
+  if (tabElt == null) tabElt = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${entry.id}']`) as HTMLLIElement;
   if (tabElt == null) return;
 
   const entryPath = entries.getPathFromId(entry.id);
@@ -1180,7 +1180,7 @@ function onActivatePreviousTab() {
     const tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
     if (tabElt === activeTabElt) {
       const newTabIndex = (tabIndex === 0) ? ui.tabStrip.tabsRoot.children.length - 1 : tabIndex - 1;
-      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
+      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex] as HTMLLIElement);
       return;
     }
   }
@@ -1192,7 +1192,7 @@ function onActivateNextTab() {
     const tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
     if (tabElt === activeTabElt) {
       const newTabIndex = (tabIndex === ui.tabStrip.tabsRoot.children.length - 1) ? 0 : tabIndex + 1;
-      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
+      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex] as HTMLLIElement);
       return;
     }
   }
