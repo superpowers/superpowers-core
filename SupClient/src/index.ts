@@ -6,11 +6,12 @@ import * as cookies from "js-cookie";
 import fetch from "./fetch";
 import readFile from "./readFile";
 import ProjectClient from "./ProjectClient";
-import setupHotkeys, { setupHelpCallback } from "./setupHotkeys";
+import { setupHotkeys, setupHelpCallback } from "./events";
 import * as table from "./table";
 import * as Dialogs from "simple-dialogs";
 import * as i18n from "./i18n";
 import html from "./html";
+import "./events";
 
 import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";

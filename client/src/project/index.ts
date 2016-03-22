@@ -61,7 +61,6 @@ function start() {
   }
 
   // Hot-keys
-  SupClient.setupHotkeys();
   document.addEventListener("keydown", (event) => {
     if (document.querySelector(".dialog") != null) return;
 

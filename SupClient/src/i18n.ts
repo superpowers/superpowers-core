@@ -3,6 +3,8 @@ import * as cookies from "js-cookie";
 import * as path from "path";
 import * as _ from "lodash";
 
+import * as SupClient from "./index";
+
 export const languageIds = fs.readdirSync(`${__dirname}/../../public/locales`);
 
 interface File {
@@ -19,9 +21,13 @@ const i18nContexts: I18nContext = {};
 let commonLocalesLoaded = false;
 
 export function load(files: File[], callback: Function) {
+  const firstLoad = !commonLocalesLoaded;
+
   function onLoadFinished() {
-    for (let label in SupClient.Dialogs.BaseDialog.defaultLabels)
-      SupClient.Dialogs.BaseDialog.defaultLabels[label] = t(`common:actions.${label}`);
+    if (firstLoad) {
+      setupDefaultDialogLabels();
+      setupHotkeyTitles();
+    }
     callback();
   }
 
@@ -107,4 +113,32 @@ function insertVariables(text: string, variables: { [key: string]: string }) {
   } while (index !== -1);
 
   return text;
+}
+
+
+function setupDefaultDialogLabels() {
+  for (const label in SupClient.Dialogs.BaseDialog.defaultLabels) {
+    SupClient.Dialogs.BaseDialog.defaultLabels[label] = t(`common:actions.${label}`);
+  }
+}
+
+function setupHotkeyTitles() {
+  const hotkeyButtons = document.querySelectorAll("[data-hotkey]") as any as HTMLButtonElement[];
+  for (const hotkeyButton of hotkeyButtons) {
+    const hotkeys = hotkeyButton.dataset["hotkey"].split("+");
+
+    let hotkeyComplete = "";
+    for (const hotkey of hotkeys) {
+      let hotkeyPartKey: string;
+      if (hotkey === "control" && window.navigator.platform === "MacIntel") hotkeyPartKey = `common:hotkeys.command`;
+      else hotkeyPartKey = `common:hotkeys.${hotkey}`;
+
+      const hotkeyPartString = t(hotkeyPartKey);
+      if (hotkeyComplete !== "") hotkeyComplete += "+";
+      if (hotkeyPartString === hotkeyPartKey) hotkeyComplete += hotkey;
+      else hotkeyComplete += hotkeyPartString;
+    }
+
+    hotkeyButton.title += ` (${hotkeyComplete})`;
+  }
 }
