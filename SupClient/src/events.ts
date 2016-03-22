@@ -13,6 +13,17 @@ function onError() {
   window.top.postMessage({ type: "error" }, window.location.origin);
 }
 
+// Auto-select number fields when focusing them
+document.body.addEventListener("focus", onFocus, true);
+
+function onFocus(event: FocusEvent) {
+  const target = event.target as HTMLInputElement;
+  console.log(target.tagName, target.type);
+  if (target.tagName !== "INPUT" || target.type !== "number") return;
+
+  target.select();
+}
+
 // Hotkey handling
 export function setupHotkeys() {
   console.warn("SupClient.setupHotkeys() has been removed, it is no longer necessary to call it.");
