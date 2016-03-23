@@ -18,7 +18,6 @@ document.body.addEventListener("focus", onFocus, true);
 
 function onFocus(event: FocusEvent) {
   const target = event.target as HTMLInputElement;
-  console.log(target.tagName, target.type);
   if (target.tagName !== "INPUT" || target.type !== "number") return;
 
   target.select();
