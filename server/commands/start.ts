@@ -5,15 +5,15 @@ import * as express from "express";
 import * as cookieParser from "cookie-parser";
 import * as socketio from "socket.io";
 
-import * as config from "./config";
-import * as schemas from "./schemas";
-import getLocalizedFilename from "./getLocalizedFilename";
-import * as SupCore from "../SupCore";
-import loadSystems from "./loadSystems";
-import ProjectHub from "./ProjectHub";
+import * as config from "../config";
+import * as schemas from "../schemas";
+import getLocalizedFilename from "../getLocalizedFilename";
+import * as SupCore from "../../SupCore";
+import loadSystems from "../loadSystems";
+import ProjectHub from "../ProjectHub";
 
 // NOTE: We explicitly add core path to NODE_PATH so systems can load modules from core
-process.env["NODE_PATH"] = path.resolve(`${__dirname}/../node_modules`);
+process.env["NODE_PATH"] = path.resolve(`${__dirname}/../../node_modules`);
 /* tslint:disable */
 require("module").Module._initPaths();
 /* tslint:enable */
@@ -44,16 +44,16 @@ export default function start(serverDataPath: string) {
 
   loadConfig();
 
-  const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../package.json`, { encoding: "utf8" }));
+  const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" }));
   SupCore.log(`Server v${version} starting...`);
-  fs.writeFileSync(`${__dirname}/../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.server.password.length !== 0 }, null, 2));
+  fs.writeFileSync(`${__dirname}/../../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.server.password.length !== 0 }, null, 2));
 
   // SupCore
   (global as any).SupCore = SupCore;
   SupCore.systemsPath = path.join(dataPath, "systems");
 
   // List available languages
-  languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
+  languageIds = fs.readdirSync(`${__dirname}/../../public/locales`);
   languageIds.unshift("none");
 
   // Main HTTP server
@@ -68,7 +68,7 @@ export default function start(serverDataPath: string) {
   mainApp.get("/project", enforceAuth, serveProjectIndex);
 
   mainApp.use("/projects/:projectId/*", serveProjectWildcard);
-  mainApp.use("/", express.static(`${__dirname}/../public`));
+  mainApp.use("/", express.static(`${__dirname}/../../public`));
 
   mainHttpServer = http.createServer(mainApp);
   mainHttpServer.on("error", onHttpServerError.bind(null, config.server.mainPort));
@@ -81,7 +81,7 @@ export default function start(serverDataPath: string) {
   buildApp.get("/", redirectToHub);
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
 
-  buildApp.use("/", express.static(`${__dirname}/../public`));
+  buildApp.use("/", express.static(`${__dirname}/../../public`));
 
   buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
     const projectServer = hub.serversById[req.params.projectId];
@@ -146,24 +146,24 @@ function enforceAuth(req: express.Request, res: express.Response, next: Function
 
 function serveHubIndex(req: express.Request, res: express.Response) {
   const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
-  res.sendFile(path.resolve(`${__dirname}/../public/hub/${localizedIndex}`));
+  res.sendFile(path.resolve(`${__dirname}/../../public/hub/${localizedIndex}`));
 }
 
 function serveProjectIndex(req: express.Request, res: express.Response) {
   const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
-  res.sendFile(path.resolve(`${__dirname}/../public/project/${localizedIndex}`));
+  res.sendFile(path.resolve(`${__dirname}/../../public/project/${localizedIndex}`));
 }
 
 function serveLoginIndex(req: express.Request, res: express.Response) {
   const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
-  res.sendFile(path.resolve(`${__dirname}/../public/login/${localizedIndex}`));
+  res.sendFile(path.resolve(`${__dirname}/../../public/login/${localizedIndex}`));
 }
 
 function serveProjectWildcard(req: express.Request, res: express.Response) {
   const projectPath = hub.serversById[req.params.projectId].projectPath;
 
   res.sendFile(req.params[0], { root: `${projectPath}/public` }, (err) => {
-    if (req.params[0] === "icon.png") res.sendFile("/images/default-project-icon.png", { root: `${__dirname}/../public` });
+    if (req.params[0] === "icon.png") res.sendFile("/images/default-project-icon.png", { root: `${__dirname}/../../public` });
   });
 }
 
@@ -179,7 +179,7 @@ function redirectToHub(req: express.Request, res: express.Response) {
 }
 
 function serveSystemSupCore(req: express.Request, res: express.Response) {
-  res.sendFile("SupCore.js", { root: `${__dirname}/../public` });
+  res.sendFile("SupCore.js", { root: `${__dirname}/../../public` });
 }
 
 function onSystemsLoaded() {
