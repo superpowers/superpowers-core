@@ -3,6 +3,7 @@ import * as dummy_https from "https";
 import * as mkdirp from "mkdirp";
 import * as path from "path";
 import * as fs from "fs";
+import * as async from "async";
 
 /* tslint:disable */
 const https: typeof dummy_https = require("follow-redirects").https;
@@ -23,23 +24,30 @@ mkdirp.sync(systemsPath);
 
 // Systems and plugins
 export const builtInPluginAuthors = [ "default", "common", "extra" ];
-export const systemsById: { [id: string]: { folderName: string; plugins: { [author: string]: string[] } } } = {};
+export const systemsById: { [id: string]: {
+  folderName: string;
+  version: string;
+  plugins: { [author: string]: string[] }
+} } = {};
 
 for (const entry of fs.readdirSync(systemsPath)) {
   if (!folderNameRegex.test(entry)) continue;
   if (!fs.statSync(`${systemsPath}/${entry}`).isDirectory) continue;
 
   let systemId: string;
+  let version: string;
   const systemPath = `${systemsPath}/${entry}`;
   try {
-    const packageData = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
-    systemId = JSON.parse(packageData).superpowers.systemId;
+    const packageDataFile = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
+    const packageData = JSON.parse(packageDataFile);
+    systemId = packageData.superpowers.systemId;
+    version = packageData.version;
   } catch (err) {
     console.error(`Could not load system id from systems/${entry}/package.json:`);
     console.error(err.stack);
     process.exit(1);
   }
-  systemsById[systemId] = { folderName: entry, plugins: {} };
+  systemsById[systemId] = { folderName: entry, version, plugins: {} };
   let pluginAuthors: string[];
   try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
   if (pluginAuthors == null) continue;
@@ -64,12 +72,11 @@ export function listAvailableSystems(registry: Registry) { console.log(`Availabl
 export function listAvailablePlugins(registry: Registry, systemId: string) {
   const pluginAuthors = Object.keys(registry.systems[systemId].plugins);
   if (pluginAuthors.length === 0) {
-    console.log(`${systemId}: No plugins found.`);
+    console.log(`No plugins found.`);
   } else {
     let pluginCount = 0;
     for (const pluginAuthor of pluginAuthors) pluginCount += Object.keys(registry.systems[systemId].plugins[pluginAuthor]).length;
 
-    console.log(`${systemId}: ${pluginCount} plugin${pluginCount !== 1 ? "s" : ""} found.`);
     for (const pluginAuthor of pluginAuthors) {
       console.log(`  ${pluginAuthor}/`);
       for (const pluginName of Object.keys(registry.systems[systemId].plugins[pluginAuthor])) console.log(`    ${pluginName}`);
@@ -78,7 +85,18 @@ export function listAvailablePlugins(registry: Registry, systemId: string) {
 }
 
 const currentRegistryVersion = 1;
-type Registry = { version: number; systems: { [sytemId: string]: { repository: string; plugins: { [author: string]: { [name: string]: string } } } } };
+type Registry = {
+  version: number;
+  core: {
+    version: string;
+    downloadURL: string;
+  }
+  systems: { [sytemId: string]: {
+    repository: string;
+    version: string;
+    downloadURL: string;
+    plugins: { [author: string]: { [name: string]: string } }
+} } };
 export function getRegistry(callback: (err: Error, registry: Registry) => any) {
   // FIXME: Use registry.json instead once the next release is out
   const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers-core/master/registryNext.json";
@@ -98,8 +116,22 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
         return;
       }
 
-      if (registry.version !== currentRegistryVersion) callback(new Error("The registry format has changed. Please update Superpowers."), null);
-      else callback(null, registry);
+      if (registry.version !== currentRegistryVersion) {
+        callback(new Error("The registry format has changed. Please update Superpowers."), null);
+      } else {
+        getLatestRelease("https://github.com/superpowers/superpowers-core", (version, downloadURL) => {
+          registry.core = { version, downloadURL };
+
+          async.each(Object.keys(registry.systems), (systemId, cb) => {
+            const system = registry.systems[systemId];
+            getLatestRelease(system.repository, (version, downloadURL) => {
+              system.version = version;
+              system.downloadURL = downloadURL;
+              cb();
+            });
+          }, (err) => { callback(err, registry); });
+        });
+      }
     });
   });
 

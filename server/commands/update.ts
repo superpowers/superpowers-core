@@ -16,7 +16,7 @@ export default function update(systemId: string, pluginFullName: string) {
   }
 
   if (pluginFullName == null) {
-    updateSystem(systemId, system.folderName);
+    updateSystem(systemId);
 
   } else {
     const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
@@ -29,7 +29,7 @@ export default function update(systemId: string, pluginFullName: string) {
       console.error(`Plugin ${pluginFullName} is not installed.`);
       process.exit(1);
     }
-    updatePlugin(systemId, pluginFullName, system.folderName);
+    updatePlugin(systemId, pluginFullName);
   }
 }
 
@@ -55,10 +55,10 @@ function updateCore() {
   });
 }
 
-function updateSystem(systemId: string, systemFolderName: string) {
-  const systemPath = `${utils.systemsPath}/${systemFolderName}`;
-  const packageData = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
-  const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
+function updateSystem(systemId: string) {
+  const system = utils.systemsById[systemId];
+  const systemPath = `${utils.systemsPath}/${system.folderName}`;
+  const [ currentMajor, currentMinor ] = system.version.split(".");
 
   utils.getRegistry((err, registry) => {
     if (err) {
@@ -74,35 +74,34 @@ function updateSystem(systemId: string, systemFolderName: string) {
       process.exit(1);
     }
 
-    utils.getLatestRelease(system.repository, (version, downloadURL) => {
-      const [ latestMajor, latestMinor ] = version.split(".");
-      if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
-        console.log(`Updating system ${systemId}...`);
+    const [ latestMajor, latestMinor ] = system.version.split(".");
+    if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
+      console.log(`Updating system ${systemId}...`);
 
-        const folders = fs.readdirSync(systemPath);
-        for (let folder of folders) {
-          if (folder === "plugins") {
-            for (const pluginAuthor of fs.readdirSync(`${systemPath}/plugins`)) {
-              if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
-              rimraf.sync(`${systemPath}/plugins/${pluginAuthor}`);
-            }
-          } else rimraf.sync(`${systemPath}/${folder}`);
-        }
-
-        utils.downloadRelease(downloadURL, systemPath, () => {
-          console.log(`System successfully updated to version ${latestMajor}.${latestMinor}.`);
-          process.exit(0);
-        });
-      } else {
-        console.log(`No updates available for system ${systemId}`);
-        process.exit(0);
+      const folders = fs.readdirSync(systemPath);
+      for (let folder of folders) {
+        if (folder === "plugins") {
+          for (const pluginAuthor of fs.readdirSync(`${systemPath}/plugins`)) {
+            if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
+            rimraf.sync(`${systemPath}/plugins/${pluginAuthor}`);
+          }
+        } else rimraf.sync(`${systemPath}/${folder}`);
       }
-    });
+
+      utils.downloadRelease(system.downloadURL, systemPath, () => {
+        console.log(`System successfully updated to version ${latestMajor}.${latestMinor}.`);
+        process.exit(0);
+      });
+    } else {
+      console.log(`No updates available for system ${systemId}`);
+      process.exit(0);
+    }
   });
 }
 
-function updatePlugin(systemId: string, pluginFullName: string, systemFolderName: string) {
-  const pluginPath = `${utils.systemsPath}/${systemFolderName}/plugins/${pluginFullName}`;
+function updatePlugin(systemId: string, pluginFullName: string) {
+  const system = utils.systemsById[systemId];
+  const pluginPath = `${utils.systemsPath}/${system.folderName}/plugins/${pluginFullName}`;
   const packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
   const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
 

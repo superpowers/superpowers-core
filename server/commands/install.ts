@@ -44,19 +44,17 @@ export default function install(systemId: string, pluginFullName: string) {
         process.exit(1);
       }
 
-      installSystem(systemId, registry.systems[systemId].repository);
+      installSystem(systemId, registry.systems[systemId].downloadURL);
     }
   });
 }
 
-function installSystem(systemId: string, repositoryURL: string) {
+function installSystem(systemId: string, downloadURL: string) {
   console.log(`Installing system ${systemId}...`);
-  utils.getLatestRelease(repositoryURL, (version, downloadURL) => {
-    const systemPath = `${utils.systemsPath}/${systemId}`;
-    utils.downloadRelease(downloadURL, systemPath, () => {
-      console.log("System successfully installed.");
-      process.exit(0);
-    });
+  const systemPath = `${utils.systemsPath}/${systemId}`;
+  utils.downloadRelease(downloadURL, systemPath, () => {
+    console.log("System successfully installed.");
+    process.exit(0);
   });
 }
 
