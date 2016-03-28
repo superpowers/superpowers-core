@@ -52,7 +52,14 @@ export default function install(systemId: string, pluginFullName: string) {
 function installSystem(systemId: string, downloadURL: string) {
   console.log(`Installing system ${systemId}...`);
   const systemPath = `${utils.systemsPath}/${systemId}`;
-  utils.downloadRelease(downloadURL, systemPath, () => {
+
+  utils.downloadRelease(downloadURL, systemPath, (err) => {
+    if (err != null) {
+      console.log("Failed to install the system.");
+      console.log(err);
+      process.exit(1);
+    }
+
     console.log("System successfully installed.");
     process.exit(0);
   });
@@ -62,7 +69,13 @@ function installPlugin(systemId: string, pluginFullName: string, repositoryURL: 
   console.log(`Installing plugin ${pluginFullName} on system ${systemId}...`);
   utils.getLatestRelease(repositoryURL, (version, downloadURL) => {
     const pluginPath = `${utils.systemsPath}/${utils.systemsById[systemId].folderName}/plugins/${pluginFullName}`;
-    utils.downloadRelease(downloadURL, pluginPath, () => {
+    utils.downloadRelease(downloadURL, pluginPath, (err) => {
+      if (err != null) {
+        console.log("Failed to install the plugin.");
+        console.log(err);
+        process.exit(1);
+      }
+
       console.log("Plugin successfully installed.");
       process.exit(0);
     });

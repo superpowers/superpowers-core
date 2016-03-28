@@ -44,7 +44,13 @@ function updateCore() {
       console.log("Updating the server...");
 
       for (let path of ["server", "SupClient", "SupCore", "package.json", "public", "node_modules"]) rimraf.sync(`${__dirname}/../../${path}`);
-      utils.downloadRelease(downloadURL, `${__dirname}/../..`, () => {
+      utils.downloadRelease(downloadURL, `${__dirname}/../..`, (err) => {
+        if (err != null) {
+          console.log("Failed to update the core.");
+          console.log(err);
+          process.exit(1);
+        }
+
         console.log("Server successfully updated.");
         process.exit(0);
       });
@@ -88,7 +94,13 @@ function updateSystem(systemId: string) {
         } else rimraf.sync(`${systemPath}/${folder}`);
       }
 
-      utils.downloadRelease(system.downloadURL, systemPath, () => {
+      utils.downloadRelease(system.downloadURL, systemPath, (err) => {
+        if (err != null) {
+          console.log("Failed to update the system.");
+          console.log(err);
+          process.exit(1);
+        }
+
         console.log(`System successfully updated to version ${latestMajor}.${latestMinor}.`);
         process.exit(0);
       });
@@ -132,7 +144,13 @@ function updatePlugin(systemId: string, pluginFullName: string) {
         console.log(`Updating plugin ${pluginFullName}...`);
 
         rimraf.sync(pluginPath);
-        utils.downloadRelease(downloadURL, pluginPath, () => {
+        utils.downloadRelease(downloadURL, pluginPath, (err) => {
+          if (err != null) {
+            console.log("Failed to update the plugin.");
+            console.log(err);
+            process.exit(1);
+          }
+
           console.log(`Plugin successfully updated to version ${latestMajor}.${latestMinor}.`);
           process.exit(0);
         });

@@ -4,10 +4,11 @@ import * as mkdirp from "mkdirp";
 import * as path from "path";
 import * as fs from "fs";
 import * as async from "async";
+import * as readline from "readline";
 
 /* tslint:disable */
 const https: typeof dummy_https = require("follow-redirects").https;
-const unzip = require("unzip");
+const yauzl = require("yauzl");
 /* tslint:enable */
 
 export const folderNameRegex = /^[a-z0-9_-]+$/;
@@ -169,32 +170,77 @@ export function getLatestRelease(repositoryURL: string, callback: (version: stri
   });
 }
 
-export function downloadRelease(downloadURL: string, downloadPath: string, callback: () => void) {
-  mkdirp.sync(downloadPath);
+export function downloadRelease(downloadURL: string, downloadPath: string, callback: (err: string) => void) {
+  console.log("0%");
+
   https.get({
     hostname: "github.com",
     path: downloadURL,
     headers: { "user-agent": "Superpowers" }
   }, (res) => {
     if (res.statusCode !== 200) {
-      console.error("Couldn't download the release:");
-      const err = new Error(`Unexpected status code: ${res.statusCode}`);
-      console.error(err.stack);
-      process.exit(1);
+      callback(`Unexpected status code: ${res.statusCode}`);
+      return;
     }
 
-    let rootFolderName: string;
-    res.pipe(unzip.Parse())
-      .on("entry", (entry: any) => {
-        if (rootFolderName == null) {
-          rootFolderName = entry.path;
-          return;
-        }
+    let progress = 0;
+    let progressMax = parseInt(res.headers["content-length"], 10) * 2;
 
-        const entryPath = `${downloadPath}/${entry.path.replace(rootFolderName, "")}`;
-        if (entry.type === "Directory") mkdirp.sync(entryPath);
-        else entry.pipe(fs.createWriteStream(entryPath));
-      })
-      .on("close", () => { callback(); });
+    const buffers: Buffer[] = [];
+    res.on("data", (data: Buffer) => { buffers.push(data); progress += data.length; onProgress(progress / progressMax); });
+    res.on("end", () => {
+      const zipBuffer = Buffer.concat(buffers);
+
+      yauzl.fromBuffer(zipBuffer, { lazyEntries: true }, (err: Error, zipFile: any) => {
+        if (err != null) throw err;
+
+        progress = zipFile.entryCount;
+        progressMax = zipFile.entryCount * 2;
+
+        const rootFolderName = path.parse(downloadURL).name;
+
+        zipFile.readEntry();
+        zipFile.on("entry", (entry: any) => {
+          if (entry.fileName.indexOf(rootFolderName) !== 0) throw new Error(`Found file outside of root folder: ${entry.fileName} (${rootFolderName})`);
+
+          const filename = path.join(downloadPath, entry.fileName.replace(rootFolderName, ""));
+          if (/\/$/.test(entry.fileName)) {
+            mkdirp(filename, (err) => {
+              if (err != null) throw err;
+              progress++;
+              onProgress(progress / progressMax);
+              zipFile.readEntry();
+            });
+          } else {
+            zipFile.openReadStream(entry, (err: Error, readStream: NodeJS.ReadableStream) => {
+              if (err) throw err;
+
+              mkdirp(path.dirname(filename), (err: Error) => {
+                if (err) throw err;
+                readStream.pipe(fs.createWriteStream(filename));
+                readStream.on("end", () => {
+                  progress++;
+                  onProgress(progress / progressMax);
+                  zipFile.readEntry();
+                });
+              });
+            });
+          }
+        });
+
+        zipFile.on("end", () => {
+          callback(null);
+        });
+      });
+    });
   });
+}
+
+function onProgress(value: number) {
+  value = Math.round(value * 100);
+
+  readline.clearLine(process.stdout, 0);
+  readline.cursorTo(process.stdout, 0, 1);
+  console.log(`${value}%`);
+  if (process != null && process.send != null) process.send({ type: "progress", value });
 }

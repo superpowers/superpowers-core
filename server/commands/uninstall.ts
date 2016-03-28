@@ -18,6 +18,7 @@ export default function uninstall(systemId: string, pluginFullName: string) {
         console.log(`Uninstalling system ${systemId}...`);
         uninstallSystem(system.folderName);
       } else {
+        console.log(`Uninstal canceled.`);
         process.exit(0);
       }
     });
@@ -40,6 +41,7 @@ export default function uninstall(systemId: string, pluginFullName: string) {
         console.log(`Uninstalling plugin ${pluginFullName} from system ${systemId}...`);
         uninstallPlugin(system.folderName, pluginFullName, pluginAuthor);
       } else {
+        console.log(`Uninstal canceled.`);
         process.exit(0);
       }
     });
