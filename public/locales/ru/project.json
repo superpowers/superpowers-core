@@ -23,7 +23,7 @@
     "newFolder": {
       "title": "Создать папку",
       "prompt": "Введите имя для новой папки.",
-      "placeholder": "Введите имя",
+      "placeholder": "Имя папки",
       "initialValue": "Папка"
     },
     "renamePrompt": "введите новое имя для ассета.",
