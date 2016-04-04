@@ -13,12 +13,12 @@ export default function uninstall(systemId: string, pluginFullName: string) {
 
   if (pluginFullName == null) {
     const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
-    r1.question(`Are you sure you want to uninstall the system ${systemId} ? (yes/no): `, (answer) => {
+    r1.question(`Are you sure you want to uninstall the system ${systemId}? (yes/no): `, (answer) => {
       if (answer === "yes") {
         console.log(`Uninstalling system ${systemId}...`);
         uninstallSystem(system.folderName);
       } else {
-        console.log(`Uninstal canceled.`);
+        console.log(`Uninstall canceled.`);
         process.exit(0);
       }
     });
@@ -36,12 +36,12 @@ export default function uninstall(systemId: string, pluginFullName: string) {
     }
 
     const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
-    r1.question(`Are you sure you want to uninstall the plugin ${pluginFullName} ? (yes/no): `, (answer) => {
+    r1.question(`Are you sure you want to uninstall the plugin ${pluginFullName}? (yes/no): `, (answer) => {
       if (answer === "yes") {
         console.log(`Uninstalling plugin ${pluginFullName} from system ${systemId}...`);
         uninstallPlugin(system.folderName, pluginFullName, pluginAuthor);
       } else {
-        console.log(`Uninstal canceled.`);
+        console.log(`Uninstall canceled.`);
         process.exit(0);
       }
     });
