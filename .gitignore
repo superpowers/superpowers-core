@@ -13,4 +13,5 @@ public/*
 !public/locales
 !public/images
 config.json
+settings.json
 npm-debug.log
