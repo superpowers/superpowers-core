@@ -212,10 +212,8 @@ function onProjectActivate() {
   const projectId = ui.projectsTreeView.selectedNodes[0].dataset["id"];
   const href = `/project/?project=${projectId}`;
 
-  if (SupClient.isApp) {
-    const url = `${window.location.origin}${href}`;
-    window.top.postMessage({ type: "new-standalone-window", url, title: data.projects.byId[projectId].name }, "file://");
-  } else window.location.href = href;
+  if (SupClient.isApp) window.open(`${window.location.origin}${href}`);
+  else window.location.href = href;
 }
 
 let autoOpenProject = true;
