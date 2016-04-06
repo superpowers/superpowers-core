@@ -14,7 +14,7 @@
     "package": "node scripts/package.js"
   },
   "superpowers": {
-    "appApiVersion": 2
+    "appApiVersion": 3
   },
   "devDependencies": {
     "brfs": "^1.4.3",
