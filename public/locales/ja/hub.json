@@ -1,0 +1,20 @@
+{
+  "serverAddress": "${hostname} on port ${port}",
+  "newProject": {
+    "title": "新規プロジェクト",
+    "prompt": "名前を入力して、プロジェクトのタイプを選択してください。",
+    "namePlaceholder": "プロジェクト名",
+    "descriptionPlaceholder": "詳細 (オプション)",
+    "emptyProject": {
+      "title": "空のプロジェクト",
+      "description": "何もない状態で開始する空のプロジェクトです。"
+    },
+    "autoOpen": "作成後すぐに開く"
+  },
+  "editDetails": {
+    "title": "詳細を編集",
+    "prompt": "プロジェクトの詳細を編集"
+  },
+  "openProject": "プロジェクトを開く",
+  "language": "言語"
+}

@@ -1,0 +1,38 @@
+{
+  "header": {
+    "goToHub": "ハブに戻る",
+    "publish": "プロジェクトを発行",
+    "publishDisabled": "プロジェクトを発行 (これは、技術的理由によりSuperpowers appでのみ動きます)",
+    "stop": "プロジェクトの停止",
+    "debug": "プロジェクトのデバッグ (F6)",
+    "run": "プロジェクトの実行 (F5)",
+    "notifications": {
+      "enable": "クリックで通知が有効化",
+      "disable": "クリックで通知が無効化",
+      "new": "\"${projectName}\" プロジェクトに新しいチャットメッセージ"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "新しいウィンドウで開く",
+    "newAsset": {
+      "title": "新しいアセット",
+      "prompt": "タイプを選択して新しいアセットの名前を入力してください。",
+      "placeholder": "アセット名 (オプション)",
+      "openAfterCreation": "作成後にすぐ開く"
+    },
+    "newFolder": {
+      "title": "新しいフォルダー",
+      "prompt": "新しいフォルダーの名前を入力してください。",
+      "placeholder": "フォルダー名",
+      "initialValue": "フォルダー"
+    },
+    "renamePrompt": "アセットの新しい名前を入力してください。",
+    "duplicatePrompt": "アセットの新しい名前を入力してください。",
+    "trash": {
+      "title": "削除",
+      "prompt": "選択したものをゴミ箱に移動しますがよろしいですか?",
+      "warnBrokenDependency": "${entryName} は ${dependentEntryNames} で使われています。"
+    },
+    "searchPlaceholder": "アセットの検索"
+  }
+}
