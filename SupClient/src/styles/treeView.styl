@@ -75,7 +75,8 @@ ol.tree {
     color: #444;
 
     > .toggle {
-      background-image: url(/images/treeView/group-open.svg);
+      opacity: 0.5;
+      background: url(/images/treeView/group-open-dark.svg) center no-repeat;
       cursor: pointer;
     }
 
@@ -92,7 +93,7 @@ ol.tree {
   }
 
   li.group.collapsed {
-    > .toggle { background-image: url(/images/treeView/group-closed.svg); }
+    > .toggle { background-image: url(/images/treeView/group-closed-dark.svg); }
 
     + ol > ol, +ol > li { display: none; }
   }
