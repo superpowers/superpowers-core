@@ -497,7 +497,10 @@ function onDependenciesRemoved(id: string, depIds: string[]) {
 }
 
 // User interface
-function goToHub() { window.location.replace("/"); }
+function goToHub() {
+  if (SupClient.isApp) electron.ipcRenderer.send("show-main-window");
+  else window.location.replace("/");
+}
 
 function runProject(options: { debug: boolean; } = { debug: false }) {
   if (SupClient.isApp) {
