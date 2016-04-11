@@ -24,7 +24,9 @@ export const query = querystring.parse(window.location.search.slice(1));
 export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
 
 // Expose SupApp to iframes
-if ((global as any).SupApp == null && (top as any).SupApp != null) (global as any).SupApp = (top as any).SupApp;
+if ((global as any).SupApp == null) {
+  (global as any).SupApp = ((top as any).SupApp != null) ? (top as any).SupApp : null;
+}
 
 // Initialize empty system
 SupCore.system = new SupCore.System("", "");
