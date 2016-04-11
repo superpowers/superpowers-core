@@ -242,8 +242,7 @@ function setupTool(toolName: string) {
   const tool = toolsByName[toolName];
 
   if (tool.pinned && SupClient.query.asset == null) {
-    // TODO: Support multiple pinned tabs
-    ui.homeTab = openTool(toolName);
+    openTool(toolName);
     return;
   }
 
@@ -356,6 +355,7 @@ function onSetManifestProperty(key: string, value: any) {
 
   switch (key) {
     case "name":
+      document.title = `${value} — Superpowers`;
       document.querySelector(".project-name").textContent = value;
       break;
   }
@@ -751,6 +751,8 @@ function onWindowDevError() {
 }
 
 function onMessageChat(message: string) {
+  if (ui.homeTab == null) return;
+
   const isHomeTabVisible = ui.homeTab.classList.contains("active");
   if (isHomeTabVisible && !document.hidden) return;
 
@@ -851,14 +853,23 @@ function openEntry(id: string, state?: {[name: string]: any}) {
   return tab;
 }
 
-function openTool(name: string, state?: {[name: string]: any}) {
+function openTool(name: string, state?: { [name: string]: any }) {
   let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`) as HTMLLIElement;
   let iframe = ui.panesElt.querySelector(`iframe[data-name='${name}']`) as HTMLIFrameElement;
 
   if (tab == null) {
     const tool = toolsByName[name];
     tab = createToolTabElement(name, tool);
-    ui.tabStrip.tabsRoot.appendChild(tab);
+
+    if (toolsByName[name].pinned) {
+      const toolElt = ui.toolsElt.querySelector(`li[data-name="${name}"]`) as HTMLLIElement;
+      if (toolElt != null) toolElt.parentElement.removeChild(toolElt);
+
+      const firstUnpinnedTab = ui.tabStrip.tabsRoot.querySelector("li:not(.pinned)") as HTMLLIElement;
+      ui.tabStrip.tabsRoot.insertBefore(tab, firstUnpinnedTab);
+    } else {
+      ui.tabStrip.tabsRoot.appendChild(tab);
+    }
 
     iframe = document.createElement("iframe");
     iframe.dataset["name"] = name;
@@ -868,7 +879,8 @@ function openTool(name: string, state?: {[name: string]: any}) {
   } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
 
   onTabActivate(tab);
-  return tab;
+
+  if (name === "main") ui.homeTab = tab;
 }
 
 function onNewAssetClick() {
