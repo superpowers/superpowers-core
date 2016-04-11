@@ -24,18 +24,17 @@ html
       a.link(href="#")
     
     script.
-      if (window.navigator.userAgent.indexOf("Electron") !== -1) {
-        var electron = require("electron");
+      if (SupApp != null) {
         var statusElt = document.querySelector(".status");
         var linkElt = document.querySelector(".link");
         var linkTarget = null;
-        
+
         linkElt.addEventListener("click", function(event) {
           event.preventDefault();
-          if (linkTarget != null) electron.shell.showItemInFolder(linkTarget);
+          if (linkTarget != null) SupApp.showItemInFolder(linkTarget);
         });
-  
-        electron.ipcRenderer.on("setText", function(event, data) {
+
+        SupApp.getIpc().on("set-export-status", function(event, data) {
           if (data.title != null) document.title = data.title;
           statusElt.textContent = data.text;
           if (data.showItemInFolder != null) {

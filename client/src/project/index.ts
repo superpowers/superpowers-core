@@ -2,7 +2,6 @@ import CreateAssetDialog from "./CreateAssetDialog";
 import FindAssetDialog from "./FindAssetDialog";
 import * as async from "async";
 
-const nodeRequire = require;
 import * as TreeView from "dnd-tree-view";
 import * as ResizeHandle from "resize-handle";
 import * as TabStrip from "tab-strip";
@@ -35,12 +34,9 @@ const ui: {
   toolsElt?: HTMLUListElement;
 } = {};
 
-let electron: GitHubElectron.Electron;
 let runWindow: GitHubElectron.BrowserWindow;
 
-if (SupClient.isApp) {
-  electron = nodeRequire("electron");
-
+if (SupApp != null) {
   window.addEventListener("beforeunload", () => {
     if (runWindow != null) runWindow.removeListener("closed", onCloseRunWindow);
   });
@@ -48,6 +44,7 @@ if (SupClient.isApp) {
 
 function start() {
   if (SupClient.query.project == null) goToHub();
+  document.body.hidden = false;
 
   // Development mode
   if (localStorage.getItem("superpowers-dev-mode") != null) {
@@ -81,7 +78,12 @@ function start() {
   });
 
   // Make sidebar resizable
-  new ResizeHandle(document.querySelector(".sidebar") as HTMLElement, "left");
+  const sidebarResizeHandle = new ResizeHandle(document.querySelector(".sidebar") as HTMLElement, "left");
+  if (SupClient.query.asset != null) {
+    sidebarResizeHandle.handleElt.classList.add("collapsed");
+    sidebarResizeHandle.targetElt.style.width = "0";
+    sidebarResizeHandle.targetElt.style.display = "none";
+  }
 
   // Project info
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
@@ -90,7 +92,7 @@ function start() {
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runProject({ debug: true }); });
   document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
 
-  if (!SupClient.isApp) {
+  if (SupApp == null) {
     (document.querySelector(".project-buttons .publish") as HTMLButtonElement).title = SupClient.i18n.t("project:header.publishDisabled");
     (document.querySelector(".project-buttons .debug") as HTMLButtonElement).hidden = true;
     (document.querySelector(".project-buttons .stop") as HTMLButtonElement).hidden = true;
@@ -239,7 +241,7 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
 function setupTool(toolName: string) {
   const tool = toolsByName[toolName];
 
-  if (tool.pinned) {
+  if (tool.pinned && SupClient.query.asset == null) {
     // TODO: Support multiple pinned tabs
     ui.homeTab = openTool(toolName);
     return;
@@ -324,7 +326,7 @@ function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
 
   (document.querySelector(".connecting") as HTMLDivElement).hidden = true;
 
-  if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
+  if (SupApp != null) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
   (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
   (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
@@ -345,6 +347,8 @@ function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
   for (const entry of entriesPub) walk(entry, null, null);
 
   setupFilterStrip();
+
+  if (SupClient.query.asset != null) openEntry(SupClient.query.asset);
 }
 
 function onSetManifestProperty(key: string, value: any) {
@@ -498,24 +502,19 @@ function onDependenciesRemoved(id: string, depIds: string[]) {
 
 // User interface
 function goToHub() {
-  if (SupClient.isApp) electron.ipcRenderer.send("show-main-window");
+  if (SupApp != null) SupApp.showMainWindow();
   else window.location.replace("/");
 }
 
 function runProject(options: { debug: boolean; } = { debug: false }) {
-  if (SupClient.isApp) {
+  if (SupApp != null) {
     if (runWindow == null) {
-      runWindow = new electron.remote.BrowserWindow({
-        title: "Superpowers", icon: `public/images/icon.png`,
-        width: 1000, height: 600,
-        minWidth: 800, minHeight: 480
-      });
+      runWindow = SupApp.openWindow(`${window.location.origin}/build.html`);
       runWindow.setMenuBarVisibility(false);
       runWindow.on("closed", onCloseRunWindow);
 
       (document.querySelector(".project-buttons") as HTMLDivElement).classList.toggle("running", true);
     }
-    runWindow.loadURL(`${window.location.origin}/build.html`);
     runWindow.show();
     runWindow.focus();
 
@@ -533,7 +532,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
     let url = `${window.location.protocol}//${window.location.hostname}:${buildPort}/systems/${SupCore.system.id}/?project=${SupClient.query.project}&build=${buildId}`;
     if (options.debug) url += "&debug";
 
-    if (SupClient.isApp) {
+    if (SupApp != null) {
       if (runWindow != null) runWindow.loadURL(url);
     } else window.open(url, `player_${SupClient.query.project}`);
   });
@@ -552,28 +551,28 @@ function stopProject() {
 }
 
 function publishProject() {
-  if (SupClient.isApp) electron.ipcRenderer.send("choose-export-folder");
+  if (SupApp != null) SupApp.chooseFolder(onPublishFolderChosen);
 }
 
-if (SupClient.isApp) {
-  electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => {
+function onPublishFolderChosen(err: string, outputFolder: string) {
+  if (err != null) {
     /* tslint:disable:no-unused-expression */
-    new SupClient.Dialogs.InfoDialog(message);
+    new SupClient.Dialogs.InfoDialog(err);
     /* tslint:enable:no-unused-expression */
-  });
-  electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
-    socket.emit("build:project", (err: string, buildId: string, files: any) => {
-      const baseURL = `${window.location.protocol}//${window.location.hostname}`;
-      electron.ipcRenderer.send("export", {
-        projectId: SupClient.query.project, buildId,
-        baseURL, mainPort: window.location.port, buildPort,
-        outputFolder, files });
+    return;
+  }
+
+  if (outputFolder == null) return;
+
+  socket.emit("build:project", (err: string, buildId: string, files: any) => {
+    const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+
+    SupApp.publishProject({
+      projectId: SupClient.query.project, buildId,
+      baseURL, mainPort: parseInt(window.location.port, 10), buildPort,
+      outputFolder, files
     });
   });
-}
-
-function toggleDevTools() {
-  if (electron != null) electron.remote.getCurrentWindow().webContents.toggleDevTools();
 }
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
@@ -793,7 +792,7 @@ function onMessageHotKey(action: string) {
     case "nextTab":      onActivateNextTab(); break;
     case "run":          runProject(); break;
     case "debug":        runProject({ debug: true }); break;
-    case "devtools":     toggleDevTools(); break;
+    case "devtools":     if (SupApp != null) SupApp.getCurrentWindow().webContents.toggleDevTools(); break;
   }
 }
 
@@ -958,27 +957,14 @@ function onTrashEntryClick() {
 
 function onOpenInNewWindowClick(event: any) {
   const id = event.target.parentElement.dataset["id"];
-  if (id != null) {
-    const entry = entries.byId[id];
-    const url = `${window.location.origin}/systems/${SupCore.system.id}` +
-    `/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
-    `?project=${SupClient.query.project}&asset=${entry.id}`;
+  const name = event.target.parentElement.dataset["name"];
+  let url: string;
 
-    const entryPath = entries.getPathFromId(id);
-    const title = (entryPath !== entry.name) ? `${entry.name} - ${entryPath}` : entry.name;
-    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", url, title);
-    else {
-      const newWindow: any = window.open(url);
-      newWindow.addEventListener("load", () => { newWindow.document.title = title; });
-    }
-  } else {
-    const name = event.target.parentElement.dataset["name"];
-    const address = `${window.location.origin}/systems/${SupCore.system.id}` +
-    `/plugins/${toolsByName[name].pluginPath}/editors/${name}/` +
-    `?project=${SupClient.query.project}`;
-    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address);
-    else window.open(address);
-  }
+  if (id != null) url = `${window.location.origin}/project/?project=${SupClient.query.project}&asset=${id}`;
+  else url = `${window.location.origin}/project/?project=${SupClient.query.project}&tool=${name}`;
+
+  if (SupApp != null) SupApp.openWindow(url);
+  else window.open(url);
 }
 
 function onRenameEntryClick() {

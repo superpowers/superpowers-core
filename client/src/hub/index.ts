@@ -212,7 +212,7 @@ function onProjectActivate() {
   const projectId = ui.projectsTreeView.selectedNodes[0].dataset["id"];
   const href = `/project/?project=${projectId}`;
 
-  if (SupClient.isApp) window.open(`${window.location.origin}${href}`);
+  if (SupApp != null) SupApp.openWindow(`${window.location.origin}${href}`);
   else window.location.href = href;
 }
 

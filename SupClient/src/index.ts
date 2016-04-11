@@ -17,13 +17,14 @@ import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";
 
 export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
-
-export const isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
 export const query = querystring.parse(window.location.search.slice(1));
 
 // Refuses filesystem-unsafe characters
 // See http://superuser.com/q/358855
 export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
+
+// Expose SupApp to iframes
+if ((global as any).SupApp == null && (top as any).SupApp != null) (global as any).SupApp = (top as any).SupApp;
 
 // Initialize empty system
 SupCore.system = new SupCore.System("", "");
