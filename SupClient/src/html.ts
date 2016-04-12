@@ -1,6 +1,6 @@
 const specialOptionKeys = [ "parent", "style", "dataset" ];
 
-export default function html(tag: string, classList: string|string[], options?: SupClient.HTMLInputOptions) {
+export default function html(tag: string, classList?: string|string[]|SupClient.HTMLInputOptions, options?: SupClient.HTMLInputOptions) {
   if (options == null) {
     if (typeof classList === "object" && !Array.isArray(classList)) {
       options = classList;
@@ -15,7 +15,7 @@ export default function html(tag: string, classList: string|string[], options?: 
   if (classList != null) {
     // NOTE: `elt.classList.add.apply(elt, classList);`
     // throws IllegalInvocationException at least in Chrome
-    for (const name of classList) elt.classList.add(name);
+    for (const name of classList as string[]) elt.classList.add(name);
   }
 
   for (const key in options) {
