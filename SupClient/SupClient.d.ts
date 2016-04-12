@@ -63,7 +63,16 @@ declare namespace SupClient {
     export function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
     export function appendSliderField(parent: HTMLElement, value: number|string,
     options?: SliderOptions): { sliderField: HTMLInputElement; numberField: HTMLInputElement; };
-    export function appendAssetField(parent: HTMLElement, value: string): { textField: HTMLInputElement; buttonElt: HTMLButtonElement; };
+
+    export function appendAssetField(parent: HTMLElement, assetId: string, assetType: string, projectClient: SupClient.ProjectClient): AssetFieldSubscriber;
+    class AssetFieldSubscriber extends SupCore.EventEmitter {
+      entries: SupCore.Data.Entries;
+
+      constructor(assetId: string, projectClient: ProjectClient, callback: (assetId: string) => void);
+      destroy(): void;
+      selectAssetId(assetId: string): void;
+      onChangeAssetId(assetId: string): void;
+    }
   }
 
   namespace Dialogs {
@@ -123,6 +132,11 @@ declare namespace SupClient {
       selectElt: HTMLSelectElement;
 
       constructor(label: string, choices: { [value: string]: string; }, options?: SelectOptions, callback?: (result: SelectResult) => void)
+    }
+
+    type FindAssetResult = string;
+    export class FindAssetDialog extends BaseDialog<FindAssetResult> {
+      constructor(entries: SupCore.Data.Entries, editorsByAssetType: { [assetType: string]: { pluginPath: string; } }, callback: (result: FindAssetResult) => void)
     }
   }
 

@@ -1,11 +1,14 @@
-/// <reference path="./fuzzy.d.ts" />
+/// <reference path="../typings/fuzzy.d.ts" />
 
 import * as fuzzy from "fuzzy";
 import * as TreeView from "dnd-tree-view";
+import * as Dialogs from "simple-dialogs";
+import * as i18n from "./i18n";
+import html from "./html";
 
 type FindAssetResult = string;
 
-export default class FindAssetDialog extends SupClient.Dialogs.BaseDialog<FindAssetResult> {
+export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult> {
   private searchElt: HTMLInputElement;
   private treeView: TreeView;
 
@@ -19,22 +22,22 @@ export default class FindAssetDialog extends SupClient.Dialogs.BaseDialog<FindAs
 
     this.dialogElt.classList.add("find-asset-dialog");
 
-    const searchGroup = SupClient.html("div", "group", { parent: this.formElt, style: { display: "flex" } });
-    this.searchElt = SupClient.html("input", {
+    const searchGroup = html("div", "group", { parent: this.formElt, style: { display: "flex" } });
+    this.searchElt = html("input", {
       parent: searchGroup, type: "search",
-      placeholder: SupClient.i18n.t("project:treeView.searchPlaceholder"),
+      placeholder: i18n.t("common:searchPlaceholder"),
       style: { flex: "1 1 0" }
-    });
+    }) as HTMLInputElement;
     this.searchElt.addEventListener("input", this.onSearchInput);
     this.searchElt.addEventListener("keydown", this.onSearchKeyDown);
     this.searchElt.focus();
 
-    const treeViewContainer = SupClient.html("div", "assets-tree-view", { parent: this.formElt });
+    const treeViewContainer = html("div", "assets-tree-view", { parent: this.formElt });
     this.treeView = new TreeView(treeViewContainer, { multipleSelection: false });
     this.treeView.on("activate", () => { this.submit(); });
 
     this.entries.walk((node: SupCore.Data.EntryNode) => {
-      if (node.type == null) return;
+      if (node.type == null || editorsByAssetType[node.type] == null) return;
 
       const path = this.entries.getPathFromId(node.id);
       this.entriesByPath[path] = node;

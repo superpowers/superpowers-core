@@ -3,11 +3,13 @@
 
   "namePatternDescription": "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].",
   "none": "(None)",
+  "searchPlaceholder": "Search for assets",
 
   "actions": {
     "applyChanges": "Apply changes",
     "applyChangesWithErrors": "Apply changes with errors",
     "cancel": "Cancel",
+    "clear": "Clear",
     "close": "Close",
     "create": "Create",
     "delete": "Delete",
@@ -19,6 +21,7 @@
     "rename": "Rename",
     "save": "Save",
     "search": "Search",
+    "select": "Select",
     "skip": "Skip",
     "update": "Update",
     "upload": "Upload",

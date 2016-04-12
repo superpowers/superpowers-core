@@ -1,5 +1,4 @@
 import CreateAssetDialog from "./CreateAssetDialog";
-import FindAssetDialog from "./FindAssetDialog";
 import * as async from "async";
 
 import * as TreeView from "dnd-tree-view";
@@ -817,7 +816,7 @@ function onSearchEntryDialog() {
   if (entries == null) return;
 
   /* tslint:disable:no-unused-expression */
-  new FindAssetDialog(entries, editorsByAssetType, (entryId) => {
+  new SupClient.Dialogs.FindAssetDialog(entries, editorsByAssetType, (entryId) => {
     /* tslint:enable:no-unused-expression */
     if (entryId == null) return;
     openEntry(entryId);

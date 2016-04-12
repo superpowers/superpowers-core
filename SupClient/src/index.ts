@@ -9,6 +9,7 @@ import ProjectClient from "./ProjectClient";
 import { setupHotkeys, setupHelpCallback } from "./events";
 import * as table from "./table";
 import * as Dialogs from "simple-dialogs";
+import FindAssetDialog from "./FindAssetDialog";
 import * as i18n from "./i18n";
 import html from "./html";
 import "./events";
@@ -18,6 +19,8 @@ import * as TreeView from "dnd-tree-view";
 
 export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
 export const query = querystring.parse(window.location.search.slice(1));
+
+(Dialogs as any).FindAssetDialog = FindAssetDialog;
 
 // Refuses filesystem-unsafe characters
 // See http://superuser.com/q/358855

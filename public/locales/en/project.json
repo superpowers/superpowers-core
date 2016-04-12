@@ -32,7 +32,6 @@
       "title": "Trash",
       "prompt": "Are you sure you want to trash the selected entries?",
       "warnBrokenDependency": "${entryName} is used in ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Search for assets"
+    }
   }
 }
