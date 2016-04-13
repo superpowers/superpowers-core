@@ -119,7 +119,7 @@ export function appendAssetField(parent: HTMLElement, assetId: string, assetType
   const assetParent = html("div", "inputs", { parent });
 
   const textField = html("input", { parent: assetParent, type: "text", readOnly: true, style: { cursor: "pointer" } }) as HTMLInputElement;
-  const buttonElt = html("button", { parent: assetParent, disabled: true }) as HTMLButtonElement;
+  const buttonElt = html("button", { parent: assetParent, disabled: true, textContent: SupClient.i18n.t("common:actions.select") }) as HTMLButtonElement;
 
   let pluginPath: string;
 
@@ -136,7 +136,13 @@ export function appendAssetField(parent: HTMLElement, assetId: string, assetType
   });
 
   textField.addEventListener("click", (event) => {
-    if (assetSubscriber.assetId != null) window.parent.postMessage({ type: "openEntry", id: assetSubscriber.assetId }, window.location.origin);
+    if (assetSubscriber.assetId != null) {
+      window.parent.postMessage({ type: "openEntry", id: assetSubscriber.assetId }, window.location.origin);
+    } else {
+      /* tslint:disable:no-unused-expression */
+      new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => { if (assetId != null) assetSubscriber.selectAssetId(assetId); });
+      /* tslint:enable:no-unused-expression */
+    }
   });
 
   textField.addEventListener("dragover", (event) => {
@@ -159,10 +165,8 @@ export function appendAssetField(parent: HTMLElement, assetId: string, assetType
     }
 
     /* tslint:disable:no-unused-expression */
-    new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => {
-      /* tslint:enable:no-unused-expression */
-      if (assetId != null) assetSubscriber.selectAssetId(assetId);
-    });
+    new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => { if (assetId != null) assetSubscriber.selectAssetId(assetId); });
+    /* tslint:enable:no-unused-expression */
   });
 
   return assetSubscriber;
