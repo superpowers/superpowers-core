@@ -137,7 +137,7 @@ export function appendAssetField(parent: HTMLElement, assetId: string, assetType
 
   textField.addEventListener("click", (event) => {
     if (assetSubscriber.assetId != null) {
-      window.parent.postMessage({ type: "openEntry", id: assetSubscriber.assetId }, window.location.origin);
+      SupClient.openEntry(assetSubscriber.assetId);
     } else {
       /* tslint:disable:no-unused-expression */
       new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => { if (assetId != null) assetSubscriber.selectAssetId(assetId); });

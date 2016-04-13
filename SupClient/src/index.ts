@@ -185,6 +185,10 @@ export function findEntryByPath(entries: any, path: string|string[]) {
   return foundEntry;
 }
 
+export function openEntry(entryId: string, state?: any) {
+  window.parent.postMessage({ type: "openEntry", id: entryId, state }, window.location.origin);
+}
+
 export function setupCollapsablePane(paneElt: HTMLDivElement, refreshCallback?: Function) {
   const handle = new ResizeHandle(paneElt, "bottom");
   if (refreshCallback != null)
