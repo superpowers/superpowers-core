@@ -337,7 +337,7 @@ function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
     const liElt = createEntryElement(entry);
     liElt.classList.add("collapsed");
 
-    const nodeType = (entry.children != null) ? "group" : "item";
+    const nodeType: "item"|"group" = (entry.children != null) ? "group" : "item";
     ui.entriesTreeView.append(liElt, nodeType, parentElt);
 
     if (entry.children != null) for (const child of entry.children) walk(child, entry, liElt);
