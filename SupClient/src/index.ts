@@ -136,8 +136,12 @@ export function getTreeViewDropPoint(dropLocation: TreeView.DropLocation, treeBy
 
   switch (dropLocation.where) {
     case "inside": {
-      parentNode = treeById.byId[targetEntryId];
-      index = parentNode.children.length;
+      if (targetEntryId != null) {
+        parentNode = treeById.byId[targetEntryId];
+        index = parentNode.children.length;
+      } else {
+        index = 0;
+      }
     } break;
     case "above":
     case "below": {
