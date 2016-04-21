@@ -97,6 +97,7 @@ export default function start(serverDataPath: string) {
   loadSystems(mainApp, buildApp, onSystemsLoaded);
 
   // Save on exit and handle crashes
+  process.on("SIGTERM", onExit);
   process.on("SIGINT", onExit);
   process.on("message", (msg: string) => { if (msg === "stop") onExit(); });
 }
