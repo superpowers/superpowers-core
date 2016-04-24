@@ -2,6 +2,10 @@ import * as utils from "./utils";
 
 export default function showRegistry() {
   utils.getRegistry((err, registry) => {
+    if (process != null && process.send != null) {
+      process.send({ type: "registry", registry });
+    }
+
     console.log(`Core v${registry.core.version}`);
     console.log("");
 
