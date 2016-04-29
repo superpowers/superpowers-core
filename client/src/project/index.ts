@@ -78,7 +78,7 @@ function start() {
 
   // Make sidebar resizable
   const sidebarResizeHandle = new ResizeHandle(document.querySelector(".sidebar") as HTMLElement, "left");
-  if (SupClient.query.asset != null) {
+  if (SupClient.query.asset != null || SupClient.query["tool"] != null) {
     sidebarResizeHandle.handleElt.classList.add("collapsed");
     sidebarResizeHandle.targetElt.style.width = "0";
     sidebarResizeHandle.targetElt.style.display = "none";
@@ -240,7 +240,7 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
 function setupTool(toolName: string) {
   const tool = toolsByName[toolName];
 
-  if (tool.pinned && SupClient.query.asset == null) {
+  if (tool.pinned && SupClient.query.asset == null && SupClient.query["tool"] == null) {
     openTool(toolName);
     return;
   }
@@ -347,6 +347,7 @@ function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
   setupFilterStrip();
 
   if (SupClient.query.asset != null) openEntry(SupClient.query.asset);
+  else if (SupClient.query["tool"] != null) openTool(SupClient.query["tool"]);
 }
 
 function onSetManifestProperty(key: string, value: any) {
