@@ -67,28 +67,12 @@ body { display: flex; }
   img.filtered:hover { opacity: 0.5; }
 }
 
-.entries-tree-view
-  flex 1
-  position relative
-  overflow-y auto
-
-  .connecting
-    position absolute
-    top 0
-    bottom 0
-    left 0
-    right 0
-    z-index 1
-    display flex
-    flex-flow column
-    align-items center
-    justify-content center
-    text-align center
-    text-transform uppercase
-    opacity 0.5
-
-  .tree
-    position absolute
+.entries-tree-view {
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
+  .tree { position: absolute; }
+}
 
 .entries-tree-view .tree, .find-asset-dialog .tree
   li

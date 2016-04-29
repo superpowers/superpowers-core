@@ -289,7 +289,7 @@ function onDisconnected() {
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
   (document.querySelector(".filter-buttons") as HTMLDivElement).hidden = true;
-  (document.querySelector(".connecting") as HTMLDivElement).hidden = false;
+  (document.querySelector(".entries-tree-view .tree-loading") as HTMLDivElement).hidden = false;
 }
 
 function onWelcome(clientId: number, config: { buildPort: number; }) {
@@ -322,7 +322,7 @@ function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
 
-  (document.querySelector(".connecting") as HTMLDivElement).hidden = true;
+  (document.querySelector(".entries-tree-view .tree-loading") as HTMLDivElement).hidden = true;
 
   if (SupApp != null) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
   (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;

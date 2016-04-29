@@ -121,7 +121,7 @@ function onDisconnected() {
   const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
   for (let i = 0; i < buttons.length; i++) buttons[i].disabled = true;
 
-  (document.querySelector(".connecting") as HTMLDivElement).hidden = false;
+  (document.querySelector(".tree-loading") as HTMLDivElement).hidden = false;
 }
 
 function onProjectsReceived(err: string, projects: SupCore.Data.ProjectManifestPub[]) {
@@ -135,7 +135,7 @@ function onProjectsReceived(err: string, projects: SupCore.Data.ProjectManifestP
     ui.projectsTreeView.append(liElt, "item");
   }
 
-  (document.querySelector(".connecting") as HTMLDivElement).hidden = true;
+  (document.querySelector(".tree-loading") as HTMLDivElement).hidden = true;
 }
 
 function onProjectAdded(manifest: SupCore.Data.ProjectManifestPub, index: number) {
