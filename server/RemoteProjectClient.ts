@@ -1,13 +1,11 @@
 import BaseRemoteClient from "./BaseRemoteClient";
 import ProjectServer from "./ProjectServer";
 import { server as serverConfig } from "./config";
-import { buildFilesBySystem } from "./loadSystems";
 import * as path from "path";
 import * as fs from "fs";
 import * as mkdirp from "mkdirp";
 import * as rimraf from "rimraf";
 import * as async from "async";
-import * as recursiveReaddir from "recursive-readdir";
 
 export default class RemoteProjectClient extends BaseRemoteClient {
   server: ProjectServer;
@@ -39,7 +37,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     // Project
     this.socket.on("vacuum:project", this.onVacuumProject);
-    this.socket.on("build:project", this.onBuildProject);
   }
 
   // TODO: Implement roles and capabilities
@@ -410,84 +407,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   };
 
   // Project
-  private onBuildProject = (callback: (err: string, buildId?: string, files?: string[]) => any) => {
-    if (!this.errorIfCant("buildProject", callback)) return;
-
-    // this.server.log("Building project...");
-
-    const buildId = this.server.nextBuildId;
-    this.server.nextBuildId++;
-
-    const buildPath = `${this.server.buildsPath}/${buildId}`;
-
-    const exportedProject = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
-
-    try { fs.mkdirSync(this.server.buildsPath); } catch (e) { /* Ignore */ }
-    try { fs.mkdirSync(buildPath); }
-    catch (err) { callback(`Could not create folder for build ${buildId}`); return; }
-
-    fs.mkdirSync(`${buildPath}/assets`);
-
-    const assetIdsToExport: string[] = [];
-    this.server.data.entries.walk((entry: SupCore.Data.EntryNode, parent: SupCore.Data.EntryNode) => {
-      if (entry.type != null) assetIdsToExport.push(entry.id);
-    });
-
-    async.each(assetIdsToExport, (assetId, cb) => {
-      this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.Data.Base.Asset) => {
-        asset.publish(buildPath, (err) => {
-          this.server.data.assets.release(assetId, null);
-          cb();
-        });
-      });
-    }, (err) => {
-      if (err != null) { callback("Could not export all assets"); return; }
-
-      fs.mkdirSync(`${buildPath}/resources`);
-
-      async.each(Object.keys(this.server.system.data.resourceClasses), (resourceId, cb) => {
-        this.server.data.resources.acquire(resourceId, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
-          resource.publish(buildPath, (err) => {
-            this.server.data.resources.release(resourceId, null);
-            cb();
-          });
-        });
-      }, (err) => {
-        if (err != null) { callback("Could not export all resources"); return; }
-
-        const json = JSON.stringify(exportedProject, null, 2);
-        fs.writeFile(`${buildPath}/project.json`, json, { encoding: "utf8" }, (err) => {
-          if (err != null) { callback("Could not save project.json"); return; }
-
-          // this.server.log(`Done generating build ${buildId}...`);
-
-          // Collect paths to all build files
-          let files: string[] = [];
-          recursiveReaddir(buildPath, (err, entries) => {
-            for (const entry of entries) {
-              let relativePath = path.relative(buildPath, entry);
-              if (path.sep === "\\") relativePath = relativePath.replace(/\\/g, "/");
-              files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
-            }
-
-            files = files.concat(buildFilesBySystem[this.server.system.id]);
-            callback(null, buildId.toString(), files);
-
-            // Remove an old build to avoid using too much disk space
-            const buildToDeleteId = buildId - serverConfig.maxRecentBuilds;
-            const buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
-            rimraf(buildToDeletePath, (err) => {
-              if (err != null) {
-                this.server.log(`Failed to remove build ${buildToDeleteId}:`);
-                this.server.log(err.toString());
-              }
-            });
-          });
-        });
-      });
-    });
-  };
-
   private onVacuumProject = (callback: (err: string, deletedCount?: number) => any) => {
     if (!this.errorIfCant("vacuumProject", callback)) return;
 

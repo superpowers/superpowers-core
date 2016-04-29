@@ -2,12 +2,9 @@ import * as path from "path";
 import * as fs from "fs";
 import * as express from "express";
 import * as async from "async";
-import * as readdirRecursive from "recursive-readdir";
 import getLocalizedFilename from "./getLocalizedFilename";
 
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
-
-export const buildFilesBySystem: { [systemId: string]: string[]; } = {};
 
 export default function(mainApp: express.Express, buildApp: express.Express, callback: Function) {
   async.eachSeries(fs.readdirSync(SupCore.systemsPath), (systemFolderName, cb) => {
@@ -41,27 +38,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     }
     fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo, null, 2));
 
-    // Build files
-    const buildFiles: string[] = buildFilesBySystem[systemId] = [ "/SupCore.js" ];
-
-    for (const plugin of pluginsInfo.list) {
-      for (const bundleName of pluginsInfo.publishedBundles) {
-        buildFiles.push(`/systems/${systemId}/plugins/${plugin}/bundles/${bundleName}.js`);
-      }
-    }
-
-    readdirRecursive(`${systemPath}/public`, (err, entries) => {
-      for (const entry of entries) {
-        const relativePath = path.relative(`${systemPath}/public`, entry);
-        if (relativePath === "manifest.json") continue;
-        if (relativePath.slice(0, "templates".length) === "templates") continue;
-        if (relativePath.slice(0, "locales".length) === "templates") continue;
-
-        buildFiles.push(`/systems/${systemId}/${relativePath}`);
-      }
-
-      cb();
-    });
+    cb();
   }, () => {
     const systemsInfo: SupCore.SystemsInfo = { list: Object.keys(SupCore.systems) };
     fs.writeFileSync(`${__dirname}/../public/systems.json`, JSON.stringify(systemsInfo, null, 2));

@@ -16,10 +16,11 @@ html
           button(title=t("project:header.goToHub")).go-to-hub
         .project-name= t("common:states.loading")
         .project-buttons
-          button(title=t("project:header.publish"),disabled).publish
-          button(title=t("project:header.stop"),disabled).stop
-          button(title=t("project:header.debug"),disabled).debug
-          button(title=t("project:header.run"),disabled).run
+          button(title=t("project:build.title"),disabled).build
+          // TODO(run)
+            button(title=t("project:header.stop"),disabled).stop
+            button(title=t("project:header.debug"),disabled).debug
+            button(title=t("project:header.run"),disabled).run
 
       .entries-buttons.flat-button-strip
         button(title=t("project:treeView.newAsset.title"),disabled,data-hotkey="control+N").new-asset

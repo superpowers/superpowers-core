@@ -33,6 +33,8 @@ const ui: {
   toolsElt?: HTMLUListElement;
 } = {};
 
+// TODO(run)
+/*
 let runWindow: GitHubElectron.BrowserWindow;
 
 if (SupApp != null) {
@@ -40,6 +42,7 @@ if (SupApp != null) {
     if (runWindow != null) runWindow.removeListener("closed", onCloseRunWindow);
   });
 }
+*/
 
 function start() {
   if (SupClient.query.project == null) goToHub();
@@ -86,10 +89,11 @@ function start() {
 
   // Project info
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
-  document.querySelector(".project-buttons .run").addEventListener("click", () => { runProject(); });
   document.querySelector(".project-buttons .publish").addEventListener("click", () => { publishProject(); });
+  // TODO(run)
+  /*document.querySelector(".project-buttons .run").addEventListener("click", () => { runProject(); });
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runProject({ debug: true }); });
-  document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
+  document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });*/
 
   if (SupApp == null) {
     (document.querySelector(".project-buttons .publish") as HTMLButtonElement).title = SupClient.i18n.t("project:header.publishDisabled");
@@ -281,10 +285,11 @@ function onDisconnected() {
   ui.entriesTreeView.treeRoot.innerHTML = "";
   updateSelectedEntry();
 
-  (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = true;
+  // TODO(run)
+  /*(document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = true;
   (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = true;
-  (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;
   (document.querySelector(".project-buttons .publish") as HTMLButtonElement).disabled = true;
+  (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;*/
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
@@ -325,8 +330,9 @@ function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
   (document.querySelector(".entries-tree-view .tree-loading") as HTMLDivElement).hidden = true;
 
   if (SupApp != null) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
-  (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
-  (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;
+  // TODO(run)
+  /*(document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;*/
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = false;
@@ -506,6 +512,8 @@ function goToHub() {
   else window.location.replace("/");
 }
 
+// TODO(run)
+/*
 function runProject(options: { debug: boolean; } = { debug: false }) {
   if (SupApp != null) {
     if (runWindow == null) {
@@ -523,9 +531,9 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
 
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) {
-      /* tslint:disable:no-unused-expression */
+      // tslint:disable:no-unused-expression
       new SupClient.Dialogs.InfoDialog(err);
-      /* tslint:enable:no-unused-expression */
+      // tslint:enable:no-unused-expression
       return;
     }
 
@@ -549,6 +557,7 @@ function stopProject() {
 
   (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;
 }
+*/
 
 function publishProject() {
   if (SupApp != null) SupApp.chooseFolder(onPublishFolderChosen);
@@ -792,8 +801,9 @@ function onMessageHotKey(action: string) {
     case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active") as HTMLLIElement); break;
     case "previousTab":  onActivatePreviousTab(); break;
     case "nextTab":      onActivateNextTab(); break;
-    case "run":          runProject(); break;
-    case "debug":        runProject({ debug: true }); break;
+    // TODO(run)
+    /*case "run":          runProject(); break;
+    case "debug":        runProject({ debug: true }); break;*/
     case "devtools":     if (SupApp != null) SupApp.getCurrentWindow().webContents.toggleDevTools(); break;
   }
 }
