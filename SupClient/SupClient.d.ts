@@ -18,7 +18,6 @@ declare namespace SupClient {
   export function connect(projectId: string, options?: { reconnection: boolean; }): SocketIOClient.Socket;
   export function onAssetTrashed(): void;
   export function onDisconnected(): void;
-  export function setupHotkeys(): void;
   export function setupHelpCallback(callback: Function): void;
 
   export function getTreeViewInsertionPoint(treeView: any /* TreeView */): { parentId: string; index: number };
