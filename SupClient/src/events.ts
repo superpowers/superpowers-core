@@ -39,12 +39,14 @@ window.addEventListener("beforeunload", onBeforeUnload);
 let isBackspaceDown = false;
 
 function onKeyDown(event: KeyboardEvent) {
-  if ((dialogs.BaseDialog as any).activeDialog != null) return;
-
-  const ctrlOrCmd = event.ctrlKey || event.metaKey;
+  // F12
+  if (event.keyCode === 123) sendHotkey("devtools");
 
   // Backspace
   if (event.keyCode === 8) isBackspaceDown = true;
+
+  if ((dialogs.BaseDialog as any).activeDialog != null) return;
+  const ctrlOrCmd = event.ctrlKey || event.metaKey;
 
   // Ctrl+N
   if (event.keyCode === 78 && ctrlOrCmd) {
@@ -84,11 +86,6 @@ function onKeyDown(event: KeyboardEvent) {
   // F6 or Cmd+Shift-P
   if (event.keyCode === 117 || (event.keyCode === 80 && event.metaKey && event.shiftKey)) {
     event.preventDefault(); sendHotkey("debug");
-  }
-
-  // F12
-  if (event.keyCode === 123) {
-    sendHotkey("devtools");
   }
 }
 
