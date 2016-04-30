@@ -5,6 +5,13 @@ import * as utils from "./utils";
 
 export default function update(systemId: string, pluginFullName: string) {
   if (systemId === "core" && pluginFullName == null) {
+    let isDevFolder = true;
+    try { fs.readdirSync(`${__dirname}/../../.git`); } catch (err) { isDevFolder = false; }
+    if (isDevFolder) {
+      console.error(`Core is a development version.`);
+      process.exit(1);
+    }
+
     updateCore();
     return;
   }
@@ -16,6 +23,13 @@ export default function update(systemId: string, pluginFullName: string) {
   }
 
   if (pluginFullName == null) {
+    let isDevFolder = true;
+    try { fs.readdirSync(`${utils.systemsPath}/${system.folderName}/.git`); } catch (err) { isDevFolder = false; }
+    if (isDevFolder) {
+      console.error(`System ${systemId} is a development version.`);
+      process.exit(1);
+    }
+
     updateSystem(systemId);
 
   } else {
@@ -29,6 +43,14 @@ export default function update(systemId: string, pluginFullName: string) {
       console.error(`Plugin ${pluginFullName} is not installed.`);
       process.exit(1);
     }
+
+    let isDevFolder = true;
+    try { fs.readdirSync(`${utils.systemsPath}/${system.folderName}/plugins/${pluginFullName}/.git`); } catch (err) { isDevFolder = false; }
+    if (isDevFolder) {
+      console.error(`Plugin ${pluginFullName} is a development version.`);
+      process.exit(1);
+    }
+
     updatePlugin(systemId, pluginFullName);
   }
 }
@@ -64,7 +86,6 @@ function updateCore() {
 function updateSystem(systemId: string) {
   const system = utils.systemsById[systemId];
   const systemPath = `${utils.systemsPath}/${system.folderName}`;
-  const [ currentMajor, currentMinor ] = system.version.split(".");
 
   utils.getRegistry((err, registry) => {
     if (err) {
@@ -80,6 +101,7 @@ function updateSystem(systemId: string) {
       process.exit(1);
     }
 
+    const [ currentMajor, currentMinor ] = system.version.split(".");
     const [ latestMajor, latestMinor ] = system.version.split(".");
     if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
       console.log(`Updating system ${systemId}...`);
@@ -114,8 +136,6 @@ function updateSystem(systemId: string) {
 function updatePlugin(systemId: string, pluginFullName: string) {
   const system = utils.systemsById[systemId];
   const pluginPath = `${utils.systemsPath}/${system.folderName}/plugins/${pluginFullName}`;
-  const packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
-  const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
 
   utils.getRegistry((err, registry) => {
     if (err) {
@@ -139,6 +159,8 @@ function updatePlugin(systemId: string, pluginFullName: string) {
     }
 
     utils.getLatestRelease(system.plugins[pluginAuthor][pluginName], (version, downloadURL) => {
+      const packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
+      const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
       const [ latestMajor, latestMinor ] = version.split(".");
       if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
         console.log(`Updating plugin ${pluginFullName}...`);

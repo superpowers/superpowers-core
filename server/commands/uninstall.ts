@@ -12,6 +12,13 @@ export default function uninstall(systemId: string, pluginFullName: string) {
   }
 
   if (pluginFullName == null) {
+    let isDevFolder = true;
+    try { fs.readdirSync(`${utils.systemsPath}/${system.folderName}/.git`); } catch (err) { isDevFolder = false; }
+    if (isDevFolder) {
+      console.error(`System ${systemId} is a development version.`);
+      process.exit(1);
+    }
+
     const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
     r1.question(`Are you sure you want to uninstall the system ${systemId}? (yes/no): `, (answer) => {
       if (answer === "yes") {
@@ -32,6 +39,13 @@ export default function uninstall(systemId: string, pluginFullName: string) {
 
     if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor].indexOf(pluginName) === -1) {
       console.error(`Plugin ${pluginFullName} is not installed.`);
+      process.exit(1);
+    }
+
+    let isDevFolder = true;
+    try { fs.readdirSync(`${utils.systemsPath}/${system.folderName}/plugins/${pluginFullName}/.git`); } catch (err) { isDevFolder = false; }
+    if (isDevFolder) {
+      console.error(`Plugin ${pluginFullName} is a development version.`);
       process.exit(1);
     }
 
