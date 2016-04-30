@@ -11,9 +11,6 @@ const argv = yargs
   .command("start", "Start the server", (yargs) => {
     yargs.demand(1, 1, `The "start" command doesn't accept any arguments`).argv;
   })
-  .command("list", "List currently installed systems and plugins", (yargs) => {
-    yargs.demand(1, 1, `The "list" command doesn't accept any arguments`).argv;
-  })
   .command("registry", "List registry content", (yargs) => {
     yargs.demand(1, 1, `The "registry" command doesn't accept any arguments`).argv;
   })
@@ -37,7 +34,6 @@ const [ systemId, pluginFullName ] = argv._[1] != null ? argv._[1].split(":") : 
 switch (command) {
   /* tslint:disable */
   case "start": require("./commands/start").default(dataPath); break;
-  case "list": require("./commands/list").default(); break;
   case "registry": require("./commands/registry").default(); break;
   case "install": require("./commands/install").default(systemId, pluginFullName); break;
   case "uninstall": require("./commands/uninstall").default(systemId, pluginFullName); break;

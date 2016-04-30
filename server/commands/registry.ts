@@ -6,11 +6,13 @@ export default function showRegistry() {
       process.send({ type: "registry", registry });
     }
 
-    console.log(`Core v${registry.core.version}`);
+    console.log(`Core - Latest: v${registry.core.version} / Installed: v${registry.core.localVersion}`);
     console.log("");
 
     for (const systemId in registry.systems) {
-      console.log(`System "${systemId}" v${registry.systems[systemId].version}`);
+      const system = registry.systems[systemId];
+      const local = system.localVersion != null ? `Installed: v${system.localVersion}` : "Not Installed";
+      console.log(`System "${systemId}" - Latest: v${system.version} / ${local}`);
       utils.listAvailablePlugins(registry, systemId);
       console.log("");
     }

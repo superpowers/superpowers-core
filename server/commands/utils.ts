@@ -91,11 +91,13 @@ type Registry = {
   core: {
     version: string;
     downloadURL: string;
+    localVersion: string;
   }
   systems: { [sytemId: string]: {
     repository: string;
     version: string;
     downloadURL: string;
+    localVersion: string;
     plugins: { [author: string]: { [name: string]: string } }
 } } };
 export function getRegistry(callback: (err: Error, registry: Registry) => any) {
@@ -121,13 +123,17 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
         callback(new Error("The registry format has changed. Please update Superpowers."), null);
       } else {
         getLatestRelease("https://github.com/superpowers/superpowers-core", (version, downloadURL) => {
-          registry.core = { version, downloadURL };
+          const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
+          const { version: localVersion } = JSON.parse(packageData);
+
+          registry.core = { version, downloadURL, localVersion };
 
           async.each(Object.keys(registry.systems), (systemId, cb) => {
             const system = registry.systems[systemId];
             getLatestRelease(system.repository, (version, downloadURL) => {
               system.version = version;
               system.downloadURL = downloadURL;
+              if (systemsById[systemId] != null) system.localVersion = systemsById[systemId].version;
               cb();
             });
           }, (err) => { callback(err, registry); });
