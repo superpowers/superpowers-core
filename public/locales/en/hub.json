@@ -1,4 +1,5 @@
 {
+  "title": "Hub",
   "serverAddress": "${hostname} on port ${port}",
   "newProject": {
     "title": "New project",

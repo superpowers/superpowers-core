@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    title Superpowers
+    meta(charset="utf-8")
+    link(rel="stylesheet",href="/styles/reset.css")
+    link(rel="stylesheet",href="/build/index.css")
+
+  body
+    header= t("common:states.loading")
+    progress
+
+    .info
+      .status
+      button.toggle-details= t("build:showDetails")
+
+    .details(hidden)
+      ol
+
+    script(src="/SupCore.js")
+    script(src="/SupClient.js")
+    script(src="/build/index.js")

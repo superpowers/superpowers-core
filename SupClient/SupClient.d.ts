@@ -204,4 +204,17 @@ declare namespace SupClient {
     onResourceReceived?: (resourceId: string, resource: any) => void;
     onResourceEdited?: (resourceId: string, command: string, ...args: any[]) => void;
   }
+
+  export interface BuildSettingsEditor {
+    getSettings(): any;
+  }
+
+  interface BuildSettingsEditorConstructor {
+    new(container: HTMLDivElement/*, projectClient: SupClient.ProjectClient*/): BuildSettingsEditor;
+  }
+
+  export interface BuildPlugin {
+    settingsEditor: BuildSettingsEditorConstructor;
+    build: (socket: SocketIOClient.Socket, settings: any) => void;
+  }
 }

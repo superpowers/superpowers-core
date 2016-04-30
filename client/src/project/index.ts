@@ -1,9 +1,11 @@
-import CreateAssetDialog from "./CreateAssetDialog";
 import * as async from "async";
 
 import * as TreeView from "dnd-tree-view";
 import * as ResizeHandle from "resize-handle";
 import * as TabStrip from "tab-strip";
+
+import CreateAssetDialog from "./CreateAssetDialog";
+import StartBuildDialog from "./StartBuildDialog";
 
 let socket: SocketIOClient.Socket;
 
@@ -89,17 +91,17 @@ function start() {
 
   // Project info
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
-  document.querySelector(".project-buttons .publish").addEventListener("click", () => { publishProject(); });
+  document.querySelector(".project-buttons .build").addEventListener("click", () => { openStartBuildDialog(); });
   // TODO(run)
   /*document.querySelector(".project-buttons .run").addEventListener("click", () => { runProject(); });
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runProject({ debug: true }); });
-  document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });*/
+  document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
 
   if (SupApp == null) {
-    (document.querySelector(".project-buttons .publish") as HTMLButtonElement).title = SupClient.i18n.t("project:header.publishDisabled");
+    (document.querySelector(".project-buttons .build") as HTMLButtonElement).title = SupClient.i18n.t("project:header.buildDisabled");
     (document.querySelector(".project-buttons .debug") as HTMLButtonElement).hidden = true;
     (document.querySelector(".project-buttons .stop") as HTMLButtonElement).hidden = true;
-  }
+  }*/
 
   // Entries tree view
   ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view") as HTMLElement, { dragStartCallback: onEntryDragStart, dropCallback: onTreeViewDrop });
@@ -288,8 +290,8 @@ function onDisconnected() {
   // TODO(run)
   /*(document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = true;
   (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = true;
-  (document.querySelector(".project-buttons .publish") as HTMLButtonElement).disabled = true;
   (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;*/
+  (document.querySelector(".project-buttons .build") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
@@ -297,14 +299,18 @@ function onDisconnected() {
   (document.querySelector(".entries-tree-view .tree-loading") as HTMLDivElement).hidden = false;
 }
 
+export let pluginsInfo: SupCore.PluginsInfo = null;
+
 function onWelcome(clientId: number, config: { buildPort: number; }) {
   buildPort = config.buildPort;
 
-  SupClient.fetch(`/systems/${SupCore.system.id}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
+  SupClient.fetch(`/systems/${SupCore.system.id}/plugins.json`, "json", (err: Error, thePluginsInfo: SupCore.PluginsInfo) => {
+    pluginsInfo = thePluginsInfo;
+
     loadPluginLocales(pluginsInfo.list, () => {
       async.parallel([
-        (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
-        (cb: Function) => { setupTools(pluginsInfo.paths.tools, cb); }
+        (cb) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
+        (cb) => { setupTools(pluginsInfo.paths.tools, cb); }
       ], (err) => {
         if (err) throw err;
         socket.emit("sub", "manifest", null, onManifestReceived);
@@ -329,7 +335,7 @@ function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
 
   (document.querySelector(".entries-tree-view .tree-loading") as HTMLDivElement).hidden = true;
 
-  if (SupApp != null) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
+  if (SupApp != null) (<HTMLButtonElement>document.querySelector(".project-buttons .build")).disabled = false;
   // TODO(run)
   /*(document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
   (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;*/
@@ -559,27 +565,16 @@ function stopProject() {
 }
 */
 
-function publishProject() {
-  if (SupApp != null) SupApp.chooseFolder(onPublishFolderChosen);
-}
-
-function onPublishFolderChosen(err: string, outputFolder: string) {
-  if (err != null) {
-    /* tslint:disable:no-unused-expression */
-    new SupClient.Dialogs.InfoDialog(err);
+function openStartBuildDialog() {
+  /* tslint:disable:no-unused-expression */
+  new StartBuildDialog((buildSetup) => {
     /* tslint:enable:no-unused-expression */
-    return;
-  }
+    if (buildSetup == null) return;
 
-  if (outputFolder == null) return;
-
-  socket.emit("build:project", (err: string, buildId: string, files: any) => {
-    const baseURL = `${window.location.protocol}//${window.location.hostname}`;
-
-    SupApp.publishProject({
-      projectId: SupClient.query.project, buildId,
-      baseURL, mainPort: parseInt(window.location.port, 10), buildPort,
-      outputFolder, files
+    const buildWindow = SupApp.openWindow(`${window.location.origin}/build/?project=${SupClient.query.project}`, { size: { width: 600, height: 150 }, resizable: false });
+    buildWindow.webContents.openDevTools();
+    buildWindow.webContents.addListener("did-finish-load", () => {
+      buildWindow.webContents.send("build", buildSetup);
     });
   });
 }
