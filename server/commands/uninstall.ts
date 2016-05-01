@@ -6,17 +6,14 @@ import * as utils from "./utils";
 
 export default function uninstall(systemId: string, pluginFullName: string) {
   const system = utils.systemsById[systemId];
-  if (system == null) {
-    console.error(`System ${systemId} is not installed.`);
-    process.exit(1);
-  }
+  if (system == null) utils.emitError(`System ${systemId} is not installed.`);
 
   if (pluginFullName == null) {
-    let isDevFolder = true;
-    try { fs.readdirSync(`${utils.systemsPath}/${system.folderName}/.git`); } catch (err) { isDevFolder = false; }
-    if (isDevFolder) {
-      console.error(`System ${systemId} is a development version.`);
-      process.exit(1);
+    if (system.isDev) utils.emitError(`System ${systemId} is a development version.`);
+
+    if (utils.force) {
+      uninstallSystem(system.folderName);
+      return;
     }
 
     const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -32,21 +29,18 @@ export default function uninstall(systemId: string, pluginFullName: string) {
 
   } else {
     const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
-    if (utils.builtInPluginAuthors.indexOf(pluginAuthor) !== -1) {
-      console.error(`Built-in plugins can not be uninstalled.`);
-      process.exit(1);
-    }
+    if (utils.builtInPluginAuthors.indexOf(pluginAuthor) !== -1) utils.emitError(`Built-in plugins can not be uninstalled.`);
 
-    if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor].indexOf(pluginName) === -1) {
-      console.error(`Plugin ${pluginFullName} is not installed.`);
-      process.exit(1);
-    }
+    if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor].indexOf(pluginName) === -1)
+      utils.emitError(`Plugin ${pluginFullName} is not installed.`);
 
     let isDevFolder = true;
     try { fs.readdirSync(`${utils.systemsPath}/${system.folderName}/plugins/${pluginFullName}/.git`); } catch (err) { isDevFolder = false; }
-    if (isDevFolder) {
-      console.error(`Plugin ${pluginFullName} is a development version.`);
-      process.exit(1);
+    if (isDevFolder) utils.emitError(`Plugin ${pluginFullName} is a development version.`);
+
+    if (utils.force) {
+      uninstallPlugin(system.folderName, pluginFullName, pluginAuthor);
+      return;
     }
 
     const r1 = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -65,8 +59,7 @@ export default function uninstall(systemId: string, pluginFullName: string) {
 function uninstallSystem(systemFolderName: string) {
   rimraf(`${utils.systemsPath}/${systemFolderName}`, (err) => {
     if (err != null) {
-      console.error(`Failed to uninstalled system.`);
-      process.exit(1);
+      utils.emitError(`Failed to uninstalled system.`);
     } else {
       console.log("System successfully uninstalled.");
       process.exit(0);
@@ -77,8 +70,7 @@ function uninstallSystem(systemFolderName: string) {
 function uninstallPlugin(systemFolderName: string, pluginFullName: string, pluginAuthor: string) {
   rimraf(`${utils.systemsPath}/${systemFolderName}/plugins/${pluginFullName}`, (err) => {
     if (err != null) {
-      console.error(`Failed to uninstalled plugin.`);
-      process.exit(1);
+      utils.emitError(`Failed to uninstalled plugin.`);
     } else {
       if (fs.readdirSync(`${utils.systemsPath}/${systemFolderName}/plugins/${pluginAuthor}`).length === 0)
         fs.rmdirSync(`${utils.systemsPath}/${systemFolderName}/plugins/${pluginAuthor}`);

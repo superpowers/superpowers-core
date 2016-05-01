@@ -15,7 +15,11 @@ export const folderNameRegex = /^[a-z0-9_-]+$/;
 export const pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
 
 // Data path
-const argv = yargs.describe("data-path", "Path to store/read data files from, including config and projects").argv;
+const argv = yargs
+  .describe("data-path", "Path to store/read data files from, including config and projects")
+  .describe("download-url", "Url to download a release")
+  .boolean("force")
+  .argv;
 export const dataPath = argv["data-path"] != null ? path.resolve(argv["data-path"]) : path.resolve(`${__dirname}/../..`);
 mkdirp.sync(dataPath);
 mkdirp.sync(`${dataPath}/projects`);
@@ -23,11 +27,15 @@ mkdirp.sync(`${dataPath}/builds`);
 export const systemsPath = `${dataPath}/systems`;
 mkdirp.sync(systemsPath);
 
+export const force = argv["force"];
+export const downloadURL = argv["download-url"];
+
 // Systems and plugins
 export const builtInPluginAuthors = [ "default", "common", "extra" ];
 export const systemsById: { [id: string]: {
   folderName: string;
   version: string;
+  isDev: boolean;
   plugins: { [author: string]: string[] }
 } } = {};
 
@@ -44,11 +52,14 @@ for (const entry of fs.readdirSync(systemsPath)) {
     systemId = packageData.superpowers.systemId;
     version = packageData.version;
   } catch (err) {
-    console.error(`Could not load system id from systems/${entry}/package.json:`);
-    console.error(err.stack);
-    process.exit(1);
+    emitError(`Could not load system id from systems/${entry}/package.json:`, err.stack);
   }
-  systemsById[systemId] = { folderName: entry, version, plugins: {} };
+
+  let isDev = true;
+  try { if (!fs.lstatSync(`${systemPath}/.git`).isDirectory()) isDev = false; }
+  catch (err) { isDev = false; }
+
+  systemsById[systemId] = { folderName: entry, version, isDev, plugins: {} };
   let pluginAuthors: string[];
   try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
   if (pluginAuthors == null) continue;
@@ -92,12 +103,14 @@ type Registry = {
     version: string;
     downloadURL: string;
     localVersion: string;
+    isLocalDev: boolean;
   }
   systems: { [sytemId: string]: {
     repository: string;
     version: string;
     downloadURL: string;
     localVersion: string;
+    isLocalDev: boolean;
     plugins: { [author: string]: { [name: string]: string } }
 } } };
 export function getRegistry(callback: (err: Error, registry: Registry) => any) {
@@ -126,14 +139,25 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
           const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
           const { version: localVersion } = JSON.parse(packageData);
 
-          registry.core = { version, downloadURL, localVersion };
+          let isLocalDev = true;
+          try { if (!fs.lstatSync(`${__dirname}/../../.git`).isDirectory()) isLocalDev = false; }
+          catch (err) { isLocalDev = false; }
+
+          registry.core = { version, downloadURL, localVersion, isLocalDev };
 
           async.each(Object.keys(registry.systems), (systemId, cb) => {
             const system = registry.systems[systemId];
             getLatestRelease(system.repository, (version, downloadURL) => {
               system.version = version;
               system.downloadURL = downloadURL;
-              if (systemsById[systemId] != null) system.localVersion = systemsById[systemId].version;
+
+              if (systemsById[systemId] != null) {
+                system.localVersion = systemsById[systemId].version;
+                system.isLocalDev = systemsById[systemId].isDev;
+              } else {
+                system.isLocalDev = false;
+              }
+
               cb();
             });
           }, (err) => { callback(err, registry); });
@@ -155,10 +179,8 @@ export function getLatestRelease(repositoryURL: string, callback: (version: stri
     headers: { "user-agent": "Superpowers" }
   }, (res) => {
     if (res.statusCode !== 200) {
-      console.error(`Couldn't get latest release from repository at ${repositoryURL}:`);
       const err = new Error(`Unexpected status code: ${res.statusCode}`);
-      console.error(err.stack);
-      process.exit(1);
+      emitError(`Couldn't get latest release from repository at ${repositoryURL}:`, err.stack);
     }
 
     let content = "";
@@ -170,9 +192,7 @@ export function getLatestRelease(repositoryURL: string, callback: (version: stri
   });
 
   request.on("error", (err: Error) => {
-    console.error(`Couldn't get latest release from repository at ${repositoryURL}:`);
-    console.error(err.stack);
-    process.exit(1);
+    emitError(`Couldn't get latest release from repository at ${repositoryURL}:`, err.stack);
   });
 }
 
@@ -249,4 +269,12 @@ function onProgress(value: number) {
   readline.cursorTo(process.stdout, 0, 1);
   console.log(`${value}%`);
   if (process != null && process.send != null) process.send({ type: "progress", value });
+}
+
+export function emitError(message: string, details?: string) {
+  console.error(message);
+  console.error(details);
+  if (process != null && process.send != null) process.send({ type: "error", message });
+
+  process.exit(1);
 }

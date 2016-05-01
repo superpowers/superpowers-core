@@ -1,12 +1,24 @@
 import * as utils from "./utils";
 
 export default function install(systemId: string, pluginFullName: string) {
-  utils.getRegistry((err, registry) => {
-    if (err) {
-      console.error("Error while fetching registry:");
-      console.error(err.stack);
-      process.exit(1);
+  if (utils.downloadURL != null) {
+    if (pluginFullName == null) {
+      if (utils.systemsById[systemId] != null) utils.emitError(`System ${systemId} is already installed.`);
+
+      installSystem(systemId, utils.downloadURL);
+
+    } else {
+      const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
+      if (utils.systemsById[systemId].plugins[pluginAuthor] != null && utils.systemsById[systemId].plugins[pluginAuthor].indexOf(pluginName) !== -1)
+        utils.emitError(`Plugin ${pluginFullName} is already installed.`);
+
+      installPlugin(systemId, pluginFullName, utils.downloadURL);
     }
+    return;
+  }
+
+  utils.getRegistry((err, registry) => {
+    if (err) utils.emitError("Error while fetching registry:", err.stack);
 
     if (registry.systems[systemId] == null) {
       console.error(`System ${systemId} is not on the registry.`);
@@ -39,10 +51,7 @@ export default function install(systemId: string, pluginFullName: string) {
 
       installPlugin(systemId, pluginFullName, registry.systems[systemId].plugins[pluginAuthor][pluginName]);
     } else {
-      if (pluginFullName != null) {
-        console.error(`System ${systemId} is not installed.`);
-        process.exit(1);
-      }
+      if (pluginFullName != null) utils.emitError(`System ${systemId} is not installed.`);
 
       installSystem(systemId, registry.systems[systemId].downloadURL);
     }
