@@ -53,6 +53,7 @@ declare namespace SupClient {
   interface HTMLInputOptions extends HTMLOptions {
     type?: string;
     value?: string;
+    readOnly?: boolean;
     accept?: string;
     placeholder?: string;
     pattern?: string;
