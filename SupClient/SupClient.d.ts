@@ -152,7 +152,7 @@ declare namespace SupClient {
     }
 
     export function load(files: File[], callback: Function): void;
-    export function t(key: string, variables?: { [key: string]: string }): string;
+    export function t(key: string, variables?: { [key: string]: string|number }): string;
   }
 
   class ProjectClient {
