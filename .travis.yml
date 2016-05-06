@@ -1,6 +1,6 @@
 sudo: false
 language: node_js
-node_js: "node"
+node_js: "5"
 # Skip "npm install" since "npm run build" takes care of it below
 install: true
 cache:
