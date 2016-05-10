@@ -210,7 +210,7 @@ declare namespace SupClient {
   }
 
   interface BuildSettingsEditorConstructor {
-    new(container: HTMLDivElement/*, projectClient: SupClient.ProjectClient*/): BuildSettingsEditor;
+    new(container: HTMLDivElement, entries: SupCore.Data.Entries, entriesTreeView: any /* TreeView */): BuildSettingsEditor;
   }
 
   export interface BuildPlugin {

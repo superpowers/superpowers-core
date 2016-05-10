@@ -18,7 +18,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
   private selectedPluginName: string;
   private settingsEditorsByName: { [pluginName: string]: SupClient.BuildSettingsEditor; } = {};
 
-  constructor(callback: (result: BuildSetup) => void) {
+  constructor(private entries: SupCore.Data.Entries, private entriesTreeView: TreeView, callback: (result: BuildSetup) => void) {
     super(callback);
 
     this.formElt.style.width = "700px";
@@ -117,7 +117,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
         SupClient.html("div", "label", { parent: elt, textContent: SupClient.i18n.t(`buildSettingsEditors:${pluginName}.label`) });
         SupClient.html("div", "description", { parent: elt, textContent: SupClient.i18n.t(`buildSettingsEditors:${pluginName}.description`) });
 
-        this.settingsEditorsByName[pluginName] = new plugin.settingsEditor(this.settingsContainer);
+        this.settingsEditorsByName[pluginName] = new plugin.settingsEditor(this.settingsContainer, this.entries, this.entriesTreeView);
       }
 
       this.treeView.addToSelection(this.treeView.treeRoot.querySelector("li") as HTMLLIElement);

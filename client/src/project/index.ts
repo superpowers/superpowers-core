@@ -567,7 +567,7 @@ function stopProject() {
 
 function openStartBuildDialog() {
   /* tslint:disable:no-unused-expression */
-  new StartBuildDialog((buildSetup) => {
+  new StartBuildDialog(entries, ui.entriesTreeView, (buildSetup) => {
     /* tslint:enable:no-unused-expression */
     if (buildSetup == null) return;
 
