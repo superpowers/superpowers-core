@@ -831,6 +831,7 @@ function onSearchEntryDialog() {
 
 function openEntry(id: string, state?: {[name: string]: any}) {
   const entry = entries.byId[id];
+  if (entry == null) return;
 
   // Just toggle folders
   if (entry.type == null) { ui.entriesTreeView.selectedNodes[0].classList.toggle("collapsed"); return; }
