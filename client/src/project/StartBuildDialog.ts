@@ -124,7 +124,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
       this.selectedPluginName = this.treeView.selectedNodes[0].dataset["buildPlugin"];
       this.validateButtonElt.disabled = false;
     }
-  }
+  };
 
   private onTreeViewSelectionChange = () => {
     if (this.treeView.selectedNodes.length === 0) {
