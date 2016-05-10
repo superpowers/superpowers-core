@@ -572,7 +572,6 @@ function openStartBuildDialog() {
     if (buildSetup == null) return;
 
     const buildWindow = SupApp.openWindow(`${window.location.origin}/build/?project=${SupClient.query.project}`, { size: { width: 600, height: 150 }, resizable: false });
-    buildWindow.webContents.openDevTools();
     buildWindow.webContents.addListener("did-finish-load", () => {
       buildWindow.webContents.send("build", buildSetup);
     });
