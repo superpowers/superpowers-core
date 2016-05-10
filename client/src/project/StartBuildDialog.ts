@@ -51,7 +51,8 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
         position: "relative",
         border: "1px solid #aaa",
         overflowY: "auto",
-        width: "200px"
+        width: "200px",
+        marginRight: "0.5em"
       }
     });
 
