@@ -98,6 +98,16 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
       if (fs.existsSync(`${pluginPath}/public/editors`)) {
         const editors = fs.readdirSync(`${pluginPath}/public/editors`);
         editors.forEach((editorName) => {
+          // Ignore folders with no index.html
+          try {
+            const stats = fs.lstatSync(`${pluginPath}/public/editors/${editorName}/index.html`);
+            if (!stats.isFile()) return;
+          }
+          catch (err) {
+            if (err.code === "ENOENT") return;
+            throw err;
+          }
+
           if (SupCore.system.data.assetClasses[editorName] != null) {
             pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
           } else {
