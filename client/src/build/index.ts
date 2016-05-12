@@ -1,6 +1,10 @@
 import * as async from "async";
-
 import { BuildSetup } from "../project/StartBuildDialog";
+
+document.addEventListener("keydown", (event) => {
+  // F12
+  if (event.keyCode === 123) SupApp.getCurrentWindow().webContents.toggleDevTools();
+});
 
 let socket: SocketIOClient.Socket;
 
