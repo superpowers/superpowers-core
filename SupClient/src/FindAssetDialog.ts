@@ -73,11 +73,23 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     let results = fuzzy.filter(this.searchElt.value, this.pathsList);
     const resultsWithoutSlashes = fuzzy.filter(this.searchElt.value, this.pathsWithoutSlashesList);
     results = results.concat(resultsWithoutSlashes);
-    results.sort((a, b) => b.score - a.score);
 
     this.treeView.clearSelection();
     this.treeView.treeRoot.innerHTML = "";
     if (results.length === 0) return;
+
+    results.sort((a, b) => b.score - a.score);
+    let index = results.length - 1;
+    for (let i = 0; i < results.length; i++) {
+      const result = results[index];
+
+      if (result.original.search(new RegExp(this.searchElt.value, "i")) !== -1) {
+        results.splice(index, 1);
+        results.unshift(result);
+      } else {
+        index -= 1;
+      }
+    }
 
     for (const result of results) {
       const liElt = this.entryElts[result.index];
