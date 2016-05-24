@@ -4,7 +4,7 @@ html
     meta(charset="utf-8")
     title Hub — Superpowers
     link(rel="stylesheet",href="/styles/reset.css")
-    link(rel="stylesheet",href="/styles/perfectResize.css")
+    link(rel="stylesheet",href="/styles/resizeHandle.css")
     link(rel="stylesheet",href="/styles/treeView.css")
     link(rel="stylesheet",href="/styles/dialogs.css")
     link(rel="stylesheet",href="/hub/index.css")
@@ -13,15 +13,11 @@ html
     .server-header
       img.server-icon(src="/images/icon.png")
       .server-name
-      .controls
-        button.minimize
-        button.maximize
-        button.close
 
     .projects-header
       .projects-buttons.button-strip
         button(disabled).new-project= t("hub:newProject.title")
-        button(disabled,hidden).open-project= t("hub:openProject")
+        button(disabled).open-project= t("hub:openProject")
         button(disabled).edit-project= t("hub:editDetails.title")
 
       .language-container
@@ -29,16 +25,17 @@ html
         select.language
 
     .projects-tree-view
-      .connecting
+      .tree-loading
         div= t("common:states.connecting")
 
     a(href="http://superpowers-html5.com/",target="_blank").server-footer
       | Superpowers — HTML5 2D+3D game maker
 
     script.
-      // We want to apply this class before the first render
-      // to avoid having the window borders flashing
-      if (window.navigator.userAgent.indexOf("Electron") === -1) document.body.classList.add("browser");
+      if (window.navigator.userAgent.indexOf("Electron") !== -1) {
+        document.body.querySelector(".server-header") .hidden = true;
+        document.body.querySelector(".server-footer") .hidden = true;
+      }
     script(src="/SupCore.js")
     script(src="/SupClient.js")
     script(src="/hub/index.js")

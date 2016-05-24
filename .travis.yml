@@ -1,15 +1,29 @@
 sudo: false
-
 language: node_js
-node_js:
-    - "4.2.4"
-before_install:
-    - npm install -g npm
-    - npm --version
-
+node_js: "5"
+# Skip "npm install" since "npm run build" takes care of it below
+install: true
 cache:
   directories:
-    - node_modules
-
+  - node_modules
 script:
-  - npm run build
+- npm run build
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/44f5607466509af53a93
+    on_success: change
+    on_failure: always
+    on_start: never
+before_deploy:
+- npm run package
+deploy:
+  provider: releases
+  api_key:
+    secure: QwUnMddbtUUYqJiz85oYDwAR57j0BiubIWGM6QTTqclI/QoyPILDI1bIxwDGmoEiBQIA8+ZQIHRU7BUj98roWT8sUPB91QTq098C3xRqu9MD16Z8nfWz/PwKCdTkugrvpkvQYaf1t9q1M1fd9Y7V6/MomZRYmtOSOUbQiN/uDfoWhuyU3USmm89ihJlG7Er5PpHFjx9lpzhaby4HaGivPUGYe9dlZtOc14doIUiYkJDflL31YqnUmKJJLEoqudzuW2v1gru69Wi/jQUAVmSdFQ8GE4/Wiyy0iAM4M2JBuTOm3EI90c5pGuUUFWbIBQTBoV6WoUEtNbit+FGAvh4sWIiSZoxZuIVqd7KDLNVnXw9k7RGM5QG6MxEHkkTSI3rr2w0GBShEV7x78iEGtrTS+gPfVHyaJXe/B7VTzT1mgF5NNdGV/7CUqbo3ZZVSRrCHL/AZ2u2FowNMx7s46HDVfAKwEXBLuAf++MZPgFYN1xwo2PiR0CmvxbarVt35RGC+JJx5hqGqd5OXmOipE5BRuN4xL3uWeJX4sF1wLZb+yeUKKHDI+cc1BylarECEAIhChImnlsyNLD0/3HBsig4w1/SVEuog96WgJKP+N++Q2iPZ+ersg6+JUDBXgF8LS+bToa019JKJMABB0mDNmEyno4G2YU8m/YyqqZRGfFShPfA=
+  file_glob: true
+  file: "packages/superpowers-core-*.zip"
+  skip_cleanup: true
+  on:
+    repo: superpowers/superpowers-core
+    tags: true

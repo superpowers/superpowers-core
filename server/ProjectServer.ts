@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as async from "async";
 
-import * as paths from "./paths";
 import authMiddleware from "./authenticate";
 import RemoteProjectClient from "./RemoteProjectClient";
 import * as schemas from "./schemas";
@@ -21,7 +20,6 @@ export default class ProjectServer {
   system: SupCore.System;
 
   data: ProjectServerData;
-  projectPath: string;
   buildsPath: string;
   nextBuildId: number;
 
@@ -29,9 +27,7 @@ export default class ProjectServer {
   nextClientId = 0;
   clientsBySocketId: { [socketId: string]: RemoteProjectClient } = {};
 
-  constructor(globalIO: SocketIO.Server, folderName: string, callback: (err: Error) => any) {
-    this.projectPath = path.join(paths.projects, folderName);
-
+  constructor(globalIO: SocketIO.Server, public projectPath: string, buildsPath: string, callback: (err: Error) => any) {
     this.data = {
       manifest: null,
       entries: null,
@@ -56,7 +52,7 @@ export default class ProjectServer {
         if (this.system == null) {
           callback(new Error(`The system ${this.data.manifest.pub.systemId} is not installed.`));
         } else {
-          this.buildsPath = path.join(paths.builds, this.data.manifest.pub.id);
+          this.buildsPath = path.join(buildsPath, this.data.manifest.pub.id);
           callback(null);
         }
       };

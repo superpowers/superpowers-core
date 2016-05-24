@@ -9,7 +9,7 @@
     "notifications": {
       "enable": "Fes click per habilitar les notificacions",
       "disable": "Fes click per deshabilitar les notificacions",
-      "new": "Nou missatge de xat en el projecte -${projectName}-"
+      "new": "Nou missatge de xat en el projecte \"${projectName}\""
     }
   },
   "treeView": {

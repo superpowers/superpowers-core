@@ -3,12 +3,13 @@ html
   head
     title Project — Superpowers
     link(rel="stylesheet",href="/styles/reset.css")
-    link(rel="stylesheet",href="/styles/perfectResize.css")
+    link(rel="stylesheet",href="/styles/resizeHandle.css")
+    link(rel="stylesheet",href="/styles/tabStrip.css")
     link(rel="stylesheet",href="/styles/treeView.css")
     link(rel="stylesheet",href="/styles/dialogs.css")
     link(rel="stylesheet",href="/project/index.css")
 
-  body
+  body(hidden)
     .sidebar
       .project-management
         .project-icon
@@ -27,25 +28,21 @@ html
         button(title=t("common:actions.duplicate"),disabled,data-hotkey="control+D").duplicate-entry.single.asset-only.edit
         button(title=t("project:treeView.trash.title"),disabled,data-hotkey="delete").trash-entry.edit
         button(title=t("common:actions.search"),disabled,data-hotkey="control+O").search
+        button(title=t("common:actions.filter"),disabled,data-hotkey="control+I").filter
+      .filter-buttons.flat-button-strip(hidden)
       .entries-tree-view
-        .connecting
+        .tree-loading
           div= t("common:states.connecting")
       .tools
         ul
+    .resize-handle.left
     .main
       .top
         .tabs-bar
         .controls
           button.toggle-notifications
-          button.minimize
-          button.maximize
-          button.close
       .panes
 
-    script.
-      // We want to apply this class before the first render
-      // to avoid having the window borders flashing
-      if (window.navigator.userAgent.indexOf("Electron") === -1) document.body.classList.add("browser");
     script(src="/SupCore.js")
     script(src="/SupClient.js")
     script(src="/project/index.js")

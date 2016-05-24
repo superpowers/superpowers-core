@@ -1,15 +1,18 @@
-var gulp = require("gulp");
+"use strict";
+
+const gulp = require("gulp");
 
 // TypeScript
-var ts = require("gulp-typescript");
-var tsProject = ts.createProject("./tsconfig.json");
-var tslint = require("gulp-tslint");
+const ts = require("gulp-typescript");
+const tsProject = ts.createProject("./tsconfig.json");
+const tslint = require("gulp-tslint");
 
 gulp.task("typescript", function() {
-  var failed = false;
-  var tsResult = tsProject.src()
-    .pipe(tslint({ tslint: require("tslint") }))
-    .pipe(tslint.report("prose", { emitError: false }))
+  let failed = false;
+  const tsResult = tsProject.src()
+    .pipe(tslint())
+    .pipe(tslint.report("prose", { emitError: true }))
+    .on("error", (err) => { throw err; })
     .pipe(ts(tsProject))
     .on("error", () => { failed = true; })
     .on("end", () => { if (failed) throw new Error("There were TypeScript errors."); });

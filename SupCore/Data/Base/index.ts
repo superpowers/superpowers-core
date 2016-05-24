@@ -38,7 +38,7 @@ export function getRuleViolation(value: any, rule: Rule, create = false): Violat
   if (!create && !rule.mutable) return { message: "Immutable" };
 
   const optional = rule.type[rule.type.length - 1] === "?";
-  if (optional && value == null) return null;
+  if ((optional || rule.type === "any") && value == null) return null;
 
   let ruleType: string;
   if (optional) ruleType = rule.type.slice(0, rule.type.length - 1);

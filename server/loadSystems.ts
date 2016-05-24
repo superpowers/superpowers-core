@@ -3,21 +3,20 @@ import * as fs from "fs";
 import * as express from "express";
 import * as async from "async";
 import * as readdirRecursive from "recursive-readdir";
-import { getLocalizedFilename } from "./paths";
+import getLocalizedFilename from "./getLocalizedFilename";
 
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
-const systemsPath = path.resolve(`${__dirname}/../systems`);
 
 export const buildFilesBySystem: { [systemId: string]: string[]; } = {};
 
 export default function(mainApp: express.Express, buildApp: express.Express, callback: Function) {
-  async.eachSeries(fs.readdirSync(systemsPath), (systemFolderName, cb) => {
+  async.eachSeries(fs.readdirSync(SupCore.systemsPath), (systemFolderName, cb) => {
     if (systemFolderName.indexOf(".") !== -1) { cb(); return; }
 
-    const systemPath = path.join(systemsPath, systemFolderName);
+    const systemPath = path.join(SupCore.systemsPath, systemFolderName);
     if (!fs.statSync(systemPath).isDirectory()) { cb(); return; }
 
-    const systemId = JSON.parse(fs.readFileSync(path.join(systemsPath, systemFolderName, "package.json"), { encoding: "utf8" })).superpowers.systemId;
+    const systemId = JSON.parse(fs.readFileSync(path.join(SupCore.systemsPath, systemFolderName, "package.json"), { encoding: "utf8" })).superpowers.systemId;
     SupCore.system = SupCore.systems[systemId] = new SupCore.System(systemId, systemFolderName);
 
     // Expose public stuff
@@ -111,7 +110,11 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
 
       // Load data module
       const dataModulePath = `${pluginPath}/data/index.js`;
-      if (fs.existsSync(dataModulePath)) require(dataModulePath);
+      if (fs.existsSync(dataModulePath)) {
+        /* tslint:disable */
+        require(dataModulePath);
+        /* tslint:enable */
+      }
 
       // Collect plugin info
       pluginsInfo.list.push(`${pluginAuthor}/${pluginName}`);
@@ -125,9 +128,9 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
           }
 
           mainApp.get(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}/editors/${editorName}`, (req, res) => {
-            const language = req.cookies["supLanguage"];
+            const languageCode = req.cookies["supLanguage"];
             const editorPath = path.join(pluginPath, "public/editors", editorName);
-            const localizedIndexFilename = getLocalizedFilename("index.html", language);
+            const localizedIndexFilename = getLocalizedFilename("index.html", languageCode);
             fs.exists(path.join(editorPath, localizedIndexFilename), (exists) => {
               if (exists) res.sendFile(path.join(editorPath, localizedIndexFilename));
               else res.sendFile(path.join(editorPath, `index.html`));

@@ -1,0 +1,7 @@
+{
+  "welcome": "Välkommen till denna Superpowers server!",
+  "password": "Server lösenord",
+  "username": "Användarnamn",
+  "usernamePatternDescription": "Giltiga tecken är: bokstäver, siffror, bindestreck och understreck.",
+  "logIn": "Logga in"
+}

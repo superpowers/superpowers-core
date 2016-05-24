@@ -37,14 +37,18 @@ export default class TreeById extends EventEmitter {
   }
 
   walk(callback: (node: TreeNode, parentNode?: TreeNode) => any) {
-    for (const node of this.pub) this.walkNode(node, null, callback);
+    for (const node of this.pub) {
+      if (this.walkNode(node, null, callback) === false) break;
+    }
   }
 
   walkNode(node: TreeNode, parentNode: TreeNode, callback: (node: TreeNode, parentNode?: TreeNode) => any) {
-    callback(node, parentNode);
+    if (callback(node, parentNode) === false) return false;
 
     if (node.children != null) {
-      for (const child of node.children) this.walkNode(child, node, callback);
+      for (const child of node.children) {
+        if (this.walkNode(child, node, callback) === false) return false;
+      }
     }
   }
 

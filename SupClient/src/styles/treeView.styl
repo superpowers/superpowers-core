@@ -12,6 +12,14 @@ ol.tree {
     user-select: none;
   }
 
+  &.drop-inside:before {
+    position: absolute;
+    content: "";
+    border-top: 1px solid #888;
+    left: 0;
+    right: 0;
+  }
+
   ol {
     list-style: none;
     margin: 0;
@@ -58,7 +66,7 @@ ol.tree {
     &.selected { background: #beddf4; }
   }
 
-  li.item .drop-below {
+  li.item.drop-below {
     border-bottom: 1px solid #888;
     padding-bottom: 0;
   }
@@ -67,7 +75,8 @@ ol.tree {
     color: #444;
 
     > .toggle {
-      background-image: url(/images/treeView/group-open.svg);
+      opacity: 0.5;
+      background: url(/images/treeView/group-open-dark.svg) center no-repeat;
       cursor: pointer;
     }
 
@@ -84,8 +93,24 @@ ol.tree {
   }
 
   li.group.collapsed {
-    > .toggle { background-image: url(/images/treeView/group-closed.svg); }
+    > .toggle { background-image: url(/images/treeView/group-closed-dark.svg); }
 
     + ol > ol, +ol > li { display: none; }
   }
+}
+
+.tree-loading {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.5;
 }

@@ -9,7 +9,7 @@
     "notifications": {
       "enable": "Click to enable notifications",
       "disable": "Click to disable notifications",
-      "new": "New chat message in -${projectName}- project"
+      "new": "New chat message in \"${projectName}\" project"
     }
   },
   "treeView": {
@@ -23,7 +23,7 @@
     "newFolder": {
       "title": "New folder",
       "prompt": "Enter a name for the new folder.",
-      "placeholder": "Enter a name",
+      "placeholder": "Folder name",
       "initialValue": "Folder"
     },
     "renamePrompt": "Enter a new name for the asset.",
@@ -32,7 +32,6 @@
       "title": "Trash",
       "prompt": "Are you sure you want to trash the selected entries?",
       "warnBrokenDependency": "${entryName} is used in ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Search for assets"
+    }
   }
 }

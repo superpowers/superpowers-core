@@ -1,0 +1,7 @@
+{
+  "welcome": "歡迎來到 Superpowers 主機!",
+  "password": "主機密碼",
+  "username": "使用者名稱",
+  "usernamePatternDescription": "可用的字元為: 文字, 數字, - 或底線.",
+  "logIn": "登入"
+}

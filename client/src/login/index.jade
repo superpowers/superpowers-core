@@ -11,10 +11,6 @@ html
     .server-header
       img.server-icon(src="/images/icon.png")
       .server-name
-      .controls
-        button.minimize
-        button.maximize
-        button.close
     .connecting
       p= t("common:states.connecting")
     form.login(hidden)
@@ -38,9 +34,10 @@ html
       | Superpowers — HTML5 2D+3D game maker
 
     script.
-      // We want to apply this class before the first render
-      // to avoid having the window borders flashing
-      if (window.navigator.userAgent.indexOf("Electron") === -1) document.body.classList.add("browser");
+      if (window.navigator.userAgent.indexOf("Electron") !== -1) {
+        document.body.querySelector(".server-header") .hidden = true;
+        document.body.querySelector(".server-footer") .hidden = true;
+      }
     script(src="/SupCore.js")
     script(src="/SupClient.js")
     script(src="/login/index.js")

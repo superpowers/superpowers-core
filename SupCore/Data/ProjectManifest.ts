@@ -13,9 +13,9 @@ export default class ProjectManifest extends Hash {
   migratedFromFormatVersion: number;
 
   constructor(pub: SupCore.Data.ProjectManifestPub) {
-    this.migratedFromFormatVersion = ProjectManifest.migrate(pub);
-
+    const migratedFromFormatVersion = ProjectManifest.migrate(pub);
     super(pub, ProjectManifest.schema);
+    this.migratedFromFormatVersion = migratedFromFormatVersion;
   }
 
   static migrate(pub: SupCore.Data.ProjectManifestPub): number {

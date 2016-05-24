@@ -1,50 +1,41 @@
-import "../window";
-import CreateAssetDialog from "../dialogs/CreateAssetDialog";
-import FindAssetDialog from "../dialogs/FindAssetDialog";
+import CreateAssetDialog from "./CreateAssetDialog";
 import * as async from "async";
 
-const nodeRequire = require;
-/* tslint:disable */
-const TreeView = require("dnd-tree-view");
-const PerfectResize = require("perfect-resize");
-const TabStrip = require("tab-strip");
-/* tslint:enable */
+import * as TreeView from "dnd-tree-view";
+import * as ResizeHandle from "resize-handle";
+import * as TabStrip from "tab-strip";
 
 let socket: SocketIOClient.Socket;
 
 interface EditorManifest {
+  title: string;
   // assetType: string; <- for asset editors, soon
   pinned?: boolean;
   pluginPath: string;
 }
 
-let data: {
-  buildPort?: number;
-  systemId?: string;
-  manifest?: SupCore.Data.ProjectManifest;
-  entries?: SupCore.Data.Entries;
+let buildPort: number;
+let manifest: SupCore.Data.ProjectManifest;
+let entries: SupCore.Data.Entries;
 
-  assetTypesByTitle?: { [title: string]: string; };
-  editorsByAssetType?: { [assetType: string]: EditorManifest };
-  toolsByName?: { [name: string]: EditorManifest };
-};
+export let assetTypes: string[];
+export let editorsByAssetType: { [assetType: string]: EditorManifest };
+export let toolsByName: { [name: string]: EditorManifest };
 
 const ui: {
-  entriesTreeView?: any;
+  entriesTreeView?: TreeView;
   openInNewWindowButton?: HTMLButtonElement;
-  tabStrip?: any;
+  tabStrip?: TabStrip;
+  entriesFilterStrip?: HTMLElement;
 
   homeTab?: HTMLLIElement;
   panesElt?: HTMLDivElement;
   toolsElt?: HTMLUListElement;
 } = {};
 
-let electron: GitHubElectron.Electron;
 let runWindow: GitHubElectron.BrowserWindow;
 
-if (SupClient.isApp) {
-  electron = nodeRequire("electron");
-
+if (SupApp != null) {
   window.addEventListener("beforeunload", () => {
     if (runWindow != null) runWindow.removeListener("closed", onCloseRunWindow);
   });
@@ -52,6 +43,7 @@ if (SupClient.isApp) {
 
 function start() {
   if (SupClient.query.project == null) goToHub();
+  document.body.hidden = false;
 
   // Development mode
   if (localStorage.getItem("superpowers-dev-mode") != null) {
@@ -65,7 +57,6 @@ function start() {
   }
 
   // Hot-keys
-  SupClient.setupHotkeys();
   document.addEventListener("keydown", (event) => {
     if (document.querySelector(".dialog") != null) return;
 
@@ -86,7 +77,12 @@ function start() {
   });
 
   // Make sidebar resizable
-  new PerfectResize(document.querySelector(".sidebar"), "left");
+  const sidebarResizeHandle = new ResizeHandle(document.querySelector(".sidebar") as HTMLElement, "left");
+  if (SupClient.query.asset != null || SupClient.query["tool"] != null) {
+    sidebarResizeHandle.handleElt.classList.add("collapsed");
+    sidebarResizeHandle.targetElt.style.width = "0";
+    sidebarResizeHandle.targetElt.style.display = "none";
+  }
 
   // Project info
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
@@ -95,16 +91,18 @@ function start() {
   document.querySelector(".project-buttons .debug").addEventListener("click", () => { runProject({ debug: true }); });
   document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
 
-  if (!SupClient.isApp) {
+  if (SupApp == null) {
     (document.querySelector(".project-buttons .publish") as HTMLButtonElement).title = SupClient.i18n.t("project:header.publishDisabled");
     (document.querySelector(".project-buttons .debug") as HTMLButtonElement).hidden = true;
     (document.querySelector(".project-buttons .stop") as HTMLButtonElement).hidden = true;
   }
 
   // Entries tree view
-  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view"), { dropCallback: onEntryDrop });
+  ui.entriesTreeView = new TreeView(document.querySelector(".entries-tree-view") as HTMLElement, { dragStartCallback: onEntryDragStart, dropCallback: onTreeViewDrop });
   ui.entriesTreeView.on("selectionChange", updateSelectedEntry);
   ui.entriesTreeView.on("activate", onEntryActivate);
+
+  ui.entriesFilterStrip = (document.querySelector(".filter-buttons") as HTMLElement);
 
   document.querySelector(".entries-buttons .new-asset").addEventListener("click", onNewAssetClick);
   document.querySelector(".entries-buttons .new-folder").addEventListener("click", onNewFolderClick);
@@ -112,6 +110,7 @@ function start() {
   document.querySelector(".entries-buttons .rename-entry").addEventListener("click", onRenameEntryClick);
   document.querySelector(".entries-buttons .duplicate-entry").addEventListener("click", onDuplicateEntryClick);
   document.querySelector(".entries-buttons .trash-entry").addEventListener("click", onTrashEntryClick);
+  document.querySelector(".entries-buttons .filter").addEventListener("click", onToggleFilterStripClick);
 
   ui.openInNewWindowButton = document.createElement("button");
   ui.openInNewWindowButton.className = "open-in-new-window";
@@ -119,7 +118,7 @@ function start() {
   ui.openInNewWindowButton.addEventListener("click", onOpenInNewWindowClick);
 
   // Tab strip
-  const tabsBarElt = document.querySelector(".tabs-bar");
+  const tabsBarElt = document.querySelector(".tabs-bar") as HTMLElement;
   ui.tabStrip = new TabStrip(tabsBarElt);
   ui.tabStrip.on("activateTab", onTabActivate);
   ui.tabStrip.on("closeTab", onTabClose);
@@ -183,7 +182,7 @@ function connect() {
 
 function loadPluginLocales(pluginsPaths: string[], cb: Function) {
   const localeFiles: SupClient.i18n.File[] = [];
-  const pluginsRoot = `/systems/${data.systemId}/plugins`;
+  const pluginsRoot = `/systems/${SupCore.system.id}/plugins`;
   for (const pluginPath of pluginsPaths) {
     localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "plugin", context: pluginPath });
     localeFiles.push({ root: `${pluginsRoot}/${pluginPath}`, name: "badges" });
@@ -193,55 +192,45 @@ function loadPluginLocales(pluginsPaths: string[], cb: Function) {
 }
 
 function setupAssetTypes(editorPaths: { [assetType: string]: string; }, callback: Function) {
-  data.editorsByAssetType = {};
-  data.assetTypesByTitle = {};
-
-  for (const assetType in editorPaths)
-    data.editorsByAssetType[assetType] = { pluginPath: editorPaths[assetType] };
-
-  const assetTypes = Object.keys(data.editorsByAssetType);
-  assetTypes.sort((a, b) => {
-    const titleA = SupClient.i18n.t(`${data.editorsByAssetType[a].pluginPath}:editors.${a}.title`);
-    const titleB = SupClient.i18n.t(`${data.editorsByAssetType[b].pluginPath}:editors.${b}.title`);
-    return titleA.localeCompare(titleB);
-  });
-
-  for (const assetType of assetTypes) {
-    const manifest = data.editorsByAssetType[assetType];
-    const title = SupClient.i18n.t(`${manifest.pluginPath}:editors.${assetType}.title`);
-    data.assetTypesByTitle[title] = assetType;
+  editorsByAssetType = {};
+  for (const assetType in editorPaths) {
+    editorsByAssetType[assetType] = {
+      title: SupClient.i18n.t(`${editorPaths[assetType]}:editors.${assetType}.title`),
+      pluginPath: editorPaths[assetType]
+    };
   }
+
+  assetTypes = Object.keys(editorPaths).sort((a, b) => editorsByAssetType[a].title.localeCompare(editorsByAssetType[b].title));
   callback();
 }
 
 function setupTools(toolPaths: { [name: string]: string; }, callback: Function) {
-  data.toolsByName = {};
+  toolsByName = {};
 
-  const pluginsRoot = `/systems/${data.systemId}/plugins`;
+  const pluginsRoot = `/systems/${SupCore.system.id}/plugins`;
 
   async.each(Object.keys(toolPaths), (toolName, cb) => {
     const pluginPath = toolPaths[toolName];
 
-    SupClient.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`, "json", (err: Error, manifest: EditorManifest) => {
+    const toolTitle = SupClient.i18n.t(`${toolPaths[toolName]}:editors.${toolName}.title`);
+
+    SupClient.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`, "json", (err: Error, toolManifest: EditorManifest) => {
       if (err != null) {
-        data.toolsByName[toolName] = { pinned: false, pluginPath };
+        toolsByName[toolName] = { pinned: false, pluginPath, title: toolTitle };
         cb();
         return;
       }
 
-      data.toolsByName[toolName] = manifest;
-      data.toolsByName[toolName].pluginPath = pluginPath;
+      toolsByName[toolName] = toolManifest;
+      toolsByName[toolName].pluginPath = pluginPath;
+      toolsByName[toolName].title = toolTitle;
       cb();
     });
   }, () => {
     ui.toolsElt.innerHTML = "";
 
-    const toolNames = Object.keys(data.toolsByName);
-    toolNames.sort((a, b) => {
-      const titleA = SupClient.i18n.t(`${data.toolsByName[a].pluginPath}:editors.${a}.title`);
-      const titleB = SupClient.i18n.t(`${data.toolsByName[b].pluginPath}:editors.${b}.title`);
-      return titleA.localeCompare(titleB);
-    });
+    const toolNames = Object.keys(toolsByName);
+    toolNames.sort((a, b) => toolsByName[a].title.localeCompare(toolsByName[b].title));
 
     for (const toolName of toolNames) setupTool(toolName);
     callback();
@@ -249,11 +238,10 @@ function setupTools(toolPaths: { [name: string]: string; }, callback: Function) 
 }
 
 function setupTool(toolName: string) {
-  const tool = data.toolsByName[toolName];
+  const tool = toolsByName[toolName];
 
-  if (tool.pinned) {
-    // TODO: Support multiple pinned tabs
-    ui.homeTab = openTool(toolName);
+  if (tool.pinned && SupClient.query.asset == null && SupClient.query["tool"] == null) {
+    openTool(toolName);
     return;
   }
 
@@ -263,7 +251,7 @@ function setupTool(toolName: string) {
   toolElt.appendChild(containerElt);
 
   const iconElt = document.createElement("img");
-  iconElt.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+  iconElt.src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   containerElt.appendChild(iconElt);
 
   const nameSpanElt = document.createElement("span");
@@ -275,7 +263,7 @@ function setupTool(toolName: string) {
   toolElt.addEventListener("mouseleave", (event) => {
     if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
   });
-  nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset.name); });
+  nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset["name"]); });
   ui.toolsElt.appendChild(toolElt);
 }
 
@@ -286,9 +274,9 @@ function onConnectionError() {
 }
 
 function onDisconnected() {
-  SupClient.dialogs.cancelDialogIfAny();
+  SupClient.Dialogs.cancelDialogIfAny();
 
-  data = null;
+  entries = null;
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
   updateSelectedEntry();
@@ -300,16 +288,14 @@ function onDisconnected() {
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = true;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = true;
-  (document.querySelector(".connecting") as HTMLDivElement).hidden = false;
+  (document.querySelector(".filter-buttons") as HTMLDivElement).hidden = true;
+  (document.querySelector(".entries-tree-view .tree-loading") as HTMLDivElement).hidden = false;
 }
 
-function onWelcome(clientId: number, config: { buildPort: number; systemId: string; }) {
-  data = {
-    buildPort: config.buildPort,
-    systemId: config.systemId
-  };
+function onWelcome(clientId: number, config: { buildPort: number; }) {
+  buildPort = config.buildPort;
 
-  SupClient.fetch(`/systems/${data.systemId}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
+  SupClient.fetch(`/systems/${SupCore.system.id}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
     loadPluginLocales(pluginsInfo.list, () => {
       async.parallel([
         (cb: Function) => { setupAssetTypes(pluginsInfo.paths.editors, cb); },
@@ -323,45 +309,53 @@ function onWelcome(clientId: number, config: { buildPort: number; systemId: stri
   });
 }
 
-function onManifestReceived(err: string, manifest: any) {
-  data.manifest = new SupCore.Data.ProjectManifest(manifest);
+function onManifestReceived(err: string, manifestPub: SupCore.Data.ProjectManifestPub) {
+  manifest = new SupCore.Data.ProjectManifest(manifestPub);
 
-  document.querySelector(".project-name").textContent = manifest.name;
-  document.title = `${manifest.name} — Superpowers`;
+  document.querySelector(".project-name").textContent = manifestPub.name;
+  document.title = `${manifestPub.name} — Superpowers`;
 }
 
-function onEntriesReceived(err: string, entries: SupCore.Data.EntryNode[]) {
-  data.entries = new SupCore.Data.Entries(entries);
+function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
+  entries = new SupCore.Data.Entries(entriesPub);
 
   ui.entriesTreeView.clearSelection();
   ui.entriesTreeView.treeRoot.innerHTML = "";
 
-  (document.querySelector(".connecting") as HTMLDivElement).hidden = true;
+  (document.querySelector(".entries-tree-view .tree-loading") as HTMLDivElement).hidden = true;
 
-  if (SupClient.isApp) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
+  if (SupApp != null) (<HTMLButtonElement>document.querySelector(".project-buttons .publish")).disabled = false;
   (document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
   (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-asset") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .new-folder") as HTMLButtonElement).disabled = false;
   (document.querySelector(".entries-buttons .search") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".entries-buttons .filter") as HTMLButtonElement).disabled = false;
+  (document.querySelector(".filter-buttons") as HTMLButtonElement).hidden = true;
 
   function walk(entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode, parentElt: HTMLLIElement) {
     const liElt = createEntryElement(entry);
     liElt.classList.add("collapsed");
 
-    const nodeType = (entry.children != null) ? "group" : "item";
+    const nodeType: "item"|"group" = (entry.children != null) ? "group" : "item";
     ui.entriesTreeView.append(liElt, nodeType, parentElt);
 
     if (entry.children != null) for (const child of entry.children) walk(child, entry, liElt);
   }
-  for (const entry of entries) walk(entry, null, null);
+  for (const entry of entriesPub) walk(entry, null, null);
+
+  setupFilterStrip();
+
+  if (SupClient.query.asset != null) openEntry(SupClient.query.asset);
+  else if (SupClient.query["tool"] != null) openTool(SupClient.query["tool"]);
 }
 
 function onSetManifestProperty(key: string, value: any) {
-  data.manifest.client_setProperty(key, value);
+  manifest.client_setProperty(key, value);
 
   switch (key) {
     case "name":
+      document.title = `${value} — Superpowers`;
       document.querySelector(".project-name").textContent = value;
       break;
   }
@@ -372,15 +366,15 @@ function onUpdateProjectIcon() {
 }
 
 function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: number) {
-  data.entries.client_add(entry, parentId, index);
+  entries.client_add(entry, parentId, index);
 
   const liElt = createEntryElement(entry);
   const nodeType = (entry.children != null) ? "group" : "item";
 
   let parentElt: HTMLLIElement;
   if (parentId != null) {
-    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
-    const parentEntry = data.entries.byId[parentId];
+    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`) as HTMLLIElement;
+    const parentEntry = entries.byId[parentId];
     const childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
@@ -390,24 +384,31 @@ function onEntryAdded(entry: SupCore.Data.EntryNode, parentId: string, index: nu
 
 let autoOpenAsset = true;
 function onEntryAddedAck(err: string, id: string) {
-  if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+  if (err != null) {
+    /* tslint:disable:no-unused-expression */
+    new SupClient.Dialogs.InfoDialog(err);
+    /* tslint:enable:no-unused-expression */
+    return;
+  }
 
   ui.entriesTreeView.clearSelection();
-  ui.entriesTreeView.addToSelection(ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`));
+  let entry = ui.entriesTreeView.treeRoot.querySelector(`li[data-id='${id}']`) as HTMLLIElement;
+  ui.entriesTreeView.addToSelection(entry);
   updateSelectedEntry();
 
   if (autoOpenAsset) openEntry(id);
+  if (entries.byId[id].type == null) entry.classList.remove("collapsed");
 }
 
 function onEntryMoved(id: string, parentId: string, index: number) {
-  data.entries.client_move(id, parentId, index);
+  entries.client_move(id, parentId, index);
 
   const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`) as HTMLLIElement;
 
   const oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
     const oldParentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`) as HTMLLIElement;
-    const parentEntry = data.entries.byId[oldParentId];
+    const parentEntry = entries.byId[oldParentId];
     const childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
@@ -416,8 +417,8 @@ function onEntryMoved(id: string, parentId: string, index: number) {
 
   let parentElt: HTMLLIElement;
   if (parentId != null) {
-    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`);
-    const parentEntry = data.entries.byId[parentId];
+    parentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${parentId}']`) as HTMLLIElement;
+    const parentEntry = entries.byId[parentId];
     const childrenElt = parentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
@@ -426,29 +427,18 @@ function onEntryMoved(id: string, parentId: string, index: number) {
   if (parentId != null) entryElt.dataset["parentId"] = parentId;
   else delete entryElt.dataset["parentId"];
 
-  updateEntryElementPath(id);
-  refreshAssetTabElement(data.entries.byId[id]);
-}
-
-function updateEntryElementPath(id: string) {
-  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
-  entryElt.dataset["dndText"] = data.entries.getPathFromId(id);
-
-  const node = data.entries.byId[id];
-  if (node.children != null) {
-    for (const child of node.children) updateEntryElementPath(child.id);
-  }
+  refreshAssetTabElement(entries.byId[id]);
 }
 
 function onEntryTrashed(id: string) {
-  data.entries.client_remove(id);
+  entries.client_remove(id);
 
-  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
+  const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`) as HTMLLIElement;
 
   const oldParentId: string = entryElt.dataset["parentId"];
   if (oldParentId != null) {
     const oldParentElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${oldParentId}']`) as HTMLLIElement;
-    const parentEntry = data.entries.byId[oldParentId];
+    const parentEntry = entries.byId[oldParentId];
     const childrenElt = oldParentElt.querySelector("span.children");
     childrenElt.textContent = `(${parentEntry.children.length})`;
   }
@@ -457,27 +447,26 @@ function onEntryTrashed(id: string) {
 }
 
 function onSetEntryProperty(id: string, key: string, value: any) {
-  data.entries.client_setProperty(id, key, value);
+  entries.client_setProperty(id, key, value);
 
   const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}']`);
 
   switch (key) {
     case "name":
       entryElt.querySelector(".name").textContent = value;
-      updateEntryElementPath(id);
 
       const walk = (entry: SupCore.Data.EntryNode) => {
         refreshAssetTabElement(entry);
         if (entry.children != null) for (const child of entry.children) walk(child);
       };
 
-      walk(data.entries.byId[id]);
+      walk(entries.byId[id]);
       break;
   }
 }
 
 function onBadgeSet(id: string, newBadge: SupCore.Data.BadgeItem) {
-  const badges = data.entries.badgesByEntryId[id];
+  const badges = entries.badgesByEntryId[id];
 
   const existingBadge = badges.byId[newBadge.id];
   if (existingBadge != null) {
@@ -493,7 +482,7 @@ function onBadgeSet(id: string, newBadge: SupCore.Data.BadgeItem) {
 }
 
 function onBadgeCleared(id: string, badgeId: string) {
-  const badges = data.entries.badgesByEntryId[id];
+  const badges = entries.badgesByEntryId[id];
   badges.client_remove(badgeId);
 
   const badgeElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges .${badgeId}`);
@@ -501,33 +490,31 @@ function onBadgeCleared(id: string, badgeId: string) {
 }
 
 function onDependenciesAdded(id: string, depIds: string[]) {
-  for (const depId of depIds) data.entries.byId[depId].dependentAssetIds.push(id);
+  for (const depId of depIds) entries.byId[depId].dependentAssetIds.push(id);
 }
 
 function onDependenciesRemoved(id: string, depIds: string[]) {
   for (const depId of depIds) {
-    const dependentAssetIds = data.entries.byId[depId].dependentAssetIds;
+    const dependentAssetIds = entries.byId[depId].dependentAssetIds;
     dependentAssetIds.splice(dependentAssetIds.indexOf(id), 1);
   }
 }
 
 // User interface
-function goToHub() { window.location.replace("/"); }
+function goToHub() {
+  if (SupApp != null) SupApp.showMainWindow();
+  else window.location.replace("/");
+}
 
 function runProject(options: { debug: boolean; } = { debug: false }) {
-  if (SupClient.isApp) {
+  if (SupApp != null) {
     if (runWindow == null) {
-      runWindow = new electron.remote.BrowserWindow({
-        title: "Superpowers", icon: `public/images/icon.png`,
-        width: 1000, height: 600,
-        minWidth: 800, minHeight: 480
-      });
+      runWindow = SupApp.openWindow(`${window.location.origin}/build.html`);
       runWindow.setMenuBarVisibility(false);
       runWindow.on("closed", onCloseRunWindow);
 
       (document.querySelector(".project-buttons") as HTMLDivElement).classList.toggle("running", true);
     }
-    runWindow.loadURL(`${window.location.origin}/build.html`);
     runWindow.show();
     runWindow.focus();
 
@@ -535,12 +522,17 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
   } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
-    if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+    if (err != null) {
+      /* tslint:disable:no-unused-expression */
+      new SupClient.Dialogs.InfoDialog(err);
+      /* tslint:enable:no-unused-expression */
+      return;
+    }
 
-    let url = `${window.location.protocol}//${window.location.hostname}:${data.buildPort}/systems/${data.systemId}/?project=${SupClient.query.project}&build=${buildId}`;
+    let url = `${window.location.protocol}//${window.location.hostname}:${buildPort}/systems/${SupCore.system.id}/?project=${SupClient.query.project}&build=${buildId}`;
     if (options.debug) url += "&debug";
 
-    if (SupClient.isApp) {
+    if (SupApp != null) {
       if (runWindow != null) runWindow.loadURL(url);
     } else window.open(url, `player_${SupClient.query.project}`);
   });
@@ -559,34 +551,42 @@ function stopProject() {
 }
 
 function publishProject() {
-  if (SupClient.isApp) electron.ipcRenderer.send("choose-export-folder");
+  if (SupApp != null) SupApp.chooseFolder(onPublishFolderChosen);
 }
 
-if (SupClient.isApp) {
-  electron.ipcRenderer.on("export-folder-failed", (event: any, message: string) => { new SupClient.dialogs.InfoDialog(message, SupClient.i18n.t("common:actions.close")); });
-  electron.ipcRenderer.on("export-folder-success", (event: any, outputFolder: string) => {
-    socket.emit("build:project", (err: string, buildId: string, files: any) => {
-      const address = `${window.location.protocol}//${window.location.hostname}`;
-      electron.ipcRenderer.send("export", { projectId: SupClient.query.project, buildId, address, mainPort: window.location.port, buildPort: data.buildPort, outputFolder, files });
+function onPublishFolderChosen(err: string, outputFolder: string) {
+  if (err != null) {
+    /* tslint:disable:no-unused-expression */
+    new SupClient.Dialogs.InfoDialog(err);
+    /* tslint:enable:no-unused-expression */
+    return;
+  }
+
+  if (outputFolder == null) return;
+
+  socket.emit("build:project", (err: string, buildId: string, files: any) => {
+    const baseURL = `${window.location.protocol}//${window.location.hostname}`;
+
+    SupApp.publishProject({
+      projectId: SupClient.query.project, buildId,
+      baseURL, mainPort: parseInt(window.location.port, 10), buildPort,
+      outputFolder, files
     });
   });
-}
-
-function toggleDevTools() {
-  if (electron != null) electron.remote.getCurrentWindow().webContents.toggleDevTools();
 }
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
   const liElt = document.createElement("li");
   liElt.dataset["id"] = entry.id;
-  liElt.dataset["dndText"] = data.entries.getPathFromId(entry.id);
-  const parentEntry = data.entries.parentNodesById[entry.id];
+  const parentEntry = entries.parentNodesById[entry.id];
   if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
   if (entry.type != null) {
+    liElt.dataset["assetType"] = entry.type;
+
     const iconElt = document.createElement("img");
     iconElt.draggable = false;
-    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+    iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     liElt.appendChild(iconElt);
   }
 
@@ -624,20 +624,95 @@ function createEntryElement(entry: SupCore.Data.EntryNode) {
   return liElt;
 }
 
-function onEntryDrop(dropInfo: any, orderedNodes: any) {
-  const dropPoint = SupClient.getTreeViewDropPoint(dropInfo, data.entries);
+function setupFilterStrip() {
+  const filterElt = ui.entriesFilterStrip;
+  filterElt.innerHTML = "";
+
+  const toggleAllElt = document.createElement("img");
+  toggleAllElt.draggable = false;
+  toggleAllElt.classList.add("toggle-all");
+  toggleAllElt.addEventListener("click", onToggleAllFilterClick);
+  filterElt.appendChild(toggleAllElt);
+
+  for (const assetType of assetTypes) {
+    const iconElt = document.createElement("img");
+    iconElt.draggable = false;
+    iconElt.addEventListener("click", onToggleAssetTypeFilterClick);
+    iconElt.dataset["assetType"] = assetType;
+    iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[assetType].pluginPath}/editors/${assetType}/icon.svg`;
+    filterElt.appendChild(iconElt);
+  }
+}
+
+function onToggleAssetTypeFilterClick(event: MouseEvent) {
+  const filterElt = event.target as HTMLElement;
+  const filtered = filterElt.classList.toggle("filtered");
+
+  const assetType = filterElt.dataset["assetType"];
+  const entryElts = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-asset-type='${assetType}']`) as any as HTMLElement[]);
+
+  for (const entryElt of entryElts) entryElt.hidden = filtered;
+
+  let allAssetTypesFiltered = true;
+  for (const assetType of assetTypes) {
+    const filtered = ui.entriesFilterStrip.querySelector(`[data-asset-type='${assetType}']`).classList.contains("filtered");
+    if (!filtered) { allAssetTypesFiltered = false; break; }
+  }
+
+  ui.entriesFilterStrip.querySelector(`.toggle-all`).classList.toggle("filtered", allAssetTypesFiltered);
+}
+
+function onToggleAllFilterClick() {
+  const enableAllFilters = !(ui.entriesFilterStrip.querySelector(".toggle-all") as HTMLElement).classList.contains("filtered");
+  const filterElts = ui.entriesFilterStrip.querySelectorAll("img") as any as HTMLImageElement[];
+
+  for (const filterElt of filterElts) {
+    filterElt.classList.toggle("filtered", enableAllFilters);
+
+    const assetType = filterElt.dataset["assetType"];
+    const entryElts = ui.entriesTreeView.treeRoot.querySelectorAll(`[data-asset-type='${assetType}']`) as any as HTMLElement[];
+    for (const entryElt of entryElts) entryElt.hidden = enableAllFilters;
+  }
+}
+
+function onEntryDragStart(event: DragEvent, entryElt: HTMLLIElement) {
+  const id = entryElt.dataset["id"];
+  event.dataTransfer.setData("text/plain", entries.getPathFromId(id));
+
+  const entryIds = [ id ];
+  for (const node of ui.entriesTreeView.selectedNodes) {
+    if (node.dataset["id"] !== id) entryIds.push(node.dataset["id"]);
+  }
+  event.dataTransfer.setData("application/vnd.superpowers.entry", entryIds.join(","));
+  return true;
+}
+
+function onTreeViewDrop(event: DragEvent, dropLocation: TreeView.DropLocation, orderedNodes: HTMLLIElement[]) {
+  if (orderedNodes == null) {
+    // TODO: Support creating assets by importing some files
+    return false;
+  }
+
+  const dropPoint = SupClient.getTreeViewDropPoint(dropLocation, entries);
 
   const entryIds: string[] = [];
-  for (const entry of orderedNodes) entryIds.push(entry.dataset.id);
+  for (const entry of orderedNodes) entryIds.push(entry.dataset["id"]);
 
-  const sourceParentNode = data.entries.parentNodesById[entryIds[0]];
-  const sourceChildren = (sourceParentNode != null && sourceParentNode.children != null) ? sourceParentNode.children : data.entries.pub;
+  const sourceParentNode = entries.parentNodesById[entryIds[0]];
+  const sourceChildren = (sourceParentNode != null && sourceParentNode.children != null) ? sourceParentNode.children : entries.pub;
   const sameParent = (sourceParentNode != null && dropPoint.parentId === sourceParentNode.id);
 
   let i = 0;
   for (const id of entryIds) {
-    socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => { if (err != null) new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); });
-    if (!sameParent || sourceChildren.indexOf(data.entries.byId[id]) >= dropPoint.index) i++;
+    socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => {
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.Dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
+    });
+    if (!sameParent || sourceChildren.indexOf(entries.byId[id]) >= dropPoint.index) i++;
   }
   return false;
 }
@@ -656,7 +731,7 @@ function updateSelectedEntry() {
 
 function onEntryActivate() {
   const activatedEntry = ui.entriesTreeView.selectedNodes[0];
-  openEntry(activatedEntry.dataset.id);
+  openEntry(activatedEntry.dataset["id"]);
 }
 
 function onMessage(event: any) {
@@ -676,6 +751,8 @@ function onWindowDevError() {
 }
 
 function onMessageChat(message: string) {
+  if (ui.homeTab == null) return;
+
   const isHomeTabVisible = ui.homeTab.classList.contains("active");
   if (isHomeTabVisible && !document.hidden) return;
 
@@ -684,7 +761,7 @@ function onMessageChat(message: string) {
   if (localStorage.getItem("superpowers-disable-notifications") != null) return;
 
   function doNotification() {
-    const title = SupClient.i18n.t("project:header.notifications.new", { projectName: data.manifest.pub.name });
+    const title = SupClient.i18n.t("project:header.notifications.new", { projectName: manifest.pub.name });
     const notification = new (window as any).Notification(title, { icon: "/images/icon.png", body: message });
 
     const closeTimeoutId = setTimeout(() => { notification.close(); }, 5000);
@@ -711,12 +788,13 @@ function onMessageHotKey(action: string) {
     case "newAsset":     onNewAssetClick(); break;
     case "newFolder":    onNewFolderClick(); break;
     case "searchEntry":  onSearchEntryDialog(); break;
-    case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active")); break;
+    case "filter":       onToggleFilterStripClick(); break;
+    case "closeTab":     onTabClose(ui.tabStrip.tabsRoot.querySelector(".active") as HTMLLIElement); break;
     case "previousTab":  onActivatePreviousTab(); break;
     case "nextTab":      onActivateNextTab(); break;
     case "run":          runProject(); break;
     case "debug":        runProject({ debug: true }); break;
-    case "devtools":     toggleDevTools(); break;
+    case "devtools":     if (SupApp != null) SupApp.getCurrentWindow().webContents.toggleDevTools(); break;
   }
 }
 
@@ -736,23 +814,29 @@ function onClickToggleNotifications(event: any) {
 }
 
 function onSearchEntryDialog() {
-  if (data == null) return;
+  if (entries == null) return;
 
   /* tslint:disable:no-unused-expression */
-  new FindAssetDialog(data.entries, data.editorsByAssetType, (entryId) => {
+  new SupClient.Dialogs.FindAssetDialog(entries, editorsByAssetType, (entryId) => {
     /* tslint:enable:no-unused-expression */
     if (entryId == null) return;
     openEntry(entryId);
+
+    ui.entriesTreeView.clearSelection();
+    const entryElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${entryId}']`) as HTMLLIElement;
+    ui.entriesTreeView.addToSelection(entryElt);
+    ui.entriesTreeView.scrollIntoView(entryElt);
   });
 }
 
 function openEntry(id: string, state?: {[name: string]: any}) {
-  const entry = data.entries.byId[id];
+  const entry = entries.byId[id];
+  if (entry == null) return;
 
   // Just toggle folders
   if (entry.type == null) { ui.entriesTreeView.selectedNodes[0].classList.toggle("collapsed"); return; }
 
-  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`);
+  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`) as HTMLLIElement;
   let iframe = ui.panesElt.querySelector(`iframe[data-asset-id='${id}']`) as HTMLIFrameElement;
 
   if (tab == null) {
@@ -761,7 +845,7 @@ function openEntry(id: string, state?: {[name: string]: any}) {
 
     iframe = document.createElement("iframe");
     iframe.dataset["assetId"] = id;
-    iframe.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
+    iframe.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
     ui.panesElt.appendChild(iframe);
   } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
@@ -770,36 +854,47 @@ function openEntry(id: string, state?: {[name: string]: any}) {
   return tab;
 }
 
-function openTool(name: string, state?: {[name: string]: any}) {
-  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`);
+function openTool(name: string, state?: { [name: string]: any }) {
+  let tab = ui.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`) as HTMLLIElement;
   let iframe = ui.panesElt.querySelector(`iframe[data-name='${name}']`) as HTMLIFrameElement;
 
   if (tab == null) {
-    const tool = data.toolsByName[name];
+    const tool = toolsByName[name];
     tab = createToolTabElement(name, tool);
-    ui.tabStrip.tabsRoot.appendChild(tab);
+
+    if (toolsByName[name].pinned) {
+      const toolElt = ui.toolsElt.querySelector(`li[data-name="${name}"]`) as HTMLLIElement;
+      if (toolElt != null) toolElt.parentElement.removeChild(toolElt);
+
+      const firstUnpinnedTab = ui.tabStrip.tabsRoot.querySelector("li:not(.pinned)") as HTMLLIElement;
+      ui.tabStrip.tabsRoot.insertBefore(tab, firstUnpinnedTab);
+    } else {
+      ui.tabStrip.tabsRoot.appendChild(tab);
+    }
 
     iframe = document.createElement("iframe");
     iframe.dataset["name"] = name;
-    iframe.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
+    iframe.src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
     ui.panesElt.appendChild(iframe);
   } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
 
   onTabActivate(tab);
-  return tab;
+
+  if (name === "main") ui.homeTab = tab;
 }
 
 function onNewAssetClick() {
   /* tslint:disable:no-unused-expression */
-  new CreateAssetDialog(data.assetTypesByTitle, autoOpenAsset, (name, type, open) => {
+  new CreateAssetDialog(autoOpenAsset, (result) => {
     /* tslint:enable:no-unused-expression */
-    if (name == null) return;
-    if (name === "")
-      name = SupClient.i18n.t(`${data.editorsByAssetType[type].pluginPath}:editors.${type}.title`);
+    if (result == null) return;
 
-    autoOpenAsset = open;
-    socket.emit("add:entries", name, type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
+    if (result.name === "")
+      result.name = SupClient.i18n.t(`${editorsByAssetType[result.type].pluginPath}:editors.${result.type}.title`);
+
+    autoOpenAsset = result.open;
+    socket.emit("add:entries", result.name, result.type, SupClient.getTreeViewInsertionPoint(ui.entriesTreeView), onEntryAddedAck);
   });
 }
 
@@ -813,7 +908,7 @@ function onNewFolderClick() {
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.newFolder.prompt"), options, (name) => {
+  new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.newFolder.prompt"), options, (name) => {
     /* tslint:enable:no-unused-expression */
     if (name == null) return;
 
@@ -829,15 +924,23 @@ function onTrashEntryClick() {
   function checkNextEntry() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
+      const confirmLabel = SupClient.i18n.t("project:treeView.trash.prompt");
+      const validationLabel = SupClient.i18n.t("project:treeView.trash.title");
+
       /* tslint:disable:no-unused-expression */
-      new SupClient.dialogs.ConfirmDialog(SupClient.i18n.t("project:treeView.trash.prompt"), SupClient.i18n.t("project:treeView.trash.title"), (confirm) => {
+      new SupClient.Dialogs.ConfirmDialog(confirmLabel, { validationLabel }, (confirm) => {
         /* tslint:enable:no-unused-expression */
         if (!confirm) return;
 
         for (const selectedNode of ui.entriesTreeView.selectedNodes) {
-          const entry = data.entries.byId[selectedNode.dataset.id];
+          const entry = entries.byId[selectedNode.dataset["id"]];
           socket.emit("trash:entries", entry.id, (err: string) => {
-            if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+            if (err != null) {
+              /* tslint:disable:no-unused-expression */
+              new SupClient.Dialogs.InfoDialog(err);
+              /* tslint:enable:no-unused-expression */
+              return;
+            }
           });
         }
         ui.entriesTreeView.clearSelection();
@@ -851,51 +954,37 @@ function onTrashEntryClick() {
 
     if (entry.dependentAssetIds != null && entry.dependentAssetIds.length > 0) {
       const dependentAssetNames: string[] = [];
-      for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(data.entries.byId[usingId].name);
+      for (const usingId of entry.dependentAssetIds) dependentAssetNames.push(entries.getPathFromId(usingId));
       /* tslint:disable:no-unused-expression */
-      const promptString = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
-        entryName: entry.name, dependentEntryNames: dependentAssetNames.join(", ")
+      const infoLabel = SupClient.i18n.t("project:treeView.trash.warnBrokenDependency", {
+        entryName: entries.getPathFromId(entry.id), dependentEntryNames: dependentAssetNames.join(", ")
       });
-      const validateString = SupClient.i18n.t("common:actions.close");
-      new SupClient.dialogs.InfoDialog(promptString, validateString, () => { checkNextEntry(); });
+      new SupClient.Dialogs.InfoDialog(infoLabel, null, () => { checkNextEntry(); });
       /* tslint:enable:no-unused-expression */
     } else checkNextEntry();
   }
 
-  for (const selectedNode of ui.entriesTreeView.selectedNodes) selectedEntries.push(data.entries.byId[selectedNode.dataset.id]);
+  for (const selectedNode of ui.entriesTreeView.selectedNodes) selectedEntries.push(entries.byId[selectedNode.dataset["id"]]);
   warnBrokenDependency(selectedEntries[0]);
 }
 
 function onOpenInNewWindowClick(event: any) {
-  const id = event.target.parentElement.dataset.id;
-  if (id != null) {
-    const entry = data.entries.byId[id];
-    const address = `${window.location.origin}/systems/${data.systemId}` +
-    `/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/` +
-    `?project=${SupClient.query.project}&asset=${entry.id}`;
+  const id = event.target.parentElement.dataset["id"];
+  const name = event.target.parentElement.dataset["name"];
+  let url: string;
 
-    const entryPath = data.entries.getPathFromId(id);
-    const title = (entryPath !== entry.name) ? `${entry.name} - ${entryPath}` : entry.name;
-    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address, title);
-    else {
-      const newWindow: any = window.open(address);
-      newWindow.addEventListener("load", () => { newWindow.document.title = title; });
-    }
-  } else {
-    const name = event.target.parentElement.dataset.name;
-    const address = `${window.location.origin}/systems/${data.systemId}` +
-    `/plugins/${data.toolsByName[name].pluginPath}/editors/${name}/` +
-    `?project=${SupClient.query.project}`;
-    if (SupClient.isApp) electron.ipcRenderer.send("new-standalone-window", address);
-    else window.open(address);
-  }
+  if (id != null) url = `${window.location.origin}/project/?project=${SupClient.query.project}&asset=${id}`;
+  else url = `${window.location.origin}/project/?project=${SupClient.query.project}&tool=${name}`;
+
+  if (SupApp != null) SupApp.openWindow(url);
+  else window.open(url);
 }
 
 function onRenameEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length !== 1) return;
 
   const selectedNode = ui.entriesTreeView.selectedNodes[0];
-  const entry = data.entries.byId[selectedNode.dataset.id];
+  const entry = entries.byId[selectedNode.dataset["id"]];
 
   const options = {
     initialValue: entry.name,
@@ -905,12 +994,17 @@ function onRenameEntryClick() {
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.renamePrompt"), options, (newName) => {
+  new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.renamePrompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null || newName === entry.name) return;
 
     socket.emit("setProperty:entries", entry.id, "name", newName, (err: string) => {
-      if (err != null) { new SupClient.dialogs.InfoDialog(err, SupClient.i18n.t("common:actions.close")); return; }
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.Dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
     });
   });
 }
@@ -919,7 +1013,7 @@ function onDuplicateEntryClick() {
   if (ui.entriesTreeView.selectedNodes.length !== 1) return;
 
   const selectedNode = ui.entriesTreeView.selectedNodes[0];
-  const entry = data.entries.byId[selectedNode.dataset.id];
+  const entry = entries.byId[selectedNode.dataset["id"]];
   if (entry.type == null) return;
 
   const options = {
@@ -930,7 +1024,7 @@ function onDuplicateEntryClick() {
   };
 
   /* tslint:disable:no-unused-expression */
-  new SupClient.dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {
+  new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {
     /* tslint:enable:no-unused-expression */
     if (newName == null) return;
 
@@ -938,11 +1032,26 @@ function onDuplicateEntryClick() {
   });
 }
 
+function onToggleFilterStripClick() {
+  ui.entriesFilterStrip.hidden = !ui.entriesFilterStrip.hidden;
+
+  if (ui.entriesFilterStrip.hidden) {
+    const hiddenEntryElts = ui.entriesTreeView.treeRoot.querySelectorAll("li.item[hidden]") as any as HTMLLIElement[];
+    for (const hiddenEntryElt of hiddenEntryElts) hiddenEntryElt.hidden = false;
+  } else {
+    for (const assetType of assetTypes) {
+      const filtered = ui.entriesFilterStrip.querySelector(`[data-asset-type='${assetType}']`).classList.contains("filtered");
+      const entryElts = (ui.entriesTreeView.treeRoot.querySelectorAll(`[data-asset-type='${assetType}']`) as any as HTMLElement[]);
+      for (const entryElt of entryElts) entryElt.hidden = filtered;
+    }
+  }
+}
+
 function refreshAssetTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLIElement) {
-  if (tabElt == null) tabElt = ui.tabStrip.tabsRoot.querySelector(`[data-asset-id='${entry.id}']`);
+  if (tabElt == null) tabElt = ui.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${entry.id}']`) as HTMLLIElement;
   if (tabElt == null) return;
 
-  const entryPath = data.entries.getPathFromId(entry.id);
+  const entryPath = entries.getPathFromId(entry.id);
   const entryName = entry.name;
 
   const lastSlash = entryPath.lastIndexOf("/");
@@ -966,7 +1075,7 @@ function createAssetTabElement(entry: SupCore.Data.EntryNode) {
   if (entry.type != null) {
     const iconElt = document.createElement("img");
     iconElt.classList.add("icon");
-    iconElt.src = `/systems/${data.systemId}/plugins/${data.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+    iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
     tabElt.appendChild(iconElt);
   }
 
@@ -999,7 +1108,7 @@ function createToolTabElement(toolName: string, tool: EditorManifest) {
 
   const iconElt = document.createElement("img");
   iconElt.classList.add("icon");
-  iconElt.src = `/systems/${data.systemId}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
+  iconElt.src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
   tabElt.appendChild(iconElt);
 
   if (!tool.pinned) {
@@ -1052,9 +1161,8 @@ function onTabClose(tabElement: HTMLLIElement) {
   let frameElt: HTMLIFrameElement;
   if (assetId != null) frameElt = ui.panesElt.querySelector(`iframe[data-asset-id='${assetId}']`) as HTMLIFrameElement;
   else {
+    if (tabElement.classList.contains("pinned")) return;
     const toolName = tabElement.dataset["pane"];
-    if (toolName === "main") return;
-
     frameElt = ui.panesElt.querySelector(`iframe[data-name='${toolName}']`) as HTMLIFrameElement;
   }
 
@@ -1073,7 +1181,7 @@ function onActivatePreviousTab() {
     const tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
     if (tabElt === activeTabElt) {
       const newTabIndex = (tabIndex === 0) ? ui.tabStrip.tabsRoot.children.length - 1 : tabIndex - 1;
-      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
+      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex] as HTMLLIElement);
       return;
     }
   }
@@ -1085,7 +1193,7 @@ function onActivateNextTab() {
     const tabElt = ui.tabStrip.tabsRoot.children[tabIndex];
     if (tabElt === activeTabElt) {
       const newTabIndex = (tabIndex === ui.tabStrip.tabsRoot.children.length - 1) ? 0 : tabIndex + 1;
-      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex]);
+      onTabActivate(ui.tabStrip.tabsRoot.children[newTabIndex] as HTMLLIElement);
       return;
     }
   }

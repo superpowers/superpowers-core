@@ -1,29 +1,32 @@
 /// <reference path="../SupCore/SupCore.d.ts" />
 /// <reference path="./typings/socket.io-client/socket.io-client.d.ts" />
+/// <reference path="./typings/SupClient.html.d.ts" />
+/// <reference path="./typings/SupApp.d.ts" />
 
 declare namespace SupClient {
   export const namePattern: string;
 
-  export const isApp: boolean;
   export const query: { project: string, asset: string; [key: string]: string; };
   export const cookies: Cookies.CookiesStatic;
 
-  export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => any): void;
+  export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => void): void;
+  export function readFile(file: File, type: string, callback: (err: Error, data: any) => void): void;
 
-  export let activePluginPath: string;
-  export const plugins: { [context: string]: { [name: string]: { path: string; content: any; } } };
-  export function registerPlugin(context: string, name: string, plugin: any): void;
+  export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
+  export function getPlugins<T>(contextName: string): { [pluginName: string]: { path: string; content: T; } };
 
   export function connect(projectId: string, options?: { reconnection: boolean; }): SocketIOClient.Socket;
   export function onAssetTrashed(): void;
   export function onDisconnected(): void;
-  export function setupHotkeys(): void;
   export function setupHelpCallback(callback: Function): void;
-  export function getTreeViewInsertionPoint(treeView: any): { parentId: string; index: number };
 
-  export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
-  export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
+  export function getTreeViewInsertionPoint(treeView: any /* TreeView */): { parentId: string; index: number };
+
+  export function getTreeViewDropPoint(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
+  export function getListViewDropIndex(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
   export function findEntryByPath(entries: any, path: string|string[]): any;
+
+  export function openEntry(entryId: string, state?: any): void;
 
   export function setupCollapsablePane(pane: HTMLDivElement, refreshCallback?: Function): void;
 
@@ -62,47 +65,80 @@ declare namespace SupClient {
     export function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
     export function appendSliderField(parent: HTMLElement, value: number|string,
     options?: SliderOptions): { sliderField: HTMLInputElement; numberField: HTMLInputElement; };
-    export function appendAssetField(parent: HTMLElement, value: string): { textField: HTMLInputElement; buttonElt: HTMLButtonElement; };
+
+    export function appendAssetField(parent: HTMLElement, assetId: string, assetType: string, projectClient: SupClient.ProjectClient): AssetFieldSubscriber;
+    class AssetFieldSubscriber extends SupCore.EventEmitter {
+      entries: SupCore.Data.Entries;
+
+      constructor(assetId: string, projectClient: ProjectClient, callback: (assetId: string) => void);
+      destroy(): void;
+      selectAssetId(assetId: string): void;
+      onChangeAssetId(assetId: string): void;
+    }
   }
 
-  namespace dialogs {
+  namespace Dialogs {
+    export function cancelDialogIfAny(): void;
+    export abstract class BaseDialog<T> {
+      static activeDialog: BaseDialog<any>;
+      static defaultLabels: { [key: string]: string };
+
+      protected dialogElt: HTMLDivElement;
+      protected formElt: HTMLFormElement;
+      protected validateButtonElt: HTMLButtonElement;
+      protected callback: Function;
+
+      constructor(callback: (result: T) => void);
+      protected submit(result?: T): void;
+      protected cancel(result?: T): void;
+    }
+
+    interface ConfirmOptions {
+      validationLabel?: string;
+      cancelLabel?: string;
+    }
+    type ConfirmResult = boolean;
+    export class ConfirmDialog extends BaseDialog<ConfirmResult> {
+      constructor(label: string, options?: ConfirmOptions, callback?: (result: ConfirmResult) => any);
+    }
+
+    interface InfoOptions {
+      closeLabel?: string;
+    }
+    export class InfoDialog extends BaseDialog<any> {
+      constructor(label: string, options?: InfoOptions, callback?: () => any);
+    }
+
     interface PromptOptions {
+      validationLabel?: string;
+      cancelLabel?: string;
       type?: string;
       initialValue?: string;
       placeholder?: string;
       pattern?: string;
       title?: string;
       required?: boolean;
-      validationLabel?: string;
-      cancelLabel?: string;
+    }
+    type PromptResult = string;
+    export class PromptDialog extends BaseDialog<PromptResult> {
+      constructor(label: string, options?: PromptOptions, callback?: (result: PromptResult) => void);
     }
 
     interface SelectOptions {
+      validationLabel?: string;
+      cancelLabel?: string;
       size?: number;
     }
+    type SelectResult = string;
+    export class SelectDialog extends BaseDialog<SelectResult> {
+      selectElt: HTMLSelectElement;
 
-    export abstract class BaseDialog {
-      protected dialogElt: HTMLDivElement;
-      protected formElt: HTMLFormElement;
-      protected validateButtonElt: HTMLButtonElement;
-
-      protected submit(): boolean;
-      protected cancel(): void;
+      constructor(label: string, choices: { [value: string]: string; }, options?: SelectOptions, callback?: (result: SelectResult) => void)
     }
 
-    export function cancelDialogIfAny(): void;
-
-    export class PromptDialog {
-      constructor(label: string, options?: PromptOptions, callback?: (value: string) => any);
-    }
-    export class ConfirmDialog {
-      constructor(label: string, validationLabel: string, callback: (confirmed: boolean) => any);
-    }
-    export class InfoDialog {
-      constructor(label: string, validationLabel: string, callback?: () => any);
-    }
-    export class SelectDialog {
-      constructor(label: string, choices: { [value: string]: string; }, validationLabel: string, options: SelectOptions, callback: (value: string) => any);
+    type FindAssetResult = string;
+    export class FindAssetDialog extends BaseDialog<FindAssetResult> {
+      constructor(entries: SupCore.Data.Entries, editorsByAssetType: { [assetType: string]: { pluginPath: string; } }, callback: (result: FindAssetResult) => void)
     }
   }
 
@@ -116,10 +152,11 @@ declare namespace SupClient {
     }
 
     export function load(files: File[], callback: Function): void;
-    export function t(key: string, variables?: { [key: string]: string }): string;
+    export function t(key: string, variables?: { [key: string]: string|number }): string;
   }
 
   class ProjectClient {
+    id: string;
     socket: SocketIOClient.Socket;
 
     entries: SupCore.Data.Entries;
@@ -139,6 +176,7 @@ declare namespace SupClient {
     subAsset(assetId: string, assetType: string, subscriber: AssetSubscriber): void;
     unsubAsset(assetId: string, subscriber: AssetSubscriber): void;
     editAsset(assetId: string, command: string, ...args: any[]): void;
+    editAssetNoErrorHandling(assetId: string, command: string, ...args: any[]): void;
     subResource(resourceId: string, subscriber: ResourceSubscriber): void;
     unsubResource(resourceId: string, subscriber: ResourceSubscriber): void;
     editResource(resourceId: string, command: string, ...args: any[]): void;
@@ -146,20 +184,20 @@ declare namespace SupClient {
 
   interface EntriesSubscriber {
     onEntriesReceived(entries: SupCore.Data.Entries): void;
-    onEntryAdded(entry: any, parentId: string, index: number): void;
-    onEntryMoved(id: string, parentId: string, index: number): void;
-    onSetEntryProperty(id: string, key: string, value: any): void;
-    onEntryTrashed(id: string): void;
+    onEntryAdded?(entry: any, parentId: string, index: number): void;
+    onEntryMoved?(id: string, parentId: string, index: number): void;
+    onSetEntryProperty?(id: string, key: string, value: any): void;
+    onEntryTrashed?(id: string): void;
   }
 
   interface AssetSubscriber {
-    onAssetReceived(assetId: string, asset: any): void;
-    onAssetEdited(assetId: string, command: string, ...args: any[]): void;
-    onAssetTrashed(assetId: string): void;
+    onAssetReceived?: (assetId: string, asset: any) => void;
+    onAssetEdited?: (assetId: string, command: string, ...args: any[]) => void;
+    onAssetTrashed?: (assetId: string) => void;
   }
 
   interface ResourceSubscriber {
-    onResourceReceived(resourceId: string, resource: any): void;
-    onResourceEdited(resourceId: string, command: string, ...args: any[]): void;
+    onResourceReceived?: (resourceId: string, resource: any) => void;
+    onResourceEdited?: (resourceId: string, command: string, ...args: any[]) => void;
   }
 }

@@ -6,13 +6,13 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "93bae1bb4c887c1375a4c1f0c3bb849ff06b8ac6"
+      "commit": "2e7a477ac2b6471055aa6e0e56b333e8f327d6b7"
     },
     "async/async.d.ts": {
       "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
     },
     "lodash/lodash.d.ts": {
-      "commit": "caee0398cbc82b1bd2cc00843d911a664d498c25"
+      "commit": "d969b903d1fce89a5e43828ec68458b4f852db4d"
     },
     "express/express.d.ts": {
       "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
@@ -51,7 +51,7 @@
       "commit": "16134c168d021351acb1673ee9659644fc58c424"
     },
     "github-electron/github-electron.d.ts": {
-      "commit": "f8af639bf29b2b00e5d27ce93c0f046564b8525c"
+      "commit": "2e7a477ac2b6471055aa6e0e56b333e8f327d6b7"
     }
   }
 }

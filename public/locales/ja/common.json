@@ -1,0 +1,46 @@
+{
+  "activeLanguage": "日本語",
+
+  "namePatternDescription": "次の文字は使えません: \\, /, :, *, ?, \", <, >, |, [ and ].",
+  "none": "(None)",
+
+  "actions": {
+    "applyChanges": "Apply changes",
+    "applyChangesWithErrors": "Apply changes with errors",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "create": "作成",
+    "delete": "削除",
+    "download": "ダウンロード",
+    "duplicate": "複製",
+    "filter": "フィルター",
+    "new": "新規",
+    "open": "開く",
+    "rename": "リネーム",
+    "save": "保存",
+    "search": "検索",
+    "skip": "スキップ",
+    "update": "更新",
+    "upload": "アップロード",
+
+    "cut": "カット",
+    "copy": "コピー",
+    "paste": "ペースト"
+  },
+
+  "states": { 
+    "disabled": "無効化",
+    "enabled": "有効化",
+    "loading": "ロード中...",
+    "connecting": "接続中...",
+    "saving": "保存中..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "Return"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "header": {
+    "goToHub": "Gå till hub",
+    "publish": "Publicera projekt",
+    "publishDisabled": "Publicera projekt (fungerar bara i Superpowers app av tekniska skäl)",
+    "stop": "Stoppa projekt",
+    "debug": "Debugga projekt (F6)",
+    "run": "Kör projekt (F5)",
+    "notifications": {
+      "enable": "Klicka för att activera notifikationer",
+      "disable": "Klicka för att avaktivera notifikationer",
+      "new": "Nytt chatmeddelande i \"${projectName}\" projektet"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "Öppna i nytt fönster",
+    "newAsset": {
+      "title": "Ny resurs",
+      "prompt": "Välj typ och ge namn till resursen.",
+      "placeholder": "Resursnamn (valfritt)",
+      "openAfterCreation": "Öppna direkt"
+    },
+    "newFolder": {
+      "title": "Ny mapp",
+      "prompt": "Ge den nya mapppen ett namn.",
+      "placeholder": "Fyll i namn",
+      "initialValue": "Mapp"
+    },
+    "renamePrompt": "Välj ett nytt namn för resursen",
+    "duplicatePrompt": "Välj ett nytt namn för resursen",
+    "trash": {
+      "title": "Soptunna",
+      "prompt": "Är du säker på att du vill slänga valda poster?",
+      "warnBrokenDependency": "${entryName} används i ${dependentEntryNames}."
+    },
+    "searchPlaceholder": "Sök resurser"
+  }
+}

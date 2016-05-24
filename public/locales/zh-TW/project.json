@@ -1,0 +1,38 @@
+{
+  "header": {
+    "goToHub": "回專案列表",
+    "publish": "發布專案",
+    "publishDisabled": "發佈專案 (由於技術因素，只能用在 Superpowers app)",
+    "stop": "停止專案",
+    "debug": "除錯專案 (F6)",
+    "run": "執行專案 (F5)",
+    "notifications": {
+      "enable": "開啟通知",
+      "disable": "關閉通知",
+      "new": "新聊天訊息在 \"${projectName}\" 專案"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "在新視窗開啟",
+    "newAsset": {
+      "title": "新素材",
+      "prompt": "選擇新素材的類別並輸入名稱",
+      "placeholder": "素材名稱 (非必填)",
+      "openAfterCreation": "建立後開啟"
+    },
+    "newFolder": {
+      "title": "新資料夾",
+      "prompt": "請輸入新資料夾的名稱",
+      "placeholder": "輸入名稱",
+      "initialValue": "資料夾"
+    },
+    "renamePrompt": "輸入此素材的新名稱",
+    "duplicatePrompt": "輸入新素材的名稱",
+    "trash": {
+      "title": "移至垃圾桶",
+      "prompt": "你確定要將這些素材移至垃圾桶？",
+      "warnBrokenDependency": "${entryName} 仍使用在 ${dependentEntryNames}."
+    },
+    "searchPlaceholder": "搜尋素材"
+  }
+}

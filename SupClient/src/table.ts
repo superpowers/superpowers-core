@@ -1,74 +1,44 @@
+import { EventEmitter } from "events";
+import html from "./html";
+import FindAssetDialog from "./FindAssetDialog";
+
 export function createTable(parent?: HTMLElement) {
-  const table = document.createElement("table");
-  if (parent != null) parent.appendChild(table);
-
-  const tbody = document.createElement("tbody");
-  table.appendChild(tbody);
-
+  const table = html("table", { parent });
+  const tbody = html("tbody", { parent: table });
   return { table, tbody };
 }
 
-function createInput(type: string, parent?: HTMLElement) {
-  const input = document.createElement("input");
-  input.type = type;
-  if (parent != null) parent.appendChild(input);
-  return input;
-}
-
 export function appendRow(parentTableBody: HTMLTableSectionElement, name: string, options?: { checkbox?: boolean; title?: string; }) {
-  const row = document.createElement("tr");
-  parentTableBody.appendChild(row);
-
-  const labelCell = document.createElement("th");
-  row.appendChild(labelCell);
+  const row = html("tr", { parent: parentTableBody});
+  const labelCell = html("th", { parent: row });
 
   let checkbox: HTMLInputElement;
   if (options != null && options.checkbox) {
-    const container = document.createElement("div");
-    labelCell.appendChild(container);
-
-    const nameElt = document.createElement("div");
-    nameElt.textContent = name;
-    nameElt.title = options.title;
-    container.appendChild(nameElt);
-
-    checkbox = createInput("checkbox", container);
+    const container = html("div", { parent: labelCell });
+    html("div", { parent: container, textContent: name, title: options.title });
+    checkbox = html("input", { parent: container, type: "checkbox" }) as HTMLInputElement;
   } else {
     labelCell.textContent = name;
     if (options != null && options.title != null) labelCell.title = options.title;
   }
 
-  const valueCell = document.createElement("td");
-  row.appendChild(valueCell);
+  const valueCell = html("td", { parent: row });
 
   return { row, labelCell, valueCell, checkbox };
 }
 
 export function appendHeader(parentTableBody: HTMLTableSectionElement, text: string) {
-  const headerRow = document.createElement("tr");
-  parentTableBody.appendChild(headerRow);
-
-  const headerTh = document.createElement("th");
-  headerTh.textContent = text;
-  headerTh.colSpan = 2;
-  headerRow.appendChild(headerTh);
-
+  const headerRow = html("tr", { parent: parentTableBody });
+  html("th", { parent: headerRow, textContent: text, colSpan: 2 });
   return headerRow;
 }
 
 export function appendTextField(parent: HTMLElement, value: string) {
-  const input = createInput("text", parent);
-  input.value = value;
-
-  return input;
+  return html("input", { parent, type: "text", value }) as HTMLInputElement;
 }
 
 export function appendTextAreaField(parent: HTMLElement, value: string) {
-  const textarea = document.createElement("textarea");
-  parent.appendChild(textarea);
-  textarea.value = value;
-
-  return textarea;
+  return html("textarea", { parent, value }) as HTMLTextAreaElement;
 }
 
 interface NumberOptions {
@@ -78,8 +48,7 @@ interface NumberOptions {
 };
 
 export function appendNumberField(parent: HTMLElement, value: number|string, options?: NumberOptions) {
-  const input = createInput("number", parent);
-  input.value = value.toString();
+  const input = html("input", { parent, type: "number", value: value.toString() }) as HTMLInputElement;
 
   if (options != null) {
     if (options.min != null) input.min = options.min.toString();
@@ -91,25 +60,19 @@ export function appendNumberField(parent: HTMLElement, value: number|string, opt
 }
 
 export function appendNumberFields(parent: HTMLElement, values: (number|string)[], options?: NumberOptions) {
-  const inputsParent = document.createElement("div");
-  inputsParent.classList.add("inputs");
-  parent.appendChild(inputsParent);
+  const inputsParent = html("div", "inputs", { parent });
 
   const inputs: HTMLInputElement[] = [];
   for (const value of values) inputs.push(appendNumberField(inputsParent, value, options));
   return inputs;
 }
 
-export function appendBooleanField(parent: HTMLElement, value: boolean) {
-  const input = createInput("checkbox", parent);
-  input.checked = value;
-
-  return input;
+export function appendBooleanField(parent: HTMLElement, checked: boolean) {
+  return html("input", { parent, type: "checkbox", checked }) as HTMLInputElement;
 }
 
 export function appendSelectBox(parent: HTMLElement, options: { [value: string]: string; }, initialValue = "") {
-  const selectInput = document.createElement("select");
-  parent.appendChild(selectInput);
+  const selectInput = html("select", { parent }) as HTMLSelectElement;
   for (const value in options) appendSelectOption(selectInput, value, options[value]);
   selectInput.value = initialValue;
 
@@ -117,35 +80,20 @@ export function appendSelectBox(parent: HTMLElement, options: { [value: string]:
 }
 
 export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement, value: string, label: string) {
-  const option = document.createElement("option");
-  option.value = value;
-  option.textContent = label;
-  parent.appendChild(option);
-
-  return option;
+  return html("option", { parent, value, textContent: label });
 }
 
 export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupElement, label: string) {
-  const optionGroup = document.createElement("optgroup");
-  optionGroup.label = label;
-  optionGroup.textContent = label;
-  parent.appendChild(optionGroup);
-
-  return optionGroup;
+  return html("optgroup", { parent, label, textContent: label });
 }
 
 export function appendColorField(parent: HTMLElement, value: string) {
-  const colorParent = document.createElement("div");
-  colorParent.classList.add("inputs");
-  parent.appendChild(colorParent);
+  const colorParent = html("div", "inputs", { parent });
 
   const textField = appendTextField(colorParent, value);
   textField.classList.add("color");
 
-  const pickerField = document.createElement("input");
-  pickerField.type = "color";
-  pickerField.value = `#${value}`;
-  colorParent.appendChild(pickerField);
+  const pickerField = html("input", { parent: colorParent, type: "color", value: `#${value}` });
 
   return { textField, pickerField };
 }
@@ -153,15 +101,9 @@ export function appendColorField(parent: HTMLElement, value: string) {
 interface SliderOptions extends NumberOptions { sliderStep?: number|string; }
 
 export function appendSliderField(parent: HTMLElement, value: number|string, options?: SliderOptions) {
-  const sliderParent = document.createElement("div");
-  sliderParent.classList.add("inputs");
-  parent.appendChild(sliderParent);
+  const sliderParent = html("div", "inputs", { parent });
 
-  const sliderField = document.createElement("input");
-  sliderParent.appendChild(sliderField);
-  sliderField.type = "range";
-  sliderField.style.flex = "2";
-  sliderField.value = value.toString();
+  const sliderField = html("input", { parent: sliderParent, type: "range", value: value.toString(), style: { flex: "2" } }) as HTMLInputElement;
   if (options != null) {
     if (options.min != null) sliderField.min = options.min.toString();
     if (options.max != null) sliderField.max = options.max.toString();
@@ -173,16 +115,98 @@ export function appendSliderField(parent: HTMLElement, value: number|string, opt
   return { sliderField, numberField };
 }
 
-export function appendAssetField(parent: HTMLElement, value: string) {
-  const assetParent = document.createElement("div");
-  assetParent.classList.add("inputs");
-  parent.appendChild(assetParent);
+export function appendAssetField(parent: HTMLElement, assetId: string, assetType: string, projectClient: SupClient.ProjectClient) {
+  const assetParent = html("div", "inputs", { parent });
 
-  const textField = appendTextField(assetParent, value);
+  const textField = html("input", { parent: assetParent, type: "text", readOnly: true, style: { cursor: "pointer" } }) as HTMLInputElement;
+  const buttonElt = html("button", { parent: assetParent, disabled: true, textContent: SupClient.i18n.t("common:actions.select") }) as HTMLButtonElement;
 
-  const buttonElt = document.createElement("button");
-  buttonElt.textContent = SupClient.i18n.t("common:actions.open");
-  assetParent.appendChild(buttonElt);
+  let pluginPath: string;
 
-  return { textField, buttonElt };
+  const assetSubscriber = new AssetFieldSubscriber(assetId, projectClient);
+  assetSubscriber.on("change", (assetId: string) => {
+    textField.value = assetId == null ? "" : assetSubscriber.entries.byId[assetId] == null ? "???" : assetSubscriber.entries.getPathFromId(assetId);
+    buttonElt.textContent = SupClient.i18n.t(`common:actions.${assetId == null ? "select" : "clear"}`);
+    buttonElt.disabled = pluginPath == null;
+  });
+
+  SupClient.fetch(`/systems/${SupCore.system.id}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
+    pluginPath = pluginsInfo.paths.editors[assetType];
+    if (assetSubscriber.entries != null) buttonElt.disabled = false;
+  });
+
+  textField.addEventListener("click", (event) => {
+    if (assetSubscriber.assetId != null) {
+      SupClient.openEntry(assetSubscriber.assetId);
+    } else {
+      /* tslint:disable:no-unused-expression */
+      new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => { if (assetId != null) assetSubscriber.selectAssetId(assetId); });
+      /* tslint:enable:no-unused-expression */
+    }
+  });
+
+  textField.addEventListener("dragover", (event) => {
+    if (!buttonElt.disabled) event.preventDefault();
+  });
+  textField.addEventListener("drop", (event) => {
+    const entryId = event.dataTransfer.getData("application/vnd.superpowers.entry").split(",")[0];
+    if (typeof entryId !== "string") return;
+
+    const entry = assetSubscriber.entries.byId[entryId];
+    if (entry == null || entry.type !== assetType) return;
+
+    assetSubscriber.selectAssetId(entryId);
+  });
+
+  buttonElt.addEventListener("click", (event) => {
+    if (assetSubscriber.assetId != null) {
+      assetSubscriber.selectAssetId(null);
+      return;
+    }
+
+    /* tslint:disable:no-unused-expression */
+    new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => { if (assetId != null) assetSubscriber.selectAssetId(assetId); });
+    /* tslint:enable:no-unused-expression */
+  });
+
+  return assetSubscriber;
+}
+
+class AssetFieldSubscriber extends EventEmitter {
+  entries: SupCore.Data.Entries;
+
+  constructor(public assetId: string, private projectClient: SupClient.ProjectClient) {
+    super();
+    this.projectClient.subEntries(this);
+  }
+
+  destroy() {
+    this.projectClient.unsubEntries(this);
+  }
+
+  onEntriesReceived(entries: SupCore.Data.Entries) {
+    this.entries = entries;
+    setTimeout(() => { this.emit("change", this.assetId); }, 1);
+  }
+
+  onEntryAdded(entry: any, parentId: string, index: number) { /* Nothing to do here */ }
+  onEntryMoved(id: string, parentId: string, index: number) {
+    this.emit("change", this.assetId);
+  }
+  onSetEntryProperty(id: string, key: string, value: any) {
+    if (key === "name") this.emit("change", this.assetId);
+  }
+  onEntryTrashed(id: string) {
+    if (id === this.assetId) this.emit("change", this.assetId);
+  }
+
+  selectAssetId(assetId: string) {
+    this.onChangeAssetId(assetId);
+    this.emit("select", assetId);
+  }
+
+  onChangeAssetId(assetId: string) {
+    this.assetId = assetId;
+    this.emit("change", this.assetId);
+  }
 }

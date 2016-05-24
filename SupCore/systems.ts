@@ -1,7 +1,54 @@
 import * as fs from "fs";
 import * as path from "path";
 
+export let systemsPath: string;
+export let systems: { [system: string]: System } = {};
+
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
+
+export class System {
+  data: SystemData;
+  private plugins: { [contextName: string]: { [pluginName: string]: any; } } = {};
+
+  constructor(public id: string, public folderName: string) {
+    this.data = new SystemData(this);
+  }
+
+  requireForAllPlugins(filePath: string) {
+    const pluginsPath = path.resolve(`${SupCore.systemsPath}/${this.folderName}/plugins`);
+
+    for (const pluginAuthor of fs.readdirSync(pluginsPath)) {
+      const pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
+      if (shouldIgnoreFolder(pluginAuthor)) continue;
+
+      for (const pluginName of fs.readdirSync(pluginAuthorPath)) {
+        if (shouldIgnoreFolder(pluginName)) continue;
+
+        const completeFilePath = `${pluginAuthorPath}/${pluginName}/${filePath}`;
+        if (fs.existsSync(completeFilePath)) {
+          /* tslint:disable */
+          require(completeFilePath);
+          /* tslint:enable */
+        }
+      }
+    }
+  }
+
+  registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
+    if (this.plugins[contextName] == null) this.plugins[contextName] = {};
+
+    if (this.plugins[contextName][pluginName] != null) {
+      console.error("SupCore.system.registerPlugin: Tried to register two or more plugins " +
+      `named "${pluginName}" in context "${contextName}", system "${this.id}"`);
+    }
+
+    this.plugins[contextName][pluginName] = plugin;
+  }
+
+  getPlugins<T>(contextName: string): { [pluginName: string]: T } {
+    return this.plugins[contextName];
+  }
+}
 
 class SystemData {
   assetClasses: { [assetName: string]: SupCore.Data.AssetClass; } = {};
@@ -26,45 +73,3 @@ class SystemData {
     this.resourceClasses[id] = resourceClass;
   }
 }
-
-export class System {
-  data: SystemData;
-  private plugins: { [contextName: string]: { [pluginName: string]: any; } } = {};
-
-  constructor(public id: string, public folderName: string) {
-    this.data = new SystemData(this);
-  }
-
-  requireForAllPlugins(filePath: string) {
-    const pluginsPath = path.resolve(`${__dirname}/../systems/${this.folderName}/plugins`);
-
-    for (const pluginAuthor of fs.readdirSync(pluginsPath)) {
-      const pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;
-      if (shouldIgnoreFolder(pluginAuthor)) continue;
-
-      for (const pluginName of fs.readdirSync(pluginAuthorPath)) {
-        if (shouldIgnoreFolder(pluginName)) continue;
-
-        const completeFilePath = `${pluginAuthorPath}/${pluginName}/${filePath}`;
-        if (fs.existsSync(completeFilePath)) require(completeFilePath);
-      }
-    }
-  }
-
-  registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
-    if (this.plugins[contextName] == null) this.plugins[contextName] = {};
-
-    if (this.plugins[contextName][pluginName] != null) {
-      console.error("SystemAPI.registerPlugin: Tried to register two or more plugins " +
-      `named "${pluginName}" in context "${contextName}", system "${this.id}"`);
-    }
-
-    this.plugins[contextName][pluginName] = plugin;
-  }
-
-  getPlugins<T>(contextName: string): { [pluginName: string]: T } {
-    return this.plugins[contextName];
-  }
-}
-
-export var systems: { [system: string]: System } = {};

@@ -1,4 +1,4 @@
-button {
+button, .radio-strip label {
   background: linear-gradient(#efefef, #e5e5e5);
   padding: 0.3em 0.6em;
   border: 1px solid #999;
@@ -9,24 +9,30 @@ button {
   line-height: 1;
 }
 
-button:not(:disabled):hover {
-  border-color: #888;
+button:not(:disabled):hover, .radio-strip input[type=radio]:not(:disabled) + label:hover {
+  border-color: #777;
 }
 
-button:active {
+button:active, .radio-strip input[type=radio] + label:active {
   background: linear-gradient(#dadada, #e5e5e5);
   border-color: #aaa;
   box-shadow: 0 0 1px 1px #ccc inset;
 }
 
-button:disabled {
+.radio-strip input[type=radio]:checked + label {
+  background: linear-gradient(#dadada, #d5d5d5);
+  border-color: #888;
+  box-shadow: 0 0 1px 1px #ccc inset;
+}
+
+button:disabled, .radio-strip input[type=radio]:disabled + label {
   color: #aaa;
 }
 
-.button-strip button {
-  &:not(:last-child) { border-right: 0; border-radius: 0; }
-  &:first-child { border-radius: 2px 0 0 2px; }
-  &:last-child { border-radius: 0 2px 2px 0; }
+.button-strip button, .radio-strip label {
+  &:not(:last-of-type) { border-right: 0; border-radius: 0; }
+  &:first-of-type { border-radius: 2px 0 0 2px; }
+  &:last-of-type { border-radius: 0 2px 2px 0; }
 }
 
 .flat-button-strip {
@@ -50,4 +56,8 @@ button:disabled {
   &:hover { background-color: rgba(0,0,0,0.1); opacity: 1; }
   &:active { background-color: #fff; }
   &:disabled { opacity: 0.2; cursor: default; }
+}
+
+.radio-strip input[type=radio] {
+  display: none;
 }

@@ -1,5 +1,8 @@
+import * as AsyncLock from "async-lock";
+
 export default class BaseRemoteClient {
   subscriptions: string[] = [];
+  lock = new AsyncLock();
 
   constructor(public server: BaseServer, public socket: SocketIO.Socket) {
     this.socket.on("error", (err: Error) => { SupCore.log((err as any).stack); });
@@ -39,28 +42,40 @@ export default class BaseRemoteClient {
   };
 
   private onSubscribe = (endpoint: string, id: string, callback: (err: string, pubData: any) => any) => {
-    const data = this.server.data[endpoint];
-    if (data == null) { callback("No such endpoint", null); return; }
-
     const roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
 
-    if (this.subscriptions.indexOf(roomName) !== -1) { callback(`You're already subscribed to ${id}`, null); return; }
+    this.lock.acquire(roomName, (unlockRoom) => {
+      const data = this.server.data[endpoint];
+      if (data == null) {
+        callback("No such endpoint", null);
+        unlockRoom();
+        return;
+      }
 
-    if (id == null) {
-      this.socket.join(roomName);
-      this.subscriptions.push(roomName);
-      callback(null, (data as SupCore.Data.Base.Hash).pub);
-      return;
-    }
+      if (this.subscriptions.indexOf(roomName) !== -1) { callback(`You're already subscribed to ${id}`, null); return; }
 
-    (data as SupCore.Data.Base.Dictionary).acquire(id, this, (err: Error, item: any) => {
-      if (err != null) { callback(`Could not acquire asset: ${err}`, null); return; }
+      if (id == null) {
+        this.socket.join(roomName);
+        this.subscriptions.push(roomName);
+        callback(null, (data as SupCore.Data.Base.Hash).pub);
+        unlockRoom();
+        return;
+      }
 
-      this.socket.join(roomName);
-      this.subscriptions.push(roomName);
+      (data as SupCore.Data.Base.Dictionary).acquire(id, this, (err: Error, item: any) => {
+        if (err != null) {
+          callback(`Could not acquire asset: ${err}`, null);
+          unlockRoom();
+          return;
+        }
 
-      callback(null, item.pub);
-      return;
+        this.socket.join(roomName);
+        this.subscriptions.push(roomName);
+
+        callback(null, item.pub);
+        unlockRoom();
+        return;
+      });
     });
   };
 
@@ -70,12 +85,15 @@ export default class BaseRemoteClient {
 
     const roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
 
-    const index = this.subscriptions.indexOf(roomName);
-     if (index === -1) return;
+    this.lock.acquire(roomName, (unlockRoom) => {
+      const index = this.subscriptions.indexOf(roomName);
+      if (index === -1) return;
 
-    if (id != null) { (data as SupCore.Data.Base.Dictionary).release(id, this); }
+      if (id != null) { (data as SupCore.Data.Base.Dictionary).release(id, this); }
 
-    this.socket.leave(roomName);
-    this.subscriptions.splice(index, 1);
+      this.socket.leave(roomName);
+      this.subscriptions.splice(index, 1);
+      unlockRoom();
+    });
   };
 }

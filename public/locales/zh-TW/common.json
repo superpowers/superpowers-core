@@ -1,0 +1,45 @@
+{
+  "activeLanguage": "繁體中文",
+
+  "namePatternDescription": "以下字元無法使用: \\, /, :, *, ?, \", <, >, |, [ and ].",
+  "none": "(None)",
+
+  "actions": {
+    "applyChanges": "更新",
+    "applyChangesWithErrors": "忽略錯誤並更新",
+    "cancel": "取消",
+    "close": "關閉",
+    "create": "建立",
+    "delete": "刪除",
+    "download": "下載",
+    "duplicate": "複製",
+    "new": "開新檔案",
+    "open": "開啟",
+    "rename": "更改名稱",
+    "save": "儲存",
+    "search": "搜尋",
+    "skip": "略過",
+    "update": "更新",
+    "upload": "上傳",
+
+    "cut": "剪下",
+    "copy": "複製",
+    "paste": "貼上"
+  },
+
+  "states": {
+    "disabled": "已關閉",
+    "enabled": "已開啟",
+    "loading": "讀取中...",
+    "connecting": "連線中...",
+    "saving": "儲存中..."
+  },
+
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "Return"
+  }
+}

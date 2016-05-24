@@ -1,4 +1,5 @@
 {
+  "serverAddress": "${hostname} sur le port ${port}",
   "newProject": {
     "title": "Nouveau projet",
     "prompt": "Entrez le nom et choisissez le type du nouveau projet.",
@@ -6,15 +7,13 @@
     "descriptionPlaceholder": "Description (optionnelle)",
     "emptyProject": {
       "title": "Projet vide",
-      "description": "Un projet vide pour partir de 0."
+      "description": "Un projet vide pour partir de zéro."
     },
-    "autoOpen": "Ouvrir après création",
-    "validate": "Créer"
+    "autoOpen": "Ouvrir après création"
   },
   "editDetails": {
     "title": "Éditer les informations",
-    "prompt": "Éditez les informations du projet.",
-    "validate": "Mettre à jour"
+    "prompt": "Éditez les informations du projet."
   },
   "openProject": "Ouvrir le projet",
   "language": "Langue"

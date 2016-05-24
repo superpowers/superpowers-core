@@ -1,7 +1,4 @@
-@import "../window"
-
-body
-  display flex
+body { display: flex; }
 
 .sidebar
   min-width 240px
@@ -28,7 +25,6 @@ body
 .project-name
   font-weight bold
   padding 1em 0
-  -webkit-app-region drag
   flex 1
   text-overflow ellipsis
   white-space nowrap
@@ -59,29 +55,24 @@ body
   .duplicate-entry { background-image: url(/images/actions/duplicate.svg); }
   .trash-entry { background-image: url(/images/actions/delete.svg); }
   .search { background-image: url(/images/actions/search.svg); }
+  .filter { background-image: url(/images/actions/filter.svg); }
 
-.entries-tree-view
-  flex 1
-  position relative
-  overflow-y auto
+.filter-buttons {
+  flex-wrap: wrap;
 
-  .connecting
-    position absolute
-    top 0
-    bottom 0
-    left 0
-    right 0
-    z-index 1
-    display flex
-    flex-flow column
-    align-items center
-    justify-content center
-    text-align center
-    text-transform uppercase
-    opacity 0.5
+  img { padding: 2px; width: 28px; height: 28px; }
+  img.toggle-all { content: url(/images/entries/filter-all.svg); }
+  img:hover { background: #ccc; }
+  img.filtered { opacity: 0.3; }
+  img.filtered:hover { opacity: 0.5; }
+}
 
-  .tree
-    position absolute
+.entries-tree-view {
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
+  .tree { position: absolute; }
+}
 
 .entries-tree-view .tree, .find-asset-dialog .tree
   li
@@ -97,40 +88,22 @@ body
     &:not(.selected):hover
       background #e0e0e0
 
-    &.group > .toggle
-      opacity 0.5
-      background url(/images/treeView/group-open-dark.svg) center no-repeat
-    &.group.collapsed > .toggle
-      background-image url(/images/treeView/group-closed-dark.svg)
-
   .name
     white-space pre
     flex 1
     text-overflow ellipsis
     overflow-x hidden
 
-  .badges
+  .badges {
     &:empty { padding: 0; }
 
-    span
-      background rgba(0,0,0,0.2)
-      color rgba(0,0,0,0.8)
-      font-size 80%
-
-.find-asset-dialog
-  form
-    width 600px
-
-  input[type=search]
-    height 28px
-
-  .assets-tree-view
-    border 1px solid #aaa
-    overflow-y auto
-    height 300px
-
-  .assets-tree-view .tree
-    padding 0
+    span {
+      background: rgba(0,0,0,0.2);
+      color: rgba(0,0,0,0.8);
+      font-size: 80%;
+      margin-left: 0.25em;
+    }
+  }
 
 .open-in-new-window
   cursor pointer
@@ -190,31 +163,59 @@ body
         text-decoration underline
         cursor pointer
 
-.main
-  flex 1
-  display flex
-  flex-flow column
+.main {
+  flex: 1;
+  display: flex;
+  flex-flow: column;
+  border-top: 1px solid #ccc;
 
-  .top
-    display flex
-    flex-shrink 0
-    background #eee
-    border-bottom 1px solid #aaa
+  .top {
+    display: flex;
+    flex-shrink: 0;
+    background: #eee;
+    height: 36px;
+  }
 
-  .tabs-bar
-    flex 1
-    height 35px
-    -webkit-app-region drag
-    @import "tabsBar"
+  .tabs-bar {
+    flex: 1;
+    background: #eee;
+    border-bottom: 1px solid #aaa;
+  }
 
-  .panes
-    flex 1
-    display flex
+  .panes {
+    flex: 1;
+    display: flex;
 
-    iframe
-      border none
-      flex 1
+    iframe {
+      border: none;
+      flex: 1;
       // NOTE: Workaround for Microsoft Edge
       // (iframes seem to ignore flex: 1)
-      min-height 100%
+      min-height: 100%;
       &:not(.active) { display: none; }
+    }
+  }
+}
+
+.top .controls {
+  border-bottom: 1px solid #aaa;
+  
+  button {
+    width: 30px;
+    height: 25px;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    outline: none;
+  }
+
+  .toggle-notifications {
+    background: url(/images/controls/notifications-enabled.svg);
+    &:hover { background: url(/images/controls/notifications-enabled-hover.svg); }
+    &:active { background: url(/images/controls/notifications-enabled-active.svg); }
+
+    &.disabled { background: url(/images/controls/notifications-disabled.svg); }
+    &.disabled:hover { background: url(/images/controls/notifications-disabled-hover.svg); }
+    &.disabled:active { background: url(/images/controls/notifications-disabled-active.svg); }
+  }
+}

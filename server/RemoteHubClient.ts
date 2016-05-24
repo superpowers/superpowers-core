@@ -2,7 +2,6 @@ import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
 
-import * as paths from "./paths";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
@@ -33,8 +32,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     let formatVersion = SupCore.Data.ProjectManifest.currentFormatVersion;
     let templatePath: string;
     if (details.template != null) {
-      // FIXME: Use paths.userData once we move /systems/ to the user data folder
-      templatePath = path.join(__dirname, `../systems/${details.systemId}/public/templates/${details.template}`);
+      templatePath = `${SupCore.systemsPath}/${details.systemId}/public/templates/${details.template}`;
       formatVersion = JSON.parse(fs.readFileSync(path.join(templatePath, `manifest.json`), { encoding: "utf8" })).formatVersion;
     }
 
@@ -51,14 +49,14 @@ export default class RemoteHubClient extends BaseRemoteClient {
     let projectFolderNumber = 1;
 
     while(true) {
-      try { fs.mkdirSync(path.join(paths.projects, projectFolder)); }
+      try { fs.mkdirSync(path.join(this.server.projectsPath, projectFolder)); }
       catch (e) {
         projectFolder = `${originalProjectFolder}-${projectFolderNumber++}`;
         continue;
       }
       break;
     }
-    const projectPath = path.join(paths.projects, projectFolder);
+    const projectPath = path.join(this.server.projectsPath, projectFolder);
 
     const onFoldersCreated = (err: Error) => {
       if (err != null) { callback(`The project could not be created, folders creation has failed: ${err.message}`); return; }

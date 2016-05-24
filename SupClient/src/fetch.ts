@@ -1,4 +1,4 @@
-export default function fetch(url: string, type: string, callback: (err: Error, data?: any) => any) {
+export default function fetch(url: string, type: string, callback: (err: Error, data?: any) => void) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", url, true);
   xhr.responseType = type;

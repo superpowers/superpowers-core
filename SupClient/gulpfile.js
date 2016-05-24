@@ -1,15 +1,18 @@
-var gulp = require("gulp");
+"use strict";
+
+const gulp = require("gulp");
 
 // TypeScript
-var ts = require("gulp-typescript");
-var tsProject = ts.createProject("./tsconfig.json");
-var tslint = require("gulp-tslint");
+const ts = require("gulp-typescript");
+const tsProject = ts.createProject("./tsconfig.json");
+const tslint = require("gulp-tslint");
 
 gulp.task("typescript", function() {
-  var failed = false;
-  var tsResult = tsProject.src()
-    .pipe(tslint({ tslint: require("tslint") }))
-    .pipe(tslint.report("prose", { emitError: false }))
+  let failed = false;
+  const tsResult = tsProject.src()
+    .pipe(tslint())
+    .pipe(tslint.report("prose", { emitError: true }))
+    .on("error", (err) => { throw err; })
     .pipe(ts(tsProject))
     .on("error", () => { failed = true; })
     .on("end", () => { if (failed) throw new Error("There were TypeScript errors."); });
@@ -17,20 +20,20 @@ gulp.task("typescript", function() {
 });
 
 // Stylus
-var stylus = require("gulp-stylus");
+const stylus = require("gulp-stylus");
 gulp.task("stylus", function() {
   return gulp.src("./src/styles/*.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public/styles"));
 });
 
 // Browserify
-var browserify = require("browserify");
-var source = require("vinyl-source-stream");
-gulp.task("browserify", [ "typescript" ], function() {
-  var bundler = browserify("./src/index.js", { standalone: "SupClient" });
-  bundler.transform("brfs");
-  function bundle() { return bundler.bundle().pipe(source("SupClient.js")).pipe(gulp.dest("../public")); };
-  return bundle();
-});
+const browserify = require("browserify");
+const source = require("vinyl-source-stream");
+gulp.task("browserify", [ "typescript" ], () =>
+  browserify("./src/index.js", { standalone: "SupClient" })
+    .transform("brfs").bundle()
+    .pipe(source("SupClient.js"))
+    .pipe(gulp.dest("../public"))
+);
 
 // All
 gulp.task("default", [ "stylus", "typescript", "browserify" ]);

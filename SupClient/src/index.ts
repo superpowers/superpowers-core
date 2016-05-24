@@ -1,42 +1,58 @@
 import * as io from "socket.io-client";
+import * as url from "url";
 import * as querystring from "querystring";
 import * as cookies from "js-cookie";
 
-/* tslint:disable:no-unused-variable */
 import fetch from "./fetch";
+import readFile from "./readFile";
 import ProjectClient from "./ProjectClient";
-import setupHotkeys, { setupHelpCallback } from "./setupHotkeys";
+import { setupHotkeys, setupHelpCallback } from "./events";
 import * as table from "./table";
-import * as dialogs from "./dialogs/index";
+import * as Dialogs from "simple-dialogs";
+import FindAssetDialog from "./FindAssetDialog";
 import * as i18n from "./i18n";
-/* tslint:enable:no-unused-variable */
-/* tslint:disable */
-const PerfectResize = require("perfect-resize");
-/* tslint:enable */
+import html from "./html";
+import "./events";
 
-export { fetch, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, dialogs, i18n };
+import * as ResizeHandle from "resize-handle";
+import * as TreeView from "dnd-tree-view";
 
-export const isApp = window.navigator.userAgent.indexOf("Electron") !== -1;
+export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
 export const query = querystring.parse(window.location.search.slice(1));
+
+(Dialogs as any).FindAssetDialog = FindAssetDialog;
 
 // Refuses filesystem-unsafe characters
 // See http://superuser.com/q/358855
 export const namePattern = "[^\\\\/:*?\"<>|\\[\\]]+";
 
+// Expose SupApp to iframes
+if ((global as any).SupApp == null) {
+  (global as any).SupApp = ((top as any).SupApp != null) ? (top as any).SupApp : null;
+}
+
 // Initialize empty system
 SupCore.system = new SupCore.System("", "");
 
-export let activePluginPath: string;
-export const plugins: { [context: string]: { [name: string]: { path: string; content: any; } } } = {};
-export function registerPlugin(context: string, name: string, content: any) {
-  if (plugins[context] == null) plugins[context] = {};
+const plugins: { [contextName: string]: { [pluginName: string]: { path: string; content: any; } } } = {};
 
-  if (plugins[context][name] != null) {
-    console.error(`SupClient.registerPlugin: Tried to register two or more plugins named "${name}"`);
+const scriptPathRegex = /^\/systems\/([^\/])+\/plugins\/([^\/])+\/([^\/])+/;
+export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T) {
+  if (plugins[contextName] == null) plugins[contextName] = {};
+
+  if (plugins[contextName][pluginName] != null) {
+    console.error("SupClient.registerPlugin: Tried to register two or more plugins " +
+    `named "${pluginName}" in context "${contextName}"`);
     return;
   }
 
-  plugins[context][name] = { path: activePluginPath, content };
+  const scriptURL = url.parse((document as any).currentScript.src);
+  const pluginPath = scriptPathRegex.exec(scriptURL.pathname)[0];
+  plugins[contextName][pluginName] = { path: pluginPath, content: plugin };
+}
+
+export function getPlugins<T>(contextName: string): { [pluginName: string]: { path: string; content: T; } } {
+  return plugins[contextName];
 }
 
 // Plugins list
@@ -87,23 +103,23 @@ export function onDisconnected() {
   document.body.appendChild(div);
 }
 
-export function getTreeViewInsertionPoint(treeView: any) {
+export function getTreeViewInsertionPoint(treeView: TreeView) {
   let selectedElt = treeView.selectedNodes[0];
   let parentId: string;
   let index: number;
 
   if (selectedElt != null) {
     if (selectedElt.classList.contains("group")) {
-      parentId = selectedElt.dataset.id;
+      parentId = selectedElt.dataset["id"];
     }
     else {
       if (selectedElt.parentElement.classList.contains("children")) {
-        parentId = selectedElt.parentElement.previousSibling.dataset.id;
+        parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
       }
 
       index = 1;
-      while (selectedElt.previousSibling != null) {
-        selectedElt = selectedElt.previousSibling;
+      while (selectedElt.previousElementSibling != null) {
+        selectedElt = selectedElt.previousElementSibling as HTMLLIElement;
         if (selectedElt.tagName === "LI") index++;
       }
     }
@@ -111,17 +127,21 @@ export function getTreeViewInsertionPoint(treeView: any) {
   return { parentId, index };
 }
 
-export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.TreeById) {
+export function getTreeViewDropPoint(dropLocation: TreeView.DropLocation, treeById: SupCore.Data.Base.TreeById) {
   let parentId: string;
   let index: number;
 
   let parentNode: any;
-  const targetEntryId = dropInfo.target.dataset.id;
+  const targetEntryId = dropLocation.target.dataset["id"];
 
-  switch (dropInfo.where) {
+  switch (dropLocation.where) {
     case "inside": {
-      parentNode = treeById.byId[targetEntryId];
-      index = parentNode.children.length;
+      if (targetEntryId != null) {
+        parentNode = treeById.byId[targetEntryId];
+        index = parentNode.children.length;
+      } else {
+        index = 0;
+      }
     } break;
     case "above":
     case "below": {
@@ -130,7 +150,7 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
 
       index = (parentNode != null) ? parentNode.children.indexOf(targetNode) : treeById.pub.indexOf(targetNode);
 
-      if (dropInfo.where === "below") index++;
+      if (dropLocation.where === "below") index++;
     } break;
   }
 
@@ -138,13 +158,13 @@ export function getTreeViewDropPoint(dropInfo: any, treeById: SupCore.Data.Base.
   return { parentId, index };
 }
 
-export function getListViewDropIndex(dropInfo: any, listById: SupCore.Data.Base.ListById, reversed = false) {
-  const targetEntryId = dropInfo.target.dataset.id;
+export function getListViewDropIndex(dropLocation: TreeView.DropLocation, listById: SupCore.Data.Base.ListById, reversed = false) {
+  const targetEntryId = dropLocation.target.dataset["id"];
   const targetNode = listById.byId[targetEntryId];
 
   let index = listById.pub.indexOf(targetNode);
-  if (!reversed && dropInfo.where === "below") index++;
-  if ( reversed && dropInfo.where === "above") index++;
+  if (!reversed && dropLocation.where === "below") index++;
+  if ( reversed && dropLocation.where === "above") index++;
   return index;
 }
 
@@ -169,8 +189,12 @@ export function findEntryByPath(entries: any, path: string|string[]) {
   return foundEntry;
 }
 
+export function openEntry(entryId: string, state?: any) {
+  window.parent.postMessage({ type: "openEntry", id: entryId, state }, window.location.origin);
+}
+
 export function setupCollapsablePane(paneElt: HTMLDivElement, refreshCallback?: Function) {
-  const handle = new PerfectResize(paneElt, "bottom");
+  const handle = new ResizeHandle(paneElt, "bottom");
   if (refreshCallback != null)
     handle.on("drag", () => { refreshCallback(); });
 

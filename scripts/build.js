@@ -1,125 +1,148 @@
-var path = require("path");
-var fs = require("fs");
-var child_process = require("child_process");
-var execSuffix = process.platform == "win32";
-var rootPath = path.resolve(__dirname + "/..");
+"use strict";
+
+const startTime = Date.now();
+
+const path = require("path");
+const fs = require("fs");
+const child_process = require("child_process");
+const execSuffix = process.platform == "win32";
+const rootPath = path.resolve(`${__dirname}/..`);
 
 function log(message) {
-  var text = new Date().toISOString() + " - " + message;
-  console.log(text);
+  const date = new Date();
+  console.log(`${date.toLocaleDateString()} ${date.toLocaleTimeString()} - ${message}`);
 }
+
+let anyRequireFailed = false;
 
 try {
   require.resolve("async");
+  require.resolve("yargs");
+  require.resolve("chalk");
 } catch (err) {
-  var spawnOptions = { cwd: rootPath, env: process.env, stdio: "inherit" };
-  var result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async" ], spawnOptions);
-  
+  anyRequireFailed = true;
+}
+
+if (anyRequireFailed) {
+  const spawnOptions = { cwd: rootPath, env: process.env, stdio: "inherit" };
+  const result = child_process.spawnSync("npm" + (execSuffix ? ".cmd" : ""), [ "install", "async", "yargs", "chalk" ], spawnOptions);
+
   if (result.error != null) {
-    log("Failed to install async");
+    log("Failed to install async, args and chalk");
     console.log(result.error);
     process.exit(1);
   }
-}
 
-// Rename system folders
-var oldNames = ["supGame", "supWeb", "markSlide"];
-var newNames = ["game"   , "web"   , "markslide"];
-for (var i = 0; i < oldNames.length; i++) {
-  var oldSystemPath = rootPath + "/systems/" + oldNames[i];
-  if (!fs.existsSync(oldSystemPath) || !fs.statSync(oldSystemPath).isDirectory()) continue;
+  // NOTE: Without a small delay after npm exits,
+  // installation sometimes fails since Node.js 5.x.
+  setTimeout(build, 1000);
+} else build();
 
-  var newSystemPath = rootPath + "/systems/" + newNames[i];
-  fs.renameSync(oldSystemPath, newSystemPath);
-}
+function build() {
+  const async = require("async");
+  let buildPaths = require("./getBuildPaths")(rootPath).map((buildPath) => path.sep + path.relative(rootPath, buildPath));
 
-var async = require("async");
-var getBuildPaths = require("./getBuildPaths");
-var buildPaths = getBuildPaths(rootPath);
+  // Arguments
+  const yargs = require("yargs");
 
-// Filter
-if (process.argv.length > 2) {
-  var filter = process.argv[2];
-  var oldPathCount = buildPaths.length;
-  buildPaths = buildPaths.filter(function(buildPath) { return path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1; });
-  log("Rebuilding \"" + filter + "\", leaving out " + (oldPathCount - buildPaths.length) + " paths");
-}
+  const argv = yargs.option("verbose", { alias: "v", describe: "Verbose mode" }).argv;
 
-// Build
-var errors = [];
+  if (argv._.length > 0) {
+    const filter = argv._[0].replace(/[\\/]/g, path.sep);
+    const oldPathCount = buildPaths.length;
+    if (filter[0] === "!") {
+      buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.slice(1).toLowerCase()) === -1);
+    } else {
+      buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
+    }
+    log(`Rebuilding "${filter}", leaving out ${oldPathCount - buildPaths.length} paths`);
+  }
 
-log("Build paths: " + buildPaths.map(function(buildPath) { return path.sep + path.relative(rootPath, buildPath); }).join(", "));
+  // Build
+  log(`Build paths: ${buildPaths.join(", ")}`);
 
-var progress = 0;
-async.eachSeries(buildPaths, function(buildPath, callback) {
-  log("Building " + path.sep + path.relative(rootPath, buildPath) + " (" + (++progress) + "/" + buildPaths.length + ")");
+  const errors = [];
+  let progress = 0;
 
-  var spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
+  const chalk = require("chalk");
+  const styleBuildPath = chalk.bgWhite.black;
 
-  async.waterfall([
+  async.eachSeries(buildPaths, (relBuildPath, callback) => {
+    log(styleBuildPath(`Building ${relBuildPath} (${++progress}/${buildPaths.length})`));
+    const absBuildPath = path.resolve(path.join(rootPath, relBuildPath));
+    const spawnOptions = { cwd: absBuildPath, env: process.env, stdio: "inherit" };
 
-    function (cb) {
-      if (!fs.existsSync(buildPath + "/package.json")) { cb(null, null); return; }
-      var packageJSON = require(buildPath + "/package.json");
-      cb(null, packageJSON);
-    },
+    async.waterfall([
 
-    function(packageJSON, cb) {
-      // Skip if the package doesn't need to be installed
-      if (packageJSON == null || packageJSON.dependencies == null && packageJSON.devDependencies == null) {
-        if (packageJSON == null || packageJSON.scripts == null ||
-        (packageJSON.scripts.preinstall == null &&
-        packageJSON.scripts.install == null &&
-        packageJSON.scripts.postinstall == null)) {
+      (cb) => {
+        if (!fs.existsSync(`${absBuildPath}/package.json`)) { cb(null, null); return; }
+        const packageJSON = require(`${absBuildPath}/package.json`);
+        cb(null, packageJSON);
+      },
+
+      (packageJSON, cb) => {
+        // Skip if the package doesn't need to be installed
+        if (packageJSON == null || packageJSON.dependencies == null && packageJSON.devDependencies == null) {
+          if (packageJSON == null || packageJSON.scripts == null ||
+          (packageJSON.scripts.preinstall == null &&
+          packageJSON.scripts.install == null &&
+          packageJSON.scripts.postinstall == null)) {
+            cb(null, packageJSON);
+            return;
+          }
+        }
+
+        const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, [ "install" ], spawnOptions);
+
+        npm.on("close", (status) => {
+          if (status !== 0) errors.push(`${relBuildPath}: "npm install" exited with status code ${status}`);
           cb(null, packageJSON);
+        });
+      },
+
+      (packageJSON, cb) => {
+        // Check if the package has a build script
+        if (absBuildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
+          const args = [ "run", "build" ];
+          if (!argv.verbose) args.push("-s", "--", "--silent");
+          const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
+    
+          npm.on("close", (status) => {
+            if (status !== 0) errors.push(`${relBuildPath}: "npm run build" exited with status code ${status}`);
+            cb();
+          });
           return;
         }
+
+        // Check if the package has a gulpfile instead
+        if (fs.existsSync(`${absBuildPath}/gulpfile.js`)) {
+          const args = [];
+          if (!argv.verbose) args.push("--silent");
+          const gulp = child_process.spawn(`gulp${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
+
+          gulp.on("close", (status) => {
+            if (status !== 0) errors.push(`${relBuildPath}: "gulp" exited with status code ${status}`);
+            cb();
+          });
+          return;
+        }
+
+        cb();
       }
 
-      var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "install" ], spawnOptions);
+    ], callback);
+  }, () => {
+    console.log("");
 
-      npm.on("close", function(status) {
-        if (status !== 0) errors.push("[" + buildPath + "] `npm install` exited with status code " + status);
-        cb(null, packageJSON);
-      });
-    },
-
-    function(packageJSON, cb) {
-      // Check if the package has a build script
-      if (buildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
-        var npm = child_process.spawn("npm" + (execSuffix ? ".cmd" : ""), [ "run", "build" ], spawnOptions);
-  
-        npm.on("close", function(status) {
-          if (status !== 0) errors.push("[" + buildPath + "] `npm run build` exited with status code " + status);
-          cb();
-        });
-        return;
-      }
-
-      // Check if the package has a gulpfile instead
-      if (fs.existsSync(buildPath + "/gulpfile.js")) {
-        var gulp = child_process.spawn("gulp" + (execSuffix ? ".cmd" : ""), [], spawnOptions);
-
-        gulp.on("close", function(status) {
-          if (status !== 0) errors.push("[" + buildPath + "] gulp exited with status code " + status);
-          cb();
-        });
-        return;
-      }
-
-      cb();
-      return;
+    if (errors.length > 0) {
+      log("There were build errors:");
+      for (const error of errors) console.log(error);
+      process.exit(1);
+    } else {
+      const duration = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(duration / 60);
+      const seconds = duration % 60;
+      log(`Build completed in ${minutes}mn ${seconds}s.`);
     }
-
-  ], callback);
-}, function() {
-  console.log("");
-
-  if (errors.length > 0) {
-    log("There were errors:");
-    errors.forEach(function(error) {
-      console.log(error);
-    });
-    process.exit(1);
-  } else log("Build complete.");
-});
+  });
+}
