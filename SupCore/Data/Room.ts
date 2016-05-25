@@ -51,15 +51,16 @@ export default class Room extends SupData.Base.Hash {
     fs.writeFile(path.join(`${roomPath}.json`), json, { encoding: "utf8" }, callback);
   }
 
-  join(client: any, callback: (err: string, item?: any, index?: number) => any) {
-    let item = this.users.byId[client.socket.username];
+  join(client: SupCore.RemoteClient, callback: (err: string, item?: any, index?: number) => any) {
+    const username = (client.socket as any).username;
+    let item = this.users.byId[username];
     if (item != null) {
       item.connectionCount++;
       callback(null, item);
       return;
     }
 
-    item = { id: client.socket.username, connectionCount: 1 };
+    item = { id: username, connectionCount: 1 };
 
     this.users.add(item, null, (err, actualIndex) => {
       if (err != null) { callback(err); return; }
@@ -72,17 +73,18 @@ export default class Room extends SupData.Base.Hash {
     else this.users.byId[item.id].connectionCount++;
   }
 
-  leave(client: any, callback: (err: string, username?: any) => any) {
-    const item = this.users.byId[client.socket.username];
+  leave(client: SupCore.RemoteClient, callback: (err: string, username?: any) => any) {
+    const username = (client.socket as any).username;
+    const item = this.users.byId[username];
     if (item.connectionCount > 1) {
       item.connectionCount--;
-      callback(null, client.socket.username);
+      callback(null, username);
       return;
     }
 
-    this.users.remove(client.socket.username, (err) => {
+    this.users.remove(username, (err) => {
       if (err != null) { callback(err); return; }
-      callback(null, client.socket.username);
+      callback(null, username);
     });
   }
 
@@ -93,10 +95,10 @@ export default class Room extends SupData.Base.Hash {
     this.users.client_remove(id);
   }
 
-  server_appendMessage(client: any, text: string, callback: (err: string, entry?: any) => any) {
+  server_appendMessage(client: SupCore.RemoteClient, text: string, callback: (err: string, entry?: any) => any) {
     if (typeof(text) !== "string" || text.length > 300) { callback("Your message was too long"); return; }
 
-    const entry = { timestamp: Date.now(), author: client.socket.username, text: text };
+    const entry = { timestamp: Date.now(), author: (client.socket as any).username, text: text };
     this.pub.history.push(entry);
     if (this.pub.history.length > 100) this.pub.history.splice(0, 1);
 

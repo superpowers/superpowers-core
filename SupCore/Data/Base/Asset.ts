@@ -61,7 +61,7 @@ export default class Asset extends Hash {
     mkdirp(folderPath, (err) => { this.save(folderPath, callback); });
   }
 
-  server_setProperty(client: any, path: string, value: any, callback: (err: string, path?: string, value?: any) => any) {
+  server_setProperty(client: SupCore.RemoteClient, path: string, value: any, callback: (err: string, path?: string, value?: any) => any) {
     this.setProperty(path, value, (err, actualValue) => {
       if (err != null) { callback(err); return; }
 

@@ -105,11 +105,11 @@ declare namespace SupCore {
       load(roomPath: string): void;
       unload(): void;
       save(roomPath: string, callback: (err: Error) => any): void;
-      join(client: any, callback: (err: string, item?: any, index?: number) => any): void;
+      join(client: SupCore.RemoteClient, callback: (err: string, item?: any, index?: number) => any): void;
       client_join(item: any, index: number): void;
-      leave(client: any, callback: (err: string, username?: any) => any): void;
+      leave(client: SupCore.RemoteClient, callback: (err: string, username?: any) => any): void;
       client_leave(id: string): void;
-      server_appendMessage(client: any, text: string, callback: (err: string, entry?: any) => any): void;
+      server_appendMessage(client: SupCore.RemoteClient, text: string, callback: (err: string, entry?: any) => any): void;
       client_appendMessage(entry: any): void;
     }
     class Rooms extends Base.Dictionary {
@@ -290,6 +290,7 @@ declare namespace SupCore {
 
   interface RemoteClient {
     id: string;
+    socket: SocketIO.Socket;
   }
 
   interface PluginsInfo {
