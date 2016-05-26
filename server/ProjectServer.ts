@@ -246,6 +246,7 @@ export default class ProjectServer {
 
   private onAssetLoaded = (assetId: string, item: SupCore.Data.Base.Asset) => {
     item.on("change", () => { this.scheduleAssetSave(assetId); });
+    item.on("edit", (commandName: string, ...args: any[]) => { this.io.in(`sub:assets:${assetId}`).emit("edit:assets", assetId, commandName, ...args); });
 
     item.on("setBadge", (badgeId: string, type: string, data: any) => { this.setBadge(assetId, badgeId, type, data); });
     item.on("clearBadge", (badgeId: string) => { this.clearBadge(assetId, badgeId); });
