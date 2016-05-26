@@ -17,6 +17,8 @@ export default class Asset extends Hash {
 
   restore() { /* Override */ }
 
+  onClientUnsubscribed(clientId: string) { /* Override */ }
+
   destroy(callback: Function) { callback(); }
 
   load(assetPath: string) {

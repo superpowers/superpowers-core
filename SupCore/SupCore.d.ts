@@ -241,6 +241,9 @@ declare namespace SupCore {
         // Also if the asset depends on others, this.emit("addDependencies", ...) with a list of entry IDs
         restore(): void;
 
+        // OVERRIDE: Called when a client unsubscribed from the asset
+        onClientUnsubscribed(clientId: string): void;
+
         // OVERRIDE: Called when destroying an asset
         // Most assets won't need to do anything here but some might want to do some
         // clean up work like making changes to associated resources
