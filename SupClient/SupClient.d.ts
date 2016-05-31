@@ -94,6 +94,7 @@ declare namespace SupClient {
     }
 
     interface ConfirmOptions {
+      header?: string;
       validationLabel?: string;
       cancelLabel?: string;
     }
@@ -103,6 +104,7 @@ declare namespace SupClient {
     }
 
     interface InfoOptions {
+      header?: string;
       closeLabel?: string;
     }
     export class InfoDialog extends BaseDialog<any> {
@@ -110,6 +112,7 @@ declare namespace SupClient {
     }
 
     interface PromptOptions {
+      header?: string;
       validationLabel?: string;
       cancelLabel?: string;
       type?: string;
@@ -125,6 +128,7 @@ declare namespace SupClient {
     }
 
     interface SelectOptions {
+      header?: string;
       validationLabel?: string;
       cancelLabel?: string;
       size?: number;
