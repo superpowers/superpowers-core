@@ -122,6 +122,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
 
       this.treeView.addToSelection(this.treeView.treeRoot.querySelector("li") as HTMLLIElement);
       this.selectedPluginName = this.treeView.selectedNodes[0].dataset["buildPlugin"];
+      this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
       this.validateButtonElt.disabled = false;
     }
   };
@@ -130,7 +131,9 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
     if (this.treeView.selectedNodes.length === 0) {
       this.treeView.addToSelection(this.treeView.treeRoot.querySelector(`li[data-build-plugin="${this.selectedPluginName}"]`) as HTMLLIElement);
     } else {
+      this.settingsEditorsByName[this.selectedPluginName].setVisible(false);
       this.selectedPluginName = this.treeView.selectedNodes[0].dataset["buildPlugin"];
+      this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
     }
   };
 }

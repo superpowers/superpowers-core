@@ -206,6 +206,7 @@ declare namespace SupClient {
   }
 
   export interface BuildSettingsEditor {
+    setVisible(visible: boolean): void;
     getSettings(): any;
   }
 
