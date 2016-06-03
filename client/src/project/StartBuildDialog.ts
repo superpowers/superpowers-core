@@ -4,6 +4,7 @@ import * as TreeView from "dnd-tree-view";
 import { pluginsInfo } from "./index";
 
 let buildPluginsLoaded = false;
+let previousSelectedPluginName: string;
 
 export interface BuildSetup {
   pluginPath: string;
@@ -15,7 +16,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
   private treeView: TreeView;
   private settingsContainer: HTMLDivElement;
   private loadingContainer: HTMLDivElement;
-  private selectedPluginName: string;
+  private selectedPluginName = previousSelectedPluginName;
   private settingsEditorsByName: { [pluginName: string]: SupClient.BuildSettingsEditor; } = {};
 
   constructor(private entries: SupCore.Data.Entries, private entriesTreeView: TreeView, callback: (result: BuildSetup) => void) {
@@ -108,23 +109,24 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
     this.loadingContainer.parentElement.removeChild(this.loadingContainer);
 
     const plugins = SupClient.getPlugins<SupClient.BuildPlugin>("build");
-    if (plugins != null && Object.keys(plugins).length > 0) {
-      for (const pluginName in plugins) {
-        const plugin = plugins[pluginName].content;
-        const elt = SupClient.html("li", { dataset: { buildPlugin: pluginName } });
-        this.treeView.append(elt, "item");
+    const pluginNames = Object.keys(plugins);
+    if (plugins == null && pluginNames.length === 0) return;
 
-        SupClient.html("div", "label", { parent: elt, textContent: SupClient.i18n.t(`buildSettingsEditors:${pluginName}.label`) });
-        SupClient.html("div", "description", { parent: elt, textContent: SupClient.i18n.t(`buildSettingsEditors:${pluginName}.description`) });
+    for (const pluginName of pluginNames) {
+      const plugin = plugins[pluginName].content;
+      const elt = SupClient.html("li", { dataset: { buildPlugin: pluginName } });
+      this.treeView.append(elt, "item");
 
-        this.settingsEditorsByName[pluginName] = new plugin.settingsEditor(this.settingsContainer, this.entries, this.entriesTreeView);
-      }
+      SupClient.html("div", "label", { parent: elt, textContent: SupClient.i18n.t(`buildSettingsEditors:${pluginName}.label`) });
+      SupClient.html("div", "description", { parent: elt, textContent: SupClient.i18n.t(`buildSettingsEditors:${pluginName}.description`) });
 
-      this.treeView.addToSelection(this.treeView.treeRoot.querySelector("li") as HTMLLIElement);
-      this.selectedPluginName = this.treeView.selectedNodes[0].dataset["buildPlugin"];
-      this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
-      this.validateButtonElt.disabled = false;
+      this.settingsEditorsByName[pluginName] = new plugin.settingsEditor(this.settingsContainer, this.entries, this.entriesTreeView);
     }
+
+    if (this.selectedPluginName == null) this.selectedPluginName = pluginNames[0];
+    this.treeView.addToSelection(this.treeView.treeRoot.querySelector(`li[data-build-plugin="${this.selectedPluginName}"]`) as HTMLLIElement);
+    this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
+    this.validateButtonElt.disabled = false;
   };
 
   private onTreeViewSelectionChange = () => {
@@ -133,6 +135,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
     } else {
       this.settingsEditorsByName[this.selectedPluginName].setVisible(false);
       this.selectedPluginName = this.treeView.selectedNodes[0].dataset["buildPlugin"];
+      previousSelectedPluginName = this.selectedPluginName;
       this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
     }
   };
