@@ -1,0 +1,37 @@
+{
+  "header": {
+    "goToHub": "Vai all'hub",
+    "publish": "Pubblica progetto",
+    "publishDisabled": "Pibblica il progetto (funziona solamente dall'app Superpowers per motivi tecnici)",
+    "stop": "Ferma il progetto",
+    "debug": "Debug del progetto (F6)",
+    "run": "Lancia il progetto (F5)",
+    "notifications": {
+      "enable": "Clicca per abilitare le notifiche",
+      "disable": "Clicca per disabilitare le notifiche",
+      "new": "Nuovo messaggio nella chat del progetto \"${projectName}\""
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "Apri in una nuova finestra",
+    "newAsset": {
+      "title": "Nuovo asset",
+      "prompt": "Seleziona il tipo ed inserisci un nome per il nuovo asset.",
+      "placeholder": "Nome dell'asset (opzionate)",
+      "openAfterCreation": "Apri dopo la creazione"
+    },
+    "newFolder": {
+      "title": "Nuova cartella",
+      "prompt": "Inserisci un nume per la nuova cartella.",
+      "placeholder": "Nome della cartella",
+      "initialValue": "Cartella"
+    },
+    "renamePrompt": "Inserisci un nuovo nome per l'asset.",
+    "duplicatePrompt": "Inserisci un nome per il nuovo asset.",
+    "trash": {
+      "title": "Cestino",
+      "prompt": "Sei sicuro di voler eliminare gli elementi selezionati?",
+      "warnBrokenDependency": "${entryName} è utilizzato in ${dependentEntryNames}."
+    }
+  }
+}

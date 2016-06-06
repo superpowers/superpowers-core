@@ -1,0 +1,49 @@
+{
+  "activeLanguage": "Italiano",
+
+  "namePatternDescription": "Non è possibile utilizzare i seguenti caratteri: \\, /, :, *, ?, \", <, >, |, [ and ].",
+  "none": "(NEssuno)",
+  "searchPlaceholder": "Ricerca asset",
+
+  "actions": {
+    "applyChanges": "Applica le modifiche",
+    "applyChangesWithErrors": "Applica le modifiche con errori",
+    "cancel": "Annulla",
+    "clear": "Pulisci",
+    "close": "Chiudi",
+    "create": "Crea",
+    "delete": "Elimina",
+    "download": "Scarica",
+    "duplicate": "Duplica",
+    "filter": "Filtra",
+    "new": "Nuovo",
+    "open": "Apri",
+    "rename": "Rinomina",
+    "save": "Salva",
+    "search": "Cerca",
+    "select": "Seleziona",
+    "skip": "Salta",
+    "update": "Aggiorna",
+    "upload": "Carica",
+
+    "cut": "Taglia",
+    "copy": "Copia",
+    "paste": "Incolla"
+  },
+
+  "states": { 
+    "disabled": "Disabilitato",
+    "enabled": "Abilitato",
+    "loading": "In caricamento...",
+    "connecting": "In connessione...",
+    "saving": "Salvataggio..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "Return"
+  }
+}
