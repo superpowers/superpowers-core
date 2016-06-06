@@ -70,9 +70,16 @@ function updateCore() {
     if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
       console.log("Updating the server...");
 
-      for (let path of ["server", "SupClient", "SupCore", "package.json", "public", "node_modules"]) rimraf.sync(`${__dirname}/../../${path}`);
-      utils.downloadRelease(downloadURL, `${__dirname}/../..`, (err) => {
+      const newPath = `${__dirname}/../../../core.new`;
+      utils.downloadRelease(downloadURL, newPath, (err) => {
         if (err != null) utils.emitError("Failed to update the core.", err);
+
+        for (let path of ["server", "SupClient", "SupCore", "package.json", "public", "node_modules"]) {
+          const fullPath = `${__dirname}/../../${path}`;
+          rimraf.sync(fullPath);
+          fs.renameSync(`${newPath}/${path}`, `${fullPath}A`);
+        }
+        rimraf.sync(newPath);
 
         console.log("Server successfully updated.");
         process.exit(0);
@@ -89,19 +96,31 @@ function updateSystem(systemId: string, downloadURL: string) {
 
   const system = utils.systemsById[systemId];
   const systemPath = `${utils.systemsPath}/${system.folderName}`;
+  const newSystemPath = `${systemPath}.new`;
 
-  const folders = fs.readdirSync(systemPath);
-  for (let folder of folders) {
-    if (folder === "plugins") {
-      for (const pluginAuthor of fs.readdirSync(`${systemPath}/plugins`)) {
-        if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
-        rimraf.sync(`${systemPath}/plugins/${pluginAuthor}`);
-      }
-    } else rimraf.sync(`${systemPath}/${folder}`);
-  }
-
-  utils.downloadRelease(downloadURL, systemPath, (err) => {
+  utils.downloadRelease(downloadURL, newSystemPath, (err) => {
     if (err != null) utils.emitError("Failed to update the system.", err);
+
+    const oldItems = fs.readdirSync(systemPath);
+    for (const item of oldItems) {
+      if (item === "plugins") {
+        for (const pluginAuthor of fs.readdirSync(`${systemPath}/plugins`)) {
+          if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
+          rimraf.sync(`${systemPath}/plugins/${pluginAuthor}`);
+        }
+      } else rimraf.sync(`${systemPath}/${item}`);
+    }
+
+    const newItems = fs.readdirSync(newSystemPath);
+    for (const item of newItems) {
+      if (item === "plugins") {
+        for (const pluginAuthor of fs.readdirSync(`${newSystemPath}/plugins`)) {
+          if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
+          fs.renameSync(`${newSystemPath}/plugins/${pluginAuthor}`, `${systemPath}/plugins/${pluginAuthor}`);
+        }
+      } else fs.renameSync(`${newSystemPath}/${item}`, `${systemPath}/${item}`);
+    }
+    rimraf.sync(newSystemPath);
 
     console.log(`System successfully updated.`);
     process.exit(0);
@@ -136,9 +155,11 @@ function updatePlugin(systemId: string, pluginFullName: string) {
       if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
         console.log(`Updating plugin ${pluginFullName}...`);
 
-        rimraf.sync(pluginPath);
-        utils.downloadRelease(downloadURL, pluginPath, (err) => {
+        utils.downloadRelease(downloadURL, `${pluginPath}.new`, (err) => {
           if (err != null) utils.emitError("Failed to update the plugin.", err);
+
+          rimraf.sync(pluginPath);
+          fs.renameSync(`${pluginPath}.new`, pluginPath);
 
           console.log(`Plugin successfully updated to version ${latestMajor}.${latestMinor}.`);
           process.exit(0);

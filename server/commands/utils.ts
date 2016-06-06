@@ -215,7 +215,7 @@ export function downloadRelease(downloadURL: string, downloadPath: string, callb
     const buffers: Buffer[] = [];
     res.on("data", (data: Buffer) => { buffers.push(data); progress += data.length; onProgress(progress / progressMax); });
     res.on("end", () => {
-      const zipBuffer = Buffer.concat(buffers);
+      let zipBuffer = Buffer.concat(buffers);
 
       yauzl.fromBuffer(zipBuffer, { lazyEntries: true }, (err: Error, zipFile: any) => {
         if (err != null) throw err;
@@ -255,7 +255,7 @@ export function downloadRelease(downloadURL: string, downloadPath: string, callb
         });
 
         zipFile.on("end", () => {
-          callback(null);
+          setTimeout(() => { callback(null); }, 100);
         });
       });
     });
@@ -273,7 +273,7 @@ function onProgress(value: number) {
 
 export function emitError(message: string, details?: string) {
   console.error(message);
-  console.error(details);
+  if (details != null) console.error(details);
   if (process != null && process.send != null) process.send({ type: "error", message });
 
   process.exit(1);
