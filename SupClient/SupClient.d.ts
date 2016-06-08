@@ -91,6 +91,7 @@ declare namespace SupClient {
       constructor(callback: (result: T) => void);
       protected submit(result?: T): void;
       protected cancel(result?: T): void;
+      protected dismiss(): void;
     }
 
     interface ConfirmOptions {
