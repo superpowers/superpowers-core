@@ -224,6 +224,9 @@ declare namespace SupCore {
         releaseAll(id: string): void;
       }
 
+      type ErrorCallback = (err: string) => void;
+      type SetPropertyCallback = ErrorCallback & ((err: string, ack: any, path: string, value: number|string|boolean) => void);
+
       class Asset extends Hash {
         id: string;
         server: ProjectServer;
@@ -260,7 +263,7 @@ declare namespace SupCore {
         save(assetPath: string, callback: (err: Error) => any): void;
         publish(buildPath: string, callback: (err: Error) => any): void;
 
-        server_setProperty(client: RemoteClient, path: string, value: any, callback: (err: string, path?: string, value?: any) => any): void;
+        server_setProperty(client: RemoteClient, path: string, value: number|string|boolean, callback: SetPropertyCallback): void;
       }
 
       class Resource extends Hash {
@@ -286,7 +289,7 @@ declare namespace SupCore {
         save(resourcePath: string, callback: (err: Error) => any): void;
         publish(buildPath: string, callback: (err: Error) => any): void;
 
-        server_setProperty(client: RemoteClient, path: string, value: number|string|boolean, callback: (err: string, path?: string, value?: any) => any): void;
+        server_setProperty(client: RemoteClient, path: string, value: number|string|boolean, callback: SetPropertyCallback): void;
       }
     }
   }
