@@ -86,14 +86,14 @@ export default class ProjectClient {
     let callback: Function;
     if (typeof args[args.length - 1] === "function") callback = args.pop();
 
-    args.push((err: string, id: string) => {
+    args.push((err: string, ack: any) => {
       if (err != null) {
         /* tslint:disable:no-unused-expression */
         new SupClient.Dialogs.InfoDialog(err);
         /* tslint:enable:no-unused-expression */
         return;
       }
-      if (callback != null) callback(id);
+      if (callback != null) callback(ack);
     });
 
     this.socket.emit("edit:assets", assetId, command, ...args);

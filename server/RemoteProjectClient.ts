@@ -339,16 +339,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.server.data.assets.acquire(id, null, (err, asset) => {
       if (err != null) { callback("Could not acquire asset"); return; }
 
-      commandMethod.call(asset, this, ...args, (err: string, ...callbackArgs: any[]) => {
+      commandMethod.call(asset, this, ...args, (err: string, ack: any, ...callbackArgs: any[]) => {
         this.server.data.assets.release(id, null);
         if (err != null) { callback(err); return; }
 
         this.server.io.in(`sub:assets:${id}`).emit("edit:assets", id, command, ...callbackArgs);
-
-        // If the first parameter has an id, send it back to the client
-        // Useful so that they can grab the thing they created
-        // (It's a bit of a hack, but has proven useful)
-        callback(null, (callbackArgs[0] != null) ? callbackArgs[0].id : null);
+        callback(null, ack);
       });
     });
   };
@@ -369,16 +365,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.server.data.resources.acquire(id, null, (err, resource) => {
       if (err != null) { callback("Could not acquire resource"); return; }
 
-      commandMethod.call(resource, this, ...args, (err: string, ...callbackArgs: any[]) => {
+      commandMethod.call(resource, this, ...args, (err: string, ack: any, ...callbackArgs: any[]) => {
         this.server.data.resources.release(id, null);
         if (err != null) { callback(err); return; }
 
         this.server.io.in(`sub:resources:${id}`).emit("edit:resources", id, command, ...callbackArgs);
-
-        // If the first parameter has an id, send it back to the client
-        // Useful so that they can grab the thing they created
-        // (It's a bit of a hack, but has proven useful)
-        callback(null, (callbackArgs[0] != null) ? callbackArgs[0].id : null);
+        callback(null, ack);
       });
     });
   };
