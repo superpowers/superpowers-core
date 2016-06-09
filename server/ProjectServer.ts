@@ -265,13 +265,10 @@ export default class ProjectServer {
     const resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
     const saveCallback = item.save.bind(item, resourcePath);
     item.on("change", () => { this.scheduleSave(saveDelay, `resources:${resourceId}`, saveCallback); });
+    item.on("edit", (commandName: string, ...args: any[]) => { this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, commandName, ...args); });
 
     item.on("setAssetBadge", (assetId: string, badgeId: string, type: string, data: any) => { this.setBadge(assetId, badgeId, type, data); });
     item.on("clearAssetBadge", (assetId: string, badgeId: string) => { this.clearBadge(assetId, badgeId); });
-
-    item.on("command", (cmd: string, ...callbackArgs: any[]) => {
-      this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, cmd, ...callbackArgs);
-    });
   };
 
   private onAddSocket = (socket: SocketIO.Socket) => {
