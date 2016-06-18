@@ -36,7 +36,7 @@ export const systemsById: { [id: string]: {
   folderName: string;
   version: string;
   isDev: boolean;
-  plugins: { [author: string]: string[] }
+  plugins: { [authorName: string]: { [pluginName: string]: { version: string; isDev: boolean; } } };
 } } = {};
 
 for (const entry of fs.readdirSync(systemsPath)) {
@@ -44,13 +44,13 @@ for (const entry of fs.readdirSync(systemsPath)) {
   if (!fs.statSync(`${systemsPath}/${entry}`).isDirectory) continue;
 
   let systemId: string;
-  let version: string;
+  let systemVersion: string;
   const systemPath = `${systemsPath}/${entry}`;
   try {
     const packageDataFile = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
     const packageData = JSON.parse(packageDataFile);
     systemId = packageData.superpowers.systemId;
-    version = packageData.version;
+    systemVersion = packageData.version;
   } catch (err) {
     emitError(`Could not load system id from systems/${entry}/package.json:`, err.stack);
   }
@@ -59,7 +59,7 @@ for (const entry of fs.readdirSync(systemsPath)) {
   try { if (!fs.lstatSync(`${systemPath}/.git`).isDirectory()) isDev = false; }
   catch (err) { isDev = false; }
 
-  systemsById[systemId] = { folderName: entry, version, isDev, plugins: {} };
+  systemsById[systemId] = { folderName: entry, version: systemVersion, isDev, plugins: {} };
   let pluginAuthors: string[];
   try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
   if (pluginAuthors == null) continue;
@@ -68,14 +68,27 @@ for (const entry of fs.readdirSync(systemsPath)) {
     if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) continue;
     if (!folderNameRegex.test(pluginAuthor)) continue;
 
-    const pluginNames: string[] = [];
+    systemsById[systemId].plugins[pluginAuthor] = {};
     for (const pluginName of fs.readdirSync(`${systemPath}/plugins/${pluginAuthor}`)) {
       if (!folderNameRegex.test(pluginName)) continue;
-      if (!fs.statSync(`${systemPath}/plugins/${pluginAuthor}/${pluginName}`).isDirectory) continue;
-      pluginNames.push(pluginName);
-    }
-    if (pluginNames.length > 0) {
-      systemsById[systemId].plugins[pluginAuthor] = pluginNames;
+
+      const pluginPath = `${systemPath}/plugins/${pluginAuthor}/${pluginName}`;
+      if (!fs.statSync(pluginPath).isDirectory) continue;
+
+      let pluginVersion: string;
+      try {
+        const packageDataFile = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
+        const packageData = JSON.parse(packageDataFile);
+        pluginVersion = packageData.version;
+      } catch (err) {
+        emitError(`Could not load plugin verson from systems/${entry}/${pluginAuthor}/${pluginName}/package.json:`, err.stack);
+      }
+
+      let isDev = true;
+      try { if (!fs.lstatSync(`${pluginPath}/.git`).isDirectory()) isDev = false; }
+      catch (err) { isDev = false; }
+
+      systemsById[systemId].plugins[pluginAuthor][pluginName] = { version: pluginVersion, isDev };
     }
   }
 }
@@ -97,22 +110,19 @@ export function listAvailablePlugins(registry: Registry, systemId: string) {
 }
 
 const currentRegistryVersion = 1;
+
+interface ItemData { version: string; downloadURL: string; localVersion: string; isLocalDev: boolean; };
+interface SystemData extends ItemData {
+  repository: string;
+  plugins: { [authorName: string]: { [pluginName: string]: ItemData; } };
+}
+
 type Registry = {
   version: number;
-  core: {
-    version: string;
-    downloadURL: string;
-    localVersion: string;
-    isLocalDev: boolean;
-  }
-  systems: { [sytemId: string]: {
-    repository: string;
-    version: string;
-    downloadURL: string;
-    localVersion: string;
-    isLocalDev: boolean;
-    plugins: { [author: string]: { [name: string]: string } }
-} } };
+  core: ItemData;
+  systems: { [sytemId: string]: SystemData }
+};
+
 export function getRegistry(callback: (err: Error, registry: Registry) => any) {
   // FIXME: Use registry.json instead once the next release is out
   const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers-core/master/registryNext.json";
@@ -146,19 +156,37 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
           registry.core = { version, downloadURL, localVersion, isLocalDev };
 
           async.each(Object.keys(registry.systems), (systemId, cb) => {
-            const system = registry.systems[systemId];
-            getLatestRelease(system.repository, (version, downloadURL) => {
-              system.version = version;
-              system.downloadURL = downloadURL;
+            const registrySystem = registry.systems[systemId];
+            getLatestRelease(registrySystem.repository, (version, downloadURL) => {
+              registrySystem.version = version;
+              registrySystem.downloadURL = downloadURL;
 
-              if (systemsById[systemId] != null) {
-                system.localVersion = systemsById[systemId].version;
-                system.isLocalDev = systemsById[systemId].isDev;
+              const localSystem = systemsById[systemId];
+              if (localSystem != null) {
+                registrySystem.localVersion = localSystem.version;
+                registrySystem.isLocalDev = localSystem.isDev;
               } else {
-                system.isLocalDev = false;
+                registrySystem.isLocalDev = false;
               }
 
-              cb();
+              async.each(Object.keys(registrySystem.plugins), (authorName, cb) => {
+                async.each(Object.keys(registrySystem.plugins[authorName]), (pluginName, cb) => {
+                  getLatestRelease(registrySystem.plugins[authorName][pluginName] as any, (version, downloadURL) => {
+                    const registryPlugin = registrySystem.plugins[authorName][pluginName] = {
+                      version, downloadURL,
+                      localVersion: null as string, isLocalDev: false
+                    };
+
+                    const localPlugin = localSystem.plugins[authorName] != null ? localSystem.plugins[authorName][pluginName] : null;
+                    if (localPlugin != null) {
+                      registryPlugin.localVersion = localPlugin.version;
+                      registryPlugin.isLocalDev = localPlugin.isDev;
+                    }
+
+                    cb();
+                  });
+                }, cb);
+              }, cb);
             });
           }, (err) => { callback(err, registry); });
         });
