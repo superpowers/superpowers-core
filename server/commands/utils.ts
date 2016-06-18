@@ -109,11 +109,10 @@ export function listAvailablePlugins(registry: Registry, systemId: string) {
   }
 }
 
-const currentRegistryVersion = 1;
+const currentRegistryVersion = 2;
 
 interface ItemData { version: string; downloadURL: string; localVersion: string; isLocalDev: boolean; };
 interface SystemData extends ItemData {
-  repository: string;
   plugins: { [authorName: string]: { [pluginName: string]: ItemData; } };
 }
 
@@ -124,8 +123,7 @@ type Registry = {
 };
 
 export function getRegistry(callback: (err: Error, registry: Registry) => any) {
-  // FIXME: Use registry.json instead once the next release is out
-  const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers-core/master/registryNext.json";
+  const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers-registry/master/registry.json";
   const request = https.get(registryUrl, (res) => {
     if (res.statusCode !== 200) {
       callback(new Error(`Unexpected status code: ${res.statusCode}`), null);
@@ -145,82 +143,48 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
       if (registry.version !== currentRegistryVersion) {
         callback(new Error("The registry format has changed. Please update Superpowers."), null);
       } else {
-        getLatestRelease("https://github.com/superpowers/superpowers-core", (version, downloadURL) => {
-          const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
-          const { version: localVersion } = JSON.parse(packageData);
+        const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
+        const { version: localCoreVersion } = JSON.parse(packageData);
+        registry.core.localVersion = localCoreVersion;
 
-          let isLocalDev = true;
-          try { if (!fs.lstatSync(`${__dirname}/../../.git`).isDirectory()) isLocalDev = false; }
-          catch (err) { isLocalDev = false; }
+        let isLocalCoreDev = true;
+        try { if (!fs.lstatSync(`${__dirname}/../../.git`).isDirectory()) isLocalCoreDev = false; }
+        catch (err) { isLocalCoreDev = false; }
+        registry.core.isLocalDev = isLocalCoreDev;
 
-          registry.core = { version, downloadURL, localVersion, isLocalDev };
+        async.each(Object.keys(registry.systems), (systemId, cb) => {
+          const registrySystem = registry.systems[systemId];
+          const localSystem = systemsById[systemId];
 
-          async.each(Object.keys(registry.systems), (systemId, cb) => {
-            const registrySystem = registry.systems[systemId];
-            getLatestRelease(registrySystem.repository, (version, downloadURL) => {
-              registrySystem.version = version;
-              registrySystem.downloadURL = downloadURL;
+          if (localSystem != null) {
+            registrySystem.localVersion = localSystem.version;
+            registrySystem.isLocalDev = localSystem.isDev;
+          } else {
+            registrySystem.isLocalDev = false;
+          }
 
-              const localSystem = systemsById[systemId];
-              if (localSystem != null) {
-                registrySystem.localVersion = localSystem.version;
-                registrySystem.isLocalDev = localSystem.isDev;
+          async.each(Object.keys(registrySystem.plugins), (authorName, cb) => {
+            async.each(Object.keys(registrySystem.plugins[authorName]), (pluginName, cb) => {
+              const registryPlugin = registrySystem.plugins[authorName][pluginName];
+              const localPlugin = localSystem.plugins[authorName] != null ? localSystem.plugins[authorName][pluginName] : null;
+
+              if (localPlugin != null) {
+                registryPlugin.localVersion = localPlugin.version;
+                registryPlugin.isLocalDev = localPlugin.isDev;
               } else {
-                registrySystem.isLocalDev = false;
+                registryPlugin.isLocalDev = false;
               }
 
-              async.each(Object.keys(registrySystem.plugins), (authorName, cb) => {
-                async.each(Object.keys(registrySystem.plugins[authorName]), (pluginName, cb) => {
-                  getLatestRelease(registrySystem.plugins[authorName][pluginName] as any, (version, downloadURL) => {
-                    const registryPlugin = registrySystem.plugins[authorName][pluginName] = {
-                      version, downloadURL,
-                      localVersion: null as string, isLocalDev: false
-                    };
-
-                    const localPlugin = localSystem.plugins[authorName] != null ? localSystem.plugins[authorName][pluginName] : null;
-                    if (localPlugin != null) {
-                      registryPlugin.localVersion = localPlugin.version;
-                      registryPlugin.isLocalDev = localPlugin.isDev;
-                    }
-
-                    cb();
-                  });
-                }, cb);
-              }, cb);
-            });
-          }, (err) => { callback(err, registry); });
-        });
+              cb();
+            }, cb);
+          }, cb);
+        }, (err) => { callback(err, registry); });
       }
     });
   });
 
   request.on("error", (err: Error) => {
     callback(err, null);
-  });
-}
-
-export function getLatestRelease(repositoryURL: string, callback: (version: string, downloadURL: string) => void) {
-  const repositoryPath = `${repositoryURL.replace("https://github.com", "/repos")}/releases/latest`;
-  const request = https.get({
-    hostname: "api.github.com",
-    path: repositoryPath,
-    headers: { "user-agent": "Superpowers" }
-  }, (res) => {
-    if (res.statusCode !== 200) {
-      const err = new Error(`Unexpected status code: ${res.statusCode}`);
-      emitError(`Couldn't get latest release from repository at ${repositoryURL}:`, err.stack);
-    }
-
-    let content = "";
-    res.on("data", (chunk: string) => { content += chunk; });
-    res.on("end", () => {
-      const repositoryInfo = JSON.parse(content);
-      callback(repositoryInfo.tag_name.slice(1), repositoryInfo.assets[0].browser_download_url);
-    });
-  });
-
-  request.on("error", (err: Error) => {
-    emitError(`Couldn't get latest release from repository at ${repositoryURL}:`, err.stack);
   });
 }
 

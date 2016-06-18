@@ -18,11 +18,11 @@ export default function update(systemId: string, pluginFullName: string) {
     const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
     const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
 
-    utils.getLatestRelease("https://github.com/superpowers/superpowers-core", (version, downloadURL) => {
-      const [ latestMajor, latestMinor ] = version.split(".");
+    utils.getRegistry((err, registry) => {
+      const [ latestMajor, latestMinor ] = registry.core.version.split(".");
 
       if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
-        updateCore(downloadURL);
+        updateCore(registry.core.downloadURL);
       } else {
         console.log("No updates available for the server.");
         process.exit(0);
