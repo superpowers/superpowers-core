@@ -1,7 +1,7 @@
 import * as async from "async";
 
 import * as TreeView from "dnd-tree-view";
-import { pluginsInfo } from "./index";
+import { pluginsInfo } from "../network";
 
 let buildPluginsLoaded = false;
 let previousSelectedPluginName: string;

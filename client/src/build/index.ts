@@ -1,5 +1,5 @@
 import * as async from "async";
-import { BuildSetup } from "../project/StartBuildDialog";
+import { BuildSetup } from "../project/sidebar/StartBuildDialog";
 
 document.addEventListener("keydown", (event) => {
   // F12
