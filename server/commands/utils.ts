@@ -166,7 +166,7 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
           async.each(Object.keys(registrySystem.plugins), (authorName, cb) => {
             async.each(Object.keys(registrySystem.plugins[authorName]), (pluginName, cb) => {
               const registryPlugin = registrySystem.plugins[authorName][pluginName];
-              const localPlugin = localSystem.plugins[authorName] != null ? localSystem.plugins[authorName][pluginName] : null;
+              const localPlugin = localSystem != null && localSystem.plugins[authorName] != null ? localSystem.plugins[authorName][pluginName] : null;
 
               if (localPlugin != null) {
                 registryPlugin.localVersion = localPlugin.version;
@@ -247,7 +247,8 @@ export function downloadRelease(downloadURL: string, downloadPath: string, callb
         });
 
         zipFile.on("end", () => {
-          callback(null);
+          // NOTE: Necessary to allow manipulating files right after download
+          setTimeout(callback, 100);
         });
       });
     });
