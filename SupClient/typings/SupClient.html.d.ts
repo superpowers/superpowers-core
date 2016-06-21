@@ -3,6 +3,7 @@ declare namespace SupClient {
   export function html(tag: "div", options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "span", options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "img", options?: HTMLImageOptions): HTMLImageElement;
+  export function html(tag: "iframe", options?: HTMLImageOptions): HTMLIFrameElement;
   export function html(tag: "button", options?: HTMLInputOptions): HTMLButtonElement;
   export function html(tag: "input", options?: HTMLInputOptions): HTMLInputElement;
   export function html(tag: "label", options?: HTMLLabelOptions): HTMLLabelElement;
@@ -18,6 +19,7 @@ declare namespace SupClient {
   export function html(tag: "div", classList?: string|string[], options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "span", classList?: string|string[], options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "img", classList?: string|string[], options?: HTMLImageOptions): HTMLImageElement;
+  export function html(tag: "iframe", classList?: string|string[], options?: HTMLImageOptions): HTMLIFrameElement;
   export function html(tag: "button", classList?: string|string[], options?: HTMLInputOptions): HTMLButtonElement;
   export function html(tag: "input", classList?: string|string[], options?: HTMLInputOptions): HTMLInputElement;
   export function html(tag: "label", classList?: string|string[], options?: HTMLLabelOptions): HTMLLabelElement;

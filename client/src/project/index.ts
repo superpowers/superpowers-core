@@ -118,9 +118,7 @@ function start() {
   document.querySelector(".entries-buttons .trash-entry").addEventListener("click", onTrashEntryClick);
   document.querySelector(".entries-buttons .filter").addEventListener("click", onToggleFilterStripClick);
 
-  ui.openInNewWindowButton = document.createElement("button");
-  ui.openInNewWindowButton.className = "open-in-new-window";
-  ui.openInNewWindowButton.title = SupClient.i18n.t("project:treeView.openInNewWindow");
+  ui.openInNewWindowButton = SupClient.html("button", "open-in-new-window", { title: SupClient.i18n.t("project:treeView.openInNewWindow") });
   ui.openInNewWindowButton.addEventListener("click", onOpenInNewWindowClick);
 
   // Tab strip
@@ -251,26 +249,17 @@ function setupTool(toolName: string) {
     return;
   }
 
-  const toolElt = document.createElement("li");
-  toolElt.dataset["name"] = toolName;
-  const containerElt = document.createElement("div");
-  toolElt.appendChild(containerElt);
-
-  const iconElt = document.createElement("img");
-  iconElt.src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
-  containerElt.appendChild(iconElt);
-
-  const nameSpanElt = document.createElement("span");
-  nameSpanElt.className = "name";
-  nameSpanElt.textContent = SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`);
-  containerElt.appendChild(nameSpanElt);
-
+  const toolElt = SupClient.html("li", { parent: ui.toolsElt, dataset: { name: toolName } });
   toolElt.addEventListener("mouseenter", (event: any) => { event.target.appendChild(ui.openInNewWindowButton); });
   toolElt.addEventListener("mouseleave", (event) => {
     if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
   });
+
+  const containerElt = SupClient.html("div", { parent: toolElt });
+  SupClient.html("img", { parent: containerElt, src: `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg` });
+
+  const nameSpanElt = SupClient.html("span", "name", { parent: containerElt, textContent: SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`) });
   nameSpanElt.addEventListener("click", (event: any) => { openTool(event.target.parentElement.parentElement.dataset["name"]); });
-  ui.toolsElt.appendChild(toolElt);
 }
 
 // Network callbacks
@@ -486,11 +475,8 @@ function onBadgeSet(id: string, newBadge: SupCore.Data.BadgeItem) {
     existingBadge.data = newBadge.data;
   } else badges.client_add(newBadge, null);
 
-  const badgesElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges`);
-  const badgeSpan = document.createElement("span");
-  badgeSpan.className = newBadge.id;
-  badgeSpan.textContent = SupClient.i18n.t(`badges:${newBadge.id}`);
-  badgesElt.appendChild(badgeSpan);
+  const badgesElt = ui.entriesTreeView.treeRoot.querySelector(`[data-id='${id}'] .badges`) as HTMLDivElement;
+  SupClient.html("span", newBadge.id, { parent: badgesElt, textContent: SupClient.i18n.t(`badges:${newBadge.id}`) });
 }
 
 function onBadgeCleared(id: string, badgeId: string) {
@@ -579,51 +565,36 @@ function openStartBuildDialog() {
 }
 
 function createEntryElement(entry: SupCore.Data.EntryNode) {
-  const liElt = document.createElement("li");
-  liElt.dataset["id"] = entry.id;
   const parentEntry = entries.parentNodesById[entry.id];
-  if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
+  const parentId = parentEntry != null ? parentEntry.id : null;
+
+  const liElt = SupClient.html("li", { dataset: { id: entry.id, parentId } });
 
   if (entry.type != null) {
     liElt.dataset["assetType"] = entry.type;
 
-    const iconElt = document.createElement("img");
-    iconElt.draggable = false;
+    const iconElt = SupClient.html("img", { parent: liElt, draggable: false });
     iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
-    liElt.appendChild(iconElt);
   }
 
-  const nameSpan = document.createElement("span");
-  nameSpan.className = "name";
-  nameSpan.textContent = entry.name;
-  liElt.appendChild(nameSpan);
+  SupClient.html("span", "name", { parent: liElt, textContent: entry.name });
 
   if (entry.type != null) {
+    const badgesSpan = SupClient.html("span", "badges", { parent: liElt });
+    for (const badge of entry.badges) SupClient.html("span", badge.id, { parent: badgesSpan, textContent: SupClient.i18n.t(`badges:${badge.id}`) });
+
     liElt.addEventListener("mouseenter", (event) => { liElt.appendChild(ui.openInNewWindowButton); });
     liElt.addEventListener("mouseleave", (event) => {
       if (ui.openInNewWindowButton.parentElement != null) ui.openInNewWindowButton.parentElement.removeChild(ui.openInNewWindowButton);
     });
 
-    const badgesSpan = document.createElement("span");
-    badgesSpan.className = "badges";
-
-    for (const badge of entry.badges) {
-      const badgeSpan = document.createElement("span");
-      badgeSpan.className = badge.id;
-      badgeSpan.textContent = SupClient.i18n.t(`badges:${badge.id}`);
-      badgesSpan.appendChild(badgeSpan);
-    }
-    liElt.appendChild(badgesSpan);
   } else {
-    const childrenElt = document.createElement("span");
-    childrenElt.className = "children";
-    childrenElt.textContent = `(${entry.children.length})`;
-    liElt.appendChild(childrenElt);
-    childrenElt.style.display = "none";
+    const childrenElt = SupClient.html("span", "children", { parent: liElt, textContent: `(${entry.children.length})`, style: { display: "none"} });
 
     liElt.addEventListener("mouseenter", (event) => { childrenElt.style.display = ""; });
     liElt.addEventListener("mouseleave", (event) => { childrenElt.style.display = "none"; });
   }
+
   return liElt;
 }
 
@@ -631,19 +602,13 @@ function setupFilterStrip() {
   const filterElt = ui.entriesFilterStrip;
   filterElt.innerHTML = "";
 
-  const toggleAllElt = document.createElement("img");
-  toggleAllElt.draggable = false;
-  toggleAllElt.classList.add("toggle-all");
+  const toggleAllElt = SupClient.html("img", "toggle-all", { parent: filterElt, draggable: false });
   toggleAllElt.addEventListener("click", onToggleAllFilterClick);
-  filterElt.appendChild(toggleAllElt);
 
   for (const assetType of assetTypes) {
-    const iconElt = document.createElement("img");
-    iconElt.draggable = false;
-    iconElt.addEventListener("click", onToggleAssetTypeFilterClick);
-    iconElt.dataset["assetType"] = assetType;
+    const iconElt = SupClient.html("img", { parent: filterElt, dataset: { assetType }, draggable: false });
     iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[assetType].pluginPath}/editors/${assetType}/icon.svg`;
-    filterElt.appendChild(iconElt);
+    iconElt.addEventListener("click", onToggleAssetTypeFilterClick);
   }
 }
 
@@ -847,12 +812,13 @@ function openEntry(id: string, state?: {[name: string]: any}) {
     tab = createAssetTabElement(entry);
     ui.tabStrip.tabsRoot.appendChild(tab);
 
-    iframe = document.createElement("iframe");
-    iframe.dataset["assetId"] = id;
-    iframe.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
+    const src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
+    iframe = SupClient.html("iframe", { parent: ui.panesElt, dataset: { assetId: id }, src });
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
-    ui.panesElt.appendChild(iframe);
-  } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
+
+  } else if (state != null) {
+    iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
+  }
 
   onTabActivate(tab);
   return tab;
@@ -876,12 +842,13 @@ function openTool(name: string, state?: { [name: string]: any }) {
       ui.tabStrip.tabsRoot.appendChild(tab);
     }
 
-    iframe = document.createElement("iframe");
-    iframe.dataset["name"] = name;
+    iframe = SupClient.html("iframe", { parent: ui.panesElt, dataset: { name }});
     iframe.src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
-    ui.panesElt.appendChild(iframe);
-  } else if (state != null) iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
+
+  } else if (state != null) {
+    iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
+  }
 
   onTabActivate(tab);
 
@@ -1074,33 +1041,19 @@ function refreshAssetTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLIEl
 }
 
 function createAssetTabElement(entry: SupCore.Data.EntryNode) {
-  const tabElt = document.createElement("li");
+  const tabElt = SupClient.html("li", { dataset: { assetId: entry.id }});
 
   if (entry.type != null) {
-    const iconElt = document.createElement("img");
-    iconElt.classList.add("icon");
+    const iconElt = SupClient.html("img", "icon", { parent: tabElt });
     iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
-    tabElt.appendChild(iconElt);
   }
 
-  const tabLabel = document.createElement("div");
-  tabLabel.classList.add("label");
-  tabElt.appendChild(tabLabel);
+  const tabLabel = SupClient.html("div", "label", { parent: tabElt });
+  SupClient.html("div", "location", { parent: tabLabel });
+  SupClient.html("div", "name", { parent: tabLabel });
 
-  const tabLabelLocation = document.createElement("div");
-  tabLabelLocation.classList.add("location");
-  tabLabel.appendChild(tabLabelLocation);
-
-  const tabLabelName = document.createElement("div");
-  tabLabelName.classList.add("name");
-  tabLabel.appendChild(tabLabelName);
-
-  const closeButton = document.createElement("button");
-  closeButton.classList.add("close");
+  const closeButton = SupClient.html("button", "close", { parent: tabElt });
   closeButton.addEventListener("click", () => { onTabClose(tabElt); });
-  tabElt.appendChild(closeButton);
-
-  tabElt.dataset["assetId"] = entry.id;
 
   refreshAssetTabElement(entry, tabElt);
 
@@ -1108,32 +1061,20 @@ function createAssetTabElement(entry: SupCore.Data.EntryNode) {
 }
 
 function createToolTabElement(toolName: string, tool: EditorManifest) {
-  const tabElt = document.createElement("li");
+  const tabElt = SupClient.html("li", { dataset: { pane: toolName }});
+  tabElt.classList.toggle("pinned", tool.pinned);
 
-  const iconElt = document.createElement("img");
-  iconElt.classList.add("icon");
+  const iconElt = SupClient.html("img", "icon", { parent: tabElt });
   iconElt.src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${toolName}/icon.svg`;
-  tabElt.appendChild(iconElt);
 
   if (!tool.pinned) {
-    const tabLabel = document.createElement("div");
-    tabLabel.classList.add("label");
-    tabElt.appendChild(tabLabel);
+    const tabLabel = SupClient.html("div", "label", { parent: tabElt });
+    SupClient.html("div", "name", { parent: tabLabel, textContent: SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`) });
 
-    const tabLabelName = document.createElement("div");
-    tabLabelName.classList.add("name");
-    tabLabel.appendChild(tabLabelName);
-    tabLabelName.textContent = SupClient.i18n.t(`${tool.pluginPath}:editors.${toolName}.title`);
-
-    const closeButton = document.createElement("button");
-    closeButton.classList.add("close");
+    const closeButton = SupClient.html("button", "close", { parent: tabElt });
     closeButton.addEventListener("click", () => { onTabClose(tabElt); });
-    tabElt.appendChild(closeButton);
-  } else {
-    tabElt.classList.add("pinned");
   }
 
-  tabElt.dataset["pane"] = toolName;
   return tabElt;
 }
 
