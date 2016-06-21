@@ -4,20 +4,34 @@ import * as fs from "fs";
 import * as utils from "./utils";
 
 export default function update(systemId: string, pluginFullName: string) {
+  // Update core
   if (systemId === "core" && pluginFullName == null) {
     let isDevFolder = true;
     try { fs.readdirSync(`${__dirname}/../../.git`); } catch (err) { isDevFolder = false; }
     if (isDevFolder) utils.emitError(`Core is a development version.`);
 
-    updateCore();
+    if (utils.downloadURL != null) {
+      updateCore(utils.downloadURL);
+      return;
+    }
+
+    utils.getRegistry((err, registry) => {
+      if (registry.core.version !== registry.core.localVersion) {
+        updateCore(registry.core.downloadURL);
+      } else {
+        console.log("No updates available for the server.");
+        process.exit(0);
+      }
+    });
     return;
   }
 
-  const system = utils.systemsById[systemId];
-  if (system == null) utils.emitError(`System ${systemId} is not installed.`);
+  const localSystem = utils.systemsById[systemId];
+  if (localSystem == null) utils.emitError(`System ${systemId} is not installed.`);
 
   if (pluginFullName == null) {
-    if (system.isDev) utils.emitError(`System ${systemId} is a development version.`);
+    // Update system
+    if (localSystem.isDev) utils.emitError(`System ${systemId} is a development version.`);
 
     if (utils.downloadURL != null) {
       updateSystem(systemId, utils.downloadURL);
@@ -27,17 +41,15 @@ export default function update(systemId: string, pluginFullName: string) {
     utils.getRegistry((err, registry) => {
       if (err) utils.emitError("Error while fetching registry:", err.stack);
 
-      const system = registry.systems[systemId];
-      if (system == null) {
+      const registrySystem = registry.systems[systemId];
+      if (registrySystem == null) {
         console.error(`System ${systemId} is not on the registry.`);
         utils.listAvailableSystems(registry);
         process.exit(1);
       }
 
-      const [ currentMajor, currentMinor ] = system.localVersion.split(".");
-      const [ latestMajor, latestMinor ] = system.version.split(".");
-      if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
-        updateSystem(systemId, system.downloadURL);
+      if (registrySystem.version !== registrySystem.localVersion) {
+        updateSystem(systemId, registrySystem.downloadURL);
       } else {
         console.log(`No updates available for system ${systemId}`);
         process.exit(0);
@@ -45,49 +57,63 @@ export default function update(systemId: string, pluginFullName: string) {
     });
 
   } else {
-    const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
-    if (utils.builtInPluginAuthors.indexOf(pluginAuthor) !== -1)
-      utils.emitError(`Built-in plugins can not be update on their own. You must update the system instad.`);
+    // Update plugin
+    const [ authorName, pluginName ] = pluginFullName.split("/");
+    if (utils.builtInPluginAuthors.indexOf(authorName) !== -1)
+      utils.emitError(`Built-in plugins can not be updated on their own. You must update the system instad.`);
 
-    if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor].indexOf(pluginName) === -1)
-      utils.emitError(`Plugin ${pluginFullName} is not installed.`);
+    const localPlugin = localSystem.plugins[authorName] != null ? localSystem.plugins[authorName][pluginName] : null;
+    if (localPlugin == null) utils.emitError(`Plugin ${pluginFullName} is not installed.`);
 
-    let isDevFolder = true;
-    try { fs.readdirSync(`${utils.systemsPath}/${system.folderName}/plugins/${pluginFullName}/.git`); } catch (err) { isDevFolder = false; }
-    if (isDevFolder) utils.emitError(`Plugin ${pluginFullName} is a development version.`);
+    if (localPlugin.isDev) utils.emitError(`Plugin ${pluginFullName} is a development version.`);
 
-    updatePlugin(systemId, pluginFullName);
+    if (utils.downloadURL != null) {
+      updatePlugin(systemId, pluginFullName, utils.downloadURL);
+      return;
+    }
+
+    utils.getRegistry((err, registry) => {
+      if (err != null) utils.emitError("Error while fetching registry:");
+
+      const registrySystem = registry.systems[systemId];
+      if (registrySystem == null) {
+        console.error(`System ${systemId} is not on the registry.`);
+        utils.listAvailableSystems(registry);
+        process.exit(1);
+      }
+
+      const registryPlugin = registrySystem.plugins[authorName] != null ? registrySystem.plugins[authorName][pluginName] : null;
+      if (registryPlugin == null) {
+        console.error(`Plugin ${pluginFullName} is not on the registry.`);
+        utils.listAvailablePlugins(registry, systemId);
+        process.exit(1);
+      }
+
+      if (registryPlugin.version !== registryPlugin.localVersion) {
+        updatePlugin(systemId, pluginFullName, registryPlugin.downloadURL);
+      } else {
+        console.log(`No updates available for plugin ${pluginFullName}`);
+        process.exit(0);
+      }
+    });
   }
 }
 
-function updateCore() {
-  const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
-  const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
+function updateCore(downloadURL: string) {
+  console.log("Updating the server...");
 
-  utils.getLatestRelease("https://github.com/superpowers/superpowers-core", (version, downloadURL) => {
-    const [ latestMajor, latestMinor ] = version.split(".");
+  const corePath = `${__dirname}/../..`;
+  const newCorePath = `${__dirname}/../../../core.new`;
 
-    if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
-      console.log("Updating the server...");
+  utils.downloadRelease(downloadURL, newCorePath, (err) => {
+    if (err != null) utils.emitError("Failed to update the core.", err);
 
-      const newPath = `${__dirname}/../../../core.new`;
-      utils.downloadRelease(downloadURL, newPath, (err) => {
-        if (err != null) utils.emitError("Failed to update the core.", err);
+    for (const oldItem of ["server", "SupClient", "SupCore", "package.json", "public", "node_modules"]) rimraf.sync(`${corePath}/${oldItem}`);
+    for (const newItem of fs.readdirSync(newCorePath)) fs.renameSync(`${newCorePath}/${newItem}`, `${corePath}/${newItem}`);
+    rimraf.sync(newCorePath);
 
-        for (let path of ["server", "SupClient", "SupCore", "package.json", "public", "node_modules"]) {
-          const fullPath = `${__dirname}/../../${path}`;
-          rimraf.sync(fullPath);
-          fs.renameSync(`${newPath}/${path}`, `${fullPath}A`);
-        }
-        rimraf.sync(newPath);
-
-        console.log("Server successfully updated.");
-        process.exit(0);
-      });
-    } else {
-      console.log("No updates available for the server.");
-      process.exit(0);
-    }
+    console.log("Server successfully updated.");
+    process.exit(0);
   });
 }
 
@@ -95,30 +121,34 @@ function updateSystem(systemId: string, downloadURL: string) {
   console.log(`Updating system ${systemId}...`);
 
   const system = utils.systemsById[systemId];
+
   const systemPath = `${utils.systemsPath}/${system.folderName}`;
   const newSystemPath = `${systemPath}.new`;
 
   utils.downloadRelease(downloadURL, newSystemPath, (err) => {
     if (err != null) utils.emitError("Failed to update the system.", err);
 
-    const oldItems = fs.readdirSync(systemPath);
-    for (const item of oldItems) {
-      if (item === "plugins") {
+    for (const oldItem of fs.readdirSync(systemPath)) {
+      if (oldItem === "plugins") {
         for (const pluginAuthor of fs.readdirSync(`${systemPath}/plugins`)) {
           if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
           rimraf.sync(`${systemPath}/plugins/${pluginAuthor}`);
         }
       } else rimraf.sync(`${systemPath}/${item}`);
+      } else {
+        rimraf.sync(`${systemPath}/${oldItem}`);
     }
 
-    const newItems = fs.readdirSync(newSystemPath);
-    for (const item of newItems) {
-      if (item === "plugins") {
+    for (const newItem of fs.readdirSync(newSystemPath)) {
+      if (newItem === "plugins") {
         for (const pluginAuthor of fs.readdirSync(`${newSystemPath}/plugins`)) {
           if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
           fs.renameSync(`${newSystemPath}/plugins/${pluginAuthor}`, `${systemPath}/plugins/${pluginAuthor}`);
         }
       } else fs.renameSync(`${newSystemPath}/${item}`, `${systemPath}/${item}`);
+      } else {
+        fs.renameSync(`${newSystemPath}/${newItem}`, `${systemPath}/${newItem}`);
+      }
     }
     rimraf.sync(newSystemPath);
 
@@ -127,47 +157,19 @@ function updateSystem(systemId: string, downloadURL: string) {
   });
 }
 
-function updatePlugin(systemId: string, pluginFullName: string) {
-  const system = utils.systemsById[systemId];
-  const pluginPath = `${utils.systemsPath}/${system.folderName}/plugins/${pluginFullName}`;
+function updatePlugin(systemId: string, pluginFullName: string, downloadURL: string) {
+  console.log(`Updating plugin ${pluginFullName}...`);
 
-  utils.getRegistry((err, registry) => {
-    if (err) utils.emitError("Error while fetching registry:");
+  const pluginPath = `${utils.systemsPath}/${utils.systemsById[systemId].folderName}/plugins/${pluginFullName}`;
+  const newPluginPath = `${pluginPath}.new`;
 
-    const system = registry.systems[systemId];
-    if (system == null) {
-      console.error(`System ${systemId} is not on the registry.`);
-      utils.listAvailableSystems(registry);
-      process.exit(1);
-    }
+  utils.downloadRelease(downloadURL, newPluginPath, (err) => {
+    if (err != null) utils.emitError("Failed to update the plugin.", err);
 
-    const [ pluginAuthor, pluginName ] = pluginFullName.split("/");
-    if (system.plugins[pluginAuthor] == null || system.plugins[pluginAuthor][pluginName] == null) {
-      console.error(`Plugin ${pluginFullName} is not on the registry.`);
-      utils.listAvailablePlugins(registry, systemId);
-      process.exit(1);
-    }
+    rimraf.sync(pluginPath);
+    fs.renameSync(newPluginPath, pluginPath);
 
-    utils.getLatestRelease(system.plugins[pluginAuthor][pluginName], (version, downloadURL) => {
-      const packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
-      const [ currentMajor, currentMinor ] = JSON.parse(packageData).version.split(".");
-      const [ latestMajor, latestMinor ] = version.split(".");
-      if (latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor)) {
-        console.log(`Updating plugin ${pluginFullName}...`);
-
-        utils.downloadRelease(downloadURL, `${pluginPath}.new`, (err) => {
-          if (err != null) utils.emitError("Failed to update the plugin.", err);
-
-          rimraf.sync(pluginPath);
-          fs.renameSync(`${pluginPath}.new`, pluginPath);
-
-          console.log(`Plugin successfully updated to version ${latestMajor}.${latestMinor}.`);
-          process.exit(0);
-        });
-      } else {
-        console.log(`No updates available for plugin ${pluginFullName}`);
-        process.exit(0);
-      }
-    });
+    console.log(`Plugin successfully updated.`);
+    process.exit(0);
   });
 }
