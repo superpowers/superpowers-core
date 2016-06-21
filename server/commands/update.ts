@@ -134,9 +134,9 @@ function updateSystem(systemId: string, downloadURL: string) {
           if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
           rimraf.sync(`${systemPath}/plugins/${pluginAuthor}`);
         }
-      } else rimraf.sync(`${systemPath}/${item}`);
       } else {
         rimraf.sync(`${systemPath}/${oldItem}`);
+      }
     }
 
     for (const newItem of fs.readdirSync(newSystemPath)) {
@@ -145,7 +145,6 @@ function updateSystem(systemId: string, downloadURL: string) {
           if (utils.builtInPluginAuthors.indexOf(pluginAuthor) === -1) continue;
           fs.renameSync(`${newSystemPath}/plugins/${pluginAuthor}`, `${systemPath}/plugins/${pluginAuthor}`);
         }
-      } else fs.renameSync(`${newSystemPath}/${item}`, `${systemPath}/${item}`);
       } else {
         fs.renameSync(`${newSystemPath}/${newItem}`, `${systemPath}/${newItem}`);
       }
