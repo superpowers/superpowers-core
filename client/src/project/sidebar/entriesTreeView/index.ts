@@ -85,10 +85,10 @@ export function disable() {
 }
 
 export function createEntryElement(entry: SupCore.Data.EntryNode) {
-  const parentEntry = entries.parentNodesById[entry.id];
-  const parentId = parentEntry != null ? parentEntry.id : null;
+  const liElt = SupClient.html("li", { dataset: { id: entry.id } });
 
-  const liElt = SupClient.html("li", { dataset: { id: entry.id, parentId } });
+  const parentEntry = entries.parentNodesById[entry.id];
+  if (parentEntry != null) liElt.dataset["parentId"] = parentEntry.id;
 
   if (entry.type != null) {
     liElt.dataset["assetType"] = entry.type;
@@ -117,8 +117,6 @@ export function createEntryElement(entry: SupCore.Data.EntryNode) {
 
   return liElt;
 }
-
-
 
 function onEntryDragStart(event: DragEvent, entryElt: HTMLLIElement) {
   const id = entryElt.dataset["id"];
