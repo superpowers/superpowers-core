@@ -63,7 +63,6 @@ function setupTool(toolName: string) {
 
 export function open(name: string, state?: { [name: string]: any }) {
   let tab = tabs.tabStrip.tabsRoot.querySelector(`li[data-pane='${name}']`) as HTMLLIElement;
-  let iframe = tabs.panesElt.querySelector(`iframe[data-name='${name}']`) as HTMLIFrameElement;
 
   if (tab == null) {
     const tool = toolsByName[name];
@@ -79,11 +78,14 @@ export function open(name: string, state?: { [name: string]: any }) {
       tabs.tabStrip.tabsRoot.appendChild(tab);
     }
 
-    iframe = SupClient.html("iframe", { parent: tabs.panesElt, dataset: { name }});
-    iframe.src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
+    const paneElt = SupClient.html("div", "pane-container", { parent: tabs.panesElt, dataset: { name } });
+
+    const src = `/systems/${SupCore.system.id}/plugins/${tool.pluginPath}/editors/${name}/?project=${SupClient.query.project}`;
+    const iframe = SupClient.html("iframe", { parent: paneElt, src });
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
 
   } else if (state != null) {
+    const iframe = tabs.panesElt.querySelector(`iframe[data-name='${name}']`) as HTMLIFrameElement;
     iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
   }
 

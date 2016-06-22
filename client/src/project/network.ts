@@ -2,6 +2,7 @@ import * as async from "async";
 
 import * as entriesTreeView from "./sidebar/entriesTreeView";
 import * as sidebar from "./sidebar";
+import * as tabs from "./tabs";
 import * as tabsAssets from "./tabs/assets";
 import * as tabsTools from "./tabs/tools";
 
@@ -26,6 +27,7 @@ export function connect() {
   socket.on("move:entries", onEntryMoved);
   socket.on("trash:entries", onEntryTrashed);
   socket.on("setProperty:entries", onSetEntryProperty);
+  socket.on("save:entries", onEntrySaved);
 
   socket.on("set:badges", onBadgeSet);
   socket.on("clear:badges", onBadgeCleared);
@@ -186,6 +188,24 @@ function onSetEntryProperty(id: string, key: string, value: any) {
 
       walk(entries.byId[id]);
       break;
+  }
+}
+
+function onEntrySaved(id: string, revisionId: string, revisionName: string) {
+  const entry = entries.byId[id];
+  entry.revisions.push({ id: revisionId, name: revisionName });
+
+  const revisionPaneElt = tabs.panesElt.querySelector(`[data-asset-id='${id}'] .revision-inner-container`) as HTMLDivElement;
+  if (revisionPaneElt == null) return;
+
+  const selectElt = revisionPaneElt.querySelector("select") as HTMLSelectElement;
+  const optionElt = SupClient.html("option", { textContent: revisionName, dataset: { id: revisionId } });
+  if (entry.revisions.length === 1) {
+    selectElt.appendChild(optionElt);
+  } else {
+    const previousRevisionId = entry.revisions[entry.revisions.length - 2].id;
+    const previousRevisionElt = selectElt.querySelector(`[data-id='${previousRevisionId}']`);
+    selectElt.insertBefore(optionElt, previousRevisionElt);
   }
 }
 

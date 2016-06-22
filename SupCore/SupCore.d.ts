@@ -64,6 +64,7 @@ declare namespace SupCore {
       type?: string;
       badges?: BadgeItem[];
       dependentAssetIds?: any[];
+      revisions?: { id: string; name: string}[];
     }
     class Entries extends Base.TreeById {
       pub: EntryNode[];

@@ -33,34 +33,37 @@ export function onActivate(tabElement: HTMLLIElement) {
   if (activeTab != null) {
     activeTab.classList.remove("active");
 
-    const activeIframe = (panesElt.querySelector("iframe.active") as HTMLIFrameElement);
+    const activePaneElt = panesElt.querySelector(".pane-container.active") as HTMLDivElement;
+    activePaneElt.classList.remove("active");
+
+    const activeIframe = activePaneElt.querySelector("iframe") as HTMLIFrameElement;
     activeIframe.contentWindow.postMessage({ type: "deactivate" }, window.location.origin);
-    activeIframe.classList.remove("active");
   }
 
   tabElement.classList.add("active");
   tabElement.classList.remove("unread");
 
   const assetId = tabElement.dataset["assetId"];
-  let tabIframe: HTMLIFrameElement;
-  if (assetId != null) tabIframe = panesElt.querySelector(`iframe[data-asset-id='${assetId}']`) as HTMLIFrameElement;
-  else tabIframe = panesElt.querySelector(`iframe[data-name='${tabElement.dataset["pane"]}']`) as HTMLIFrameElement;
+  let paneElt: HTMLDivElement;
+  if (assetId != null) paneElt = panesElt.querySelector(`.pane-container[data-asset-id='${assetId}']`) as HTMLDivElement;
+  else paneElt = panesElt.querySelector(`.pane-container[data-name='${tabElement.dataset["pane"]}']`) as HTMLDivElement;
 
-  tabIframe.classList.add("active");
-  tabIframe.contentWindow.focus();
-  tabIframe.contentWindow.postMessage({ type: "activate" }, window.location.origin);
+  paneElt.classList.add("active");
+
+  const iframe = paneElt.querySelector("iframe") as HTMLIFrameElement;
+  iframe.contentWindow.focus();
+  iframe.contentWindow.postMessage({ type: "activate" }, window.location.origin);
 }
 
 export function onClose(tabElement?: HTMLLIElement) {
   if (tabElement == null) tabElement = tabStrip.tabsRoot.querySelector(".active") as HTMLLIElement;
 
   const assetId = tabElement.dataset["assetId"];
-  let frameElt: HTMLIFrameElement;
-  if (assetId != null) frameElt = panesElt.querySelector(`iframe[data-asset-id='${assetId}']`) as HTMLIFrameElement;
+  let paneElt: HTMLDivElement;
+  if (assetId != null) paneElt = panesElt.querySelector(`.pane-container[data-asset-id='${assetId}']`) as HTMLDivElement;
   else {
     if (tabElement.classList.contains("pinned")) return;
-    const toolName = tabElement.dataset["pane"];
-    frameElt = panesElt.querySelector(`iframe[data-name='${toolName}']`) as HTMLIFrameElement;
+    paneElt = panesElt.querySelector(`.pane-container[data-name='${tabElement.dataset["pane"]}']`) as HTMLDivElement;
   }
 
   if (tabElement.classList.contains("active")) {
@@ -69,7 +72,7 @@ export function onClose(tabElement?: HTMLLIElement) {
   }
 
   tabElement.parentElement.removeChild(tabElement);
-  frameElt.parentElement.removeChild(frameElt);
+  paneElt.parentElement.removeChild(paneElt);
 }
 
 export function onActivatePrevious() {

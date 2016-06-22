@@ -25,6 +25,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.socket.on("move:entries", this.onMoveEntry);
     this.socket.on("trash:entries", this.onTrashEntry);
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
+    this.socket.on("save:entries", this.onSaveEntry);
 
     // Assets
     this.socket.on("edit:assets", this.onEditAsset);
@@ -316,6 +317,39 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       }
     ]);
+  };
+
+  private onSaveEntry = (entryId: string, revisionName: string, callback: (err: string) => void) => {
+    if (!this.errorIfCant("editAssets", callback)) return;
+
+    const entry = this.server.data.entries.byId[entryId];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    if (revisionName.length === 0) { callback("Save name can't be empty"); return; }
+
+    this.server.data.assets.acquire(entryId, null, (err, asset) => {
+      if (err != null) { callback("Could not acquire asset"); return; }
+
+      this.server.data.assets.release(entryId, null);
+
+      const revisionId = Date.now().toString();
+      const revisionPath = path.join(this.server.projectPath, `assetRevisions/${entryId}/${revisionId}-${revisionName}`);
+      mkdirp(revisionPath, (err) => {
+        if (err != null) { callback("Could not write the save"); return; }
+
+        asset.save(revisionPath, (err: Error) => {
+          if (err != null) {
+            callback("Could not write the save");
+            console.log(err);
+            return;
+          }
+
+          entry.revisions.push({ id: revisionId, name: revisionName });
+          this.server.io.in("sub:entries").emit("save:entries", entryId, revisionId, revisionName);
+          callback(null);
+        });
+      });
+    });
   };
 
   // Assets

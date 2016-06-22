@@ -1,4 +1,4 @@
-import { entries } from "../network";
+import { entries, socket } from "../network";
 import * as entriesTreeView from "../sidebar/entriesTreeView";
 import * as tabs from "./";
 
@@ -26,17 +26,60 @@ export function open(id: string, state?: {[name: string]: any}) {
   if (entry.type == null) { entriesTreeView.widget.selectedNodes[0].classList.toggle("collapsed"); return; }
 
   let tab = tabs.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`) as HTMLLIElement;
-  let iframe = tabs.panesElt.querySelector(`iframe[data-asset-id='${id}']`) as HTMLIFrameElement;
 
   if (tab == null) {
     tab = createTabElement(entry);
     tabs.tabStrip.tabsRoot.appendChild(tab);
 
+    const paneElt = SupClient.html("div", "pane-container", { parent: tabs.panesElt, dataset: { assetId: id } });
+
+    const revisionOuterContainer = SupClient.html("div", "revision-outer-container", { parent: paneElt });
+    const revisionInnerContainer = SupClient.html("div", "revision-inner-container", { parent: revisionOuterContainer });
+    SupClient.html("span", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("project:revision.title") });
+
+    const selectElt = SupClient.html("select", { parent: revisionInnerContainer });
+    SupClient.html("option", { parent: selectElt, textContent: SupClient.i18n.t("project:revision.current") });
+
+    for (let revisionIndex = entry.revisions.length - 1; revisionIndex >= 0; revisionIndex--) {
+      const revision = entry.revisions[revisionIndex];
+      SupClient.html("option", { parent: selectElt, textContent: revision.name, dataset: { id: revision.id } });
+    }
+
+    // TODO: Send message to server or iframe when selecting a revision
+
+    const saveButtonElt = SupClient.html("button", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("common:actions.save") });
+    saveButtonElt.addEventListener("click", () => {
+      const date = new Date();
+      const options = {
+        header: SupClient.i18n.t("project:revision.title"),
+        validationLabel: SupClient.i18n.t("common:actions.save"),
+        initialValue: `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDay()} ${date.getUTCHours()}h${date.getUTCMinutes()}`,
+        title: SupClient.i18n.t("common:namePatternDescription"),
+        pattern: SupClient.namePattern
+      };
+
+      /* tslint:disable:no-unused-expression */
+      new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:revision.prompt"), options, (revisionName) => {
+        /* tslint:enable:no-unused-expression */
+        if (revisionName == null) return;
+
+        socket.emit("save:entries", id, revisionName, (err: string) => {
+          if (err != null) {
+            /* tslint:disable:no-unused-expression */
+            new SupClient.Dialogs.InfoDialog(err);
+            /* tslint:enable:no-unused-expression */
+            return;
+          }
+        });
+      });
+    });
+
     const src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
-    iframe = SupClient.html("iframe", { parent: tabs.panesElt, dataset: { assetId: id }, src });
+    const iframe = SupClient.html("iframe", { parent: paneElt, src });
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
 
   } else if (state != null) {
+    const iframe = tabs.panesElt.querySelector(`[data-asset-id='${id}'] iframe`) as HTMLIFrameElement;
     iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
   }
 

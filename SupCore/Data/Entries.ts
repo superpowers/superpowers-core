@@ -1,15 +1,7 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import * as SupData from "./index";
-
-interface EntryNode {
-  id: string;
-  name: string;
-  children?: EntryNode[];
-  [name: string]: any;
-
-  type?: string;
-  badges?: SupCore.Data.BadgeItem[];
-  dependentAssetIds?: any[];
-}
 
 export default class Entries extends SupData.Base.TreeById {
   static schema: SupCore.Data.Schema = {
@@ -19,26 +11,39 @@ export default class Entries extends SupData.Base.TreeById {
     dependentAssetIds: { type: "array", items: { type: "string" } }
   };
 
-  pub: EntryNode[];
-  byId: { [id: string]: EntryNode };
-  parentNodesById: { [id: string]: EntryNode };
+  pub: SupCore.Data.EntryNode[];
+  byId: { [id: string]: SupCore.Data.EntryNode };
+  parentNodesById: { [id: string]: SupCore.Data.EntryNode };
 
   badgesByEntryId: { [key: string]: SupData.Badges } = {};
   dependenciesByAssetId: any = {};
 
-  constructor(pub: EntryNode[], nextEntryId: number, public server?: ProjectServer) {
+  constructor(pub: SupCore.Data.EntryNode[], nextEntryId: number, public server?: ProjectServer) {
     super(pub, Entries.schema, nextEntryId);
 
-    this.walk((node: EntryNode, parentNode: EntryNode) => {
+    this.walk((node: SupCore.Data.EntryNode, parentNode: SupCore.Data.EntryNode) => {
       if (node.type == null) return;
 
       if (node.badges == null) node.badges = [];
       this.badgesByEntryId[node.id] = new SupData.Badges(node.badges);
       if (node.dependentAssetIds == null) node.dependentAssetIds = [];
+
+      if (this.server != null) {
+        node.revisions = [];
+
+        let revisionList: string[] = [];
+        try { revisionList = fs.readdirSync(path.join(this.server.projectPath, `assetRevisions/${node.id}`)); }
+        catch (e) { /* Ignore if the entry doesn't have any revision */ }
+
+        for (const fullRevisionPath of revisionList) {
+          const separatorIndex = fullRevisionPath.indexOf("-");
+          node.revisions.push({ id: fullRevisionPath.slice(0, separatorIndex), name: fullRevisionPath.slice(separatorIndex + 1) });
+        }
+      }
     });
   }
 
-  add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
+  add(node: SupCore.Data.EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     const assetClass = this.server.system.data.assetClasses[node.type];
     if (node.type != null && assetClass == null) { callback("Invalid asset type"); return; }
 
@@ -60,7 +65,7 @@ export default class Entries extends SupData.Base.TreeById {
     });
   }
 
-  client_add(node: EntryNode, parentId: string, index: number) {
+  client_add(node: SupCore.Data.EntryNode, parentId: string, index: number) {
     super.client_add(node, parentId, index);
     this.badgesByEntryId[node.id] = new SupData.Badges(node.badges);
   }
@@ -80,7 +85,7 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   remove(id: string, callback: (err: string) => any) {
-    const node = this.byId[id] as EntryNode;
+    const node = this.byId[id] as SupCore.Data.EntryNode;
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
     if (node.type == null && node.children.length !== 0) { callback("The folder must be empty"); return; }
 
@@ -101,11 +106,11 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   getForStorage() {
-    const entries: EntryNode[] = [];
-    const entriesById: {[id: string]: EntryNode} = {};
+    const entries: SupCore.Data.EntryNode[] = [];
+    const entriesById: {[id: string]: SupCore.Data.EntryNode} = {};
 
-    this.walk((entry: EntryNode, parentEntry: EntryNode) => {
-      const savedEntry: EntryNode = { id: entry.id, name: entry.name, type: entry.type };
+    this.walk((entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode) => {
+      const savedEntry: SupCore.Data.EntryNode = { id: entry.id, name: entry.name, type: entry.type };
       if (entry.children != null) savedEntry.children = [];
       entriesById[savedEntry.id] = savedEntry;
 
