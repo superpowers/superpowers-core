@@ -45,8 +45,16 @@ const projectEntry = {
 
 const projectEntries = {
   definitions: { projectEntry },
-  type: "array",
-  items: { $ref: "#/definitions/projectEntry" }
+  type: "object",
+  properties: {
+    // IDs used to be integers but are now serialized as strings
+    id: { type: "integer" },
+    nodes: {
+      type: "array",
+      items: { $ref: "#/definitions/projectEntry" }
+    }
+  },
+  required: [ "nextEntryId", "nodes" ]
 };
 
 const schemas: { [name: string]: any } = { config, projectManifest, projectEntries };

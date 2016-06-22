@@ -73,7 +73,7 @@ declare namespace SupCore {
       badgesByEntryId: { [key: string]: Badges };
       dependenciesByAssetId: any;
 
-      constructor(pub: EntryNode[], server?: ProjectServer);
+      constructor(pub: EntryNode[], nextEntryId: number, server?: ProjectServer);
       walk(callback: (node: EntryNode, parentNode?: EntryNode) => any): void;
       add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
       client_add(node: EntryNode, parentId: string, index: number): void;

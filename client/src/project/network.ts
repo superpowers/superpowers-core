@@ -83,8 +83,8 @@ function onManifestReceived(err: string, manifestPub: SupCore.Data.ProjectManife
   document.title = `${manifestPub.name} — Superpowers`;
 }
 
-function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
-  entries = new SupCore.Data.Entries(entriesPub);
+function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[], nextEntryId: number) {
+  entries = new SupCore.Data.Entries(entriesPub, nextEntryId);
 
   sidebar.enable();
 

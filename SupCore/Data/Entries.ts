@@ -26,8 +26,8 @@ export default class Entries extends SupData.Base.TreeById {
   badgesByEntryId: { [key: string]: SupData.Badges } = {};
   dependenciesByAssetId: any = {};
 
-  constructor(pub: EntryNode[], public server?: ProjectServer) {
-    super(pub, Entries.schema);
+  constructor(pub: EntryNode[], nextEntryId: number, public server?: ProjectServer) {
+    super(pub, Entries.schema, nextEntryId);
 
     this.walk((node: EntryNode, parentNode: EntryNode) => {
       if (node.type == null) return;

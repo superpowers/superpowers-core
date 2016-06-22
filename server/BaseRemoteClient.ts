@@ -41,30 +41,32 @@ export default class BaseRemoteClient {
     this.server.removeRemoteClient(this.socket.id);
   };
 
-  private onSubscribe = (endpoint: string, id: string, callback: (err: string, pubData: any) => any) => {
-    const roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
+  private onSubscribe = (endpoint: string, id: string, callback: (err: string, pubData?: any, optionalArg?: any) => any) => {
+    const roomName = ((id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`);
 
     this.lock.acquire(roomName, (unlockRoom) => {
       const data = this.server.data[endpoint];
       if (data == null) {
-        callback("No such endpoint", null);
+        callback("No such endpoint");
         unlockRoom();
         return;
       }
 
-      if (this.subscriptions.indexOf(roomName) !== -1) { callback(`You're already subscribed to ${id}`, null); return; }
+      if (this.subscriptions.indexOf(roomName) !== -1) { callback(`You're already subscribed to ${id}`); return; }
 
       if (id == null) {
         this.socket.join(roomName);
         this.subscriptions.push(roomName);
-        callback(null, (data as SupCore.Data.Base.Hash).pub);
+        const pub = (data as SupCore.Data.Base.Hash).pub;
+        const optionalArg = endpoint === "entries" ? (data as SupCore.Data.Entries).nextId : null;
+        callback(null, pub, optionalArg);
         unlockRoom();
         return;
       }
 
       (data as SupCore.Data.Base.Dictionary).acquire(id, this, (err: Error, item: any) => {
         if (err != null) {
-          callback(`Could not acquire asset: ${err}`, null);
+          callback(`Could not acquire asset: ${err}`);
           unlockRoom();
           return;
         }
@@ -83,7 +85,7 @@ export default class BaseRemoteClient {
     const data = this.server.data[endpoint];
     if (data == null) return;
 
-    const roomName = (id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`;
+    const roomName = ((id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`);
 
     this.lock.acquire(roomName, (unlockRoom) => {
       const index = this.subscriptions.indexOf(roomName);

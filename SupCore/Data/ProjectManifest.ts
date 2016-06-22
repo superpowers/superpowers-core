@@ -9,7 +9,7 @@ export default class ProjectManifest extends Hash {
     formatVersion: { type: "integer" }
   };
 
-  static currentFormatVersion = 5;
+  static currentFormatVersion = 6;
   migratedFromFormatVersion: number;
 
   constructor(pub: SupCore.Data.ProjectManifestPub) {

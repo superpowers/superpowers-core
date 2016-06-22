@@ -231,8 +231,8 @@ export default class ProjectClient {
     }
   };
 
-  private onEntriesReceived = (err: string, entries: any) => {
-    this.entries = new SupCore.Data.Entries(entries);
+  private onEntriesReceived = (err: string, entries: SupCore.Data.EntryNode[], nextEntryId: number) => {
+    this.entries = new SupCore.Data.Entries(entries, nextEntryId);
 
     this.socket.on("add:entries", this.onEntryAdded);
     this.socket.on("move:entries", this.onEntryMoved);
