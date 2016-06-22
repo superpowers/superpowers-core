@@ -305,7 +305,6 @@ declare namespace SupCore {
       editors: { [assetType: string]: string; };
       tools: { [name: string]: string; };
     };
-    publishedBundles: string[];
   }
 
   interface SystemsInfo {
@@ -325,6 +324,8 @@ declare namespace SupCore {
     id: string;
     folderName: string;
     data: SystemData;
+    pluginsInfo: PluginsInfo;
+    serverBuild: (server: ProjectServer, buildPath: string, callback: (err: string, extraBuildFiles?: string[]) => void) => void;
 
     constructor(id: string, folderName: string);
     requireForAllPlugins(filePath: string): void;

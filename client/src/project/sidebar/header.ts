@@ -1,37 +1,42 @@
-import { entries } from "../network";
+import { socket, entries, buildPort, supportsServerBuild } from "../network";
 import * as entriesTreeView from "./entriesTreeView";
 
 import StartBuildDialog from "./StartBuildDialog";
+
+const projectButtons = document.querySelector(".project-buttons") as HTMLDivElement;
+
+const runButton = projectButtons.querySelector(".run") as HTMLButtonElement;
+const debugButton = projectButtons.querySelector(".debug") as HTMLButtonElement;
+const stopButton = projectButtons.querySelector(".stop") as HTMLButtonElement;
+const buildButton = projectButtons.querySelector(".build") as HTMLButtonElement;
 
 export function start() {
   if (SupClient.query.project == null) goToHub();
 
   document.querySelector(".project-icon .go-to-hub").addEventListener("click", () => { goToHub(); });
-  document.querySelector(".project-buttons .build").addEventListener("click", () => { openStartBuildDialog(); });
-  // TODO(run)
-  /*document.querySelector(".project-buttons .run").addEventListener("click", () => { runProject(); });
-  document.querySelector(".project-buttons .debug").addEventListener("click", () => { runProject({ debug: true }); });
-  document.querySelector(".project-buttons .stop").addEventListener("click", () => { stopProject(); });
+  buildButton.addEventListener("click", () => { openStartBuildDialog(); });
+  runButton.addEventListener("click", () => { runProject(); });
+  debugButton.addEventListener("click", () => { runProject({ debug: true }); });
+  stopButton.addEventListener("click", () => { stopProject(); });
 
-  if (SupApp == null) {
-    (document.querySelector(".project-buttons .build") as HTMLButtonElement).title = SupClient.i18n.t("project:header.buildDisabled");
-    (document.querySelector(".project-buttons .debug") as HTMLButtonElement).hidden = true;
-    (document.querySelector(".project-buttons .stop") as HTMLButtonElement).hidden = true;
-  }*/
+  if (SupApp == null) buildButton.title = SupClient.i18n.t("project:header.buildDisabled");
 }
 
 export function enable() {
-  // TODO(run)
-  /*(document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = false;
-  (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = false;*/
-  (document.querySelector(".project-buttons .build") as HTMLButtonElement).disabled = false;
+  runButton.hidden = !supportsServerBuild;
+  debugButton.hidden = !supportsServerBuild || SupApp == null;
+  stopButton.hidden = !supportsServerBuild || SupApp == null;
+  projectButtons.hidden = false;
+
+  runButton.disabled = false;
+  debugButton.disabled = false;
+  buildButton.disabled = SupApp == null;
 }
 
 export function disable() {
-  // TODO(run)
-  /*(document.querySelector(".project-buttons .run") as HTMLButtonElement).disabled = true;
-  (document.querySelector(".project-buttons .debug") as HTMLButtonElement).disabled = true;*/
-  (document.querySelector(".project-buttons .build") as HTMLButtonElement).disabled = true;
+  runButton.disabled = true;
+  debugButton.disabled = true;
+  buildButton.disabled = true;
 }
 
 function goToHub() {
@@ -39,8 +44,6 @@ function goToHub() {
   else window.location.replace("/");
 }
 
-// TODO(run)
-/*
 let runWindow: GitHubElectron.BrowserWindow;
 
 if (SupApp != null) {
@@ -49,7 +52,7 @@ if (SupApp != null) {
   });
 }
 
-function runProject(options: { debug: boolean; } = { debug: false }) {
+export function runProject(options: { debug: boolean; } = { debug: false }) {
   if (SupApp != null) {
     if (runWindow == null) {
       runWindow = SupApp.openWindow(`${window.location.origin}/build.html`);
@@ -61,7 +64,7 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
     runWindow.show();
     runWindow.focus();
 
-    (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = false;
+    stopButton.disabled = false;
   } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
@@ -83,16 +86,15 @@ function runProject(options: { debug: boolean; } = { debug: false }) {
 
 function onCloseRunWindow() {
   runWindow = null;
-  (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;
+  stopButton.disabled = true;
 }
 
 function stopProject() {
   runWindow.destroy();
   runWindow = null;
 
-  (document.querySelector(".project-buttons .stop") as HTMLButtonElement).disabled = true;
+  stopButton.disabled = true;
 }
-*/
 
 function openStartBuildDialog() {
   /* tslint:disable:no-unused-expression */

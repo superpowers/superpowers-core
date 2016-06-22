@@ -10,7 +10,8 @@ export let entries: SupCore.Data.Entries;
 export let manifest: SupCore.Data.ProjectManifest;
 export let pluginsInfo: SupCore.PluginsInfo;
 
-let buildPort: number;
+export let buildPort: number;
+export let supportsServerBuild: boolean;
 
 export function connect() {
   socket = SupClient.connect(SupClient.query.project, { reconnection: true });
@@ -46,7 +47,8 @@ function onDisconnected() {
   sidebar.disable();
 }
 
-function onWelcome(clientId: number, config: { buildPort: number; }) {
+function onWelcome(clientId: number, config: { buildPort: number; supportsServerBuild: boolean; }) {
+  supportsServerBuild = config.supportsServerBuild;
   buildPort = config.buildPort;
 
   SupClient.fetch(`/systems/${SupCore.system.id}/plugins.json`, "json", (err: Error, thePluginsInfo: SupCore.PluginsInfo) => {

@@ -1,5 +1,6 @@
 import * as network from "./network";
 import * as sidebar from "./sidebar";
+import * as header from "./sidebar/header";
 import { onNewAssetClick, onNewFolderClick, onSearchEntryDialog, onToggleFilterStripClick } from "./sidebar/entriesTreeView/buttonCallbacks";
 import * as tabs from "./tabs";
 import * as tabsAssets from "./tabs/assets";
@@ -64,9 +65,8 @@ function onMessageHotKey(action: string) {
     case "closeTab":     tabs.onClose(); break;
     case "previousTab":  tabs.onActivatePrevious(); break;
     case "nextTab":      tabs.onActivateNext(); break;
-    // TODO(run)
-    /*case "run":          runProject(); break;
-    case "debug":        runProject({ debug: true }); break;*/
+    case "run":          header.runProject(); break;
+    case "debug":        header.runProject({ debug: true }); break;
     case "devtools":     if (SupApp != null) SupApp.getCurrentWindow().webContents.toggleDevTools(); break;
   }
 }

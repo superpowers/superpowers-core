@@ -6,6 +6,7 @@ import * as fs from "fs";
 import * as mkdirp from "mkdirp";
 import * as rimraf from "rimraf";
 import * as async from "async";
+import * as recursiveReaddir from "recursive-readdir";
 
 export default class RemoteProjectClient extends BaseRemoteClient {
   server: ProjectServer;
@@ -14,7 +15,11 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   constructor(server: ProjectServer, id: string, socket: SocketIO.Socket) {
     super(server, socket);
     this.id = id;
-    this.socket.emit("welcome", this.id, { buildPort: serverConfig.buildPort, systemId: this.server.system.id });
+    this.socket.emit("welcome", this.id, {
+      systemId: this.server.system.id,
+      buildPort: serverConfig.buildPort,
+      supportsServerBuild: this.server.system.serverBuild != null
+    });
 
     // Manifest
     this.socket.on("setProperty:manifest", this.onSetManifestProperty);
@@ -37,6 +42,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     // Project
     this.socket.on("vacuum:project", this.onVacuumProject);
+    this.socket.on("build:project", this.onBuildProject);
   }
 
   // TODO: Implement roles and capabilities
@@ -419,6 +425,50 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           cb();
         });
       }, () => { callback(null, removedFolderCount); });
+    });
+  };
+
+  private onBuildProject = (callback: (err: string, buildId?: string, files?: string[]) => any) => {
+    if (!this.errorIfCant("buildProject", callback)) return;
+
+    // this.server.log("Building project...");
+
+    const buildId = this.server.nextBuildId;
+    this.server.nextBuildId++;
+
+    const buildPath = `${this.server.buildsPath}/${buildId}`;
+
+    try { fs.mkdirSync(this.server.buildsPath); } catch (e) { /* Ignore */ }
+    try { fs.mkdirSync(buildPath); }
+    catch (err) { callback(`Could not create folder for build ${buildId}`); return; }
+
+    this.server.system.serverBuild(this.server, buildPath, (err, extraBuildFiles) => {
+      if (err != null) { callback(`Failed to create build ${buildId}: ${err}`); return; }
+
+      // Collect paths to all build files
+      let files: string[] = [];
+
+      recursiveReaddir(buildPath, (err, entries) => {
+        for (const entry of entries) {
+          let relativePath = path.relative(buildPath, entry);
+          if (path.sep === "\\") relativePath = relativePath.replace(/\\/g, "/");
+          files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
+        }
+
+        files = files.concat(extraBuildFiles);
+
+        callback(null, buildId.toString(), files);
+
+        // Remove an old build to avoid using too much disk space
+        const buildToDeleteId = buildId - serverConfig.maxRecentBuilds;
+        const buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
+        rimraf(buildToDeletePath, (err) => {
+          if (err != null) {
+            this.server.log(`Failed to remove build ${buildToDeleteId}:`);
+            this.server.log(err.toString());
+          }
+        });
+      });
     });
   };
 }

@@ -27,15 +27,16 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     if (fs.existsSync(templatesFolder)) templatesList = fs.readdirSync(templatesFolder);
     fs.writeFileSync(`${systemPath}/public/templates.json`, JSON.stringify(templatesList, null, 2));
 
-    // Load plugins
-    const pluginsInfo = loadPlugins(systemId, `${systemPath}/plugins`, mainApp, buildApp);
-
-    const packagePath = `${systemPath}/package.json`;
-    if (fs.existsSync(packagePath)) {
-      const packageJSON = JSON.parse(fs.readFileSync(packagePath, { encoding: "utf8" }));
-      if (packageJSON.superpowers != null && packageJSON.superpowers.publishedPluginBundles != null)
-        pluginsInfo.publishedBundles = pluginsInfo.publishedBundles.concat(packageJSON.superpowers.publishedPluginBundles);
+    // Load server-side system module
+    const systemServerModulePath = `${systemPath}/server`;
+    if (fs.existsSync(systemServerModulePath)) {
+      /* tslint:disable */
+      require(systemServerModulePath);
+      /* tslint:enable */
     }
+
+    // Load plugins
+    const pluginsInfo = SupCore.system.pluginsInfo = loadPlugins(systemId, `${systemPath}/plugins`, mainApp, buildApp);
     fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo, null, 2));
 
     cb();
@@ -50,7 +51,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
 
 function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Express, buildApp: express.Express): SupCore.PluginsInfo {
   const pluginNamesByAuthor: { [author: string]: string[] } = {};
-  const pluginsInfo: SupCore.PluginsInfo = { list: [], paths: { editors: {}, tools: {} }, publishedBundles: [] };
+  const pluginsInfo: SupCore.PluginsInfo = { list: [], paths: { editors: {}, tools: {} } };
 
   let pluginsFolder: string[];
   try { pluginsFolder = fs.readdirSync(pluginsPath); } catch (err) { /* Ignore */ }
@@ -68,13 +69,6 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
       if (!fs.statSync(pluginPath).isDirectory()) continue;
 
       pluginNamesByAuthor[pluginAuthor].push(pluginName);
-
-      const packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
-      if (packageData != null) {
-        const packageJSON = JSON.parse(packageData);
-        if (packageJSON.superpowers != null && packageJSON.superpowers.publishedPluginBundles != null)
-          pluginsInfo.publishedBundles = pluginsInfo.publishedBundles.concat(packageJSON.superpowers.publishedPluginBundles);
-      }
     }
   }
 
