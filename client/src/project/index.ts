@@ -44,6 +44,7 @@ function onMessage(event: any) {
     case "chat": homeTab.onMessageChat(event.data.content); break;
     case "hotkey": onMessageHotKey(event.data.content); break;
     case "openEntry": tabsAssets.open(event.data.id, event.data.state); break;
+    case "setEntryRevisionDisabled": tabsAssets.setRevisionDisabled(event.data.id, event.data.disabled); break;
     case "openTool": tabsTools.open(event.data.name, event.data.state); break;
     case "error": onWindowDevError(); break;
   }

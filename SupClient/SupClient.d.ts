@@ -27,6 +27,7 @@ declare namespace SupClient {
   export function findEntryByPath(entries: any, path: string|string[]): any;
 
   export function openEntry(entryId: string, state?: any): void;
+  export function setEntryRevisionDisabled(disabled: boolean): void;
 
   export function setupCollapsablePane(pane: HTMLDivElement, refreshCallback?: Function): void;
 

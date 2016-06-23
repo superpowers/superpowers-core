@@ -37,7 +37,7 @@ export function open(id: string, state?: {[name: string]: any}) {
     const revisionInnerContainer = SupClient.html("div", "revision-inner-container", { parent: revisionOuterContainer });
     SupClient.html("span", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("project:revision.title") });
 
-    const selectElt = SupClient.html("select", { parent: revisionInnerContainer });
+    const selectElt = SupClient.html("select", { parent: revisionInnerContainer, disabled: true });
     SupClient.html("option", { parent: selectElt, textContent: SupClient.i18n.t("project:revision.current") });
 
     for (let revisionIndex = entry.revisions.length - 1; revisionIndex >= 0; revisionIndex--) {
@@ -47,7 +47,7 @@ export function open(id: string, state?: {[name: string]: any}) {
 
     // TODO: Send message to server or iframe when selecting a revision
 
-    const saveButtonElt = SupClient.html("button", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("common:actions.save") });
+    const saveButtonElt = SupClient.html("button", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("common:actions.save"), disabled: true });
     saveButtonElt.addEventListener("click", () => {
       const date = new Date();
       const options = {
@@ -127,4 +127,10 @@ export function refreshTabElement(entry: SupCore.Data.EntryNode, tabElt?: HTMLLI
   tabElt.querySelector(".label .location").textContent = entryLocation;
   tabElt.querySelector(".label .name").textContent = entryName;
   tabElt.title = entryPath;
+}
+
+export function setRevisionDisabled(id: string, disabled: boolean) {
+  const revisionContainer = tabs.panesElt.querySelector(`[data-asset-id='${id}'] .revision-inner-container`);
+  (revisionContainer.querySelector("select") as HTMLSelectElement).disabled = disabled;
+  (revisionContainer.querySelector("button") as HTMLButtonElement).disabled = disabled;
 }
