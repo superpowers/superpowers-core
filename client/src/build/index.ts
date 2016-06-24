@@ -38,19 +38,9 @@ function loadPlugins(buildSetup: BuildSetup, callback: Function) {
       (cb) => {
         SupClient.i18n.load(i18nFiles, cb);
       }, (cb) => {
-        async.each(pluginsInfo.list, (pluginName, pluginCallback) => {
+        async.each(pluginsInfo.list, (pluginName, cb) => {
           const pluginPath = `/systems/${SupCore.system.id}/plugins/${pluginName}`;
-
-          const bundles = [ "data" ];
-          if (pluginPath === buildSetup.pluginPath) bundles.push("build");
-
-          async.each(bundles, (name, cb) => {
-            const script = document.createElement("script");
-            script.src = `${pluginPath}/bundles/${name}.js`;
-            script.addEventListener("load", () => { cb(null); } );
-            script.addEventListener("error", () => { cb(null); } );
-            document.body.appendChild(script);
-          }, pluginCallback);
+          SupClient.loadScript(`${pluginPath}/bundles/build.js`, cb);
         }, cb);
       }
     ], () => {
