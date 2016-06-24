@@ -81,6 +81,8 @@ declare namespace SupCore {
       move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
       remove(id: string, callback: (err: string) => any): void;
       setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any): void;
+      save(id: string, revisionName: string, callback: (err: string, revisionId?: string) => void): void;
+      client_save(id: string, revisionId: string, revisionName: string): void;
       getForStorage(): EntryNode[];
       getStoragePathFromId(id: string): string;
     }

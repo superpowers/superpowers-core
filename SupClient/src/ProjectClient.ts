@@ -44,6 +44,7 @@ export default class ProjectClient {
       this.socket.off("add:entries", this.onEntryAdded);
       this.socket.off("move:entries", this.onEntryMoved);
       this.socket.off("setProperty:entries", this.onSetEntryProperty);
+      this.socket.off("save:entries", this.onEntrySaved);
       this.socket.off("trash:entries", this.onEntryTrashed);
 
       this.entries = null;
@@ -237,6 +238,7 @@ export default class ProjectClient {
     this.socket.on("add:entries", this.onEntryAdded);
     this.socket.on("move:entries", this.onEntryMoved);
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
+    this.socket.on("save:entries", this.onEntrySaved);
     this.socket.on("trash:entries", this.onEntryTrashed);
 
     for (const subscriber of this.entriesSubscribers) {
@@ -262,6 +264,13 @@ export default class ProjectClient {
     this.entries.client_setProperty(id, key, value);
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onSetEntryProperty != null) subscriber.onSetEntryProperty(id, key, value);
+    }
+  };
+
+  private onEntrySaved = (id: string, revisionId: string, revisionName: string) => {
+    this.entries.client_save(id, revisionId, revisionName);
+    for (const subscriber of this.entriesSubscribers) {
+      if (subscriber.onEntrySaved != null) subscriber.onEntrySaved(id, revisionId, revisionName);
     }
   };
 

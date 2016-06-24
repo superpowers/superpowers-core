@@ -192,18 +192,18 @@ function onSetEntryProperty(id: string, key: string, value: any) {
 }
 
 function onEntrySaved(id: string, revisionId: string, revisionName: string) {
-  const entry = entries.byId[id];
-  entry.revisions.push({ id: revisionId, name: revisionName });
+  entries.client_save(id, revisionId, revisionName);
 
   const revisionPaneElt = tabs.panesElt.querySelector(`[data-asset-id='${id}'] .revision-inner-container`) as HTMLDivElement;
   if (revisionPaneElt == null) return;
 
+  const revisions = entries.byId[id].revisions;
   const selectElt = revisionPaneElt.querySelector("select") as HTMLSelectElement;
   const optionElt = SupClient.html("option", { textContent: revisionName, dataset: { id: revisionId } });
-  if (entry.revisions.length === 1) {
+  if (revisions.length === 1) {
     selectElt.appendChild(optionElt);
   } else {
-    const previousRevisionId = entry.revisions[entry.revisions.length - 2].id;
+    const previousRevisionId = revisions[revisions.length - 2].id;
     const previousRevisionElt = selectElt.querySelector(`[data-id='${previousRevisionId}']`);
     selectElt.insertBefore(optionElt, previousRevisionElt);
   }

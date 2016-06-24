@@ -8,7 +8,17 @@ export default class Entries extends SupData.Base.TreeById {
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     type: { type: "string?" },
     badges: { type: "array?" },
-    dependentAssetIds: { type: "array", items: { type: "string" } }
+    dependentAssetIds: { type: "array", items: { type: "string" } },
+    revisions: {
+      type: "array",
+      items: {
+        type: "hash",
+        properties: {
+          id: { type: "string" },
+          name: { type: "string" }
+        }
+      }
+    },
   };
 
   pub: SupCore.Data.EntryNode[];
@@ -17,6 +27,7 @@ export default class Entries extends SupData.Base.TreeById {
 
   badgesByEntryId: { [key: string]: SupData.Badges } = {};
   dependenciesByAssetId: any = {};
+  revisionsByEntryId: { [ id: string ]: { [ revisionId: string]: string; } } = {};
 
   constructor(pub: SupCore.Data.EntryNode[], nextEntryId: number, public server?: ProjectServer) {
     super(pub, Entries.schema, nextEntryId);
@@ -35,9 +46,13 @@ export default class Entries extends SupData.Base.TreeById {
         try { revisionList = fs.readdirSync(path.join(this.server.projectPath, `assetRevisions/${node.id}`)); }
         catch (e) { /* Ignore if the entry doesn't have any revision */ }
 
+        this.revisionsByEntryId[node.id] = {};
         for (const fullRevisionPath of revisionList) {
           const separatorIndex = fullRevisionPath.indexOf("-");
-          node.revisions.push({ id: fullRevisionPath.slice(0, separatorIndex), name: fullRevisionPath.slice(separatorIndex + 1) });
+          const revisionId = fullRevisionPath.slice(0, separatorIndex);
+          const revisionName = fullRevisionPath.slice(separatorIndex + 1);
+          node.revisions.push({ id: revisionId, name: revisionName });
+          this.revisionsByEntryId[node.id][revisionId] = revisionName;
         }
       }
     });
@@ -58,6 +73,9 @@ export default class Entries extends SupData.Base.TreeById {
         const badges = new SupData.Badges(node.badges);
         this.badgesByEntryId[node.id] = badges;
         node.badges = badges.pub;
+
+        node.revisions = [];
+        this.revisionsByEntryId[node.id] = {};
       }
       else node.children = [];
 
@@ -89,9 +107,11 @@ export default class Entries extends SupData.Base.TreeById {
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
     if (node.type == null && node.children.length !== 0) { callback("The folder must be empty"); return; }
 
+    delete this.badgesByEntryId[id];
+    delete this.revisionsByEntryId[id];
+
     super.remove(id, callback);
   }
-
 
   setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any) {
     if (key === "name") {
@@ -103,6 +123,22 @@ export default class Entries extends SupData.Base.TreeById {
     }
 
     super.setProperty(id, key, value, callback);
+  }
+
+  save(id: string, revisionName: string, callback: (err: string, revisionId?: string) => void) {
+    const entry = this.byId[id];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    const revisionId = Date.now().toString();
+    entry.revisions.push({ id: revisionId, name: revisionName });
+    this.revisionsByEntryId[id][revisionId] = revisionName;
+
+    callback(null, revisionId);
+  }
+
+  client_save(id: string, revisionId: string, revisionName: string) {
+    const entry = this.byId[id];
+    entry.revisions.push({ id: revisionId, name: revisionName });
   }
 
   getForStorage() {

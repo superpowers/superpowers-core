@@ -193,6 +193,7 @@ declare namespace SupClient {
     onEntryAdded?(entry: any, parentId: string, index: number): void;
     onEntryMoved?(id: string, parentId: string, index: number): void;
     onSetEntryProperty?(id: string, key: string, value: any): void;
+    onEntrySaved?: (assetId: string, revisionId: string, revisionName: string) => void;
     onEntryTrashed?(id: string): void;
   }
 
