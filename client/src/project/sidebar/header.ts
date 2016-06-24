@@ -45,6 +45,7 @@ function goToHub() {
 }
 
 let runWindow: GitHubElectron.BrowserWindow;
+let runWindowDestroyTimeout: NodeJS.Timer;
 
 if (SupApp != null) {
   window.addEventListener("beforeunload", () => {
@@ -86,14 +87,30 @@ export function runProject(options: { debug: boolean; } = { debug: false }) {
 
 function onCloseRunWindow() {
   runWindow = null;
+  if (runWindowDestroyTimeout != null) {
+    clearTimeout(runWindowDestroyTimeout);
+    runWindowDestroyTimeout = null;
+  }
   stopButton.disabled = true;
 }
 
 function stopProject() {
-  runWindow.destroy();
-  runWindow = null;
-
   stopButton.disabled = true;
+
+  // Send a message to ask the window to exit gracefully
+  // So that it has a chance to clean things up
+  runWindow.webContents.send("forceQuit");
+
+  // If it doesn't, destroy it
+  runWindowDestroyTimeout = setTimeout(destroyRunWindow, 500);
+}
+
+function destroyRunWindow() {
+  runWindowDestroyTimeout = null;
+  if (runWindow != null) {
+    runWindow.destroy();
+    runWindow = null;
+  }
 }
 
 function openStartBuildDialog() {
