@@ -47,13 +47,13 @@ export function open(id: string, state?: {[name: string]: any}) {
 
     const saveOrRestoreButtonElt = SupClient.html("button", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("common:actions.save"), disabled: true });
 
+    const src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
+    const iframe = SupClient.html("iframe", { parent: paneElt, src });
+    if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
+
     selectElt.addEventListener("change", () => {
-      // TODO: Send message to iframe to request the revision
-      if (selectElt.value === "current") {
-        saveOrRestoreButtonElt.textContent = SupClient.i18n.t("common:actions.save");
-      } else {
-        saveOrRestoreButtonElt.textContent = SupClient.i18n.t("common:actions.restore");
-      }
+      saveOrRestoreButtonElt.textContent = SupClient.i18n.t(`common:actions.${selectElt.value === "current" ? "save" : "restore"}`);
+      iframe.contentWindow.postMessage({ type: "setRevision", revisionId: selectElt.value }, window.location.origin);
     });
 
     saveOrRestoreButtonElt.addEventListener("click", () => {
@@ -101,10 +101,6 @@ export function open(id: string, state?: {[name: string]: any}) {
         });
       }
     });
-
-    const src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;
-    const iframe = SupClient.html("iframe", { parent: paneElt, src });
-    if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
 
   } else if (state != null) {
     const iframe = tabs.panesElt.querySelector(`[data-asset-id='${id}'] iframe`) as HTMLIFrameElement;
