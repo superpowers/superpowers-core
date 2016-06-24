@@ -10,6 +10,7 @@ declare namespace SupClient {
   export const cookies: Cookies.CookiesStatic;
 
   export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => void): void;
+  export function loadScript(url: string, callback: Function): void;
   export function readFile(file: File, type: string, callback: (err: Error, data: any) => void): void;
 
   export function registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;

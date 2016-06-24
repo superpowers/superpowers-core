@@ -4,6 +4,7 @@ import * as querystring from "querystring";
 import * as cookies from "js-cookie";
 
 import fetch from "./fetch";
+import loadScript from "./loadScript";
 import readFile from "./readFile";
 import ProjectClient from "./ProjectClient";
 import { setupHotkeys, setupHelpCallback } from "./events";
@@ -17,7 +18,7 @@ import "./events";
 import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";
 
-export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
+export { fetch, loadScript, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
 export const query = querystring.parse(window.location.search.slice(1));
 
 (Dialogs as any).FindAssetDialog = FindAssetDialog;
