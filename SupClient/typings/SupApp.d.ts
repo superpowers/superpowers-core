@@ -28,6 +28,7 @@ declare namespace SupApp {
   // export function chooseFile(callback: ChooseFileCallback): void;
 
   export function mkdirp(folderPath: string, callback: (err: any) => void): void;
+  export function writeFile(filename: string, data: any, callback: (err: NodeJS.ErrnoException) => void): void;
   export function writeFile(filename: string, data: any, options: any, callback: (err: NodeJS.ErrnoException) => void): void;
   export function spawnChildProcess(filename: string): void;
 
