@@ -18,6 +18,7 @@ export default class ProjectClient {
     this.socket.on("welcome", this.onWelcome);
     this.socket.on("edit:assets", this.onAssetEdited);
     this.socket.on("trash:assets", this.onAssetTrashed);
+    this.socket.on("restore:assets", this.onAssetRestored);
     this.socket.on("edit:resources", this.onResourceEdited);
 
     // Allow keeping an entries subscription alive at all times
@@ -201,6 +202,20 @@ export default class ProjectClient {
     this.assetsById[assetId].client_unload();
     delete this.assetsById[assetId];
     delete this.subscribersByAssetId[assetId];
+  };
+
+  private onAssetRestored = (assetId: string, assetType: string, assetData: any) => {
+    const subscribers = this.subscribersByAssetId[assetId];
+    if (subscribers == null) return;
+
+    this.assetsById[assetId].client_unload();
+
+    const asset = this.assetsById[assetId] = new SupCore.system.data.assetClasses[assetType](assetId, assetData);
+    asset.client_load();
+
+    for (const subscriber of subscribers) {
+      if (subscriber.onAssetReceived != null) subscriber.onAssetReceived(assetId, asset);
+    }
   };
 
   private onResourceReceived = (resourceId: string, err: string, resourceData: any) => {

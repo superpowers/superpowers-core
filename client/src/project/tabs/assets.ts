@@ -38,40 +38,68 @@ export function open(id: string, state?: {[name: string]: any}) {
     SupClient.html("span", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("project:revision.title") });
 
     const selectElt = SupClient.html("select", { parent: revisionInnerContainer, disabled: true });
-    SupClient.html("option", { parent: selectElt, textContent: SupClient.i18n.t("project:revision.current") });
+    SupClient.html("option", { parent: selectElt, textContent: SupClient.i18n.t("project:revision.current"), value: "current" });
 
     for (let revisionIndex = entry.revisions.length - 1; revisionIndex >= 0; revisionIndex--) {
       const revision = entry.revisions[revisionIndex];
-      SupClient.html("option", { parent: selectElt, textContent: revision.name, dataset: { id: revision.id } });
+      SupClient.html("option", { parent: selectElt, textContent: revision.name, value: revision.id });
     }
 
-    // TODO: Send message to server or iframe when selecting a revision
+    const saveOrRestoreButtonElt = SupClient.html("button", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("common:actions.save"), disabled: true });
 
-    const saveButtonElt = SupClient.html("button", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("common:actions.save"), disabled: true });
-    saveButtonElt.addEventListener("click", () => {
-      const date = new Date();
-      const options = {
-        header: SupClient.i18n.t("project:revision.title"),
-        validationLabel: SupClient.i18n.t("common:actions.save"),
-        initialValue: `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDay()} ${date.getUTCHours()}h${date.getUTCMinutes()}`,
-        title: SupClient.i18n.t("common:namePatternDescription"),
-        pattern: SupClient.namePattern
-      };
+    selectElt.addEventListener("change", () => {
+      // TODO: Send message to iframe to request the revision
+      if (selectElt.value === "current") {
+        saveOrRestoreButtonElt.textContent = SupClient.i18n.t("common:actions.save");
+      } else {
+        saveOrRestoreButtonElt.textContent = SupClient.i18n.t("common:actions.restore");
+      }
+    });
 
-      /* tslint:disable:no-unused-expression */
-      new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:revision.prompt"), options, (revisionName) => {
-        /* tslint:enable:no-unused-expression */
-        if (revisionName == null) return;
+    saveOrRestoreButtonElt.addEventListener("click", () => {
+      if (selectElt.value === "current") {
+        const date = new Date();
+        const options = {
+          header: SupClient.i18n.t("project:revision.title"),
+          validationLabel: SupClient.i18n.t("common:actions.save"),
+          initialValue: `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDay()} ${date.getUTCHours()}h${date.getUTCMinutes()}`,
+          title: SupClient.i18n.t("common:namePatternDescription"),
+          pattern: SupClient.namePattern
+        };
 
-        socket.emit("save:entries", id, revisionName, (err: string) => {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:revision.prompt"), options, (revisionName) => {
+          /* tslint:enable:no-unused-expression */
+          if (revisionName == null) return;
+
+          socket.emit("save:entries", id, revisionName, (err: string) => {
+            if (err != null) {
+              /* tslint:disable:no-unused-expression */
+              new SupClient.Dialogs.InfoDialog(err);
+              /* tslint:enable:no-unused-expression */
+              return;
+            }
+          });
+        });
+
+      } else {
+        selectElt.disabled = true;
+        saveOrRestoreButtonElt.disabled = true;
+
+        socket.emit("restore:assets", id, selectElt.value, (err: string) => {
           if (err != null) {
             /* tslint:disable:no-unused-expression */
             new SupClient.Dialogs.InfoDialog(err);
             /* tslint:enable:no-unused-expression */
             return;
           }
+
+          selectElt.disabled = false;
+          selectElt.value = "current";
+          saveOrRestoreButtonElt.disabled = false;
+          saveOrRestoreButtonElt.textContent = SupClient.i18n.t("common:actions.save");
         });
-      });
+      }
     });
 
     const src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/?project=${SupClient.query.project}&asset=${id}`;

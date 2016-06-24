@@ -29,6 +29,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     // Assets
     this.socket.on("edit:assets", this.onEditAsset);
+    this.socket.on("restore:assets", this.onRestoreAsset);
 
     // Resources
     this.socket.on("edit:resources", this.onEditResource);
@@ -374,6 +375,30 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
         this.server.io.in(`sub:assets:${id}`).emit("edit:assets", id, command, ...callbackArgs);
         callback(null, ack);
+      });
+    });
+  };
+
+  private onRestoreAsset = (assetId: string, revisionId: string, callback: (err: string) => void) => {
+    const entry = this.server.data.entries.byId[assetId];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    const assetClass = this.server.system.data.assetClasses[entry.type];
+    const newAsset = new assetClass(assetId, null, this.server);
+
+    const revisionName = this.server.data.entries.revisionsByEntryId[assetId][revisionId];
+    const revisionPath = `assetRevisions/${assetId}/${revisionId}-${revisionName}`;
+    newAsset.load(path.join(this.server.projectPath, revisionPath));
+    newAsset.on("load", () => {
+      this.server.data.assets.acquire(assetId, null, (err, asset) => {
+        if (err != null) { callback("Could not acquire asset"); return; }
+
+        this.server.data.assets.release(assetId, null);
+        asset.pub = newAsset.pub;
+        asset.emit("change");
+
+        this.server.io.in(`sub:assets:${assetId}`).emit("restore:assets", assetId, entry.type, asset.pub);
+        callback(null);
       });
     });
   };

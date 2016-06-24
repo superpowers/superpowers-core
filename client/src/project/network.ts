@@ -199,12 +199,12 @@ function onEntrySaved(id: string, revisionId: string, revisionName: string) {
 
   const revisions = entries.byId[id].revisions;
   const selectElt = revisionPaneElt.querySelector("select") as HTMLSelectElement;
-  const optionElt = SupClient.html("option", { textContent: revisionName, dataset: { id: revisionId } });
+  const optionElt = SupClient.html("option", { textContent: revisionName, value: revisionId });
   if (revisions.length === 1) {
     selectElt.appendChild(optionElt);
   } else {
     const previousRevisionId = revisions[revisions.length - 2].id;
-    const previousRevisionElt = selectElt.querySelector(`[data-id='${previousRevisionId}']`);
+    const previousRevisionElt = selectElt.querySelector(`option[value='${previousRevisionId}']`);
     selectElt.insertBefore(optionElt, previousRevisionElt);
   }
 }

@@ -73,6 +73,7 @@ declare namespace SupCore {
 
       badgesByEntryId: { [key: string]: Badges };
       dependenciesByAssetId: any;
+      revisionsByEntryId: { [ id: string ]: { [ revisionId: string]: string; } };
 
       constructor(pub: EntryNode[], nextEntryId: number, server?: ProjectServer);
       walk(callback: (node: EntryNode, parentNode?: EntryNode) => any): void;
@@ -91,14 +92,14 @@ declare namespace SupCore {
       server: ProjectServer;
 
       constructor(server: ProjectServer);
-      // _load(id: string): void;
+      acquire(id: string, owner: SupCore.RemoteClient, callback: (err: Error, item: SupCore.Data.Base.Asset) => void): void;
     }
     class Resources extends Base.Dictionary {
       server: ProjectServer;
       resourceClassesById: ProjectServer;
 
       constructor(server: ProjectServer);
-      // _load(id: string): void;
+      acquire(id: string, owner: SupCore.RemoteClient, callback: (err: Error, item: SupCore.Data.Base.Resource) => void): void;
     }
 
     class Room extends Base.Hash {
