@@ -32,6 +32,8 @@ function loadPlugins(buildSetup: BuildSetup, callback: Function) {
   i18nFiles.push({ root: buildSetup.pluginPath, name: "builds" });
 
   SupClient.fetch(`/systems/${SupCore.system.id}/plugins.json`, "json", (err: Error, pluginsInfo: SupCore.PluginsInfo) => {
+    SupCore.system.pluginsInfo = pluginsInfo;
+
     async.parallel([
       (cb) => {
         SupClient.i18n.load(i18nFiles, cb);
