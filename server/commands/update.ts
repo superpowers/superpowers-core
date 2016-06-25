@@ -108,7 +108,7 @@ function updateCore(downloadURL: string) {
   utils.downloadRelease(downloadURL, newCorePath, (err) => {
     if (err != null) utils.emitError("Failed to update the core.", err);
 
-    for (const oldItem of ["server", "SupClient", "SupCore", "package.json", "public", "node_modules"]) rimraf.sync(`${corePath}/${oldItem}`);
+    for (const oldItem of ["client", "node_modules", "public", "server", "SupClient", "SupCore", "LICENSE.txt", "package.json", "README.md" ]) rimraf.sync(`${corePath}/${oldItem}`);
     for (const newItem of fs.readdirSync(newCorePath)) fs.renameSync(`${newCorePath}/${newItem}`, `${corePath}/${newItem}`);
     rimraf.sync(newCorePath);
 

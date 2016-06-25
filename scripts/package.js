@@ -13,7 +13,6 @@ const child_process = require("child_process");
 const argv = yargs.argv;
 const systemName = argv._[0];
 
-
 let sourceRootPath = path.resolve(`${__dirname}/..`);
 let packageName = "core";
 if (systemName != null) {
@@ -39,10 +38,8 @@ function shouldIgnore(file) {
   if (file.indexOf("node_modules/") !== -1) return false;
   if (file.indexOf("public/") !== -1) return false;
 
-  // TODO: Get rid of this?
-  // Currently required to protect .d.ts API files
-  // loaded by the server in Superpowers Game
-  if (file.indexOf("typings/") !== -1) return false;
+  if (systemName == null && file.indexOf("typings/") !== -1) return true;
+  if (_.endsWith(file, ".d.ts")) return false;
 
   if (file[0] === "." || file.indexOf("/.") !== -1) return true;
   if (_.endsWith(file, ".orig")) return true;
@@ -53,8 +50,6 @@ function shouldIgnore(file) {
 
   if (file.indexOf("editors/") !== -1) return true;
   if (_.endsWith(file, ".ts")) return true;
-  if (_.startsWith(file, "client")) return true;
-  if (_.startsWith(file, "SupClient")) return true;
   if (_.startsWith(file, "scripts")) return true;
   if (_.startsWith(file, "systems")) return true;
   if (_.startsWith(file, "workbench")) return true;
