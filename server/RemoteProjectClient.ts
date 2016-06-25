@@ -442,7 +442,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     try { fs.mkdirSync(buildPath); }
     catch (err) { callback(`Could not create folder for build ${buildId}`); return; }
 
-    this.server.system.serverBuild(this.server, buildPath, (err, extraBuildFiles) => {
+    this.server.system.serverBuild(this.server, buildPath, (err) => {
       if (err != null) { callback(`Failed to create build ${buildId}: ${err}`); return; }
 
       // Collect paths to all build files
@@ -455,9 +455,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
         }
 
-        files = files.concat(extraBuildFiles);
-
-        callback(null, buildId.toString(), files);
+        callback(null, buildId.toString());
 
         // Remove an old build to avoid using too much disk space
         const buildToDeleteId = buildId - serverConfig.maxRecentBuilds;

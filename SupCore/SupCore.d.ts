@@ -261,7 +261,6 @@ declare namespace SupCore {
         client_unload(): void;
 
         save(assetPath: string, callback: (err: Error) => any): void;
-        publish(buildPath: string, callback: (err: Error) => any): void;
 
         server_setProperty(client: RemoteClient, path: string, value: number|string|boolean, callback: SetPropertyCallback): void;
       }
@@ -287,7 +286,6 @@ declare namespace SupCore {
         migrate(resourcePath: string, pub: any, callback: (hasMigrated: boolean) => void): void;
 
         save(resourcePath: string, callback: (err: Error) => any): void;
-        publish(buildPath: string, callback: (err: Error) => any): void;
 
         server_setProperty(client: RemoteClient, path: string, value: number|string|boolean, callback: SetPropertyCallback): void;
       }
@@ -325,7 +323,7 @@ declare namespace SupCore {
     folderName: string;
     data: SystemData;
     pluginsInfo: PluginsInfo;
-    serverBuild: (server: ProjectServer, buildPath: string, callback: (err: string, extraBuildFiles?: string[]) => void) => void;
+    serverBuild: (server: ProjectServer, buildPath: string, callback: (err: string) => void) => void;
 
     constructor(id: string, folderName: string);
     requireForAllPlugins(filePath: string): void;

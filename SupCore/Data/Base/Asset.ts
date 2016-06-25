@@ -2,7 +2,6 @@ import Hash from "./Hash";
 
 import * as path from "path";
 import * as fs from "fs";
-import * as mkdirp from "mkdirp";
 
 export default class Asset extends Hash {
   constructor(public id: string, pub: any, schema: SupCore.Data.Schema, public server: ProjectServer) {
@@ -56,11 +55,6 @@ export default class Asset extends Hash {
   save(assetPath: string, callback: (err: Error) => any) {
     const json = JSON.stringify(this.pub, null, 2);
     fs.writeFile(path.join(assetPath, "asset.json"), json, { encoding: "utf8" }, callback);
-  }
-
-  publish(buildPath: string, callback: (err: Error) => any) {
-    const folderPath = `${buildPath}/assets/${this.server.data.entries.getStoragePathFromId(this.id)}`;
-    mkdirp(folderPath, (err) => { this.save(folderPath, callback); });
   }
 
   server_setProperty(client: SupCore.RemoteClient, path: string, value: number|string|boolean, callback: SupCore.Data.Base.SetPropertyCallback) {
