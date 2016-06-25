@@ -46,6 +46,7 @@ function shouldIgnore(file) {
 
   if (file[0] === "." || file.indexOf("/.") !== -1) return true;
   if (_.endsWith(file, ".orig")) return true;
+  if (_.endsWith(file, ".log")) return true;
 
   if (_.endsWith(file, "gulpfile.js") || _.endsWith(file, "Gulpfile.js")) return true;
   if (_.endsWith(file, "tsconfig.json")) return true;
