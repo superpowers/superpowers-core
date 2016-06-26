@@ -88,9 +88,7 @@ export default class ProjectClient {
 
     args.push((err: string, ack: any) => {
       if (err != null) {
-        /* tslint:disable:no-unused-expression */
         new SupClient.Dialogs.InfoDialog(err);
-        /* tslint:enable:no-unused-expression */
         return;
       }
       if (callback != null) callback(ack);
@@ -139,12 +137,7 @@ export default class ProjectClient {
     if (typeof args[args.length - 1] === "function") callback = args.pop();
 
     args.push((err: string, id: string) => {
-      if (err != null) {
-        /* tslint:disable:no-unused-expression */
-        new SupClient.Dialogs.InfoDialog(err);
-        /* tslint:enable:no-unused-expression */
-        return;
-      }
+      if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
       if (callback != null) callback(id);
     });
 

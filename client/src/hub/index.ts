@@ -195,9 +195,7 @@ function onProjectActivate() {
 
 let autoOpenProject = true;
 function onNewProjectClick() {
-  /* tslint:disable:no-unused-expression */
   new CreateOrEditProjectDialog(data.systemsById, { autoOpen: autoOpenProject }, (result) => {
-    /* tslint:enable:no-unused-expression */
     if (result == null) return;
     autoOpenProject = result.open;
 
@@ -206,12 +204,7 @@ function onNewProjectClick() {
 }
 
 function onProjectAddedAck(err: string, id: string) {
-  if (err != null) {
-    /* tslint:disable:no-unused-expression */
-    new SupClient.Dialogs.InfoDialog(err);
-    /* tslint:enable:no-unused-expression */
-    return;
-  }
+  if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
 
   ui.projectsTreeView.clearSelection();
 
@@ -228,9 +221,7 @@ function onEditProjectClick() {
   const selectedNode = ui.projectsTreeView.selectedNodes[0];
   const existingProject = data.projects.byId[selectedNode.dataset["id"]];
 
-  /* tslint:disable:no-unused-expression */
   new CreateOrEditProjectDialog(data.systemsById, { existingProject }, (result) => {
-    /* tslint:enable:no-unused-expression */
     if (result == null) return;
     autoOpenProject = result.open;
 
@@ -238,12 +229,7 @@ function onEditProjectClick() {
     if (result.project.icon == null) delete result.project.icon;
 
     socket.emit("edit:projects", existingProject.id, result.project, (err: string) => {
-      if (err != null) {
-        /* tslint:disable:no-unused-expression */
-        new SupClient.Dialogs.InfoDialog(err);
-        /* tslint:enable:no-unused-expression */
-        return;
-      }
+      if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
     });
   });
 }

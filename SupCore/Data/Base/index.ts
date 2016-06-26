@@ -1,11 +1,10 @@
-﻿/* tslint:disable:no-unused-variable */
-import Hash from "./Hash";
+﻿import Hash from "./Hash";
 import ListById from "./ListById";
 import TreeById from "./TreeById";
 import Dictionary from "./Dictionary";
 import Asset from "./Asset";
 import Resource from "./Resource";
-/* tslint:enable:no-unused-variable */
+
 export { Hash, ListById, TreeById, Dictionary, Asset, Resource };
 
 interface Rule {

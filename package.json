@@ -30,7 +30,7 @@
     "gulp-util": "^3.0.7",
     "simple-dialogs": "^1.2.0",
     "socket.io-client": "^1.4.4",
-    "tslint": "^3.2.2",
+    "tslint": "^3.12.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"
   },

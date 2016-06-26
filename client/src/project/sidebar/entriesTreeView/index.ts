@@ -148,12 +148,7 @@ function onTreeViewDrop(event: DragEvent, dropLocation: TreeView.DropLocation, o
   let i = 0;
   for (const id of entryIds) {
     socket.emit("move:entries", id, dropPoint.parentId, dropPoint.index + i, (err: string) => {
-      if (err != null) {
-        /* tslint:disable:no-unused-expression */
-        new SupClient.Dialogs.InfoDialog(err);
-        /* tslint:enable:no-unused-expression */
-        return;
-      }
+      if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
     });
     if (!sameParent || sourceChildren.indexOf(entries.byId[id]) >= dropPoint.index) i++;
   }

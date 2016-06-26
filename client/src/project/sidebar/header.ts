@@ -69,12 +69,7 @@ export function runProject(options: { debug: boolean; } = { debug: false }) {
   } else window.open("/build.html", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
-    if (err != null) {
-      /* tslint:disable:no-unused-expression */
-      new SupClient.Dialogs.InfoDialog(err);
-      /* tslint:enable:no-unused-expression */
-      return;
-    }
+    if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
 
     let url = `${window.location.protocol}//${window.location.hostname}:${buildPort}/systems/${SupCore.system.id}/?project=${SupClient.query.project}&build=${buildId}`;
     if (options.debug) url += "&debug";
@@ -114,9 +109,7 @@ function destroyRunWindow() {
 }
 
 function openStartBuildDialog() {
-  /* tslint:disable:no-unused-expression */
   new StartBuildDialog(entries, entriesTreeView.widget, (buildSetup) => {
-    /* tslint:enable:no-unused-expression */
     if (buildSetup == null) return;
 
     const buildWindow = SupApp.openWindow(`${window.location.origin}/build/?project=${SupClient.query.project}`, { size: { width: 600, height: 150 }, resizable: false });
