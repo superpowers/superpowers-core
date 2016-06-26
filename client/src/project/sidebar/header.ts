@@ -70,9 +70,9 @@ export function runProject(options: { debug: boolean; } = { debug: false }) {
 
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) {
-      // tslint:disable:no-unused-expression
+      /* tslint:disable:no-unused-expression */
       new SupClient.Dialogs.InfoDialog(err);
-      // tslint:enable:no-unused-expression
+      /* tslint:enable:no-unused-expression */
       return;
     }
 
