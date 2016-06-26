@@ -38,9 +38,6 @@ function shouldIgnore(file) {
   if (file.indexOf("node_modules/") !== -1) return false;
   if (file.indexOf("public/") !== -1) return false;
 
-  if (systemName == null && file.indexOf("typings/") !== -1) return true;
-  if (_.endsWith(file, ".d.ts")) return false;
-
   if (file[0] === "." || file.indexOf("/.") !== -1) return true;
   if (_.endsWith(file, ".orig")) return true;
   if (_.endsWith(file, ".log")) return true;
@@ -48,6 +45,7 @@ function shouldIgnore(file) {
   if (_.endsWith(file, "gulpfile.js") || _.endsWith(file, "Gulpfile.js")) return true;
   if (_.endsWith(file, "tsconfig.json")) return true;
 
+  if (file.indexOf("typings/") !== -1) return true;
   if (file.indexOf("editors/") !== -1) return true;
   if (_.endsWith(file, ".ts")) return true;
   if (_.startsWith(file, "scripts")) return true;
