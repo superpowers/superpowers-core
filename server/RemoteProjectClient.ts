@@ -395,7 +395,13 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         if (err != null) { callback("Could not acquire asset"); return; }
 
         this.server.data.assets.release(assetId, null);
+
+        for (const badge of entry.badges) asset.emit("clearBadge", badge.id);
+        entry.badges.length = 0;
+
         asset.pub = newAsset.pub;
+        asset.setup();
+        asset.restore();
         asset.emit("change");
 
         this.server.io.in(`sub:assets:${assetId}`).emit("restore:assets", assetId, entry.type, asset.pub);
