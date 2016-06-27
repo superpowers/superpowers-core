@@ -64,6 +64,7 @@ declare namespace SupCore {
       type?: string;
       badges?: BadgeItem[];
       dependentAssetIds?: any[];
+      revisions?: { id: string; name: string}[];
     }
     class Entries extends Base.TreeById {
       pub: EntryNode[];
@@ -72,14 +73,17 @@ declare namespace SupCore {
 
       badgesByEntryId: { [key: string]: Badges };
       dependenciesByAssetId: any;
+      revisionsByEntryId: { [ id: string ]: { [ revisionId: string]: string; } };
 
-      constructor(pub: EntryNode[], server?: ProjectServer);
+      constructor(pub: EntryNode[], nextEntryId: number, server?: ProjectServer);
       walk(callback: (node: EntryNode, parentNode?: EntryNode) => any): void;
       add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
       client_add(node: EntryNode, parentId: string, index: number): void;
       move(id: string, parentId: string, index: number, callback: (err: string, index?: number) => any): void;
       remove(id: string, callback: (err: string) => any): void;
       setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any): void;
+      save(id: string, revisionName: string, callback: (err: string, revisionId?: string) => void): void;
+      client_save(id: string, revisionId: string, revisionName: string): void;
       getForStorage(): EntryNode[];
       getStoragePathFromId(id: string): string;
     }
@@ -88,14 +92,14 @@ declare namespace SupCore {
       server: ProjectServer;
 
       constructor(server: ProjectServer);
-      // _load(id: string): void;
+      acquire(id: string, owner: SupCore.RemoteClient, callback: (err: Error, item: SupCore.Data.Base.Asset) => void): void;
     }
     class Resources extends Base.Dictionary {
       server: ProjectServer;
       resourceClassesById: ProjectServer;
 
       constructor(server: ProjectServer);
-      // _load(id: string): void;
+      acquire(id: string, owner: SupCore.RemoteClient, callback: (err: Error, item: SupCore.Data.Base.Resource) => void): void;
     }
 
     class Room extends Base.Hash {

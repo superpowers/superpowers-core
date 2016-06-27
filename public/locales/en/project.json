@@ -37,5 +37,11 @@
   "build": {
     "title": "Build project",
     "build": "Build"
+  },
+  "revision": {
+    "title": "Revision",
+    "prompt": "Enter a name for the new revision.",
+    "current": "Current",
+    "restoring": "Restoring..."
   }
 }

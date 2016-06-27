@@ -30,9 +30,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.socket.on("move:entries", this.onMoveEntry);
     this.socket.on("trash:entries", this.onTrashEntry);
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
+    this.socket.on("save:entries", this.onSaveEntry);
 
     // Assets
     this.socket.on("edit:assets", this.onEditAsset);
+    this.socket.on("restore:assets", this.onRestoreAsset);
+    this.socket.on("getRevision:assets", this.onGetAssetRevision);
 
     // Resources
     this.socket.on("edit:resources", this.onEditResource);
@@ -324,6 +327,37 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     ]);
   };
 
+  private onSaveEntry = (entryId: string, revisionName: string, callback: (err: string) => void) => {
+    if (!this.errorIfCant("editAssets", callback)) return;
+    if (revisionName.length === 0) { callback("Revision name can't be empty"); return; }
+
+    this.server.data.entries.save(entryId, revisionName, (err, revisionId) => {
+      if (err != null) { callback(err); return; }
+
+      this.server.data.assets.acquire(entryId, null, (err, asset) => {
+        if (err != null) { callback("Could not acquire asset"); return; }
+
+        this.server.data.assets.release(entryId, null);
+
+        const revisionPath = path.join(this.server.projectPath, `assetRevisions/${entryId}/${revisionId}-${revisionName}`);
+        mkdirp(revisionPath, (err) => {
+          if (err != null) { callback("Could not write the save"); return; }
+
+          asset.save(revisionPath, (err: Error) => {
+            if (err != null) {
+              callback("Could not write the save");
+              console.log(err);
+              return;
+            }
+
+            this.server.io.in("sub:entries").emit("save:entries", entryId, revisionId, revisionName);
+            callback(null);
+          });
+        });
+      });
+    });
+  };
+
   // Assets
   private onEditAsset = (id: string, command: string, ...args: any[]) => {
     let callback: (err: string, id?: string) => any = null;
@@ -351,6 +385,49 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       });
     });
   };
+
+  private onRestoreAsset = (assetId: string, revisionId: string, callback: (err: string) => void) => {
+    const entry = this.server.data.entries.byId[assetId];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    const assetClass = this.server.system.data.assetClasses[entry.type];
+    const newAsset = new assetClass(assetId, null, this.server);
+
+    const revisionName = this.server.data.entries.revisionsByEntryId[assetId][revisionId];
+    const revisionPath = `assetRevisions/${assetId}/${revisionId}-${revisionName}`;
+    newAsset.load(path.join(this.server.projectPath, revisionPath));
+    newAsset.on("load", () => {
+      this.server.data.assets.acquire(assetId, null, (err, asset) => {
+        if (err != null) { callback("Could not acquire asset"); return; }
+
+        this.server.data.assets.release(assetId, null);
+
+        for (const badge of entry.badges) asset.emit("clearBadge", badge.id);
+        entry.badges.length = 0;
+
+        asset.pub = newAsset.pub;
+        asset.setup();
+        asset.restore();
+        asset.emit("change");
+
+        this.server.io.in(`sub:assets:${assetId}`).emit("restore:assets", assetId, entry.type, asset.pub);
+        callback(null);
+      });
+    });
+  };
+
+  private onGetAssetRevision = (assetId: string, revisionId: string, callback: (err: string, assetData?: any) => void) => {
+    const entry = this.server.data.entries.byId[assetId];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    const assetClass = this.server.system.data.assetClasses[entry.type];
+    const revisionAsset = new assetClass(assetId, null, this.server);
+
+    const revisionName = this.server.data.entries.revisionsByEntryId[assetId][revisionId];
+    const revisionPath = `assetRevisions/${assetId}/${revisionId}-${revisionName}`;
+    revisionAsset.load(path.join(this.server.projectPath, revisionPath));
+    revisionAsset.on("load", () => { callback(null, revisionAsset.pub); });
+  }
 
   // Resources
   private onEditResource = (id: string, command: string, ...args: any[]) => {

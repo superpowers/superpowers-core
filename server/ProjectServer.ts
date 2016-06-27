@@ -108,13 +108,30 @@ export default class ProjectServer {
         try { entriesData = JSON.parse(entriesJSON); }
         catch (err) { callback(err); return; }
 
+        if (this.data.manifest.migratedFromFormatVersion != null && this.data.manifest.migratedFromFormatVersion <= 5) {
+          let nextEntryId = 0;
+          let walk = (node: SupCore.Data.EntryNode) => {
+            const intNodeId = parseInt(node.id, 10);
+            nextEntryId = Math.max(nextEntryId, intNodeId);
+
+            if (node.type == null) for (const childNode of node.children) walk(childNode);
+          };
+          for (const node of entriesData) walk(node);
+
+          entriesData = { nextEntryId, nodes: entriesData };
+        }
+
         try { schemas.validate(entriesData, "projectEntries"); }
         catch (err) { callback(err); return; }
 
-        this.data.entries = new SupCore.Data.Entries(entriesData, this);
+        this.data.entries = new SupCore.Data.Entries(entriesData.nodes, entriesData.nextEntryId, this);
         this.data.entries.on("change", this.onEntriesChanged);
 
-        callback(null);
+        if (this.data.manifest.migratedFromFormatVersion != null && this.data.manifest.migratedFromFormatVersion <= 5) {
+          this.saveEntries(callback);
+        } else {
+          callback(null);
+        }
       });
     };
 
@@ -313,7 +330,7 @@ export default class ProjectServer {
   };
 
   private saveEntries = (callback: (err: Error) => any) => {
-    const entriesJSON = JSON.stringify(this.data.entries.getForStorage(), null, 2);
+    const entriesJSON = JSON.stringify({ nextEntryId: this.data.entries.nextId, nodes: this.data.entries.getForStorage() }, null, 2);
     fs.writeFile(path.join(this.projectPath, "newEntries.json"), entriesJSON, () => {
       fs.rename(path.join(this.projectPath, "newEntries.json"), path.join(this.projectPath, "entries.json"), callback);
     });

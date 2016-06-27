@@ -2,6 +2,7 @@ import * as async from "async";
 
 import * as entriesTreeView from "./sidebar/entriesTreeView";
 import * as sidebar from "./sidebar";
+import * as tabs from "./tabs";
 import * as tabsAssets from "./tabs/assets";
 import * as tabsTools from "./tabs/tools";
 
@@ -27,6 +28,7 @@ export function connect() {
   socket.on("move:entries", onEntryMoved);
   socket.on("trash:entries", onEntryTrashed);
   socket.on("setProperty:entries", onSetEntryProperty);
+  socket.on("save:entries", onEntrySaved);
 
   socket.on("set:badges", onBadgeSet);
   socket.on("clear:badges", onBadgeCleared);
@@ -85,8 +87,8 @@ function onManifestReceived(err: string, manifestPub: SupCore.Data.ProjectManife
   document.title = `${manifestPub.name} — Superpowers`;
 }
 
-function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[]) {
-  entries = new SupCore.Data.Entries(entriesPub);
+function onEntriesReceived(err: string, entriesPub: SupCore.Data.EntryNode[], nextEntryId: number) {
+  entries = new SupCore.Data.Entries(entriesPub, nextEntryId);
 
   sidebar.enable();
 
@@ -188,6 +190,24 @@ function onSetEntryProperty(id: string, key: string, value: any) {
 
       walk(entries.byId[id]);
       break;
+  }
+}
+
+function onEntrySaved(id: string, revisionId: string, revisionName: string) {
+  entries.client_save(id, revisionId, revisionName);
+
+  const revisionPaneElt = tabs.panesElt.querySelector(`[data-asset-id='${id}'] .revision-inner-container`) as HTMLDivElement;
+  if (revisionPaneElt == null) return;
+
+  const revisions = entries.byId[id].revisions;
+  const selectElt = revisionPaneElt.querySelector("select") as HTMLSelectElement;
+  const optionElt = SupClient.html("option", { textContent: revisionName, value: revisionId });
+  if (revisions.length === 1) {
+    selectElt.appendChild(optionElt);
+  } else {
+    const previousRevisionId = revisions[revisions.length - 2].id;
+    const previousRevisionElt = selectElt.querySelector(`option[value='${previousRevisionId}']`);
+    selectElt.insertBefore(optionElt, previousRevisionElt);
   }
 }
 

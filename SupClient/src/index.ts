@@ -193,6 +193,10 @@ export function openEntry(entryId: string, state?: any) {
   window.parent.postMessage({ type: "openEntry", id: entryId, state }, window.location.origin);
 }
 
+export function setEntryRevisionDisabled(disabled: boolean) {
+  window.parent.postMessage({ type: "setEntryRevisionDisabled", id: query.asset, disabled }, window.location.origin);
+}
+
 export function setupCollapsablePane(paneElt: HTMLDivElement, refreshCallback?: Function) {
   const handle = new ResizeHandle(paneElt, "bottom");
   if (refreshCallback != null)
