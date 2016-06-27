@@ -64,7 +64,7 @@ export default class BaseRemoteClient {
 
       (data as SupCore.Data.Base.Dictionary).acquire(id, this, (err: Error, item: any) => {
         if (err != null) {
-          callback(`Could not acquire asset: ${err}`, null);
+          callback(`Could not acquire item: ${err}`, null);
           unlockRoom();
           return;
         }
