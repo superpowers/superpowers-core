@@ -30,6 +30,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     // Assets
     this.socket.on("edit:assets", this.onEditAsset);
     this.socket.on("restore:assets", this.onRestoreAsset);
+    this.socket.on("getRevision:assets", this.onGetAssetRevision);
 
     // Resources
     this.socket.on("edit:resources", this.onEditResource);
@@ -402,6 +403,19 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       });
     });
   };
+
+  private onGetAssetRevision = (assetId: string, revisionId: string, callback: (err: string, assetData?: any) => void) => {
+    const entry = this.server.data.entries.byId[assetId];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    const assetClass = this.server.system.data.assetClasses[entry.type];
+    const revisionAsset = new assetClass(assetId, null, this.server);
+
+    const revisionName = this.server.data.entries.revisionsByEntryId[assetId][revisionId];
+    const revisionPath = `assetRevisions/${assetId}/${revisionId}-${revisionName}`;
+    revisionAsset.load(path.join(this.server.projectPath, revisionPath));
+    revisionAsset.on("load", () => { callback(null, revisionAsset.pub); });
+  }
 
   // Resources
   private onEditResource = (id: string, command: string, ...args: any[]) => {

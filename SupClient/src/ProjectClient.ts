@@ -8,7 +8,7 @@ export default class ProjectClient {
   assetsById: { [assetId: string]: SupCore.Data.Base.Asset } = {};
   subscribersByAssetId: { [assetId: string]: SupClient.AssetSubscriber[] } = {};
 
-  resourcesById: { [resourceId: string]: any} = {};
+  resourcesById: { [resourceId: string]: SupCore.Data.Base.Resource } = {};
   subscribersByResourceId: { [assetId: string]: SupClient.ResourceSubscriber[] } = {};
 
   private keepEntriesSubscription: boolean;
@@ -103,6 +103,21 @@ export default class ProjectClient {
 
   editAssetNoErrorHandling(assetId: string, command: string, ...args: any[]) {
     this.socket.emit("edit:assets", assetId, command, ...args);
+  }
+
+  getAssetRevision(assetId: string, assetType: string, revisionId: string, onRevisionReceivedCallback: (assetId: string, asset: SupCore.Data.Base.Asset) => void) {
+    this.socket.emit("getRevision:assets", assetId, revisionId, (err: string, assetData: any) => {
+      if (err != null) {
+        /* tslint:disable:no-unused-expression */
+        new SupClient.Dialogs.InfoDialog(err);
+        /* tslint:enable:no-unused-expression */
+        return;
+      }
+
+      const asset = new SupCore.system.data.assetClasses[assetType](assetId, assetData);
+      asset.client_load();
+      onRevisionReceivedCallback(assetId, asset);
+    });
   }
 
   subResource(resourceId: string, subscriber: SupClient.ResourceSubscriber) {
@@ -214,7 +229,7 @@ export default class ProjectClient {
     asset.client_load();
 
     for (const subscriber of subscribers) {
-      if (subscriber.onAssetReceived != null) subscriber.onAssetReceived(assetId, asset);
+      if (subscriber.onAssetRestored != null) subscriber.onAssetRestored(assetId, asset);
     }
   };
 

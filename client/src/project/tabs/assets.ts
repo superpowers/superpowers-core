@@ -98,6 +98,7 @@ export function open(id: string, state?: {[name: string]: any}) {
           selectElt.value = "current";
           saveOrRestoreButtonElt.disabled = false;
           saveOrRestoreButtonElt.textContent = SupClient.i18n.t("common:actions.save");
+          iframe.contentWindow.postMessage({ type: "setRevision", revisionId: "restored" }, window.location.origin);
         });
       }
     });

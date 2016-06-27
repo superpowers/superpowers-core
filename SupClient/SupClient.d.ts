@@ -168,10 +168,10 @@ declare namespace SupClient {
     entries: SupCore.Data.Entries;
     entriesSubscribers: EntriesSubscriber[];
 
-    assetsById: {[assetId: string]: any};
+    assetsById: {[assetId: string]: SupCore.Data.Base.Asset };
     subscribersByAssetId: {[assetId: string]: AssetSubscriber[]};
 
-    resourcesById: {[resourceId: string]: any};
+    resourcesById: {[resourceId: string]: SupCore.Data.Base.Resource };
     subscribersByResourceId: {[assetId: string]: ResourceSubscriber[]};
 
     constructor(socket: SocketIOClient.Socket, options?: { subEntries: boolean; });
@@ -183,6 +183,8 @@ declare namespace SupClient {
     unsubAsset(assetId: string, subscriber: AssetSubscriber): void;
     editAsset(assetId: string, command: string, ...args: any[]): void;
     editAssetNoErrorHandling(assetId: string, command: string, ...args: any[]): void;
+    getAssetRevision(assetId: string, assetType: string, revisionId: string, onRevisionReceivedCallback: (assetId: string, asset: SupCore.Data.Base.Asset) => void): void;
+
     subResource(resourceId: string, subscriber: ResourceSubscriber): void;
     unsubResource(resourceId: string, subscriber: ResourceSubscriber): void;
     editResource(resourceId: string, command: string, ...args: any[]): void;
@@ -198,13 +200,14 @@ declare namespace SupClient {
   }
 
   interface AssetSubscriber {
-    onAssetReceived?: (assetId: string, asset: any) => void;
+    onAssetReceived?: (assetId: string, asset: SupCore.Data.Base.Asset) => void;
     onAssetEdited?: (assetId: string, command: string, ...args: any[]) => void;
+    onAssetRestored?: (assetId: string, asset: SupCore.Data.Base.Asset) => void;
     onAssetTrashed?: (assetId: string) => void;
   }
 
   interface ResourceSubscriber {
-    onResourceReceived?: (resourceId: string, resource: any) => void;
+    onResourceReceived?: (resourceId: string, resource: SupCore.Data.Base.Resource) => void;
     onResourceEdited?: (resourceId: string, command: string, ...args: any[]) => void;
   }
 
