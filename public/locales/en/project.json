@@ -41,6 +41,7 @@
   "revision": {
     "title": "Revision",
     "prompt": "Enter a name for the new revision.",
-    "current": "Current"
+    "current": "Current",
+    "restoring": "Restoring..."
   }
 }

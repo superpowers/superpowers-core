@@ -85,6 +85,7 @@ export function open(id: string, state?: {[name: string]: any}) {
       } else {
         selectElt.disabled = true;
         saveOrRestoreButtonElt.disabled = true;
+        saveOrRestoreButtonElt.textContent = SupClient.i18n.t("project:revision.restoring");
 
         socket.emit("restore:assets", id, selectElt.value, (err: string) => {
           if (err != null) {
