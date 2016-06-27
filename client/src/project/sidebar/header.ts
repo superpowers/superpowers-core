@@ -44,7 +44,7 @@ function goToHub() {
   else window.location.replace("/");
 }
 
-let runWindow: GitHubElectron.BrowserWindow;
+let runWindow: Electron.BrowserWindow;
 let runWindowDestroyTimeout: NodeJS.Timer;
 
 if (SupApp != null) {

@@ -8,7 +8,7 @@ document.addEventListener("keydown", (event) => {
 
 let socket: SocketIOClient.Socket;
 
-SupApp.getIpc().addListener("build", (sender: GitHubElectron.IpcRenderer, buildSetup: BuildSetup) => {
+SupApp.getIpc().addListener("build", (event: Electron.IpcRendererEvent, buildSetup: BuildSetup) => {
   socket = SupClient.connect(SupClient.query.project);
   socket.on("welcome", () => {
     loadPlugins(buildSetup, () => {
