@@ -13,19 +13,19 @@ html
       .server-name
     .connecting
       p= t("common:states.connecting")
-    form.login(hidden)
+    form.login(method="post",hidden)
       .welcome= t("login:welcome")
     
       table.properties
-        tr(hidden)
-          th= t("login:password")
-          td
-            input.server-password(type="password",placeholder="Password",autofocus)
         tr
           th= t("login:username")
           td
             // NOTE: The pattern and min/max lengths must match the regex in server/authenticate.ts
-            input.username(type="text",placeholder="Your username",spellcheck="false",minlength="3",maxlength="20",pattern="[A-Za-z0-9_-]+",title=t("login:usernamePatternDescription"))
+            input.username(type="text",name="username",placeholder="Your username",spellcheck="false",minlength="3",maxlength="20",pattern="[A-Za-z0-9_-]+",title=t("login:usernamePatternDescription"),autofocus)
+        tr(hidden)
+          th= t("login:password")
+          td
+            input.server-password(name="password",type="password",placeholder="Password")
 
       .buttons
         button.log-in= t("login:logIn")

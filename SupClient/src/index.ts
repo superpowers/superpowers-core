@@ -63,9 +63,8 @@ export function connect(projectId: string, options?: { reconnection?: boolean; }
 
   const namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
-  const supServerAuth = cookies.get("supServerAuth");
   const socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
-    { transports: [ "websocket" ], reconnection: options.reconnection, query: { supServerAuth } }
+    { transports: [ "websocket" ], reconnection: options.reconnection }
   );
 
   socket.on("welcome", (clientId: number, config: { systemId: string; }) => {

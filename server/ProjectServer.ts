@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as async from "async";
 
-import authMiddleware from "./authenticate";
 import RemoteProjectClient from "./RemoteProjectClient";
 import * as schemas from "./schemas";
 import migrateProject from "./migrateProject";
@@ -128,7 +127,6 @@ export default class ProjectServer {
     const serve = (callback: (err: Error) => any) => {
       // Setup the project's namespace
       this.io = globalIO.of(`/project:${this.data.manifest.pub.id}`);
-      this.io.use(authMiddleware);
       this.io.on("connection", this.onAddSocket);
       callback(null);
     };

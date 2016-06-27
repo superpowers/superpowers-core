@@ -1,9 +1,15 @@
 import * as path from "path";
 import * as fs from "fs";
+import * as crypto from "crypto";
 import * as http from "http";
 import * as express from "express";
-import * as cookieParser from "cookie-parser";
 import * as socketio from "socket.io";
+
+import passportMiddleware from "../passportMiddleware";
+import * as bodyParser from "body-parser";
+import * as cookieParser from "cookie-parser";
+import * as expressSession from "express-session";
+import * as passportSocketIo from "passport.socketio";
 
 import * as config from "../config";
 import * as schemas from "../schemas";
@@ -59,11 +65,28 @@ export default function start(serverDataPath: string) {
   // Main HTTP server
   mainApp = express();
 
+  if (typeof config.server.sessionSecret !== "string") throw new Error("serverConfig.sessionSecret is null");
+  const sessionSettings = {
+    name: "supSession",
+    secret: config.server.sessionSecret,
+    store: new expressSession.MemoryStore(),
+    resave: false,
+    saveUninitialized: false
+  };
+
   mainApp.use(cookieParser());
+  mainApp.use(bodyParser.urlencoded({ extended: false }));
   mainApp.use(handleLanguage);
+  mainApp.use(expressSession(sessionSettings));
+  mainApp.use(passportMiddleware.initialize());
+  mainApp.use(passportMiddleware.session());
 
   mainApp.get("/", (req, res) => { res.redirect("/hub"); });
+
+  mainApp.post("/login", passportMiddleware.authenticate("local", { successReturnToOrRedirect: "/", failureRedirect: "/login" }));
   mainApp.get("/login", serveLoginIndex);
+  mainApp.get("/logout", (req, res) => { req.logout(); res.redirect("/"); });
+
   mainApp.get("/hub", enforceAuth, serveHubIndex);
   mainApp.get("/project", enforceAuth, serveProjectIndex);
 
@@ -74,6 +97,12 @@ export default function start(serverDataPath: string) {
   mainHttpServer.on("error", onHttpServerError.bind(null, config.server.mainPort));
 
   io = socketio(mainHttpServer, { transports: [ "websocket" ] });
+  io.use(passportSocketIo.authorize({
+    cookieParser: cookieParser,
+    key: sessionSettings.name,
+    secret: sessionSettings.secret,
+    store: sessionSettings.store
+  }));
 
   // Build HTTP server
   buildApp = express();
@@ -103,6 +132,8 @@ export default function start(serverDataPath: string) {
 }
 
 function loadConfig() {
+  let mustWriteConfig = false;
+
   const serverConfigPath = `${dataPath}/config.json`;
   if (fs.existsSync(serverConfigPath)) {
     config.server = JSON.parse(fs.readFileSync(serverConfigPath, { encoding: "utf8" }));
@@ -112,9 +143,18 @@ function loadConfig() {
       if (config.server[key] == null) config.server[key] = config.defaults[key];
     }
   } else {
-    fs.writeFileSync(serverConfigPath, JSON.stringify(config.defaults, null, 2) + "\n", { encoding: "utf8" });
+    mustWriteConfig = true;
     config.server = {} as any;
     for (const key in config.defaults) config.server[key] = config.defaults[key];
+  }
+
+  if (config.server.sessionSecret == null) {
+    config.server.sessionSecret = crypto.randomBytes(48).toString("hex");
+    mustWriteConfig = true;
+  }
+
+  if (mustWriteConfig) {
+    fs.writeFileSync(serverConfigPath, JSON.stringify(config.server, null, 2) + "\n", { encoding: "utf8" });
   }
 }
 
@@ -137,8 +177,9 @@ function handleLanguage(req: express.Request, res: express.Response, next: Funct
 }
 
 function enforceAuth(req: express.Request, res: express.Response, next: Function) {
-  if (req.cookies["supServerAuth"] == null) {
-    res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl)}`);
+  if (!req.isAuthenticated()) {
+    req.session["returnTo"] = req.originalUrl;
+    res.redirect(`/login`);
     return;
   }
 

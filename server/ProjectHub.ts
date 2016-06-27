@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as async from "async";
 
-import authMiddleware from "./authenticate";
 import ProjectServer from "./ProjectServer";
 import RemoteHubClient from "./RemoteHubClient";
 
@@ -48,7 +47,6 @@ export default class ProjectHub {
 
     const serve = (callback: Function) => {
       this.io = this.globalIO.of("/hub");
-      this.io.use(authMiddleware);
 
       this.io.on("connection", this.onAddSocket);
       callback();

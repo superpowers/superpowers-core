@@ -9,6 +9,7 @@ const config = {
     mainPort: { type: "number" },
     buildPort: { type: "number" },
     password: { type: "string" },
+    sessionSecret: { type: "string" },
     maxRecentBuilds: { type: "number", min: 1 }
   }
 };

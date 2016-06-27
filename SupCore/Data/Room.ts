@@ -52,7 +52,7 @@ export default class Room extends SupData.Base.Hash {
   }
 
   join(client: SupCore.RemoteClient, callback: (err: string, item?: any, index?: number) => any) {
-    const username = (client.socket as any).username;
+    const username = client.socket.request.user.username;
     let item = this.users.byId[username];
     if (item != null) {
       item.connectionCount++;
@@ -74,7 +74,7 @@ export default class Room extends SupData.Base.Hash {
   }
 
   leave(client: SupCore.RemoteClient, callback: (err: string, username?: any) => any) {
-    const username = (client.socket as any).username;
+    const username = client.socket.request.user.username;
     const item = this.users.byId[username];
     if (item.connectionCount > 1) {
       item.connectionCount--;
