@@ -25,8 +25,9 @@ export function open(id: string, state?: {[name: string]: any}) {
   // Just toggle folders
   if (entry.type == null) { entriesTreeView.widget.selectedNodes[0].classList.toggle("collapsed"); return; }
 
-  let tab = tabs.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`) as HTMLLIElement;
+  entriesTreeView.scrollEntryIntoView(id);
 
+  let tab = tabs.tabStrip.tabsRoot.querySelector(`li[data-asset-id='${id}']`) as HTMLLIElement;
   if (tab == null) {
     tab = createTabElement(entry);
     tabs.tabStrip.tabsRoot.appendChild(tab);
@@ -119,6 +120,9 @@ function createTabElement(entry: SupCore.Data.EntryNode) {
   if (entry.type != null) {
     const iconElt = SupClient.html("img", "icon", { parent: tabElt });
     iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+
+    // FIXME: This event isn't emitted on the last opened tab in Chrome. Works fine in Firefox though
+    tabElt.addEventListener("dblclick", () => { entriesTreeView.scrollEntryIntoView(entry.id); });
   }
 
   const tabLabel = SupClient.html("div", "label", { parent: tabElt });

@@ -167,6 +167,13 @@ export function updateSelectedEntry() {
   }
 }
 
+export function scrollEntryIntoView(entryId: string) {
+  const entryElt = widget.treeRoot.querySelector(`[data-id='${entryId}']`) as HTMLLIElement;
+  widget.clearSelection();
+  widget.scrollIntoView(entryElt);
+  widget.addToSelection(entryElt);
+}
+
 function onEntryActivate() {
   const activatedEntry = widget.selectedNodes[0];
   tabsAssets.open(activatedEntry.dataset["id"]);
