@@ -10,7 +10,7 @@ export default class Entries extends SupData.Base.TreeById {
     badges: { type: "array?" },
     dependentAssetIds: { type: "array", items: { type: "string" } },
     revisions: {
-      type: "array",
+      type: "array?",
       items: {
         type: "hash",
         properties: {
