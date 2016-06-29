@@ -71,7 +71,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (name.length === 0) { callback("Entry name cannot be empty"); return; }
     if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
 
-    const entry: SupCore.Data.EntryNode = { id: null, name, type, badges: [], dependentAssetIds: [] };
+    const entry: SupCore.Data.EntryNode = { id: null, name, type };
     if (options == null) options = {};
 
     this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
@@ -102,10 +102,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     if (entryToDuplicate == null) { callback(`Entry ${id} doesn't exist`); return; }
     if (entryToDuplicate.type == null) { callback("Entry to duplicate must be an asset"); return; }
 
-    const entry: SupCore.Data.EntryNode = {
-      id: null, name: newName, type: entryToDuplicate.type,
-      badges: [], dependentAssetIds: []
-    };
+    const entry: SupCore.Data.EntryNode = { id: null, name: newName, type: entryToDuplicate.type };
 
     if (options == null) options = {};
 

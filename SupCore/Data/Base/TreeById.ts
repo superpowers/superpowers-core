@@ -71,7 +71,12 @@ export default class TreeById extends EventEmitter {
     if (parentId != null) siblings = (this.byId[parentId] != null) ? this.byId[parentId].children : null;
     if (siblings == null) { callback(`Invalid parent id: ${parentId}`); return; }
 
-    const missingKeys = Object.keys(this.schema);
+    const missingKeys: string[] = [];
+    for (const key of Object.keys(this.schema)) {
+      const rule = this.schema[key];
+      if (rule.type[rule.type.length - 1] !== "?") missingKeys.push(key);
+    }
+
     for (const key in node) {
       const value = node[key];
       const rule = this.schema[key];
