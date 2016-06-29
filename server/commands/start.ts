@@ -71,7 +71,8 @@ export default function start(serverDataPath: string) {
     secret: config.server.sessionSecret,
     store: new expressSession.MemoryStore(),
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }
   };
 
   mainApp.use(cookieParser());
