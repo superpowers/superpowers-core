@@ -10,7 +10,7 @@ passport.deserializeUser((username, done) => { done(null, { username }); });
 
 const strategy = new LocalStrategy((username, password, done) => {
   if (!usernameRegex.test(username)) return done(null, false, { message: "invalidUsername" });
-  if (password !== serverConfig.password) return done(null, false, { message: "invalidCredentials" });
+  if (serverConfig.password.length > 0 && password !== serverConfig.password) return done(null, false, { message: "invalidCredentials" });
 
   done(null, { username });
 });
