@@ -117,6 +117,7 @@ export default class ProjectServer {
             if (node.type == null) for (const childNode of node.children) walk(childNode);
           };
           for (const node of entriesData) walk(node);
+          nextEntryId++;
 
           entriesData = { nextEntryId, nodes: entriesData };
         }
