@@ -54,7 +54,7 @@
     "resize-handle": "^4.0.0",
     "rimraf": "^2.5.0",
     "socket.io": "^1.4.4",
-    "tab-strip": "^2.2.0",
+    "tab-strip": "^2.3.0",
     "tv4": "^1.2.7",
     "yargs": "^3.32.0",
     "yauzl": "^2.4.1"
