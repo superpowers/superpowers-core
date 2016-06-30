@@ -4,7 +4,13 @@ import * as sidebar from "../sidebar";
 import * as tabs from "./";
 import * as homeTab from "./homeTab";
 
-export let toolsByName: { [name: string]: tabs.EditorManifest };
+type ToolManifest = {
+  title: string;
+  pluginPath: string;
+  pinned: boolean
+};
+
+export let toolsByName: { [name: string]: ToolManifest };
 const toolsElt = document.querySelector(".sidebar .tools ul") as HTMLUListElement;
 
 export function setup(toolPaths: { [name: string]: string; }, callback: Function) {
@@ -13,23 +19,19 @@ export function setup(toolPaths: { [name: string]: string; }, callback: Function
   const pluginsRoot = `/systems/${SupCore.system.id}/plugins`;
 
   async.each(Object.keys(toolPaths), (toolName, cb) => {
+    const toolTitle = SupClient.i18n.t(`${toolPaths[toolName]}:editors.${toolName}.title`);
     const pluginPath = toolPaths[toolName];
 
-    const toolTitle = SupClient.i18n.t(`${toolPaths[toolName]}:editors.${toolName}.title`);
+    toolsByName[toolName] = { title: toolTitle, pluginPath, pinned: false };
+    SupClient.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`, "json", (err: Error, toolManifest: ToolManifest) => {
+      if (err != null) { cb(err); return; }
 
-    SupClient.fetch(`${pluginsRoot}/${pluginPath}/editors/${toolName}/manifest.json`, "json", (err: Error, toolManifest: tabs.EditorManifest) => {
-      if (err != null) {
-        toolsByName[toolName] = { pinned: false, pluginPath, title: toolTitle };
-        cb();
-        return;
-      }
-
-      toolsByName[toolName] = toolManifest;
-      toolsByName[toolName].pluginPath = pluginPath;
-      toolsByName[toolName].title = toolTitle;
+      toolsByName[toolName].pinned = toolManifest.pinned;
       cb();
     });
-  }, () => {
+  }, (err) => {
+    if (err != null) { callback(err); return; }
+
     toolsElt.innerHTML = "";
 
     const toolNames = Object.keys(toolsByName);
@@ -94,7 +96,7 @@ export function open(name: string, state?: { [name: string]: any }) {
   if (name === "main") homeTab.setup(tab);
 }
 
-function createTabElement(toolName: string, tool: tabs.EditorManifest) {
+function createTabElement(toolName: string, tool: ToolManifest) {
   const tabElt = SupClient.html("li", { dataset: { pane: toolName }});
   tabElt.classList.toggle("pinned", tool.pinned);
 

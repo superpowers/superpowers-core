@@ -1,21 +1,41 @@
+import * as async from "async";
+
 import { entries, socket } from "../network";
 import * as entriesTreeView from "../sidebar/entriesTreeView";
 import * as tabs from "./";
 
+type EditorManifest = {
+  title: string;
+  pluginPath: string;
+  // assetType: string; <- for asset editors, soon
+  revision: boolean;
+}
+
 export let assetTypes: string[];
-export let editorsByAssetType: { [assetType: string]: tabs.EditorManifest };
+export let editorsByAssetType: { [assetType: string]: EditorManifest };
 
 export function setup(editorPaths: { [assetType: string]: string; }, callback: Function) {
   editorsByAssetType = {};
-  for (const assetType in editorPaths) {
-    editorsByAssetType[assetType] = {
-      title: SupClient.i18n.t(`${editorPaths[assetType]}:editors.${assetType}.title`),
-      pluginPath: editorPaths[assetType]
-    };
-  }
 
-  assetTypes = Object.keys(editorPaths).sort((a, b) => editorsByAssetType[a].title.localeCompare(editorsByAssetType[b].title));
-  callback();
+  const pluginsRoot = `/systems/${SupCore.system.id}/plugins`;
+
+  async.each(Object.keys(editorPaths), (assetType, cb) => {
+    const toolTitle = SupClient.i18n.t(`${editorPaths[assetType]}:editors.${assetType}.title`);
+    const pluginPath = editorPaths[assetType];
+
+    editorsByAssetType[assetType] = { title: toolTitle, pluginPath, revision: false };
+    SupClient.fetch(`${pluginsRoot}/${pluginPath}/editors/${assetType}/manifest.json`, "json", (err: Error, editorManifest: EditorManifest) => {
+      if (err != null) { cb(err); return; }
+
+      editorsByAssetType[assetType].revision = editorManifest.revision;
+      cb();
+    });
+  }, (err) => {
+    if (err != null) { callback(err); return; }
+
+    assetTypes = Object.keys(editorPaths).sort((a, b) => editorsByAssetType[a].title.localeCompare(editorsByAssetType[b].title));
+    callback();
+  });
 }
 
 export function open(id: string, state?: {[name: string]: any}) {
@@ -34,7 +54,7 @@ export function open(id: string, state?: {[name: string]: any}) {
 
     const paneElt = SupClient.html("div", "pane-container", { parent: tabs.panesElt, dataset: { assetId: id } });
 
-    const revisionOuterContainer = SupClient.html("div", "revision-outer-container", { parent: paneElt });
+    const revisionOuterContainer = SupClient.html("div", "revision-outer-container", { parent: paneElt, hidden: !editorsByAssetType[entry.type].revision });
     const revisionInnerContainer = SupClient.html("div", "revision-inner-container", { parent: revisionOuterContainer });
     SupClient.html("span", { parent: revisionInnerContainer, textContent: SupClient.i18n.t("project:revision.title") });
 

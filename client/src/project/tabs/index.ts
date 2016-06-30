@@ -1,12 +1,5 @@
 import * as TabStrip from "tab-strip";
 
-export interface EditorManifest {
-  title: string;
-  // assetType: string; <- for asset editors, soon
-  pinned?: boolean;
-  pluginPath: string;
-}
-
 const tabsBarElt = document.querySelector(".tabs-bar") as HTMLElement;
 export const tabStrip = new TabStrip(tabsBarElt);
 
