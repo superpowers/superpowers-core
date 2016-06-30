@@ -54,6 +54,8 @@ if (SupApp != null) {
 }
 
 export function runProject(options: { debug: boolean; } = { debug: false }) {
+if (runButton.hidden || runButton.disabled) return;
+
   if (SupApp != null) {
     if (runWindow == null) {
       runWindow = SupApp.openWindow(`${window.location.origin}/build.html`);
