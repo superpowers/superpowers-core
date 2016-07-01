@@ -70,12 +70,9 @@ export default class Entries extends SupData.Base.TreeById {
       node.name = SupData.ensureUniqueName(node.id, node.name, siblings);
 
       if (node.type != null) {
-        node.badges = [];
         const badges = new SupData.Badges(node.badges);
         this.badgesByEntryId[node.id] = badges;
         node.badges = badges.pub;
-
-        node.dependentAssetIds = [];
 
         node.revisions = [];
         this.revisionsByEntryId[node.id] = {};
