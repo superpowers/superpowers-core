@@ -96,7 +96,7 @@ function stopProject() {
 
   // Send a message to ask the window to exit gracefully
   // So that it has a chance to clean things up
-  runWindow.webContents.send("forceQuit");
+  runWindow.webContents.send("sup-app-message-force-quit");
 
   // If it doesn't, destroy it
   runWindowDestroyTimeout = setTimeout(destroyRunWindow, 500);
@@ -116,7 +116,7 @@ function openStartBuildDialog() {
 
     const buildWindow = SupApp.openWindow(`${window.location.origin}/build/?project=${SupClient.query.project}`, { size: { width: 600, height: 150 }, resizable: false });
     buildWindow.webContents.addListener("did-finish-load", () => {
-      buildWindow.webContents.send("build", buildSetup);
+      buildWindow.webContents.send("sup-app-message-build", buildSetup);
     });
   });
 }

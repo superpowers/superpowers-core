@@ -2,10 +2,9 @@ type ChooseFolderCallback = (folder: string) => void;
 type ChooseFileCallback = (filename: string) => void;
 
 declare namespace SupApp {
+  export function onMessage(messageType: string, callback: Function): void;
 
   export function getCurrentWindow(): Electron.BrowserWindow;
-  export function getIpc(): Electron.IpcRenderer;
-
   export function showMainWindow(): void;
 
   export function openWindow(url: string, options?: OpenWindowOptions): Electron.BrowserWindow;
