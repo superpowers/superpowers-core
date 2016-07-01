@@ -98,7 +98,7 @@ export default class Room extends SupData.Base.Hash {
   server_appendMessage(client: SupCore.RemoteClient, text: string, callback: (err: string, entry?: any) => any) {
     if (typeof(text) !== "string" || text.length > 300) { callback("Your message was too long"); return; }
 
-    const entry = { timestamp: Date.now(), author: (client.socket as any).username, text: text };
+    const entry = { timestamp: Date.now(), author: client.socket.request.user.username, text: text };
     this.pub.history.push(entry);
     if (this.pub.history.length > 100) this.pub.history.splice(0, 1);
 
