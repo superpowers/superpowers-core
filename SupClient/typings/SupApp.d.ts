@@ -1,7 +1,8 @@
-type ChooseFolderCallback = (err: string, folder: string) => void;
-// type ChooseFileCallback = (err: string, filename: string) => void;
+type ChooseFolderCallback = (folder: string) => void;
+type ChooseFileCallback = (filename: string) => void;
 
 declare namespace SupApp {
+
   export function getCurrentWindow(): Electron.BrowserWindow;
   export function getIpc(): Electron.IpcRenderer;
 
@@ -25,12 +26,12 @@ declare namespace SupApp {
   }
 
   export function chooseFolder(callback: ChooseFolderCallback): void;
-  // export function chooseFile(callback: ChooseFileCallback): void;
+  export function chooseFile(access: "readWrite"|"execute", callback: ChooseFileCallback): void;
+  export function tryFileAccess(filePath: string, access: "readWrite"|"execute", callback: (err: Error) => void): void;
 
-  export function mkdirp(folderPath: string, callback: (err: any) => void): void;
+  export function mkdirp(folderPath: string, callback: (err: Error) => void): void;
+  export function mktmpdir(callback: (err: Error, path: string) => void): void;
   export function writeFile(filename: string, data: any, callback: (err: NodeJS.ErrnoException) => void): void;
   export function writeFile(filename: string, data: any, options: any, callback: (err: NodeJS.ErrnoException) => void): void;
-  export function spawnChildProcess(filename: string): void;
-
-  // export function publishProject(options: PublishOptions): void;
+  export function spawnChildProcess(filename: string, args: string[], callback: (err: Error, childProcess?: any) => void): void;
 }
