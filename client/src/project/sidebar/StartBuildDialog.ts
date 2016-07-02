@@ -96,12 +96,15 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
   submit() {
     if (!buildPluginsLoaded) return;
 
-    const plugin = SupClient.getPlugins<SupClient.BuildPlugin>("build")[this.selectedPluginName];
+    this.settingsEditorsByName[this.selectedPluginName].getSettings((settings) => {
+      if (settings == null) return;
 
-    super.submit({
-      pluginPath: plugin.path,
-      buildPluginName: this.selectedPluginName,
-      settings: this.settingsEditorsByName[this.selectedPluginName].getSettings()
+      const plugin = SupClient.getPlugins<SupClient.BuildPlugin>("build")[this.selectedPluginName];
+      super.submit({
+        pluginPath: plugin.path,
+        buildPluginName: this.selectedPluginName,
+        settings
+      });
     });
   }
 
