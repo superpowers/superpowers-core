@@ -201,6 +201,17 @@ export default class RemoteProjectClient extends BaseRemoteClient {
               });
             } else cb(null);
           }, (cb) => {
+            // Apply and clear any scheduled saved
+            const scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${entry.id}`];
+            if (scheduledSaveCallback == null) { cb(); return; }
+
+            if (scheduledSaveCallback.timeoutId != null) clearTimeout(scheduledSaveCallback.timeoutId);
+            delete this.server.scheduledSaveCallbacks[`assets:${entry.id}`];
+
+            const assetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
+            asset.save(assetPath, cb);
+
+          }, (cb) => {
             // Delete the entry
             this.server.data.entries.remove(entry.id, (err) => {
               if (err != null) { cb(new Error(err)); return; }
