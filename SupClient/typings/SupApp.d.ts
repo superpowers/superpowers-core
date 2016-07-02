@@ -32,5 +32,6 @@ declare namespace SupApp {
   export function mktmpdir(callback: (err: Error, path: string) => void): void;
   export function writeFile(filename: string, data: any, callback: (err: NodeJS.ErrnoException) => void): void;
   export function writeFile(filename: string, data: any, options: any, callback: (err: NodeJS.ErrnoException) => void): void;
+  export function readDir(folderPath: string, callback: (err: NodeJS.ErrnoException, files: string[]) => void): void;
   export function spawnChildProcess(filename: string, args: string[], callback: (err: Error, childProcess?: any) => void): void;
 }
