@@ -159,11 +159,7 @@ export function updateSelectedEntry() {
   const allButtons = document.querySelectorAll(".entries-buttons button.edit");
   for (let index = 0; index < allButtons.length; index++) {
     const button = allButtons.item(index) as HTMLButtonElement;
-    const disabled = (widget.selectedNodes.length === 0 ||
-      (button.classList.contains("single") && widget.selectedNodes.length !== 1) ||
-      (button.classList.contains("asset-only") && widget.selectedNodes[0].classList.contains("group")));
-
-    button.disabled = disabled;
+    button.disabled = widget.selectedNodes.length === 0 || (button.classList.contains("single") && widget.selectedNodes.length !== 1);
   }
 }
 

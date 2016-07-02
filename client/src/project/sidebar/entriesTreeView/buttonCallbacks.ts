@@ -71,7 +71,6 @@ export function onDuplicateEntryClick() {
 
   const selectedNode = entriesTreeView.widget.selectedNodes[0];
   const entry = entries.byId[selectedNode.dataset["id"]];
-  if (entry.type == null) return;
 
   const options = {
     initialValue: entry.name,
@@ -83,7 +82,8 @@ export function onDuplicateEntryClick() {
   new SupClient.Dialogs.PromptDialog(SupClient.i18n.t("project:treeView.duplicatePrompt"), options, (newName) => {
     if (newName == null) return;
 
-    socket.emit("duplicate:entries", newName, entry.id, SupClient.getTreeViewInsertionPoint(entriesTreeView.widget), onEntryAddedAck);
+    const insertionPoint = entry.type == null ? SupClient.getTreeViewSiblingInsertionPoint(entriesTreeView.widget) : SupClient.getTreeViewInsertionPoint(entriesTreeView.widget);
+    socket.emit("duplicate:entries", newName, entry.id, insertionPoint, onEntryAddedAck);
   });
 }
 

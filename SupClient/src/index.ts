@@ -129,9 +129,14 @@ export function getTreeViewInsertionPoint(treeView: TreeView) {
 
 export function getTreeViewSiblingInsertionPoint(treeView: TreeView) {
   let selectedElt = treeView.selectedNodes[0];
-  let parentId: string;
-  let index: number;
-  parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
+  const parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
+
+  let index = 1;
+  while (selectedElt.previousElementSibling != null) {
+    selectedElt = selectedElt.previousElementSibling as HTMLLIElement;
+    if (selectedElt.tagName === "LI") index++;
+  }
+
   return { parentId, index };
 }
 
