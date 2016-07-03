@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as crypto from "crypto";
 import * as http from "http";
 import * as express from "express";
+import * as url from "url";
 import * as socketio from "socket.io";
 
 import passportMiddleware from "../passportMiddleware";
@@ -112,6 +113,19 @@ export default function start(serverDataPath: string) {
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
 
   buildApp.use("/", express.static(`${__dirname}/../../public`));
+
+  buildApp.use((req, res, next) => {
+    const originValue = req.get("origin");
+    if (originValue == null) { next(); return; }
+
+    const origin = url.parse(originValue);
+    const host = url.parse(`http://${req.get("host")}`);
+
+    if (origin.hostname === host.hostname && origin.port === config.server.mainPort.toString() && host.port === config.server.buildPort.toString()) {
+      res.header("Access-Control-Allow-Origin", originValue);
+    }
+    next();
+  });
 
   buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
     const projectServer = hub.serversById[req.params.projectId];
