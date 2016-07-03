@@ -10,10 +10,10 @@ let socket: SocketIOClient.Socket;
 
 SupApp.onMessage("build", (buildSetup: BuildSetup) => {
   socket = SupClient.connect(SupClient.query.project);
-  socket.on("welcome", () => {
+  socket.on("welcome", (clientId: number, config: { buildPort: number; supportsServerBuild: boolean; }) => {
     loadPlugins(buildSetup, () => {
       const buildPlugin = SupClient.getPlugins<SupClient.BuildPlugin>("build")[buildSetup.buildPluginName];
-      buildPlugin.content.build(socket, buildSetup.settings);
+      buildPlugin.content.build(socket, buildSetup.settings, config.buildPort);
     });
   });
 });
