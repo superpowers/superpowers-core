@@ -119,9 +119,7 @@ export default function start(serverDataPath: string) {
     if (originValue == null) { next(); return; }
 
     const origin = url.parse(originValue);
-    const host = url.parse(`http://${req.get("host")}`);
-
-    if (origin.hostname === host.hostname && origin.port === config.server.mainPort.toString() && host.port === config.server.buildPort.toString()) {
+    if (origin.hostname === req.hostname && origin.port === config.server.mainPort.toString()) {
       res.header("Access-Control-Allow-Origin", originValue);
     }
     next();
