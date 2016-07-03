@@ -85,7 +85,7 @@ export default function start(serverDataPath: string) {
 
   mainApp.get("/", (req, res) => { res.redirect("/hub"); });
 
-  mainApp.post("/login", passportMiddleware.authenticate("local", { successReturnToOrRedirect: "/", failureRedirect: "/login" }));
+  mainApp.post("/login", ensurePasswordFieldIsntEmpty, passportMiddleware.authenticate("local", { successReturnToOrRedirect: "/", failureRedirect: "/login" }));
   mainApp.get("/login", serveLoginIndex);
   mainApp.get("/logout", (req, res) => { req.logout(); res.redirect("/"); });
 
@@ -207,6 +207,12 @@ function serveHubIndex(req: express.Request, res: express.Response) {
 function serveProjectIndex(req: express.Request, res: express.Response) {
   const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
   res.sendFile(path.resolve(`${__dirname}/../../public/project/${localizedIndex}`));
+}
+
+function ensurePasswordFieldIsntEmpty(req: express.Request, res: express.Response, next: Function) {
+  // This is required so that passport-local doesn't reject logins on servers without a password
+  if (req.body.password === "" || req.body.password == null) req.body.password = "_";
+  next();
 }
 
 function serveLoginIndex(req: express.Request, res: express.Response) {
