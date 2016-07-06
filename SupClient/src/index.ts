@@ -114,7 +114,7 @@ export function getTreeViewInsertionPoint(treeView: TreeView) {
     }
     else {
       if (selectedElt.parentElement.classList.contains("children")) {
-        parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
+        parentId = selectedElt.parentElement.previousElementSibling != null ? (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"] : null;
       }
 
       index = 1;
@@ -129,7 +129,7 @@ export function getTreeViewInsertionPoint(treeView: TreeView) {
 
 export function getTreeViewSiblingInsertionPoint(treeView: TreeView) {
   let selectedElt = treeView.selectedNodes[0];
-  const parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
+  const parentId = selectedElt.parentElement.previousElementSibling != null ? (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"] : null;
 
   let index = 1;
   while (selectedElt.previousElementSibling != null) {
