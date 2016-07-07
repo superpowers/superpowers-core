@@ -93,6 +93,7 @@ export default function start(serverDataPath: string) {
   mainApp.get("/project", enforceAuth, serveProjectIndex);
 
   mainApp.get("/build", enforceAuth, serveBuildIndex);
+  mainApp.get("/serverBuild", enforceAuth, serveServerBuildIndex);
 
   mainApp.use("/projects/:projectId/*", serveProjectWildcard);
   mainApp.use("/", express.static(`${__dirname}/../../public`));
@@ -225,6 +226,11 @@ function serveLoginIndex(req: express.Request, res: express.Response) {
 function serveBuildIndex(req: express.Request, res: express.Response) {
   const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
   res.sendFile(path.resolve(`${__dirname}/../../public/build/${localizedIndex}`));
+}
+
+function serveServerBuildIndex(req: express.Request, res: express.Response) {
+  const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
+  res.sendFile(path.resolve(`${__dirname}/../../public/serverBuild/${localizedIndex}`));
 }
 
 function serveProjectWildcard(req: express.Request, res: express.Response) {

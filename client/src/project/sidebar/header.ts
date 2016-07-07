@@ -58,7 +58,7 @@ if (runButton.hidden || runButton.disabled) return;
 
   if (SupApp != null) {
     if (runWindow == null) {
-      runWindow = SupApp.openWindow(`${window.location.origin}/build.html`);
+      runWindow = SupApp.openWindow(`${window.location.origin}/serverBuild`);
       runWindow.setMenuBarVisibility(false);
       runWindow.on("closed", onCloseRunWindow);
 
@@ -68,7 +68,7 @@ if (runButton.hidden || runButton.disabled) return;
     runWindow.focus();
 
     stopButton.disabled = false;
-  } else window.open("/build.html", `player_${SupClient.query.project}`);
+  } else window.open("/serverBuild", `player_${SupClient.query.project}`);
 
   socket.emit("build:project", (err: string, buildId: string) => {
     if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
