@@ -92,6 +92,8 @@ export default function start(serverDataPath: string) {
   mainApp.get("/hub", enforceAuth, serveHubIndex);
   mainApp.get("/project", enforceAuth, serveProjectIndex);
 
+  mainApp.get("/build", enforceAuth, serveBuildIndex);
+
   mainApp.use("/projects/:projectId/*", serveProjectWildcard);
   mainApp.use("/", express.static(`${__dirname}/../../public`));
 
@@ -218,6 +220,11 @@ function ensurePasswordFieldIsntEmpty(req: express.Request, res: express.Respons
 function serveLoginIndex(req: express.Request, res: express.Response) {
   const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
   res.sendFile(path.resolve(`${__dirname}/../../public/login/${localizedIndex}`));
+}
+
+function serveBuildIndex(req: express.Request, res: express.Response) {
+  const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
+  res.sendFile(path.resolve(`${__dirname}/../../public/build/${localizedIndex}`));
 }
 
 function serveProjectWildcard(req: express.Request, res: express.Response) {
