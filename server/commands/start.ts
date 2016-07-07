@@ -35,6 +35,8 @@ let buildHttpServer: http.Server;
 let languageIds: string[];
 let isQuitting = false;
 
+let memoryStore: expressSession.MemoryStore;
+
 function onUncaughtException(err: Error) {
   if (hub != null && hub.loadingProjectFolderName != null) {
     SupCore.log(`The server crashed while loading project "${hub.loadingProjectFolderName}".\n${(err as any).stack}`);
@@ -67,10 +69,20 @@ export default function start(serverDataPath: string) {
   mainApp = express();
 
   if (typeof config.server.sessionSecret !== "string") throw new Error("serverConfig.sessionSecret is null");
+
+  memoryStore = new expressSession.MemoryStore();
+
+  try {
+    const sessionsJSON = fs.readFileSync(`${__dirname}/../../sessions.json`, { encoding: "utf8" });
+    (memoryStore as any).sessions = JSON.parse(sessionsJSON);
+  } catch (err) {
+    // Ignore
+  }
+
   const sessionSettings = {
     name: "supSession",
     secret: config.server.sessionSecret,
-    store: new expressSession.MemoryStore(),
+    store: memoryStore,
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }
@@ -297,8 +309,23 @@ function onExit() {
   SupCore.log("Saving all projects...");
 
   hub.saveAll((err: Error) => {
-    if (err != null) SupCore.log(`Error while exiting:\n${(err as any).stack}`);
-    else SupCore.log("Exited cleanly.");
+    let hadError = false;
+
+    if (err != null) {
+      SupCore.log(`Error while exiting:\n${(err as any).stack}`);
+      hadError = true;
+    }
+
+    SupCore.log("Saving sessions...");
+    try {
+      const sessionsJSON = JSON.stringify((memoryStore as any).sessions, null, 2);
+      fs.writeFileSync(`${__dirname}/../../sessions.json`, sessionsJSON);
+    } catch (err) {
+      SupCore.log(`Failed to save sessions:\n${(err as any).stack}`);
+      hadError = true;
+    }
+
+    if (!hadError) SupCore.log("Exited cleanly.");
     process.exit(0);
   });
 }
