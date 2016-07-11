@@ -1,5 +1,6 @@
 {
-  "welcome": "Привествуем на этом сервере Superpowers!",
+  "title": "Вход",
+  "welcome": "Привествуем на сервере Superpowers!",
   "password": "Пароль сервера",
   "username": "Имя пользователя",
   "usernamePatternDescription": "Допустимые символы: буквы, цифры, тире и подчеркивания.",
