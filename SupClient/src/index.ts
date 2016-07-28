@@ -4,6 +4,7 @@ import * as querystring from "querystring";
 import * as cookies from "js-cookie";
 
 import fetch from "./fetch";
+import loadScript from "./loadScript";
 import readFile from "./readFile";
 import ProjectClient from "./ProjectClient";
 import { setupHotkeys, setupHelpCallback } from "./events";
@@ -17,7 +18,7 @@ import "./events";
 import * as ResizeHandle from "resize-handle";
 import * as TreeView from "dnd-tree-view";
 
-export { fetch, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
+export { fetch, loadScript, readFile, cookies, ProjectClient, setupHotkeys, setupHelpCallback, table, Dialogs, i18n, html };
 export const query = querystring.parse(window.location.search.slice(1));
 
 (Dialogs as any).FindAssetDialog = FindAssetDialog;
@@ -62,9 +63,8 @@ export function connect(projectId: string, options?: { reconnection?: boolean; }
 
   const namespace = (projectId != null) ? `project:${projectId}` : "hub";
 
-  const supServerAuth = cookies.get("supServerAuth");
   const socket = io.connect(`${window.location.protocol}//${window.location.host}/${namespace}`,
-    { transports: [ "websocket" ], reconnection: options.reconnection, query: { supServerAuth } }
+    { transports: [ "websocket" ], reconnection: options.reconnection }
   );
 
   socket.on("welcome", (clientId: number, config: { systemId: string; }) => {
@@ -114,7 +114,7 @@ export function getTreeViewInsertionPoint(treeView: TreeView) {
     }
     else {
       if (selectedElt.parentElement.classList.contains("children")) {
-        parentId = (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"];
+        parentId = selectedElt.parentElement.previousElementSibling != null ? (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"] : null;
       }
 
       index = 1;
@@ -124,6 +124,19 @@ export function getTreeViewInsertionPoint(treeView: TreeView) {
       }
     }
   }
+  return { parentId, index };
+}
+
+export function getTreeViewSiblingInsertionPoint(treeView: TreeView) {
+  let selectedElt = treeView.selectedNodes[0];
+  const parentId = selectedElt.parentElement.previousElementSibling != null ? (selectedElt.parentElement.previousElementSibling as HTMLElement).dataset["id"] : null;
+
+  let index = 1;
+  while (selectedElt.previousElementSibling != null) {
+    selectedElt = selectedElt.previousElementSibling as HTMLLIElement;
+    if (selectedElt.tagName === "LI") index++;
+  }
+
   return { parentId, index };
 }
 
@@ -191,6 +204,10 @@ export function findEntryByPath(entries: any, path: string|string[]) {
 
 export function openEntry(entryId: string, state?: any) {
   window.parent.postMessage({ type: "openEntry", id: entryId, state }, window.location.origin);
+}
+
+export function setEntryRevisionDisabled(disabled: boolean) {
+  window.parent.postMessage({ type: "setEntryRevisionDisabled", id: query.asset, disabled }, window.location.origin);
 }
 
 export function setupCollapsablePane(paneElt: HTMLDivElement, refreshCallback?: Function) {

@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as async from "async";
 
-import authMiddleware from "./authenticate";
 import RemoteProjectClient from "./RemoteProjectClient";
 import * as schemas from "./schemas";
 import migrateProject from "./migrateProject";
@@ -109,13 +108,31 @@ export default class ProjectServer {
         try { entriesData = JSON.parse(entriesJSON); }
         catch (err) { callback(err); return; }
 
+        if (this.data.manifest.migratedFromFormatVersion != null && this.data.manifest.migratedFromFormatVersion <= 5) {
+          let nextEntryId = 0;
+          let walk = (node: SupCore.Data.EntryNode) => {
+            const intNodeId = parseInt(node.id, 10);
+            nextEntryId = Math.max(nextEntryId, intNodeId);
+
+            if (node.type == null) for (const childNode of node.children) walk(childNode);
+          };
+          for (const node of entriesData) walk(node);
+          nextEntryId++;
+
+          entriesData = { nextEntryId, nodes: entriesData };
+        }
+
         try { schemas.validate(entriesData, "projectEntries"); }
         catch (err) { callback(err); return; }
 
-        this.data.entries = new SupCore.Data.Entries(entriesData, this);
+        this.data.entries = new SupCore.Data.Entries(entriesData.nodes, entriesData.nextEntryId, this);
         this.data.entries.on("change", this.onEntriesChanged);
 
-        callback(null);
+        if (this.data.manifest.migratedFromFormatVersion != null && this.data.manifest.migratedFromFormatVersion <= 5) {
+          this.saveEntries(callback);
+        } else {
+          callback(null);
+        }
       });
     };
 
@@ -128,7 +145,6 @@ export default class ProjectServer {
     const serve = (callback: (err: Error) => any) => {
       // Setup the project's namespace
       this.io = globalIO.of(`/project:${this.data.manifest.pub.id}`);
-      this.io.use(authMiddleware);
       this.io.on("connection", this.onAddSocket);
       callback(null);
     };
@@ -265,13 +281,10 @@ export default class ProjectServer {
     const resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
     const saveCallback = item.save.bind(item, resourcePath);
     item.on("change", () => { this.scheduleSave(saveDelay, `resources:${resourceId}`, saveCallback); });
+    item.on("edit", (commandName: string, ...args: any[]) => { this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, commandName, ...args); });
 
     item.on("setAssetBadge", (assetId: string, badgeId: string, type: string, data: any) => { this.setBadge(assetId, badgeId, type, data); });
     item.on("clearAssetBadge", (assetId: string, badgeId: string) => { this.clearBadge(assetId, badgeId); });
-
-    item.on("command", (cmd: string, ...callbackArgs: any[]) => {
-      this.io.in(`sub:resources:${resourceId}`).emit("edit:resources", resourceId, cmd, ...callbackArgs);
-    });
   };
 
   private onAddSocket = (socket: SocketIO.Socket) => {
@@ -318,7 +331,7 @@ export default class ProjectServer {
   };
 
   private saveEntries = (callback: (err: Error) => any) => {
-    const entriesJSON = JSON.stringify(this.data.entries.getForStorage(), null, 2);
+    const entriesJSON = JSON.stringify({ nextEntryId: this.data.entries.nextId, nodes: this.data.entries.getForStorage() }, null, 2);
     fs.writeFile(path.join(this.projectPath, "newEntries.json"), entriesJSON, () => {
       fs.rename(path.join(this.projectPath, "newEntries.json"), path.join(this.projectPath, "entries.json"), callback);
     });

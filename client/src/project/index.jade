@@ -1,12 +1,14 @@
 doctype html
 html
   head
-    title Project — Superpowers
+    meta(charset="utf-8")
+    title #{t("project:title")} — Superpowers
     link(rel="stylesheet",href="/styles/reset.css")
     link(rel="stylesheet",href="/styles/resizeHandle.css")
     link(rel="stylesheet",href="/styles/tabStrip.css")
     link(rel="stylesheet",href="/styles/treeView.css")
     link(rel="stylesheet",href="/styles/dialogs.css")
+    link(rel="stylesheet",href="/styles/properties.css")
     link(rel="stylesheet",href="/project/index.css")
 
   body(hidden)
@@ -15,17 +17,17 @@ html
         .project-icon
           button(title=t("project:header.goToHub")).go-to-hub
         .project-name= t("common:states.loading")
-        .project-buttons
-          button(title=t("project:header.publish"),disabled).publish
-          button(title=t("project:header.stop"),disabled).stop
-          button(title=t("project:header.debug"),disabled).debug
-          button(title=t("project:header.run"),disabled).run
+        .project-buttons(hidden)
+          button(title=t("project:build.title"),disabled).build
+          button(title=t("project:header.stop"),disabled,hidden).stop
+          button(title=t("project:header.debug"),disabled,hidden).debug
+          button(title=t("project:header.run"),disabled,hidden).run
 
       .entries-buttons.flat-button-strip
         button(title=t("project:treeView.newAsset.title"),disabled,data-hotkey="control+N").new-asset
         button(title=t("project:treeView.newFolder.title"),disabled,data-hotkey="control+shift+N").new-folder
         button(title=t("common:actions.rename"),disabled,data-hotkey="F2").rename-entry.single.edit
-        button(title=t("common:actions.duplicate"),disabled,data-hotkey="control+D").duplicate-entry.single.asset-only.edit
+        button(title=t("common:actions.duplicate"),disabled,data-hotkey="control+D").duplicate-entry.single.edit
         button(title=t("project:treeView.trash.title"),disabled,data-hotkey="delete").trash-entry.edit
         button(title=t("common:actions.search"),disabled,data-hotkey="control+O").search
         button(title=t("common:actions.filter"),disabled,data-hotkey="control+I").filter

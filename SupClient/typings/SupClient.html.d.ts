@@ -3,6 +3,7 @@ declare namespace SupClient {
   export function html(tag: "div", options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "span", options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "img", options?: HTMLImageOptions): HTMLImageElement;
+  export function html(tag: "iframe", options?: HTMLImageOptions): HTMLIFrameElement;
   export function html(tag: "button", options?: HTMLInputOptions): HTMLButtonElement;
   export function html(tag: "input", options?: HTMLInputOptions): HTMLInputElement;
   export function html(tag: "label", options?: HTMLLabelOptions): HTMLLabelElement;
@@ -13,11 +14,14 @@ declare namespace SupClient {
   export function html(tag: "ol", options?: HTMLOptions): HTMLOListElement;
   export function html(tag: "ul", options?: HTMLOptions): HTMLUListElement;
   export function html(tag: "li", options?: HTMLOptions): HTMLLIElement;
+  export function html(tag: "a", options?: HTMLOptions): HTMLAnchorElement;
+  export function html(tag: "link", options?: HTMLLinkOptions): HTMLLinkElement;
 
   export function html(tag: string, classList?: string|string[], options?: HTMLOptions): HTMLElement;
   export function html(tag: "div", classList?: string|string[], options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "span", classList?: string|string[], options?: HTMLOptions): HTMLDivElement;
   export function html(tag: "img", classList?: string|string[], options?: HTMLImageOptions): HTMLImageElement;
+  export function html(tag: "iframe", classList?: string|string[], options?: HTMLImageOptions): HTMLIFrameElement;
   export function html(tag: "button", classList?: string|string[], options?: HTMLInputOptions): HTMLButtonElement;
   export function html(tag: "input", classList?: string|string[], options?: HTMLInputOptions): HTMLInputElement;
   export function html(tag: "label", classList?: string|string[], options?: HTMLLabelOptions): HTMLLabelElement;
@@ -28,6 +32,8 @@ declare namespace SupClient {
   export function html(tag: "ol", classList?: string|string[], options?: HTMLOptions): HTMLOListElement;
   export function html(tag: "ul", classList?: string|string[], options?: HTMLOptions): HTMLUListElement;
   export function html(tag: "li", classList?: string|string[], options?: HTMLOptions): HTMLLIElement;
+  export function html(tag: "a", classList?: string|string[], options?: HTMLOptions): HTMLAnchorElement;
+  export function html(tag: "link", classList?: string|string[], options?: HTMLLinkOptions): HTMLLinkElement;
 
   interface HTMLOptions {
     id?: string;
@@ -58,6 +64,12 @@ declare namespace SupClient {
     placeholder?: string;
     pattern?: string;
     checked?: boolean;
+  }
+
+  interface HTMLLinkOptions extends HTMLOptions {
+    rel?: string;
+    href?: string;
+    type?: string;
   }
 
   interface HTMLOptionOptions extends HTMLOptions {

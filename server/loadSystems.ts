@@ -2,12 +2,9 @@ import * as path from "path";
 import * as fs from "fs";
 import * as express from "express";
 import * as async from "async";
-import * as readdirRecursive from "recursive-readdir";
 import getLocalizedFilename from "./getLocalizedFilename";
 
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
-
-export const buildFilesBySystem: { [systemId: string]: string[]; } = {};
 
 export default function(mainApp: express.Express, buildApp: express.Express, callback: Function) {
   async.eachSeries(fs.readdirSync(SupCore.systemsPath), (systemFolderName, cb) => {
@@ -30,38 +27,19 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     if (fs.existsSync(templatesFolder)) templatesList = fs.readdirSync(templatesFolder);
     fs.writeFileSync(`${systemPath}/public/templates.json`, JSON.stringify(templatesList, null, 2));
 
-    // Load plugins
-    const pluginsInfo = loadPlugins(systemId, `${systemPath}/plugins`, mainApp, buildApp);
-
-    const packagePath = `${systemPath}/package.json`;
-    if (fs.existsSync(packagePath)) {
-      const packageJSON = JSON.parse(fs.readFileSync(packagePath, { encoding: "utf8" }));
-      if (packageJSON.superpowers != null && packageJSON.superpowers.publishedPluginBundles != null)
-        pluginsInfo.publishedBundles = pluginsInfo.publishedBundles.concat(packageJSON.superpowers.publishedPluginBundles);
+    // Load server-side system module
+    const systemServerModulePath = `${systemPath}/server`;
+    if (fs.existsSync(systemServerModulePath)) {
+      /* tslint:disable */
+      require(systemServerModulePath);
+      /* tslint:enable */
     }
+
+    // Load plugins
+    const pluginsInfo = SupCore.system.pluginsInfo = loadPlugins(systemId, `${systemPath}/plugins`, mainApp, buildApp);
     fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo, null, 2));
 
-    // Build files
-    const buildFiles: string[] = buildFilesBySystem[systemId] = [ "/SupCore.js" ];
-
-    for (const plugin of pluginsInfo.list) {
-      for (const bundleName of pluginsInfo.publishedBundles) {
-        buildFiles.push(`/systems/${systemId}/plugins/${plugin}/bundles/${bundleName}.js`);
-      }
-    }
-
-    readdirRecursive(`${systemPath}/public`, (err, entries) => {
-      for (const entry of entries) {
-        const relativePath = path.relative(`${systemPath}/public`, entry);
-        if (relativePath === "manifest.json") continue;
-        if (relativePath.slice(0, "templates".length) === "templates") continue;
-        if (relativePath.slice(0, "locales".length) === "templates") continue;
-
-        buildFiles.push(`/systems/${systemId}/${relativePath}`);
-      }
-
-      cb();
-    });
+    cb();
   }, () => {
     const systemsInfo: SupCore.SystemsInfo = { list: Object.keys(SupCore.systems) };
     fs.writeFileSync(`${__dirname}/../public/systems.json`, JSON.stringify(systemsInfo, null, 2));
@@ -73,7 +51,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
 
 function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Express, buildApp: express.Express): SupCore.PluginsInfo {
   const pluginNamesByAuthor: { [author: string]: string[] } = {};
-  const pluginsInfo: SupCore.PluginsInfo = { list: [], paths: { editors: {}, tools: {} }, publishedBundles: [] };
+  const pluginsInfo: SupCore.PluginsInfo = { list: [], paths: { editors: {}, tools: {} } };
 
   let pluginsFolder: string[];
   try { pluginsFolder = fs.readdirSync(pluginsPath); } catch (err) { /* Ignore */ }
@@ -91,13 +69,6 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
       if (!fs.statSync(pluginPath).isDirectory()) continue;
 
       pluginNamesByAuthor[pluginAuthor].push(pluginName);
-
-      const packageData = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
-      if (packageData != null) {
-        const packageJSON = JSON.parse(packageData);
-        if (packageJSON.superpowers != null && packageJSON.superpowers.publishedPluginBundles != null)
-          pluginsInfo.publishedBundles = pluginsInfo.publishedBundles.concat(packageJSON.superpowers.publishedPluginBundles);
-      }
     }
   }
 
@@ -121,6 +92,16 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
       if (fs.existsSync(`${pluginPath}/public/editors`)) {
         const editors = fs.readdirSync(`${pluginPath}/public/editors`);
         editors.forEach((editorName) => {
+          // Ignore folders with no index.html
+          try {
+            const stats = fs.lstatSync(`${pluginPath}/public/editors/${editorName}/index.html`);
+            if (!stats.isFile()) return;
+          }
+          catch (err) {
+            if (err.code === "ENOENT") return;
+            throw err;
+          }
+
           if (SupCore.system.data.assetClasses[editorName] != null) {
             pluginsInfo.paths.editors[editorName] = `${pluginAuthor}/${pluginName}`;
           } else {

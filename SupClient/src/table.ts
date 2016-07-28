@@ -139,9 +139,7 @@ export function appendAssetField(parent: HTMLElement, assetId: string, assetType
     if (assetSubscriber.assetId != null) {
       SupClient.openEntry(assetSubscriber.assetId);
     } else {
-      /* tslint:disable:no-unused-expression */
       new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => { if (assetId != null) assetSubscriber.selectAssetId(assetId); });
-      /* tslint:enable:no-unused-expression */
     }
   });
 
@@ -164,9 +162,7 @@ export function appendAssetField(parent: HTMLElement, assetId: string, assetType
       return;
     }
 
-    /* tslint:disable:no-unused-expression */
     new FindAssetDialog(projectClient.entries, { [assetType]: { pluginPath } }, (assetId) => { if (assetId != null) assetSubscriber.selectAssetId(assetId); });
-    /* tslint:enable:no-unused-expression */
   });
 
   return assetSubscriber;

@@ -34,12 +34,8 @@ function start() {
     if (b === "none") return -1;
     return languageNamesById[a].localeCompare(languageNamesById[b]);
   });
-  for (const languageId of languageIds) {
-    const optionElt = document.createElement("option");
-    optionElt.value = languageId;
-    optionElt.textContent = languageNamesById[languageId];
-    selectLanguageElt.appendChild(optionElt);
-  }
+
+  for (const languageId of languageIds) SupClient.html("option", { parent: selectLanguageElt, value: languageId, textContent: languageNamesById[languageId] });
   selectLanguageElt.value = SupClient.cookies.get("supLanguage");
 
   document.querySelector("select.language").addEventListener("change", (event: any) => {
@@ -168,35 +164,16 @@ function onUpdateProjectIcon(id: string) {
 
 // User interface
 function createProjectElement(manifest: SupCore.Data.ProjectManifestPub) {
-  const liElt = document.createElement("li");
-  liElt.dataset["id"] = manifest.id;
+  const liElt = SupClient.html("li", { dataset: { id: manifest.id} });
 
-  const iconElt = new Image();
-  iconElt.src = `/projects/${manifest.id}/icon.png`;
-  liElt.appendChild(iconElt);
+  SupClient.html("img", { parent: liElt, src: `/projects/${manifest.id}/icon.png` });
 
-  const infoElt = document.createElement("div");
-  infoElt.className = "info";
-  liElt.appendChild(infoElt);
+  const infoElt = SupClient.html("div", "info", { parent: liElt });
+  SupClient.html("div", "name", { parent: infoElt, textContent: manifest.name });
 
-  const nameElt = document.createElement("div");
-  nameElt.className = "name";
-  nameElt.textContent = manifest.name;
-  infoElt.appendChild(nameElt);
-
-  const detailsElt = document.createElement("div");
-  detailsElt.className = "details";
-  infoElt.appendChild(detailsElt);
-
-  const descriptionElt = document.createElement("span");
-  descriptionElt.className = "description";
-  descriptionElt.textContent = manifest.description;
-  detailsElt.appendChild(descriptionElt);
-
-  const projectTypeSpan = document.createElement("span");
-  projectTypeSpan.className = "project-type";
-  projectTypeSpan.textContent = SupClient.i18n.t(`system-${manifest.systemId}:title`);
-  detailsElt.appendChild(projectTypeSpan);
+  const detailsElt = SupClient.html("div", "details", { parent: infoElt });
+  SupClient.html("span", "description", { parent: detailsElt, textContent: manifest.description });
+  SupClient.html("span", "project-type", { parent: detailsElt, textContent: SupClient.i18n.t(`system-${manifest.systemId}:title`) });
 
   return liElt;
 }
@@ -218,9 +195,7 @@ function onProjectActivate() {
 
 let autoOpenProject = true;
 function onNewProjectClick() {
-  /* tslint:disable:no-unused-expression */
   new CreateOrEditProjectDialog(data.systemsById, { autoOpen: autoOpenProject }, (result) => {
-    /* tslint:enable:no-unused-expression */
     if (result == null) return;
     autoOpenProject = result.open;
 
@@ -229,12 +204,7 @@ function onNewProjectClick() {
 }
 
 function onProjectAddedAck(err: string, id: string) {
-  if (err != null) {
-    /* tslint:disable:no-unused-expression */
-    new SupClient.Dialogs.InfoDialog(err);
-    /* tslint:enable:no-unused-expression */
-    return;
-  }
+  if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
 
   ui.projectsTreeView.clearSelection();
 
@@ -251,9 +221,7 @@ function onEditProjectClick() {
   const selectedNode = ui.projectsTreeView.selectedNodes[0];
   const existingProject = data.projects.byId[selectedNode.dataset["id"]];
 
-  /* tslint:disable:no-unused-expression */
   new CreateOrEditProjectDialog(data.systemsById, { existingProject }, (result) => {
-    /* tslint:enable:no-unused-expression */
     if (result == null) return;
     autoOpenProject = result.open;
 
@@ -261,12 +229,7 @@ function onEditProjectClick() {
     if (result.project.icon == null) delete result.project.icon;
 
     socket.emit("edit:projects", existingProject.id, result.project, (err: string) => {
-      if (err != null) {
-        /* tslint:disable:no-unused-expression */
-        new SupClient.Dialogs.InfoDialog(err);
-        /* tslint:enable:no-unused-expression */
-        return;
-      }
+      if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
     });
   });
 }

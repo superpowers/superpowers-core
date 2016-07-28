@@ -34,7 +34,12 @@ export default class ListById extends EventEmitter {
   add(item: any, index: number, callback: (err: string, index?: number) => any) {
     if (item.id != null && this.schema["id"] == null) { callback("Found unexpected id key"); return; }
 
-    const missingKeys = Object.keys(this.schema);
+    const missingKeys: string[] = [];
+    for (const key of Object.keys(this.schema)) {
+      const rule = this.schema[key];
+      if (rule.type[rule.type.length - 1] !== "?") missingKeys.push(key);
+    }
+
     for (const key in item) {
       const value = item[key];
       const rule = this.schema[key];

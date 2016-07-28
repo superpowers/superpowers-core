@@ -52,7 +52,7 @@ export default class Room extends SupData.Base.Hash {
   }
 
   join(client: SupCore.RemoteClient, callback: (err: string, item?: any, index?: number) => any) {
-    const username = (client.socket as any).username;
+    const username = client.socket.request.user.username;
     let item = this.users.byId[username];
     if (item != null) {
       item.connectionCount++;
@@ -74,7 +74,7 @@ export default class Room extends SupData.Base.Hash {
   }
 
   leave(client: SupCore.RemoteClient, callback: (err: string, username?: any) => any) {
-    const username = (client.socket as any).username;
+    const username = client.socket.request.user.username;
     const item = this.users.byId[username];
     if (item.connectionCount > 1) {
       item.connectionCount--;
@@ -98,7 +98,7 @@ export default class Room extends SupData.Base.Hash {
   server_appendMessage(client: SupCore.RemoteClient, text: string, callback: (err: string, entry?: any) => any) {
     if (typeof(text) !== "string" || text.length > 300) { callback("Your message was too long"); return; }
 
-    const entry = { timestamp: Date.now(), author: (client.socket as any).username, text: text };
+    const entry = { timestamp: Date.now(), author: client.socket.request.user.username, text: text };
     this.pub.history.push(entry);
     if (this.pub.history.length > 100) this.pub.history.splice(0, 1);
 

@@ -1,8 +1,9 @@
 {
+  "title": "Хаб",
   "serverAddress": "${hostname} порт: ${port}",
   "newProject": {
     "title": "Новый проект",
-    "prompt": "Введите имя и выберите тип для нового проекта.",
+    "prompt": "Введите имя и выберите тип нового проекта.",
     "namePlaceholder": "Имя проекта",
     "descriptionPlaceholder": "Описание (не обязательно)",
     "emptyProject": {

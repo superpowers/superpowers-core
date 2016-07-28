@@ -1,9 +1,16 @@
 import * as path from "path";
 import * as fs from "fs";
+import * as crypto from "crypto";
 import * as http from "http";
 import * as express from "express";
-import * as cookieParser from "cookie-parser";
+import * as url from "url";
 import * as socketio from "socket.io";
+
+import passportMiddleware from "../passportMiddleware";
+import * as bodyParser from "body-parser";
+import * as cookieParser from "cookie-parser";
+import * as expressSession from "express-session";
+import * as passportSocketIo from "passport.socketio";
 
 import * as config from "../config";
 import * as schemas from "../schemas";
@@ -27,6 +34,8 @@ let buildApp: express.Express = null;
 let buildHttpServer: http.Server;
 let languageIds: string[];
 let isQuitting = false;
+
+let memoryStore: expressSession.MemoryStore;
 
 function onUncaughtException(err: Error) {
   if (hub != null && hub.loadingProjectFolderName != null) {
@@ -59,13 +68,44 @@ export default function start(serverDataPath: string) {
   // Main HTTP server
   mainApp = express();
 
+  if (typeof config.server.sessionSecret !== "string") throw new Error("serverConfig.sessionSecret is null");
+
+  memoryStore = new expressSession.MemoryStore();
+
+  try {
+    const sessionsJSON = fs.readFileSync(`${__dirname}/../../sessions.json`, { encoding: "utf8" });
+    (memoryStore as any).sessions = JSON.parse(sessionsJSON);
+  } catch (err) {
+    // Ignore
+  }
+
+  const sessionSettings = {
+    name: "supSession",
+    secret: config.server.sessionSecret,
+    store: memoryStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }
+  };
+
   mainApp.use(cookieParser());
+  mainApp.use(bodyParser.urlencoded({ extended: false }));
   mainApp.use(handleLanguage);
+  mainApp.use(expressSession(sessionSettings));
+  mainApp.use(passportMiddleware.initialize());
+  mainApp.use(passportMiddleware.session());
 
   mainApp.get("/", (req, res) => { res.redirect("/hub"); });
+
+  mainApp.post("/login", ensurePasswordFieldIsntEmpty, passportMiddleware.authenticate("local", { successReturnToOrRedirect: "/", failureRedirect: "/login" }));
   mainApp.get("/login", serveLoginIndex);
+  mainApp.get("/logout", (req, res) => { req.logout(); res.redirect("/"); });
+
   mainApp.get("/hub", enforceAuth, serveHubIndex);
   mainApp.get("/project", enforceAuth, serveProjectIndex);
+
+  mainApp.get("/build", enforceAuth, serveBuildIndex);
+  mainApp.get("/serverBuild", enforceAuth, serveServerBuildIndex);
 
   mainApp.use("/projects/:projectId/*", serveProjectWildcard);
   mainApp.use("/", express.static(`${__dirname}/../../public`));
@@ -74,6 +114,12 @@ export default function start(serverDataPath: string) {
   mainHttpServer.on("error", onHttpServerError.bind(null, config.server.mainPort));
 
   io = socketio(mainHttpServer, { transports: [ "websocket" ] });
+  io.use(passportSocketIo.authorize({
+    cookieParser: cookieParser,
+    key: sessionSettings.name,
+    secret: sessionSettings.secret,
+    store: sessionSettings.store
+  }));
 
   // Build HTTP server
   buildApp = express();
@@ -82,6 +128,17 @@ export default function start(serverDataPath: string) {
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
 
   buildApp.use("/", express.static(`${__dirname}/../../public`));
+
+  buildApp.use((req, res, next) => {
+    const originValue = req.get("origin");
+    if (originValue == null) { next(); return; }
+
+    const origin = url.parse(originValue);
+    if (origin.hostname === req.hostname && origin.port === config.server.mainPort.toString()) {
+      res.header("Access-Control-Allow-Origin", originValue);
+    }
+    next();
+  });
 
   buildApp.get("/builds/:projectId/:buildId/*", (req, res) => {
     const projectServer = hub.serversById[req.params.projectId];
@@ -103,6 +160,8 @@ export default function start(serverDataPath: string) {
 }
 
 function loadConfig() {
+  let mustWriteConfig = false;
+
   const serverConfigPath = `${dataPath}/config.json`;
   if (fs.existsSync(serverConfigPath)) {
     config.server = JSON.parse(fs.readFileSync(serverConfigPath, { encoding: "utf8" }));
@@ -112,9 +171,18 @@ function loadConfig() {
       if (config.server[key] == null) config.server[key] = config.defaults[key];
     }
   } else {
-    fs.writeFileSync(serverConfigPath, JSON.stringify(config.defaults, null, 2) + "\n", { encoding: "utf8" });
+    mustWriteConfig = true;
     config.server = {} as any;
     for (const key in config.defaults) config.server[key] = config.defaults[key];
+  }
+
+  if (config.server.sessionSecret == null) {
+    config.server.sessionSecret = crypto.randomBytes(48).toString("hex");
+    mustWriteConfig = true;
+  }
+
+  if (mustWriteConfig) {
+    fs.writeFileSync(serverConfigPath, JSON.stringify(config.server, null, 2) + "\n", { encoding: "utf8" });
   }
 }
 
@@ -137,8 +205,9 @@ function handleLanguage(req: express.Request, res: express.Response, next: Funct
 }
 
 function enforceAuth(req: express.Request, res: express.Response, next: Function) {
-  if (req.cookies["supServerAuth"] == null) {
-    res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl)}`);
+  if (!req.isAuthenticated()) {
+    req.session["returnTo"] = req.originalUrl;
+    res.redirect(`/login`);
     return;
   }
 
@@ -155,9 +224,25 @@ function serveProjectIndex(req: express.Request, res: express.Response) {
   res.sendFile(path.resolve(`${__dirname}/../../public/project/${localizedIndex}`));
 }
 
+function ensurePasswordFieldIsntEmpty(req: express.Request, res: express.Response, next: Function) {
+  // This is required so that passport-local doesn't reject logins on servers without a password
+  if (req.body.password === "" || req.body.password == null) req.body.password = "_";
+  next();
+}
+
 function serveLoginIndex(req: express.Request, res: express.Response) {
   const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
   res.sendFile(path.resolve(`${__dirname}/../../public/login/${localizedIndex}`));
+}
+
+function serveBuildIndex(req: express.Request, res: express.Response) {
+  const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
+  res.sendFile(path.resolve(`${__dirname}/../../public/build/${localizedIndex}`));
+}
+
+function serveServerBuildIndex(req: express.Request, res: express.Response) {
+  const localizedIndex = getLocalizedFilename("index.html", req.cookies["supLanguage"]);
+  res.sendFile(path.resolve(`${__dirname}/../../public/serverBuild/${localizedIndex}`));
 }
 
 function serveProjectWildcard(req: express.Request, res: express.Response) {
@@ -224,8 +309,23 @@ function onExit() {
   SupCore.log("Saving all projects...");
 
   hub.saveAll((err: Error) => {
-    if (err != null) SupCore.log(`Error while exiting:\n${(err as any).stack}`);
-    else SupCore.log("Exited cleanly.");
+    let hadError = false;
+
+    if (err != null) {
+      SupCore.log(`Error while exiting:\n${(err as any).stack}`);
+      hadError = true;
+    }
+
+    SupCore.log("Saving sessions...");
+    try {
+      const sessionsJSON = JSON.stringify((memoryStore as any).sessions, null, 2);
+      fs.writeFileSync(`${__dirname}/../../sessions.json`, sessionsJSON);
+    } catch (err) {
+      SupCore.log(`Failed to save sessions:\n${(err as any).stack}`);
+      hadError = true;
+    }
+
+    if (!hadError) SupCore.log("Exited cleanly.");
     process.exit(0);
   });
 }

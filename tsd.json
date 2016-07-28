@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "2e7a477ac2b6471055aa6e0e56b333e8f327d6b7"
+      "commit": "2743ece76d3b31df635afdc39c63ed13acf393ad"
     },
     "async/async.d.ts": {
       "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
@@ -15,7 +15,7 @@
       "commit": "d969b903d1fce89a5e43828ec68458b4f852db4d"
     },
     "express/express.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "2743ece76d3b31df635afdc39c63ed13acf393ad"
     },
     "yargs/yargs.d.ts": {
       "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
@@ -27,7 +27,7 @@
       "commit": "a61199a4684d70334795302f09fb2a6b8ca016db"
     },
     "socket.io/socket.io.d.ts": {
-      "commit": "f2c140074f7c318ae1042284758575fafea6efab"
+      "commit": "993f83fe84ba1381d006772dc3343e1b8d5304f3"
     },
     "recursive-readdir/recursive-readdir.d.ts": {
       "commit": "93bae1bb4c887c1375a4c1f0c3bb849ff06b8ac6"
@@ -39,10 +39,10 @@
       "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
     },
     "serve-static/serve-static.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "2743ece76d3b31df635afdc39c63ed13acf393ad"
     },
     "mime/mime.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "2743ece76d3b31df635afdc39c63ed13acf393ad"
     },
     "js-cookie/js-cookie.d.ts": {
       "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
@@ -51,7 +51,22 @@
       "commit": "16134c168d021351acb1673ee9659644fc58c424"
     },
     "github-electron/github-electron.d.ts": {
-      "commit": "2e7a477ac2b6471055aa6e0e56b333e8f327d6b7"
+      "commit": "2743ece76d3b31df635afdc39c63ed13acf393ad"
+    },
+    "passport-local/passport-local.d.ts": {
+      "commit": "993f83fe84ba1381d006772dc3343e1b8d5304f3"
+    },
+    "passport/passport.d.ts": {
+      "commit": "993f83fe84ba1381d006772dc3343e1b8d5304f3"
+    },
+    "express-serve-static-core/express-serve-static-core.d.ts": {
+      "commit": "2743ece76d3b31df635afdc39c63ed13acf393ad"
+    },
+    "express-session/express-session.d.ts": {
+      "commit": "993f83fe84ba1381d006772dc3343e1b8d5304f3"
+    },
+    "body-parser/body-parser.d.ts": {
+      "commit": "2743ece76d3b31df635afdc39c63ed13acf393ad"
     }
   }
 }

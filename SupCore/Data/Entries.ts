@@ -1,44 +1,64 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import * as SupData from "./index";
-
-interface EntryNode {
-  id: string;
-  name: string;
-  children?: EntryNode[];
-  [name: string]: any;
-
-  type?: string;
-  badges?: SupCore.Data.BadgeItem[];
-  dependentAssetIds?: any[];
-}
 
 export default class Entries extends SupData.Base.TreeById {
   static schema: SupCore.Data.Schema = {
     name: { type: "string", minLength: 1, maxLength: 80, mutable: true },
     type: { type: "string?" },
     badges: { type: "array?" },
-    dependentAssetIds: { type: "array", items: { type: "string" } }
+    dependentAssetIds: { type: "array", items: { type: "string" } },
+    revisions: {
+      type: "array?",
+      items: {
+        type: "hash",
+        properties: {
+          id: { type: "string" },
+          name: { type: "string" }
+        }
+      }
+    },
   };
 
-  pub: EntryNode[];
-  byId: { [id: string]: EntryNode };
-  parentNodesById: { [id: string]: EntryNode };
+  pub: SupCore.Data.EntryNode[];
+  byId: { [id: string]: SupCore.Data.EntryNode };
+  parentNodesById: { [id: string]: SupCore.Data.EntryNode };
 
   badgesByEntryId: { [key: string]: SupData.Badges } = {};
   dependenciesByAssetId: any = {};
+  revisionsByEntryId: { [ id: string ]: { [ revisionId: string]: string; } } = {};
 
-  constructor(pub: EntryNode[], public server?: ProjectServer) {
-    super(pub, Entries.schema);
+  constructor(pub: SupCore.Data.EntryNode[], nextEntryId: number, public server?: ProjectServer) {
+    super(pub, Entries.schema, nextEntryId);
 
-    this.walk((node: EntryNode, parentNode: EntryNode) => {
+    this.walk((node: SupCore.Data.EntryNode, parentNode: SupCore.Data.EntryNode) => {
       if (node.type == null) return;
 
       if (node.badges == null) node.badges = [];
       this.badgesByEntryId[node.id] = new SupData.Badges(node.badges);
       if (node.dependentAssetIds == null) node.dependentAssetIds = [];
+
+      if (this.server != null) {
+        node.revisions = [];
+
+        let revisionList: string[] = [];
+        try { revisionList = fs.readdirSync(path.join(this.server.projectPath, `assetRevisions/${node.id}`)); }
+        catch (e) { /* Ignore if the entry doesn't have any revision */ }
+
+        this.revisionsByEntryId[node.id] = {};
+        for (const fullRevisionPath of revisionList) {
+          const separatorIndex = fullRevisionPath.indexOf("-");
+          const revisionId = fullRevisionPath.slice(0, separatorIndex);
+          const revisionName = fullRevisionPath.slice(separatorIndex + 1);
+          node.revisions.push({ id: revisionId, name: revisionName });
+          this.revisionsByEntryId[node.id][revisionId] = revisionName;
+        }
+      }
     });
   }
 
-  add(node: EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
+  add(node: SupCore.Data.EntryNode, parentId: string, index: number, callback: (err: string, index?: number) => any) {
     const assetClass = this.server.system.data.assetClasses[node.type];
     if (node.type != null && assetClass == null) { callback("Invalid asset type"); return; }
 
@@ -53,6 +73,9 @@ export default class Entries extends SupData.Base.TreeById {
         const badges = new SupData.Badges(node.badges);
         this.badgesByEntryId[node.id] = badges;
         node.badges = badges.pub;
+
+        node.revisions = [];
+        this.revisionsByEntryId[node.id] = {};
       }
       else node.children = [];
 
@@ -60,7 +83,7 @@ export default class Entries extends SupData.Base.TreeById {
     });
   }
 
-  client_add(node: EntryNode, parentId: string, index: number) {
+  client_add(node: SupCore.Data.EntryNode, parentId: string, index: number) {
     super.client_add(node, parentId, index);
     this.badgesByEntryId[node.id] = new SupData.Badges(node.badges);
   }
@@ -80,13 +103,15 @@ export default class Entries extends SupData.Base.TreeById {
   }
 
   remove(id: string, callback: (err: string) => any) {
-    const node = this.byId[id] as EntryNode;
+    const node = this.byId[id] as SupCore.Data.EntryNode;
     if (node == null) { callback(`Invalid node id: ${id}`); return; }
     if (node.type == null && node.children.length !== 0) { callback("The folder must be empty"); return; }
 
+    delete this.badgesByEntryId[id];
+    delete this.revisionsByEntryId[id];
+
     super.remove(id, callback);
   }
-
 
   setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any) {
     if (key === "name") {
@@ -100,12 +125,28 @@ export default class Entries extends SupData.Base.TreeById {
     super.setProperty(id, key, value, callback);
   }
 
-  getForStorage() {
-    const entries: EntryNode[] = [];
-    const entriesById: {[id: string]: EntryNode} = {};
+  save(id: string, revisionName: string, callback: (err: string, revisionId?: string) => void) {
+    const entry = this.byId[id];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
 
-    this.walk((entry: EntryNode, parentEntry: EntryNode) => {
-      const savedEntry: EntryNode = { id: entry.id, name: entry.name, type: entry.type };
+    const revisionId = Date.now().toString();
+    entry.revisions.push({ id: revisionId, name: revisionName });
+    this.revisionsByEntryId[id][revisionId] = revisionName;
+
+    callback(null, revisionId);
+  }
+
+  client_save(id: string, revisionId: string, revisionName: string) {
+    const entry = this.byId[id];
+    entry.revisions.push({ id: revisionId, name: revisionName });
+  }
+
+  getForStorage() {
+    const entries: SupCore.Data.EntryNode[] = [];
+    const entriesById: {[id: string]: SupCore.Data.EntryNode} = {};
+
+    this.walk((entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode) => {
+      const savedEntry: SupCore.Data.EntryNode = { id: entry.id, name: entry.name, type: entry.type };
       if (entry.children != null) savedEntry.children = [];
       entriesById[savedEntry.id] = savedEntry;
 

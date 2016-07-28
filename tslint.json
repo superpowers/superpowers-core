@@ -2,7 +2,7 @@
   "rules": {
     "indent": [ true, "spaces" ],
     "eofline": true,
-    "semicolon": true,
+    "semicolon": [ "always" ],
     "max-line-length": [ true, 200 ],
     "class-name": true,
     "variable-name": true,

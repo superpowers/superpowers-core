@@ -1,7 +1,6 @@
 import BaseRemoteClient from "./BaseRemoteClient";
 import ProjectServer from "./ProjectServer";
 import { server as serverConfig } from "./config";
-import { buildFilesBySystem } from "./loadSystems";
 import * as path from "path";
 import * as fs from "fs";
 import * as mkdirp from "mkdirp";
@@ -16,7 +15,11 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   constructor(server: ProjectServer, id: string, socket: SocketIO.Socket) {
     super(server, socket);
     this.id = id;
-    this.socket.emit("welcome", this.id, { buildPort: serverConfig.buildPort, systemId: this.server.system.id });
+    this.socket.emit("welcome", this.id, {
+      systemId: this.server.system.id,
+      buildPort: serverConfig.buildPort,
+      supportsServerBuild: this.server.system.serverBuild != null
+    });
 
     // Manifest
     this.socket.on("setProperty:manifest", this.onSetManifestProperty);
@@ -27,9 +30,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.socket.on("move:entries", this.onMoveEntry);
     this.socket.on("trash:entries", this.onTrashEntry);
     this.socket.on("setProperty:entries", this.onSetEntryProperty);
+    this.socket.on("save:entries", this.onSaveEntry);
 
     // Assets
     this.socket.on("edit:assets", this.onEditAsset);
+    this.socket.on("restore:assets", this.onRestoreAsset);
+    this.socket.on("getRevision:assets", this.onGetAssetRevision);
 
     // Resources
     this.socket.on("edit:resources", this.onEditResource);
@@ -94,43 +100,57 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
     const entryToDuplicate = this.server.data.entries.byId[id];
     if (entryToDuplicate == null) { callback(`Entry ${id} doesn't exist`); return; }
-    if (entryToDuplicate.type == null) { callback("Entry to duplicate must be an asset"); return; }
-
     const entry: SupCore.Data.EntryNode = {
       id: null, name: newName, type: entryToDuplicate.type,
       badges: [], dependentAssetIds: []
     };
-
     if (options == null) options = {};
 
-    this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
-      if (err != null) { callback(err); return; }
+    if (entryToDuplicate.type == null) {
+      this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
+        if (err != null) { callback(err, null); return; }
+        this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
 
-      const newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
-      this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
-        mkdirp(newAssetPath, () => {
-          referenceAsset.save(newAssetPath, (err: Error) => {
-            this.server.data.assets.release(id, null);
+        async.each(entryToDuplicate.children, (child, cb) => {
+          this.onDuplicateEntry(child.name, child.id, { parentId: entry.id, index: entryToDuplicate.children.indexOf(child) }, (err: string, duplicatedId?: string) => {
+            if(err == null) cb(null);
+            else cb(new Error(err));
+          });
+        }, (err) => {
+          if (err != null) callback(err.message, null);
+          else callback(null, entry.id);
+        });
+      });
+    } else {
+      this.server.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
+        if (err != null) { callback(err); return; }
 
-            if (err != null) {
-              this.server.log(`Failed to save duplicated asset at ${newAssetPath} (duplicating ${id})`);
-              this.server.log(err.toString());
-              this.server.data.entries.remove(entry.id, (err) => { if (err != null) this.server.log(err); });
-              callback("Could not save asset");
-              return;
-            }
+        const newAssetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
+        this.server.data.assets.acquire(id, null, (err, referenceAsset) => {
+          mkdirp(newAssetPath, () => {
+            referenceAsset.save(newAssetPath, (err: Error) => {
+              this.server.data.assets.release(id, null);
 
-            this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
-              this.server.data.assets.release(entry.id, null);
+              if (err != null) {
+                this.server.log(`Failed to save duplicated asset at ${newAssetPath} (duplicating ${id})`);
+                this.server.log(err.toString());
+                this.server.data.entries.remove(entry.id, (err) => { if (err != null) this.server.log(err); });
+                callback("Could not save asset");
+                return;
+              }
 
-              this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
-              newAsset.restore();
-              callback(null, entry.id);
+              this.server.data.assets.acquire(entry.id, null, (err, newAsset) => {
+                this.server.data.assets.release(entry.id, null);
+
+                this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+                newAsset.restore();
+                callback(null, entry.id);
+              });
             });
           });
         });
       });
-    });
+    }
   };
 
   private onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
@@ -194,6 +214,17 @@ export default class RemoteProjectClient extends BaseRemoteClient {
                 cb(null);
               });
             } else cb(null);
+          }, (cb) => {
+            // Apply and clear any scheduled saved
+            const scheduledSaveCallback = this.server.scheduledSaveCallbacks[`assets:${entry.id}`];
+            if (scheduledSaveCallback == null) { cb(); return; }
+
+            if (scheduledSaveCallback.timeoutId != null) clearTimeout(scheduledSaveCallback.timeoutId);
+            delete this.server.scheduledSaveCallbacks[`assets:${entry.id}`];
+
+            const assetPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(entry.id)}`);
+            asset.save(assetPath, cb);
+
           }, (cb) => {
             // Delete the entry
             this.server.data.entries.remove(entry.id, (err) => {
@@ -321,6 +352,37 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     ]);
   };
 
+  private onSaveEntry = (entryId: string, revisionName: string, callback: (err: string) => void) => {
+    if (!this.errorIfCant("editAssets", callback)) return;
+    if (revisionName.length === 0) { callback("Revision name can't be empty"); return; }
+
+    this.server.data.entries.save(entryId, revisionName, (err, revisionId) => {
+      if (err != null) { callback(err); return; }
+
+      this.server.data.assets.acquire(entryId, null, (err, asset) => {
+        if (err != null) { callback("Could not acquire asset"); return; }
+
+        this.server.data.assets.release(entryId, null);
+
+        const revisionPath = path.join(this.server.projectPath, `assetRevisions/${entryId}/${revisionId}-${revisionName}`);
+        mkdirp(revisionPath, (err) => {
+          if (err != null) { callback("Could not write the save"); return; }
+
+          asset.save(revisionPath, (err: Error) => {
+            if (err != null) {
+              callback("Could not write the save");
+              console.log(err);
+              return;
+            }
+
+            this.server.io.in("sub:entries").emit("save:entries", entryId, revisionId, revisionName);
+            callback(null);
+          });
+        });
+      });
+    });
+  };
+
   // Assets
   private onEditAsset = (id: string, command: string, ...args: any[]) => {
     let callback: (err: string, id?: string) => any = null;
@@ -339,19 +401,58 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.server.data.assets.acquire(id, null, (err, asset) => {
       if (err != null) { callback("Could not acquire asset"); return; }
 
-      commandMethod.call(asset, this, ...args, (err: string, ...callbackArgs: any[]) => {
+      commandMethod.call(asset, this, ...args, (err: string, ack: any, ...callbackArgs: any[]) => {
         this.server.data.assets.release(id, null);
         if (err != null) { callback(err); return; }
 
         this.server.io.in(`sub:assets:${id}`).emit("edit:assets", id, command, ...callbackArgs);
-
-        // If the first parameter has an id, send it back to the client
-        // Useful so that they can grab the thing they created
-        // (It's a bit of a hack, but has proven useful)
-        callback(null, (callbackArgs[0] != null) ? callbackArgs[0].id : null);
+        callback(null, ack);
       });
     });
   };
+
+  private onRestoreAsset = (assetId: string, revisionId: string, callback: (err: string) => void) => {
+    const entry = this.server.data.entries.byId[assetId];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    const assetClass = this.server.system.data.assetClasses[entry.type];
+    const newAsset = new assetClass(assetId, null, this.server);
+
+    const revisionName = this.server.data.entries.revisionsByEntryId[assetId][revisionId];
+    const revisionPath = `assetRevisions/${assetId}/${revisionId}-${revisionName}`;
+    newAsset.load(path.join(this.server.projectPath, revisionPath));
+    newAsset.on("load", () => {
+      this.server.data.assets.acquire(assetId, null, (err, asset) => {
+        if (err != null) { callback("Could not acquire asset"); return; }
+
+        this.server.data.assets.release(assetId, null);
+
+        for (const badge of entry.badges) asset.emit("clearBadge", badge.id);
+        entry.badges.length = 0;
+
+        asset.pub = newAsset.pub;
+        asset.setup();
+        asset.restore();
+        asset.emit("change");
+
+        this.server.io.in(`sub:assets:${assetId}`).emit("restore:assets", assetId, entry.type, asset.pub);
+        callback(null);
+      });
+    });
+  };
+
+  private onGetAssetRevision = (assetId: string, revisionId: string, callback: (err: string, assetData?: any) => void) => {
+    const entry = this.server.data.entries.byId[assetId];
+    if (entry == null || entry.type == null) { callback("No such asset"); return; }
+
+    const assetClass = this.server.system.data.assetClasses[entry.type];
+    const revisionAsset = new assetClass(assetId, null, this.server);
+
+    const revisionName = this.server.data.entries.revisionsByEntryId[assetId][revisionId];
+    const revisionPath = `assetRevisions/${assetId}/${revisionId}-${revisionName}`;
+    revisionAsset.load(path.join(this.server.projectPath, revisionPath));
+    revisionAsset.on("load", () => { callback(null, revisionAsset.pub); });
+  }
 
   // Resources
   private onEditResource = (id: string, command: string, ...args: any[]) => {
@@ -369,16 +470,12 @@ export default class RemoteProjectClient extends BaseRemoteClient {
     this.server.data.resources.acquire(id, null, (err, resource) => {
       if (err != null) { callback("Could not acquire resource"); return; }
 
-      commandMethod.call(resource, this, ...args, (err: string, ...callbackArgs: any[]) => {
+      commandMethod.call(resource, this, ...args, (err: string, ack: any, ...callbackArgs: any[]) => {
         this.server.data.resources.release(id, null);
         if (err != null) { callback(err); return; }
 
         this.server.io.in(`sub:resources:${id}`).emit("edit:resources", id, command, ...callbackArgs);
-
-        // If the first parameter has an id, send it back to the client
-        // Useful so that they can grab the thing they created
-        // (It's a bit of a hack, but has proven useful)
-        callback(null, (callbackArgs[0] != null) ? callbackArgs[0].id : null);
+        callback(null, ack);
       });
     });
   };
@@ -410,84 +507,6 @@ export default class RemoteProjectClient extends BaseRemoteClient {
   };
 
   // Project
-  private onBuildProject = (callback: (err: string, buildId?: string, files?: string[]) => any) => {
-    if (!this.errorIfCant("buildProject", callback)) return;
-
-    // this.server.log("Building project...");
-
-    const buildId = this.server.nextBuildId;
-    this.server.nextBuildId++;
-
-    const buildPath = `${this.server.buildsPath}/${buildId}`;
-
-    const exportedProject = { name: this.server.data.manifest.pub.name, assets: this.server.data.entries.getForStorage() };
-
-    try { fs.mkdirSync(this.server.buildsPath); } catch (e) { /* Ignore */ }
-    try { fs.mkdirSync(buildPath); }
-    catch (err) { callback(`Could not create folder for build ${buildId}`); return; }
-
-    fs.mkdirSync(`${buildPath}/assets`);
-
-    const assetIdsToExport: string[] = [];
-    this.server.data.entries.walk((entry: SupCore.Data.EntryNode, parent: SupCore.Data.EntryNode) => {
-      if (entry.type != null) assetIdsToExport.push(entry.id);
-    });
-
-    async.each(assetIdsToExport, (assetId, cb) => {
-      this.server.data.assets.acquire(assetId, null, (err: Error, asset: SupCore.Data.Base.Asset) => {
-        asset.publish(buildPath, (err) => {
-          this.server.data.assets.release(assetId, null);
-          cb();
-        });
-      });
-    }, (err) => {
-      if (err != null) { callback("Could not export all assets"); return; }
-
-      fs.mkdirSync(`${buildPath}/resources`);
-
-      async.each(Object.keys(this.server.system.data.resourceClasses), (resourceId, cb) => {
-        this.server.data.resources.acquire(resourceId, null, (err: Error, resource: SupCore.Data.Base.Resource) => {
-          resource.publish(buildPath, (err) => {
-            this.server.data.resources.release(resourceId, null);
-            cb();
-          });
-        });
-      }, (err) => {
-        if (err != null) { callback("Could not export all resources"); return; }
-
-        const json = JSON.stringify(exportedProject, null, 2);
-        fs.writeFile(`${buildPath}/project.json`, json, { encoding: "utf8" }, (err) => {
-          if (err != null) { callback("Could not save project.json"); return; }
-
-          // this.server.log(`Done generating build ${buildId}...`);
-
-          // Collect paths to all build files
-          let files: string[] = [];
-          recursiveReaddir(buildPath, (err, entries) => {
-            for (const entry of entries) {
-              let relativePath = path.relative(buildPath, entry);
-              if (path.sep === "\\") relativePath = relativePath.replace(/\\/g, "/");
-              files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
-            }
-
-            files = files.concat(buildFilesBySystem[this.server.system.id]);
-            callback(null, buildId.toString(), files);
-
-            // Remove an old build to avoid using too much disk space
-            const buildToDeleteId = buildId - serverConfig.maxRecentBuilds;
-            const buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
-            rimraf(buildToDeletePath, (err) => {
-              if (err != null) {
-                this.server.log(`Failed to remove build ${buildToDeleteId}:`);
-                this.server.log(err.toString());
-              }
-            });
-          });
-        });
-      });
-    });
-  };
-
   private onVacuumProject = (callback: (err: string, deletedCount?: number) => any) => {
     if (!this.errorIfCant("vacuumProject", callback)) return;
 
@@ -508,6 +527,48 @@ export default class RemoteProjectClient extends BaseRemoteClient {
           cb();
         });
       }, () => { callback(null, removedFolderCount); });
+    });
+  };
+
+  private onBuildProject = (callback: (err: string, buildId?: string, files?: string[]) => any) => {
+    if (!this.errorIfCant("buildProject", callback)) return;
+
+    // this.server.log("Building project...");
+
+    const buildId = this.server.nextBuildId;
+    this.server.nextBuildId++;
+
+    const buildPath = `${this.server.buildsPath}/${buildId}`;
+
+    try { fs.mkdirSync(this.server.buildsPath); } catch (e) { /* Ignore */ }
+    try { fs.mkdirSync(buildPath); }
+    catch (err) { callback(`Could not create folder for build ${buildId}`); return; }
+
+    this.server.system.serverBuild(this.server, buildPath, (err) => {
+      if (err != null) { callback(`Failed to create build ${buildId}: ${err}`); return; }
+
+      // Collect paths to all build files
+      let files: string[] = [];
+
+      recursiveReaddir(buildPath, (err, entries) => {
+        for (const entry of entries) {
+          let relativePath = path.relative(buildPath, entry);
+          if (path.sep === "\\") relativePath = relativePath.replace(/\\/g, "/");
+          files.push(`/builds/${this.server.data.manifest.pub.id}/${buildId}/${relativePath}`);
+        }
+
+        callback(null, buildId.toString());
+
+        // Remove an old build to avoid using too much disk space
+        const buildToDeleteId = buildId - serverConfig.maxRecentBuilds;
+        const buildToDeletePath = `${this.server.buildsPath}/${buildToDeleteId}`;
+        rimraf(buildToDeletePath, (err) => {
+          if (err != null) {
+            this.server.log(`Failed to remove build ${buildToDeleteId}:`);
+            this.server.log(err.toString());
+          }
+        });
+      });
     });
   };
 }

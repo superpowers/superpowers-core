@@ -22,9 +22,6 @@ for (const languageCode of languageCodes) {
   tasks.push(`jade-${languageCode}`);
 }
 
-gulp.task("jade-build", () => gulp.src("./src/build.jade").pipe(jade()).pipe(gulp.dest("../public")));
-tasks.push("jade-build");
-
 // Stylus
 const stylus = require("gulp-stylus");
 gulp.task("stylus", () => gulp.src("./src/**/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public")));
@@ -55,7 +52,8 @@ const source = require("vinyl-source-stream");
 gulp.task("browserify-login", [ "typescript" ], () => browserify("./src/login/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/login")));
 gulp.task("browserify-hub", [ "typescript" ], () => browserify("./src/hub/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/hub")));
 gulp.task("browserify-project", [ "typescript" ], () => browserify("./src/project/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/project")));
-tasks.push("browserify-login", "browserify-hub", "browserify-project");
+gulp.task("browserify-build", [ "typescript" ], () => browserify("./src/build/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/build")));
+tasks.push("browserify-login", "browserify-hub", "browserify-project", "browserify-build");
 
 // All
 gulp.task("default", tasks);

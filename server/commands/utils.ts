@@ -36,7 +36,7 @@ export const systemsById: { [id: string]: {
   folderName: string;
   version: string;
   isDev: boolean;
-  plugins: { [author: string]: string[] }
+  plugins: { [authorName: string]: { [pluginName: string]: { version: string; isDev: boolean; } } };
 } } = {};
 
 for (const entry of fs.readdirSync(systemsPath)) {
@@ -44,13 +44,13 @@ for (const entry of fs.readdirSync(systemsPath)) {
   if (!fs.statSync(`${systemsPath}/${entry}`).isDirectory) continue;
 
   let systemId: string;
-  let version: string;
+  let systemVersion: string;
   const systemPath = `${systemsPath}/${entry}`;
   try {
     const packageDataFile = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
     const packageData = JSON.parse(packageDataFile);
     systemId = packageData.superpowers.systemId;
-    version = packageData.version;
+    systemVersion = packageData.version;
   } catch (err) {
     emitError(`Could not load system id from systems/${entry}/package.json:`, err.stack);
   }
@@ -59,7 +59,7 @@ for (const entry of fs.readdirSync(systemsPath)) {
   try { if (!fs.lstatSync(`${systemPath}/.git`).isDirectory()) isDev = false; }
   catch (err) { isDev = false; }
 
-  systemsById[systemId] = { folderName: entry, version, isDev, plugins: {} };
+  systemsById[systemId] = { folderName: entry, version: systemVersion, isDev, plugins: {} };
   let pluginAuthors: string[];
   try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
   if (pluginAuthors == null) continue;
@@ -68,14 +68,27 @@ for (const entry of fs.readdirSync(systemsPath)) {
     if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) continue;
     if (!folderNameRegex.test(pluginAuthor)) continue;
 
-    const pluginNames: string[] = [];
+    systemsById[systemId].plugins[pluginAuthor] = {};
     for (const pluginName of fs.readdirSync(`${systemPath}/plugins/${pluginAuthor}`)) {
       if (!folderNameRegex.test(pluginName)) continue;
-      if (!fs.statSync(`${systemPath}/plugins/${pluginAuthor}/${pluginName}`).isDirectory) continue;
-      pluginNames.push(pluginName);
-    }
-    if (pluginNames.length > 0) {
-      systemsById[systemId].plugins[pluginAuthor] = pluginNames;
+
+      const pluginPath = `${systemPath}/plugins/${pluginAuthor}/${pluginName}`;
+      if (!fs.statSync(pluginPath).isDirectory) continue;
+
+      let pluginVersion: string;
+      try {
+        const packageDataFile = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
+        const packageData = JSON.parse(packageDataFile);
+        pluginVersion = packageData.version;
+      } catch (err) {
+        emitError(`Could not load plugin verson from systems/${entry}/${pluginAuthor}/${pluginName}/package.json:`, err.stack);
+      }
+
+      let isDev = true;
+      try { if (!fs.lstatSync(`${pluginPath}/.git`).isDirectory()) isDev = false; }
+      catch (err) { isDev = false; }
+
+      systemsById[systemId].plugins[pluginAuthor][pluginName] = { version: pluginVersion, isDev };
     }
   }
 }
@@ -96,26 +109,21 @@ export function listAvailablePlugins(registry: Registry, systemId: string) {
   }
 }
 
-const currentRegistryVersion = 1;
+const currentRegistryVersion = 2;
+
+interface ItemData { version: string; downloadURL: string; localVersion: string; isLocalDev: boolean; };
+interface SystemData extends ItemData {
+  plugins: { [authorName: string]: { [pluginName: string]: ItemData; } };
+}
+
 type Registry = {
   version: number;
-  core: {
-    version: string;
-    downloadURL: string;
-    localVersion: string;
-    isLocalDev: boolean;
-  }
-  systems: { [sytemId: string]: {
-    repository: string;
-    version: string;
-    downloadURL: string;
-    localVersion: string;
-    isLocalDev: boolean;
-    plugins: { [author: string]: { [name: string]: string } }
-} } };
+  core: ItemData;
+  systems: { [sytemId: string]: SystemData }
+};
+
 export function getRegistry(callback: (err: Error, registry: Registry) => any) {
-  // FIXME: Use registry.json instead once the next release is out
-  const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers-core/master/registryNext.json";
+  const registryUrl = "https://raw.githubusercontent.com/superpowers/superpowers-registry/master/registry.json";
   const request = https.get(registryUrl, (res) => {
     if (res.statusCode !== 200) {
       callback(new Error(`Unexpected status code: ${res.statusCode}`), null);
@@ -135,64 +143,48 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
       if (registry.version !== currentRegistryVersion) {
         callback(new Error("The registry format has changed. Please update Superpowers."), null);
       } else {
-        getLatestRelease("https://github.com/superpowers/superpowers-core", (version, downloadURL) => {
-          const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
-          const { version: localVersion } = JSON.parse(packageData);
+        const packageData = fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" });
+        const { version: localCoreVersion } = JSON.parse(packageData);
+        registry.core.localVersion = localCoreVersion;
 
-          let isLocalDev = true;
-          try { if (!fs.lstatSync(`${__dirname}/../../.git`).isDirectory()) isLocalDev = false; }
-          catch (err) { isLocalDev = false; }
+        let isLocalCoreDev = true;
+        try { if (!fs.lstatSync(`${__dirname}/../../.git`).isDirectory()) isLocalCoreDev = false; }
+        catch (err) { isLocalCoreDev = false; }
+        registry.core.isLocalDev = isLocalCoreDev;
 
-          registry.core = { version, downloadURL, localVersion, isLocalDev };
+        async.each(Object.keys(registry.systems), (systemId, cb) => {
+          const registrySystem = registry.systems[systemId];
+          const localSystem = systemsById[systemId];
 
-          async.each(Object.keys(registry.systems), (systemId, cb) => {
-            const system = registry.systems[systemId];
-            getLatestRelease(system.repository, (version, downloadURL) => {
-              system.version = version;
-              system.downloadURL = downloadURL;
+          if (localSystem != null) {
+            registrySystem.localVersion = localSystem.version;
+            registrySystem.isLocalDev = localSystem.isDev;
+          } else {
+            registrySystem.isLocalDev = false;
+          }
 
-              if (systemsById[systemId] != null) {
-                system.localVersion = systemsById[systemId].version;
-                system.isLocalDev = systemsById[systemId].isDev;
+          async.each(Object.keys(registrySystem.plugins), (authorName, cb) => {
+            async.each(Object.keys(registrySystem.plugins[authorName]), (pluginName, cb) => {
+              const registryPlugin = registrySystem.plugins[authorName][pluginName];
+              const localPlugin = localSystem != null && localSystem.plugins[authorName] != null ? localSystem.plugins[authorName][pluginName] : null;
+
+              if (localPlugin != null) {
+                registryPlugin.localVersion = localPlugin.version;
+                registryPlugin.isLocalDev = localPlugin.isDev;
               } else {
-                system.isLocalDev = false;
+                registryPlugin.isLocalDev = false;
               }
 
               cb();
-            });
-          }, (err) => { callback(err, registry); });
-        });
+            }, cb);
+          }, cb);
+        }, (err) => { callback(err, registry); });
       }
     });
   });
 
   request.on("error", (err: Error) => {
     callback(err, null);
-  });
-}
-
-export function getLatestRelease(repositoryURL: string, callback: (version: string, downloadURL: string) => void) {
-  const repositoryPath = `${repositoryURL.replace("https://github.com", "/repos")}/releases/latest`;
-  const request = https.get({
-    hostname: "api.github.com",
-    path: repositoryPath,
-    headers: { "user-agent": "Superpowers" }
-  }, (res) => {
-    if (res.statusCode !== 200) {
-      const err = new Error(`Unexpected status code: ${res.statusCode}`);
-      emitError(`Couldn't get latest release from repository at ${repositoryURL}:`, err.stack);
-    }
-
-    let content = "";
-    res.on("data", (chunk: string) => { content += chunk; });
-    res.on("end", () => {
-      const repositoryInfo = JSON.parse(content);
-      callback(repositoryInfo.tag_name.slice(1), repositoryInfo.assets[0].browser_download_url);
-    });
-  });
-
-  request.on("error", (err: Error) => {
-    emitError(`Couldn't get latest release from repository at ${repositoryURL}:`, err.stack);
   });
 }
 
@@ -215,7 +207,7 @@ export function downloadRelease(downloadURL: string, downloadPath: string, callb
     const buffers: Buffer[] = [];
     res.on("data", (data: Buffer) => { buffers.push(data); progress += data.length; onProgress(progress / progressMax); });
     res.on("end", () => {
-      const zipBuffer = Buffer.concat(buffers);
+      let zipBuffer = Buffer.concat(buffers);
 
       yauzl.fromBuffer(zipBuffer, { lazyEntries: true }, (err: Error, zipFile: any) => {
         if (err != null) throw err;
@@ -255,7 +247,8 @@ export function downloadRelease(downloadURL: string, downloadPath: string, callb
         });
 
         zipFile.on("end", () => {
-          callback(null);
+          // NOTE: Necessary to allow manipulating files right after download
+          setTimeout(callback, 100);
         });
       });
     });
@@ -273,7 +266,7 @@ function onProgress(value: number) {
 
 export function emitError(message: string, details?: string) {
   console.error(message);
-  console.error(details);
+  if (details != null) console.error(details);
   if (process != null && process.send != null) process.send({ type: "error", message });
 
   process.exit(1);

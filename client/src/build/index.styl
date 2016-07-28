@@ -1,0 +1,48 @@
+body {
+  display: flex;
+  flex-flow: column;
+  align-items: stretch;
+  padding: 2em;
+  background: #eee;
+}
+
+header {
+  text-transform: uppercase;
+  font-size: 1.5em;
+  margin-bottom: .5em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+progress {
+  width: 100%;
+}
+
+.info {
+  display: flex;
+  margin-top: 1em;
+}
+
+.status {
+  flex: 1;
+  color: #666;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.details {
+  margin-top: 1em;
+  border: 1px solid #aaa;
+  background: #fff;
+  overflow-y: scroll;
+  flex: 1 1 0;
+}
+
+.details ol {
+  list-style: none;
+  margin: 0;
+  padding: 0.5em;
+}

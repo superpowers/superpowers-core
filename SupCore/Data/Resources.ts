@@ -8,7 +8,7 @@ export default class Resources extends SupData.Base.Dictionary {
     super();
   }
 
-  acquire(id: string, owner: any, callback: (err: Error, item: any) => any) {
+  acquire(id: string, owner: SupCore.RemoteClient, callback: (err: Error, item: SupCore.Data.Base.Resource) => void) {
     if (this.server.system.data.resourceClasses[id] == null) { callback(new Error(`Invalid resource id: ${id}`), null); return; }
 
     super.acquire(id, owner, callback);

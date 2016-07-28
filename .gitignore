@@ -3,6 +3,7 @@
 npm-debug.log
 /config.json
 /settings.json
+/sessions.json
 
 SupCore/**/*.js
 SupClient/**/*.js

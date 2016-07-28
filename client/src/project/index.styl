@@ -42,7 +42,7 @@ body { display: flex; }
     width 30px
     height 30px
 
-  .publish { background-image: url(/images/project/publish.svg); }
+  .build { background-image: url(/images/project/build.svg); }
   .stop {background-image: url(/images/project/stop.svg); }
   .debug {background-image: url(/images/project/debug.svg); }
   .run { background-image: url(/images/project/run.svg); }
@@ -186,20 +186,54 @@ body { display: flex; }
     flex: 1;
     display: flex;
 
+    .pane-container {
+      flex: 1;
+      display: flex;
+      flex-flow: column;
+
+      &:not(.active) { display: none; }
+
+      .revision-outer-container {
+        background: rgba(0,0,0,0.1);
+        border-bottom: 1px solid #acacac;
+        padding: 0.2em;
+        display: flex;
+      }
+
+      .revision-inner-container {
+        margin: auto;
+        flex: 1;
+        max-width: 600px;
+        display: flex;
+
+        span {
+          text-transform: uppercase;
+          color: #666;
+          padding: 0.3em;
+          background: #ddd;
+        }
+
+        select {
+          flex: 1;
+          margin: 0 0.5em;
+        }
+      }
+    }
+
     iframe {
       border: none;
       flex: 1;
       // NOTE: Workaround for Microsoft Edge
       // (iframes seem to ignore flex: 1)
-      min-height: 100%;
-      &:not(.active) { display: none; }
+      // Deactivated when revision UI was added
+      // min-height: 100%;
     }
   }
 }
 
 .top .controls {
   border-bottom: 1px solid #aaa;
-  
+
   button {
     width: 30px;
     height: 25px;

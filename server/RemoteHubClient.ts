@@ -99,7 +99,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
         };
 
         const writeEntries = (callback: (err?: NodeJS.ErrnoException) => any) => {
-          const entriesJSON = JSON.stringify([], null, 2);
+          const entriesJSON = JSON.stringify({ nextEntryId: 0, nodes: [] }, null, 2);
           fs.writeFile(path.join(projectPath, "entries.json"), entriesJSON, { encoding: "utf8" }, callback);
         };
 

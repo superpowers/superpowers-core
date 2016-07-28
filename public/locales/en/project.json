@@ -1,8 +1,8 @@
 {
+  "title": "Project",
   "header": {
     "goToHub": "Go to hub",
-    "publish": "Publish project",
-    "publishDisabled": "Publish project (only works from the Superpowers app for technical reasons)",
+    "buildDisabled": "Build project (only works from the Superpowers app for technical reasons)",
     "stop": "Stop project",
     "debug": "Debug project (F6)",
     "run": "Run project (F5)",
@@ -27,11 +27,21 @@
       "initialValue": "Folder"
     },
     "renamePrompt": "Enter a new name for the asset.",
-    "duplicatePrompt": "Enter a name for the new asset.",
+    "duplicatePrompt": "Enter a name for the new asset or folder.",
     "trash": {
       "title": "Trash",
       "prompt": "Are you sure you want to trash the selected entries?",
       "warnBrokenDependency": "${entryName} is used in ${dependentEntryNames}."
     }
+  },
+  "build": {
+    "title": "Build project",
+    "build": "Build"
+  },
+  "revision": {
+    "title": "Revision",
+    "prompt": "Enter a name for the new revision.",
+    "current": "Current",
+    "restoring": "Restoring..."
   }
 }
