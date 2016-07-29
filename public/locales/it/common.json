@@ -2,8 +2,8 @@
   "activeLanguage": "Italiano",
 
   "namePatternDescription": "Non è possibile utilizzare i seguenti caratteri: \\, /, :, *, ?, \", <, >, |, [ and ].",
-  "none": "(NEssuno)",
-  "searchPlaceholder": "Ricerca asset",
+  "none": "(Nessuno)",
+  "searchPlaceholder": "Cerca asset",
 
   "actions": {
     "applyChanges": "Applica le modifiche",
@@ -15,10 +15,13 @@
     "delete": "Elimina",
     "download": "Scarica",
     "duplicate": "Duplica",
+    "export": "Esporta",
     "filter": "Filtra",
+    "import": "Importa",
     "new": "Nuovo",
     "open": "Apri",
     "rename": "Rinomina",
+    "restore": "Ripristina",
     "save": "Salva",
     "search": "Cerca",
     "select": "Seleziona",
@@ -31,14 +34,14 @@
     "paste": "Incolla"
   },
 
-  "states": { 
+  "states": {
     "disabled": "Disabilitato",
     "enabled": "Abilitato",
     "loading": "In caricamento...",
     "connecting": "In connessione...",
     "saving": "Salvataggio..."
   },
-  
+
   "hotkeys": {
     "control": "Ctrl",
     "command": "Cmd",
