@@ -1,10 +1,10 @@
 {
+  "title": "Progetto",
   "header": {
     "goToHub": "Vai all'hub",
-    "publish": "Pubblica progetto",
-    "publishDisabled": "Pibblica il progetto (funziona solamente dall'app Superpowers per motivi tecnici)",
+    "buildDisabled": "Compila il progetto (funziona solamente dall'app Superpowers per motivi tecnici)",
     "stop": "Ferma il progetto",
-    "debug": "Debug del progetto (F6)",
+    "debug": "Debug progetto (F6)",
     "run": "Lancia il progetto (F5)",
     "notifications": {
       "enable": "Clicca per abilitare le notifiche",
@@ -17,21 +17,31 @@
     "newAsset": {
       "title": "Nuovo asset",
       "prompt": "Seleziona il tipo ed inserisci un nome per il nuovo asset.",
-      "placeholder": "Nome dell'asset (opzionate)",
+      "placeholder": "Nome dell'asset (opzionale)",
       "openAfterCreation": "Apri dopo la creazione"
     },
     "newFolder": {
       "title": "Nuova cartella",
-      "prompt": "Inserisci un nume per la nuova cartella.",
+      "prompt": "Inserisci un nome per la nuova cartella.",
       "placeholder": "Nome della cartella",
       "initialValue": "Cartella"
     },
     "renamePrompt": "Inserisci un nuovo nome per l'asset.",
-    "duplicatePrompt": "Inserisci un nome per il nuovo asset.",
+    "duplicatePrompt": "Inserisci un nome per il nuovo asset o cartella.",
     "trash": {
       "title": "Cestino",
       "prompt": "Sei sicuro di voler eliminare gli elementi selezionati?",
       "warnBrokenDependency": "${entryName} è utilizzato in ${dependentEntryNames}."
     }
+  },
+  "build": {
+    "title": "Compila progetto",
+    "build": "Compila"
+  },
+  "revision": {
+    "title": "Revisione",
+    "prompt": "Inserisci un nome per la nuova revisione.",
+    "current": "Corrente",
+    "restoring": "In ripristino..."
   }
 }
