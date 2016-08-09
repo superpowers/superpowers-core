@@ -208,29 +208,18 @@ export default class ProjectServer {
 
   moveAssetFolderToTrash(trashedAssetFolder: string, callback: (err: Error) => any) {
     const assetsPath = path.join(this.projectPath, "assets");
+    const folderPath = path.join(assetsPath, trashedAssetFolder);
+    if (!fs.existsSync(folderPath)) { callback(null); return; }
+
     const trashedAssetsPath = path.join(this.projectPath, "trashedAssets");
 
     fs.mkdir(trashedAssetsPath, (err) => {
       if (err != null && err.code !== "EEXIST") throw err;
 
-      const folderPath = path.join(assetsPath, trashedAssetFolder);
-      let folderNumber = 0;
-
-      let renameSuccessful = false;
-      async.until(() => renameSuccessful, (cb) => {
-        const index = trashedAssetFolder.lastIndexOf("/");
-        if (index !== -1) trashedAssetFolder = trashedAssetFolder.slice(index);
-        let newFolderPath = path.join(trashedAssetsPath, trashedAssetFolder);
-
-        if (folderNumber > 0) newFolderPath = `${newFolderPath} (${folderNumber})`;
-        fs.rename(folderPath, newFolderPath, (err) => {
-          if (err != null) folderNumber++;
-          else renameSuccessful = true;
-
-          if (folderNumber > 1000) callback(new Error(`Couldn't trash asset: ${trashedAssetFolder}`));
-          else cb();
-        });
-      }, callback);
+      const index = trashedAssetFolder.lastIndexOf("/");
+      if (index !== -1) trashedAssetFolder = trashedAssetFolder.slice(index);
+      const newFolderPath = path.join(trashedAssetsPath, trashedAssetFolder);
+      fs.rename(folderPath, newFolderPath, callback);
     });
   }
 
