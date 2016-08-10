@@ -1,6 +1,10 @@
 {
   "serverAddress": "${hostname} sur le port ${port}",
   "newProject": {
+    "noSystemError": {
+      "header": "Impossible de créer un projet",
+      "message": "Ce serveur n'a aucun système installé. Veuillez d'abord en installer un depuis l'onglet de paramètrage du serveur."
+    },
     "title": "Nouveau projet",
     "prompt": "Entrez le nom et choisissez le type du nouveau projet.",
     "namePlaceholder": "Nom du projet",

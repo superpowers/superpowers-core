@@ -195,12 +195,16 @@ function onProjectActivate() {
 
 let autoOpenProject = true;
 function onNewProjectClick() {
-  new CreateOrEditProjectDialog(data.systemsById, { autoOpen: autoOpenProject }, (result) => {
-    if (result == null) return;
-    autoOpenProject = result.open;
+  if (Object.keys(data.systemsById).length === 0) {
+    new SupClient.Dialogs.InfoDialog(SupClient.i18n.t("hub:newProject.noSystemError.message"), { header: SupClient.i18n.t("hub:newProject.noSystemError.header") });
+  } else {
+    new CreateOrEditProjectDialog(data.systemsById, { autoOpen: autoOpenProject }, (result) => {
+      if (result == null) return;
+      autoOpenProject = result.open;
 
-    socket.emit("add:projects", result.project, onProjectAddedAck);
-  });
+      socket.emit("add:projects", result.project, onProjectAddedAck);
+    });
+  }
 }
 
 function onProjectAddedAck(err: string, id: string) {

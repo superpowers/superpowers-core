@@ -2,6 +2,10 @@
   "title": "Hub",
   "serverAddress": "${hostname} on port ${port}",
   "newProject": {
+    "noSystemError": {
+      "header": "Can't create a project",
+      "message": "This server doesn't have any systems installed yet. Please install one from the Server Settings tab first."
+    },
     "title": "New project",
     "prompt": "Enter a name and select a type for the new project.",
     "namePlaceholder": "Project name",
