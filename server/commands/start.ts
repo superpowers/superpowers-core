@@ -55,7 +55,11 @@ export default function start(serverDataPath: string) {
 
   const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" }));
   SupCore.log(`Server v${version} starting...`);
-  fs.writeFileSync(`${__dirname}/../../public/superpowers.json`, JSON.stringify({ version, appApiVersion, hasPassword: config.server.password.length !== 0 }, null, 2));
+  fs.writeFileSync(`${__dirname}/../../public/superpowers.json`, JSON.stringify({
+    serverName: config.server.serverName,
+    version, appApiVersion,
+    hasPassword: config.server.password.length !== 0
+  }, null, 2));
 
   // SupCore
   (global as any).SupCore = SupCore;

@@ -10,7 +10,7 @@ html
   body
     .server-header
       img.server-icon(src="/images/icon.png")
-      .server-name
+      .server-name= t("common:states.connecting")
     .connecting
       p= t("common:states.connecting")
     form.login(method="post",hidden)
