@@ -6,6 +6,7 @@ const config = {
   properties: {
     // Deprecated, use mainPort instead
     port: { type: "number" },
+    serverName: { type: "string" },
     mainPort: { type: "number" },
     buildPort: { type: "number" },
     password: { type: "string" },

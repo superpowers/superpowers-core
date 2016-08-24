@@ -1,4 +1,5 @@
 export interface Config {
+  serverName?: string;
   mainPort: number;
   buildPort: number;
   password: string;
@@ -8,6 +9,7 @@ export interface Config {
 }
 
 export const defaults: Config = {
+  serverName: null,
   mainPort: 4237,
   buildPort: 4238,
   password: "",

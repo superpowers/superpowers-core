@@ -16,8 +16,6 @@ const languageNamesById: { [id: string]: string; } = {};
 if (localStorage.getItem("superpowers-dev-mode") != null) languageNamesById["none"] = "None";
 
 function start() {
-  document.querySelector(".server-name").textContent = SupClient.i18n.t(`hub:serverAddress`, { hostname: window.location.hostname, port });
-
   ui.projectsTreeView = new TreeView(document.querySelector(".projects-tree-view") as HTMLElement, { multipleSelection: false });
   ui.projectsTreeView.on("selectionChange", onProjectSelectionChange);
   ui.projectsTreeView.on("activate", onProjectActivate);
@@ -47,6 +45,7 @@ function start() {
 
   socket.on("error", onConnectionError);
   socket.on("connect", onConnected);
+  socket.on("hubWelcome", onHubWelcome);
   socket.on("disconnect", onDisconnected);
 
   socket.on("add:projects", onProjectAdded);
@@ -105,6 +104,13 @@ function onConnected() {
   buttons[0].disabled = false;
   const noSelection = ui.projectsTreeView.selectedNodes.length === 0;
   for (let i = 1; i < buttons.length; i++) buttons[i].disabled = noSelection;
+}
+
+function onHubWelcome(config: { serverName: string; }) {
+  let serverName = config.serverName;
+  if (serverName == null) serverName = SupClient.i18n.t(`hub:serverAddress`, { hostname: window.location.hostname, port });
+
+  document.querySelector(".server-name").textContent = serverName;
 }
 
 function onDisconnected() {

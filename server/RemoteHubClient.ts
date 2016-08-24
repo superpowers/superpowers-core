@@ -2,6 +2,7 @@ import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
 
+import { server as serverConfig } from "./config";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
@@ -17,6 +18,8 @@ interface AddProjectCallback { (err: string, projectId?: string): any; };
 export default class RemoteHubClient extends BaseRemoteClient {
   constructor(public server: ProjectHub, socket: SocketIO.Socket) {
     super(server, socket);
+
+    this.socket.emit("hubWelcome", { serverName: serverConfig.serverName });
 
     // Projects
     this.socket.on("add:projects", this.onAddProject);
