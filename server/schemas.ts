@@ -4,8 +4,6 @@ import * as tv4 from "tv4";
 const config = {
   type: "object",
   properties: {
-    // Deprecated, use mainPort instead
-    port: { type: "number" },
     serverName: { type: "string" },
     mainPort: { type: "number" },
     buildPort: { type: "number" },
