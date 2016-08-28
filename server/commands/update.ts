@@ -1,5 +1,6 @@
 import * as rimraf from "rimraf";
 import * as fs from "fs";
+import * as path from "path";
 
 import * as utils from "./utils";
 
@@ -7,7 +8,7 @@ export default function update(systemId: string, pluginFullName: string) {
   // Update core
   if (systemId === "core" && pluginFullName == null) {
     let isDevFolder = true;
-    try { fs.readdirSync(`${__dirname}/../../.git`); } catch (err) { isDevFolder = false; }
+    try { fs.readdirSync(path.resolve(`${__dirname}/../../.git`)); } catch (err) { isDevFolder = false; }
     if (isDevFolder) utils.emitError(`Core is a development version.`);
 
     if (utils.downloadURL != null) {
@@ -102,8 +103,8 @@ export default function update(systemId: string, pluginFullName: string) {
 function updateCore(downloadURL: string) {
   console.log("Updating the server...");
 
-  const corePath = `${__dirname}/../..`;
-  const newCorePath = `${__dirname}/../../../core.new`;
+  const corePath = path.resolve( `${__dirname}/../..`);
+  const newCorePath = path.resolve(`${__dirname}/../../../core.new`);
 
   utils.downloadRelease(downloadURL, newCorePath, (err) => {
     if (err != null) utils.emitError("Failed to update the core.", err);
