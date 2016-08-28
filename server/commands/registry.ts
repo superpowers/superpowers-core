@@ -2,9 +2,13 @@ import * as utils from "./utils";
 
 export default function showRegistry() {
   utils.getRegistry((err, registry) => {
-    if (process != null && process.send != null) {
-      process.send({ type: "registry", registry });
+    if (err != null) {
+      if (process != null && process.send != null) process.send({ type: "registry", error: err.message });
+      console.log("Could not get registry:");
+      throw err;
     }
+
+    if (process != null && process.send != null) process.send({ type: "registry", registry });
 
     console.log(`Core - Latest: v${registry.core.version} / Installed: v${registry.core.localVersion}`);
     console.log("");
