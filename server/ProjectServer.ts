@@ -49,7 +49,7 @@ export default class ProjectServer {
 
         this.system = SupCore.systems[this.data.manifest.pub.systemId];
         if (this.system == null) {
-          callback(new Error(`The system ${this.data.manifest.pub.systemId} is not installed.`));
+          callback(new Error(`The system ${this.data.manifest.pub.systemId} is not installed. Run "node server install ${this.data.manifest.pub.systemId}" to install it.`));
         } else {
           this.buildsPath = path.join(buildsPath, this.data.manifest.pub.id);
           callback(null);
