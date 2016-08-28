@@ -103,7 +103,7 @@ export default function update(systemId: string, pluginFullName: string) {
 function updateCore(downloadURL: string) {
   console.log("Updating the server...");
 
-  const corePath = path.resolve( `${__dirname}/../..`);
+  const corePath = path.resolve(`${__dirname}/../..`);
   const newCorePath = path.resolve(`${__dirname}/../../../core.new`);
 
   utils.downloadRelease(downloadURL, newCorePath, (err) => {
