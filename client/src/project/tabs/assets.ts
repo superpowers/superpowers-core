@@ -80,10 +80,18 @@ export function open(id: string, state?: {[name: string]: any}) {
     saveOrRestoreButtonElt.addEventListener("click", () => {
       if (selectElt.value === "current") {
         const date = new Date();
+
+      const defaultRevisionName =
+          date.getUTCFullYear() + "-" +
+          `00${date.getUTCMonth() + 1}`.slice(-2) + "-" +
+          `00${date.getUTCDate()}`.slice(-2) + " " +
+          `00${date.getUTCHours()}`.slice(-2) + "-" +
+          `00${date.getUTCMinutes() + 1}`.slice(-2);
+
         const options = {
           header: SupClient.i18n.t("project:revision.title"),
           validationLabel: SupClient.i18n.t("common:actions.save"),
-          initialValue: `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDay()} ${date.getUTCHours()}h${date.getUTCMinutes()}`,
+          initialValue: defaultRevisionName,
           title: SupClient.i18n.t("common:namePatternDescription"),
           pattern: SupClient.namePattern
         };
