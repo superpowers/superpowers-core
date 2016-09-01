@@ -87,8 +87,6 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
     if (navigator.platform === "Win32") buttonsElt.insertBefore(this.validateButtonElt, cancelButtonElt);
     else buttonsElt.appendChild(this.validateButtonElt);
 
-    this.treeView.treeRoot.focus();
-
     if (!buildPluginsLoaded) loadBuildPlugins(this.onBuildPluginsLoaded);
     else this.onBuildPluginsLoaded();
   }
@@ -130,6 +128,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
     this.treeView.addToSelection(this.treeView.treeRoot.querySelector(`li[data-build-plugin="${this.selectedPluginName}"]`) as HTMLLIElement);
     this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
     this.validateButtonElt.disabled = false;
+    this.validateButtonElt.focus();
   };
 
   private onTreeViewSelectionChange = () => {
