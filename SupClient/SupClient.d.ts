@@ -65,11 +65,16 @@ declare namespace SupClient {
     options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
     export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement, value: string, label: string): HTMLOptionElement;
     export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupElement, label: string): HTMLOptGroupElement;
-    export function appendColorField(parent: HTMLElement, value: string): { textField: HTMLInputElement; pickerField: HTMLInputElement; };
     export function appendSliderField(parent: HTMLElement, value: number|string,
     options?: SliderOptions): { sliderField: HTMLInputElement; numberField: HTMLInputElement; };
 
-    export function appendAssetField(parent: HTMLElement, assetId: string, assetType: string, projectClient: SupClient.ProjectClient): AssetFieldSubscriber;
+    export class ColorField extends SupCore.EventEmitter {
+      constructor(textField: HTMLInputElement, pickerField: HTMLInputElement);
+      setValue(color: string) : void;
+      setDisabled(disabled: boolean): void;
+    }
+    export function appendColorField(parent: HTMLElement, value: string): ColorField;
+
     class AssetFieldSubscriber extends SupCore.EventEmitter {
       entries: SupCore.Data.Entries;
 
@@ -78,6 +83,7 @@ declare namespace SupClient {
       selectAssetId(assetId: string): void;
       onChangeAssetId(assetId: string): void;
     }
+    export function appendAssetField(parent: HTMLElement, assetId: string, assetType: string, projectClient: SupClient.ProjectClient): AssetFieldSubscriber;
   }
 
   namespace Dialogs {

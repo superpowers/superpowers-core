@@ -87,17 +87,6 @@ export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupEl
   return html("optgroup", { parent, label, textContent: label });
 }
 
-export function appendColorField(parent: HTMLElement, value: string) {
-  const colorParent = html("div", "inputs", { parent });
-
-  const textField = appendTextField(colorParent, value);
-  textField.classList.add("color");
-
-  const pickerField = html("input", { parent: colorParent, type: "color", value: `#${value}` });
-
-  return { textField, pickerField };
-}
-
 interface SliderOptions extends NumberOptions { sliderStep?: number|string; }
 
 export function appendSliderField(parent: HTMLElement, value: number|string, options?: SliderOptions) {
@@ -113,6 +102,90 @@ export function appendSliderField(parent: HTMLElement, value: number|string, opt
   const numberField = appendNumberField(sliderParent, value, options);
 
   return { sliderField, numberField };
+}
+
+class ColorField extends EventEmitter {
+  constructor(private textField: HTMLInputElement, private pickerField: HTMLInputElement, color: string) {
+    super();
+
+    this.textField.addEventListener("change", (event: any) => {
+      const color = event.target.value as string;
+      if (color.length !== 6) return;
+
+      this.pickerField.value = `#${color}`;
+
+      this.emit("change", color);
+    });
+
+    this.pickerField.addEventListener("change", (event: any) => {
+      const color = event.target.value.slice(1) as string;
+      this.textField.value = color;
+
+      this.emit("change", color);
+    });
+
+    this.setValue(color);
+  }
+
+  setValue(color: string) {
+    this.textField.value = (color !== null) ? color : "";
+    this.pickerField.value = (color !== null) ? `#${color}` : "#000000";
+  }
+
+  setDisabled(disabled: boolean) {
+    this.textField.disabled = disabled;
+    this.pickerField.disabled = disabled;
+  }
+}
+
+export function appendColorField(parent: HTMLElement, color: string) {
+  const colorParent = html("div", "inputs", { parent });
+
+  const textField = appendTextField(colorParent, "");
+  textField.classList.add("color");
+
+  const pickerField = html("input", { parent: colorParent, type: "color" }) as HTMLInputElement;
+
+  return new ColorField(textField, pickerField, color);
+}
+
+class AssetFieldSubscriber extends EventEmitter {
+  entries: SupCore.Data.Entries;
+
+  constructor(public assetId: string, private projectClient: SupClient.ProjectClient) {
+    super();
+    this.projectClient.subEntries(this);
+  }
+
+  destroy() {
+    this.projectClient.unsubEntries(this);
+  }
+
+  onEntriesReceived(entries: SupCore.Data.Entries) {
+    this.entries = entries;
+    setTimeout(() => { this.emit("change", this.assetId); }, 1);
+  }
+
+  onEntryAdded(entry: any, parentId: string, index: number) { /* Nothing to do here */ }
+  onEntryMoved(id: string, parentId: string, index: number) {
+    this.emit("change", this.assetId);
+  }
+  onSetEntryProperty(id: string, key: string, value: any) {
+    if (key === "name") this.emit("change", this.assetId);
+  }
+  onEntryTrashed(id: string) {
+    if (id === this.assetId) this.emit("change", this.assetId);
+  }
+
+  selectAssetId(assetId: string) {
+    this.onChangeAssetId(assetId);
+    this.emit("select", assetId);
+  }
+
+  onChangeAssetId(assetId: string) {
+    this.assetId = assetId;
+    this.emit("change", this.assetId);
+  }
 }
 
 export function appendAssetField(parent: HTMLElement, assetId: string, assetType: string, projectClient: SupClient.ProjectClient) {
@@ -166,43 +239,4 @@ export function appendAssetField(parent: HTMLElement, assetId: string, assetType
   });
 
   return assetSubscriber;
-}
-
-class AssetFieldSubscriber extends EventEmitter {
-  entries: SupCore.Data.Entries;
-
-  constructor(public assetId: string, private projectClient: SupClient.ProjectClient) {
-    super();
-    this.projectClient.subEntries(this);
-  }
-
-  destroy() {
-    this.projectClient.unsubEntries(this);
-  }
-
-  onEntriesReceived(entries: SupCore.Data.Entries) {
-    this.entries = entries;
-    setTimeout(() => { this.emit("change", this.assetId); }, 1);
-  }
-
-  onEntryAdded(entry: any, parentId: string, index: number) { /* Nothing to do here */ }
-  onEntryMoved(id: string, parentId: string, index: number) {
-    this.emit("change", this.assetId);
-  }
-  onSetEntryProperty(id: string, key: string, value: any) {
-    if (key === "name") this.emit("change", this.assetId);
-  }
-  onEntryTrashed(id: string) {
-    if (id === this.assetId) this.emit("change", this.assetId);
-  }
-
-  selectAssetId(assetId: string) {
-    this.onChangeAssetId(assetId);
-    this.emit("select", assetId);
-  }
-
-  onChangeAssetId(assetId: string) {
-    this.assetId = assetId;
-    this.emit("change", this.assetId);
-  }
 }
