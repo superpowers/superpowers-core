@@ -215,10 +215,12 @@ export function downloadRelease(downloadURL: string, downloadPath: string, callb
         progress = zipFile.entryCount;
         progressMax = zipFile.entryCount * 2;
 
-        const rootFolderName = path.parse(downloadURL).name;
+        let rootFolderName: string;
 
         zipFile.readEntry();
         zipFile.on("entry", (entry: any) => {
+          if (rootFolderName == null) rootFolderName = entry.fileName;
+
           if (entry.fileName.indexOf(rootFolderName) !== 0) throw new Error(`Found file outside of root folder: ${entry.fileName} (${rootFolderName})`);
 
           const filename = path.join(downloadPath, entry.fileName.replace(rootFolderName, ""));
