@@ -20,5 +20,9 @@
     "prompt": "Éditez les informations du projet."
   },
   "openProject": "Ouvrir le projet",
+  "importProject": {
+    "title": "Importez un projet",
+    "prompt": "Importez un projet en archive ZIP"
+  },
   "language": "Langue"
 }

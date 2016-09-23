@@ -6,6 +6,10 @@ import { server as serverConfig } from "./config";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
+/* tslint:disable */
+const unzip = require("unzip");
+/* tslint:enable */
+
 interface ProjectDetails {
   name: string;
   description: string;
@@ -14,6 +18,10 @@ interface ProjectDetails {
   icon: Buffer;
 }
 interface AddProjectCallback { (err: string, projectId?: string): any; };
+interface ImportProjectData {
+  name: string;
+  data: string;
+};
 
 export default class RemoteHubClient extends BaseRemoteClient {
   constructor(public server: ProjectHub, socket: SocketIO.Socket) {
@@ -24,6 +32,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     // Projects
     this.socket.on("add:projects", this.onAddProject);
     this.socket.on("edit:projects", this.onEditProject);
+    this.socket.on("import:projects", this.onImportProject);
   }
 
   // TODO: Implement roles and capabilities
@@ -190,4 +199,22 @@ export default class RemoteHubClient extends BaseRemoteClient {
       else callback(null);
     });
   };
+
+  private onImportProject =  (data: ImportProjectData) => {
+
+    fs.writeFile(path.join(this.server.projectsPath, "project.zip"), data.data as string, (err) => {
+      if (err) return console.log(err);
+
+      fs.createReadStream(path.join(this.server.projectsPath, "project.zip"))
+        .pipe(unzip.Parse())
+        .on("entry", (entry: any) => {
+          if (entry.type === "Directory") {
+            fs.mkdir(path.join(this.server.projectsPath, entry.path));
+          }
+          else {
+            entry.pipe(fs.createWriteStream(path.join(this.server.projectsPath, entry.path)));
+          }
+        });
+    });
+  }
 }

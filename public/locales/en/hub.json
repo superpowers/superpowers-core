@@ -21,5 +21,9 @@
     "prompt": "Edit the project's details."
   },
   "openProject": "Open project",
+  "importProject": {
+    "title": "Import project",
+    "prompt": "Import a project from a ZIP archive"
+  },
   "language": "Language"
 }

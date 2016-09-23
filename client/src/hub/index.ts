@@ -23,6 +23,9 @@ function start() {
   document.querySelector(".projects-buttons .new-project").addEventListener("click", onNewProjectClick);
   document.querySelector(".projects-buttons .open-project").addEventListener("click", onProjectActivate);
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
+  let importedFile = document.querySelector("input.file-select") as HTMLInputElement;
+  importedFile.addEventListener("change", onImportProjectClick);
+  document.querySelector(".projects-buttons .import-project").addEventListener("click", () => { importedFile.click(); });
 
   const selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
   const languageIds = Object.keys(languageNamesById);
@@ -102,8 +105,9 @@ function onConnected() {
 
   const buttons = document.querySelectorAll(".projects-buttons button") as NodeListOf<HTMLButtonElement>;
   buttons[0].disabled = false;
+  buttons[1].disabled = false;
   const noSelection = ui.projectsTreeView.selectedNodes.length === 0;
-  for (let i = 1; i < buttons.length; i++) buttons[i].disabled = noSelection;
+  for (let i = 2; i < buttons.length; i++) buttons[i].disabled = noSelection;
 }
 
 function onHubWelcome(config: { serverName: string; }) {
@@ -242,4 +246,16 @@ function onEditProjectClick() {
       if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
     });
   });
+}
+
+function onImportProjectClick(event: Event) {
+  let target = event.target as HTMLInputElement;
+  if (target.files.length === 0) return;
+
+  let reader = new FileReader();
+
+  reader.onload = function(evnt) {
+    socket.emit("import:projects", {name: target.files[0].name.split(".")[0], data: (evnt.target as any).result});
+  };
+  reader.readAsArrayBuffer(target.files[0]);
 }

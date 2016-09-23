@@ -17,8 +17,12 @@ html
     .projects-header
       .projects-buttons.button-strip
         button(disabled).new-project= t("hub:newProject.title")
+        button(disabled).import-project= t("hub:importProject.title")
         button(disabled).open-project= t("hub:openProject")
         button(disabled).edit-project= t("hub:editDetails.title")
+
+        form(style="display: none")
+          input.file-select(type="file", accept="application.zip")
 
       .language-container
         span= t("hub:language")
