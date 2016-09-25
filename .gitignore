@@ -4,6 +4,7 @@ npm-debug.log
 /config.json
 /settings.json
 /sessions.json
+/authorizationsByOrigin.json
 
 SupCore/**/*.js
 SupClient/**/*.js
