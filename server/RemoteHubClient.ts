@@ -202,19 +202,26 @@ export default class RemoteHubClient extends BaseRemoteClient {
 
   private onImportProject =  (data: ImportProjectData) => {
 
-    fs.writeFile(path.join(this.server.projectsPath, "project.zip"), data.data as string, (err) => {
-      if (err) return console.log(err);
+  fs.writeFile(path.join(this.server.projectsPath, "project.zip"), data.data as string, (err) => {
+    if (err) return console.log(err);
 
-      fs.createReadStream(path.join(this.server.projectsPath, "project.zip"))
-        .pipe(unzip.Parse())
-        .on("entry", (entry: any) => {
-          if (entry.type === "Directory") {
-            fs.mkdir(path.join(this.server.projectsPath, entry.path));
-          }
-          else {
-            entry.pipe(fs.createWriteStream(path.join(this.server.projectsPath, entry.path)));
+    fs.createReadStream(path.join(this.server.projectsPath, "project.zip"))
+      .pipe(unzip.Parse())
+      .on("entry", (entry: any) => {
+        if (entry.type === "Directory") {
+          fs.mkdir(path.join(this.server.projectsPath, entry.path));
+        }
+        else {
+          entry.pipe(fs.createWriteStream(path.join(this.server.projectsPath, entry.path)));
+        }
+      })
+      .on("close", () => {
+        this.server.loadProject(data.name, (err: Error) => {
+          if (err) {
+            console.log(err);
           }
         });
-    });
+      });
+  });
   }
 }
