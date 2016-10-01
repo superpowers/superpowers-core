@@ -203,6 +203,7 @@ export default class TreeById extends EventEmitter {
     let rule = this.schema[parts[0]];
     for (const part of parts.slice(1)) {
       rule = rule.properties[part];
+      if (rule == null) break;
       if (rule.type === "any") break;
     }
 
