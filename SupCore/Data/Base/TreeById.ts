@@ -192,8 +192,6 @@ export default class TreeById extends EventEmitter {
     });
   }
 
-  // clear() {}
-
   setProperty(id: string, path: string, value: any, callback: (err: string, value?: any) => any) {
     let node = this.byId[id];
     if (node == null) { callback(`Invalid node id: ${id}`); return; }

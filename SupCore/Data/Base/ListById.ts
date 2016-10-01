@@ -116,8 +116,6 @@ export default class ListById extends EventEmitter {
     delete this.byId[id];
   }
 
-  // clear: ->
-
   setProperty(id: string, path: string, value: number|string|boolean, callback: (err: string, value?: any) => any) {
     let item = this.byId[id];
     if (item == null) { callback(`Invalid item id: ${id}`); return; }
