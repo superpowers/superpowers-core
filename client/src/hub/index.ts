@@ -23,7 +23,7 @@ function start() {
   document.querySelector(".projects-buttons .new-project").addEventListener("click", onNewProjectClick);
   document.querySelector(".projects-buttons .open-project").addEventListener("click", onProjectActivate);
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
-  let importedFile = document.querySelector("input.file-select") as HTMLInputElement;
+  const importedFile = document.querySelector("input.file-select") as HTMLInputElement;
   importedFile.addEventListener("change", onImportProjectClick);
   document.querySelector(".projects-buttons .import-project").addEventListener("click", () => { importedFile.click(); });
 
