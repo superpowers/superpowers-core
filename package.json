@@ -47,6 +47,7 @@
     "js-cookie": "^2.1.0",
     "lodash": "^4.8.1",
     "mkdirp": "^0.5.1",
+    "mv": "^2.1.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport.socketio": "^3.6.1",
@@ -55,8 +56,8 @@
     "rimraf": "^2.5.0",
     "socket.io": "^1.4.4",
     "tab-strip": "^2.3.0",
+    "temp": "^0.8.3",
     "tv4": "^1.2.7",
-    "unzip": "^0.1.11",
     "yargs": "^3.32.0",
     "yauzl": "^2.4.1"
   }

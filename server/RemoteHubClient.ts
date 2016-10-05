@@ -1,13 +1,16 @@
 import * as async from "async";
 import * as fs from "fs";
 import * as path from "path";
+import * as mkdirp from "mkdirp";
 
 import { server as serverConfig } from "./config";
 import ProjectHub from "./ProjectHub";
 import BaseRemoteClient from "./BaseRemoteClient";
 
 /* tslint:disable */
-const unzip = require("unzip");
+const yauzl = require("yauzl");
+const temp = require("temp").track();
+const mv = require("mv");
 /* tslint:enable */
 
 interface ProjectDetails {
@@ -201,27 +204,77 @@ export default class RemoteHubClient extends BaseRemoteClient {
   };
 
   private onImportProject =  (data: ImportProjectData) => {
+    // Import a project with a zip archive
+    // 1] Extract the content of the zip file in a temporary folder
+    // 2] Move the extracted content into the projects' folder
 
-  fs.writeFile(path.join(this.server.projectsPath, "project.zip"), data.data as string, (err) => {
-    if (err) return console.log(err);
+    // Extract the content of the zip file in a temporary folder
+    temp.mkdir("project", (err: Error, dirPath: any) => {
+      const inputPath = path.join(dirPath, "project.zip");
+      let rootFolderName: string = null;
+      fs.writeFile(inputPath, data.data, (err) => {
+        if (err) throw err;
 
-    fs.createReadStream(path.join(this.server.projectsPath, "project.zip"))
-      .pipe(unzip.Parse())
-      .on("entry", (entry: any) => {
-        if (entry.type === "Directory") {
-          fs.mkdir(path.join(this.server.projectsPath, entry.path));
-        }
-        else {
-          entry.pipe(fs.createWriteStream(path.join(this.server.projectsPath, entry.path)));
-        }
-      })
-      .on("close", () => {
-        this.server.loadProject(data.name, (err: Error) => {
-          if (err) {
-            console.log(err);
-          }
+        yauzl.open(inputPath, { lazyEntries: true }, (err: Error, zipFile: any) => {
+          if (err != null) throw err;
+
+          zipFile.readEntry();
+          zipFile.on("entry", (entry: any) => {
+            if (rootFolderName === null) {
+              rootFolderName = entry.fileName;
+            }
+
+            if (/\/$/.test(entry.fileName)) {
+              mkdirp(path.join(dirPath, entry.fileName), (err: Error) => {
+                if (err != null) throw err;
+                zipFile.readEntry();
+              });
+            }
+            else {
+              zipFile.openReadStream(entry, (err: Error, readStream: NodeJS.ReadableStream) => {
+                if (err != null) throw err;
+
+                mkdirp(path.dirname(path.join(dirPath, entry.fileName)), (err: Error) => {
+                  if (err != null) throw err;
+
+                  readStream.pipe(fs.createWriteStream(path.join(dirPath, entry.fileName)));
+                  readStream.on("end", () => {
+                    zipFile.readEntry();
+                  });
+                });
+              });
+            }
+          });
+          zipFile.on("end", () => {
+            // move the extracted content into the projects' folder
+            mv(path.join(dirPath, rootFolderName), path.join(this.server.projectsPath, rootFolderName), (err: Error) => {
+              if (err != null) throw err;
+
+              console.log("fini");
+            });
+          });
         });
       });
-  });
+    });
+    // fs.writeFile(path.join(this.server.projectsPath, "project.zip"), data.data as string, (err) => {
+      // if (err) return console.log(err);
+//
+      // fs.createReadStream(path.join(this.server.projectsPath, "project.zip"))
+        // .on("entry", (entry: any) => {
+          // if (entry.type === "Directory") {
+            // fs.mkdir(path.join(this.server.projectsPath, entry.path));
+          // }
+          // else {
+            // entry.pipe(fs.createWriteStream(path.join(this.server.projectsPath, entry.path)));
+          // }
+        // })
+        // .on("close", () => {
+          // this.server.loadProject(data.name, (err: Error) => {
+            // if (err) {
+              // console.log(err);
+            // }
+          // });
+        // });
+    // });
   }
 }

@@ -25,7 +25,7 @@ function start() {
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
   const importedFile = document.querySelector("input.file-select") as HTMLInputElement;
   importedFile.addEventListener("change", onImportProjectClick);
-  document.querySelector(".projects-buttons .import-project").addEventListener("click", () => { importedFile.click(); });
+  document.querySelector(".projects-buttons .project-archive-select").addEventListener("click", () => { importedFile.click(); });
 
   const selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
   const languageIds = Object.keys(languageNamesById);
@@ -249,13 +249,13 @@ function onEditProjectClick() {
 }
 
 function onImportProjectClick(event: Event) {
-  let target = event.target as HTMLInputElement;
+  const target = event.target as HTMLInputElement;
   if (target.files.length === 0) return;
 
-  let reader = new FileReader();
+  const reader = new FileReader();
 
   reader.onload = function(evnt) {
-    socket.emit("import:projects", {name: target.files[0].name.split(".")[0], data: (evnt.target as any).result});
+    socket.emit("import:projects", { name: target.files[0].name.split(".")[0], data: (evnt.target as any).result });
   };
   reader.readAsArrayBuffer(target.files[0]);
 }
