@@ -23,9 +23,9 @@ function start() {
   document.querySelector(".projects-buttons .new-project").addEventListener("click", onNewProjectClick);
   document.querySelector(".projects-buttons .open-project").addEventListener("click", onProjectActivate);
   document.querySelector(".projects-buttons .edit-project").addEventListener("click", onEditProjectClick);
-  const importedFile = document.querySelector("input.file-select") as HTMLInputElement;
+  const importedFile = document.querySelector("input.project-archive-select") as HTMLInputElement;
   importedFile.addEventListener("change", onImportProjectClick);
-  document.querySelector(".projects-buttons .project-archive-select").addEventListener("click", () => { importedFile.click(); });
+  document.querySelector(".projects-buttons .import-project").addEventListener("click", () => { importedFile.click(); });
 
   const selectLanguageElt = document.querySelector("select.language") as HTMLSelectElement;
   const languageIds = Object.keys(languageNamesById);

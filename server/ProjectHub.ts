@@ -61,7 +61,7 @@ export default class ProjectHub {
     }, callback);
   }
 
-  loadProject(folderName: string, callback: (err: Error) => any) {
+  loadProject(folderName: string, callback: (err: Error, manifest?: SupCore.Data.ProjectManifest) => any) {
     const server = new ProjectServer(this.globalIO, `${this.projectsPath}/${folderName}`, this.buildsPath, (err) => {
       if (err != null) { callback(err); return; }
 
@@ -72,7 +72,7 @@ export default class ProjectHub {
       }
 
       this.serversById[server.data.manifest.pub.id] = server;
-      callback(null);
+      callback(null, server.data.manifest);
     });
   }
 

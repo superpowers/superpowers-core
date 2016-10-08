@@ -10,7 +10,7 @@ import BaseRemoteClient from "./BaseRemoteClient";
 /* tslint:disable */
 const yauzl = require("yauzl");
 const temp = require("temp").track();
-const mv = require("mv");
+const copydir = require("copy-dir");
 /* tslint:enable */
 
 interface ProjectDetails {
@@ -203,7 +203,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     });
   };
 
-  private onImportProject =  (data: ImportProjectData) => {
+  private onImportProject = (data: ImportProjectData) => {
     // Import a project with a zip archive
     // 1] Extract the content of the zip file in a temporary folder
     // 2] Move the extracted content into the projects' folder
@@ -247,34 +247,15 @@ export default class RemoteHubClient extends BaseRemoteClient {
           });
           zipFile.on("end", () => {
             // move the extracted content into the projects' folder
-            mv(path.join(dirPath, rootFolderName), path.join(this.server.projectsPath, rootFolderName), (err: Error) => {
+            copydir(path.join(dirPath, rootFolderName), path.join(this.server.projectsPath, rootFolderName), (err: Error) => {
               if (err != null) throw err;
-
-              console.log("fini");
+              this.server.loadProject(rootFolderName, (err: Error, manifest: SupCore.Data.ProjectManifest) => {
+                if (err != null) throw err;
+              });
             });
           });
         });
       });
     });
-    // fs.writeFile(path.join(this.server.projectsPath, "project.zip"), data.data as string, (err) => {
-      // if (err) return console.log(err);
-//
-      // fs.createReadStream(path.join(this.server.projectsPath, "project.zip"))
-        // .on("entry", (entry: any) => {
-          // if (entry.type === "Directory") {
-            // fs.mkdir(path.join(this.server.projectsPath, entry.path));
-          // }
-          // else {
-            // entry.pipe(fs.createWriteStream(path.join(this.server.projectsPath, entry.path)));
-          // }
-        // })
-        // .on("close", () => {
-          // this.server.loadProject(data.name, (err: Error) => {
-            // if (err) {
-              // console.log(err);
-            // }
-          // });
-        // });
-    // });
   }
 }
