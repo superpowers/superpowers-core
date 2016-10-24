@@ -1,26 +1,14 @@
 
 //  import KeyState from "../systems/game/SupEngine/src/Input.ts";
 
-/*
-interface KeyModifiers {
-  shiftKey: boolean,
-  ctlKey: boolean;
-  altKey: boolean;
-  shiftLeft: boolean;
-  shiftRight: boolean;
-  ctlLeft: boolean;
-  ctlRight: boolean;
-  altLeft: boolean;
-  altRight: boolean;
-}
-*/
+
 interface KeyDef {
   str: string;
   asc: number;
 }
 interface KeySet {
-  meta: KeyDef;
-  core: KeyDef;
+  meta: KeyDef | {};
+  core: KeyDef | {};
 }
 interface KeyState {
   isDown: boolean;
@@ -28,10 +16,32 @@ interface KeyState {
   wasJustAutoRepeated: boolean;
   wasJustReleased: boolean;
 }
+interface PropAction {
+  [action: string]: any;
+}
+interface ResultOK {
+  ok: boolean;
+  msg?: string;
+}
+interface ResultActions {
+  ok: boolean;
+  msg?: string;
+  actions?: PropAction;
+}
+interface ResultKeySet {
+  ok: boolean;
+  msg?: string;
+  keySet?: KeySet;
+}
+interface ResultStr {
+  ok: boolean;
+  msg?: string;
+  str?: string;
+}
 export default class HotKeyMgr {
 
   keyEvent = {
-    DOM_VK_NULL: 0,
+
     DOM_VK_CANCEL: 3,
     DOM_VK_HELP: 6,
     DOM_VK_BACK_SPACE: 8,
@@ -148,17 +158,19 @@ export default class HotKeyMgr {
     DOM_VK_QUOTE: 222,
     DOM_VK_META: 224,
 
+    DOM_VK_NULL: 255,
     DOM_VK_SHIFT_LEFT: 256,
     DOM_VK_SHIFT_RIGHT: 257,
     DOM_VK_CONTROL_LEFT: 258,
     DOM_VK_CONTROL_RIGHT: 259,
     DOM_VK_ALT_LEFT: 260,
-    DOM_VK_ALT_RIGHT: 261
+    DOM_VK_ALT_RIGHT: 261,
+
+    ARRAY_SIZE: 262
   };
 
-
-  private keyset: { [contextName: string]: any } = {};
-  private uniq: { [contextName: string]: any } = {};
+  private keyset: { [name: string]: any } = {};
+  private uniq: { [combo: string]: any } = {};
 
   constructor () {
     Object.freeze(this.keyEvent);
@@ -183,13 +195,108 @@ export default class HotKeyMgr {
     }
     return rc;
   }
-
-  decGroup<T>(groupName: string): {ok: boolean, msg?: string} {
+  _valGroupParm<T>(groupName: string, groupExists?: boolean): ResultOK {
     if (groupName == null) {
       return {ok: false, msg: "missing groupName"};
     }
     if (typeof groupName !== "string") {
       return {ok: false, msg: "groupName must be string"};
+    }
+
+    if (!groupExists) {
+      return {ok: true};
+    }
+
+    if (this.keyset[groupName] == null) {
+        return {ok: false, msg: "groupName " + groupName + " not declared"};
+    }
+    return {ok: true};
+  }
+  _valActionParm<T>(actionName: string): ResultOK {
+    if (actionName == null) {
+        return {ok: false, msg: "missing actionName"};
+    }
+    if (typeof actionName !== "string") {
+        return {ok: false, msg: "actionName must be string"};
+    }
+    return {ok: true};
+  }
+  _validateParms(groupName: string, actionName: string, groupExists?: boolean, actionExists?: boolean, keySetDefined?: boolean): ResultOK {
+    let rc = this._valGroupParm(groupName);
+    if(!rc.ok) {
+      return rc;
+    }
+
+    rc = this._valActionParm(actionName);
+    if(!rc.ok) {
+      return rc;
+    }
+
+    if (!groupExists) {
+      return {ok: true};
+    }
+
+    if (this.keyset[groupName] == null) {
+        return {ok: false, msg: "groupName " + groupName + " not declared"};
+    }
+
+    if (!actionExists) {
+      return {ok: true};
+    }
+
+    let ks = this.keyset[groupName][actionName];
+
+    if (ks == null) {
+      return {ok: false, msg: "action " + actionName + " not declared" };
+    }
+    if (ks.meta == null) {
+      return {ok: false, msg: "action " + actionName + " not declared properly" };
+    }
+    if (ks.core == null) {
+      return {ok: false, msg: "action " + actionName + " not declared properly" };
+    }
+
+    if (!keySetDefined) {
+      return {ok: true};
+    }
+
+    if (ks.meta == null || ks.meta.str == null) {
+      return {ok: false, msg: "meta not declared properly" };
+    }
+    if (ks.core == null || ks.core.str == null) {
+      return {ok: false, msg: "core not declared properly" };
+    }
+
+    return {ok: true};
+  }
+  seqKeySet<T>(groupName: string, actionName: string): ResultStr {
+
+    let rc = this._validateParms(groupName, actionName, true, true, true);
+    if (!rc.ok) {
+      return rc;
+    }
+
+    let ks = this.keyset[groupName][actionName];
+    // TODO:  validate str prop
+    let str = ks.meta.str + "+" + ks.core.str;
+    return {ok: true, str: str};
+
+  }
+  getActions<T>(groupName: string): ResultActions {
+
+    let rc = this._valGroupParm(groupName, true);
+    if(!rc.ok) {
+      return rc;
+    }
+
+    return {ok: true, actions: this.keyset[groupName]};
+
+  }
+  decGroup<T>(groupName: string): ResultOK {
+
+    let rc = this._valGroupParm(groupName);
+    if(!rc.ok) {
+      return rc;
     }
     if (this.keyset[groupName] == null) {
       this.keyset[groupName] = {};
@@ -198,76 +305,27 @@ export default class HotKeyMgr {
       return {ok: false, msg: "groupName already declared"};
     }
   }
-  decAction<T>(groupName: string, actionName: string): {ok: boolean, msg?: string} {
-    if (groupName == null) {
-        return {ok: false, msg: "missing groupName"};
-    }
-    if (this.keyset[groupName] == null) {
-        return {ok: false, msg: "groupName " + groupName + " not declared"};
-    }
-    if (actionName == null) {
-        return {ok: false, msg: "missing actionName"};
-    }
-    if (typeof actionName !== "string") {
-        return {ok: false, msg: "actionName must be string"};
+  decAction<T>(groupName: string, actionName: string): ResultKeySet {
+    let rc = this._validateParms(groupName, actionName, true, false);
+    if(!rc.ok) {
+      return rc;
     }
 
     if (this.keyset[groupName][actionName] == null) {
-        this.keyset[groupName][actionName] = {meta: {}, core: {}};
-        return {ok: true};
+        let keySet : KeySet = {meta: {}, core: {}};
+        this.keyset[groupName][actionName] = keySet;
+        return {ok: true, keySet: keySet};
     } else  {
         return {ok: false, msg: "actionName already declared"};
     }
   }
-  seqKeySet<T>(groupName: string, actionName: string): {ok: boolean, msg?: string, str?: string} {
-    if (groupName == null) {
-      return {ok: false, msg: "missing groupName"};
-    }
-    if (this.keyset[groupName] == null) {
-      return {ok: false, msg: "group " + groupName + " not declared" };
-    }
-    if (actionName == null) {
-      return {ok: false, msg: "missing actionName" };
-    }
-    if (typeof actionName !== "string") {
-      return {ok: false, msg: "actionName must be string" };
-    }
-    let ks = this.keyset[groupName][actionName];
-    if (ks == null) {
-      return {ok: false, msg: "action " + actionName + " not declared" };
-    }
-    if (ks.meta == null || ks.meta.str == null) {
-      return {ok: false, msg: "action " + actionName + " not declared properly" };
-    }
-    if (ks.core == null || ks.meta.str == null) {
-      return {ok: false, msg: "action " + actionName + " not declared properly" };
-    }
-    // todo:  validate str prop
-    let str = ks.meta.str + "+" + ks.core.str;
-    return {ok: true, str: str};
 
-  }
-  regKeySet<T>(groupName: string, actionName: string, keyModDef: string, keyCodeDef: string ): {ok: boolean, msg?: string} {
-    if (groupName == null) {
-      return {ok: false, msg: "missing groupName" };
-    }
-    if (this.keyset[groupName] == null) {
-      return {ok: false, msg: "group " + groupName + " not declared" };
-    }
-    if (actionName == null) {
-      return {ok: false, msg: "missing actionName" };
-    }
-    if (typeof actionName !== "string") {
-      return {ok: false, msg: "actionName must be string" };
-    }
-    if (this.keyset[groupName][actionName] == null) {
-      return {ok: false, msg: "action " + actionName + " not declared" };
-    }
-    if (this.keyset[groupName][actionName].meta == null) {
-      return {ok: false, msg: "action " + actionName + " not declared properly" };
-    }
-    if (this.keyset[groupName][actionName].core == null) {
-      return {ok: false, msg: "action " + actionName + " not declared properly" };
+
+  setAction<T>(groupName: string, actionName: string, keyModDef: string, keyCodeDef: string ): ResultKeySet {
+
+    let rc = this._validateParms(groupName, actionName, true, true);
+    if(!rc.ok) {
+      return rc;
     }
 
     if (typeof keyModDef !== "string") {
@@ -306,30 +364,19 @@ export default class HotKeyMgr {
         }
     }
 
-    let meta = { str: keyModDef,  asc: (<any>this.keyEvent)[keyModDef]  };
-    let core = { str: keyCodeDef, asc: (<any>this.keyEvent)[keyCodeDef] };
+    let keySet = this.keyset[groupName][actionName];
 
-    this.keyset[groupName][actionName].meta = meta;
-    this.keyset[groupName][actionName].core = core;
+    keySet.meta = { str: keyModDef,  asc: (<any>this.keyEvent)[keyModDef]  };
+    keySet.core = { str: keyCodeDef, asc: (<any>this.keyEvent)[keyCodeDef] };
 
-    return {ok: true};
+    return {ok: true, keySet: keySet};
+
   }
-  clrKeySet<T>(groupName: string, actionName: string ): {ok: boolean, msg?: string} {
+  freeAction<T>(groupName: string, actionName: string ): ResultOK {
 
-    if (groupName == null) {
-      return {ok: false, msg: "missing groupName" };
-    }
-    if (this.keyset[groupName] == null) {
-      return {ok: false, msg: "group  [" + groupName + "] not registered" };
-    }
-    if (actionName == null) {
-      return {ok: false, msg: "missing actionName" };
-    }
-    if (typeof actionName !== "string") {
-      return {ok: false, msg: "actionName must be string" };
-    }
-    if (this.keyset[groupName][actionName] == null) {
-      return {ok: false, msg: "action " + actionName + " not declared" };
+    let rc = this._validateParms(groupName, actionName, true, true);
+    if(!rc.ok) {
+      return rc;
     }
 
     let old = this.seqKeySet(groupName, actionName);
@@ -339,44 +386,114 @@ export default class HotKeyMgr {
         }
     }
 
-    this.keyset[groupName][actionName].meta = {};
-    this.keyset[groupName][actionName].core = {};
+    let keySet = this.keyset[groupName][actionName];
+
+    keySet.meta = {};
+    keySet.core = {};
+
     return {ok: true};
   }
-  getKeySet<T>(groupName: string, actionName: string ): {ok: boolean, msg?: string, obj?: KeySet} {
+  getKeySet<T>(groupName: string, actionName: string ): ResultKeySet {
 
-    if (groupName == null) {
-      return {ok: false, msg: "missing groupName" };
-    }
-    if (this.keyset[groupName] == null) {
-      return {ok: false, msg: "group  [" + groupName + "] not registered" };
-    }
-    if (actionName == null) {
-      return {ok: false, msg: "missing actionName" };
-    }
-    if (typeof actionName !== "string") {
-      return {ok: false, msg: "actionName must be string" };
-    }
-    if (this.keyset[groupName][actionName] == null) {
-      return {ok: false, msg: "action " + actionName + " not declared" };
+    let rc = this._validateParms(groupName, actionName, true, true, true);
+    if(!rc.ok) {
+      return rc;
     }
 
-    let obj = this.keyset[groupName][actionName];
-    return {ok: true, obj: obj};
+    let keySet = this.keyset[groupName][actionName];
+    return {ok: true, keySet: keySet};
+
   }
-  //  IKBA:  Input.KeyboardButton.Array
-  isKeySetActiveIKBA<T>(keySet: KeySet, ikbArr: KeyState[] ) {
+  //
+  saveAction<T>(groupName: string, actionName: string ): ResultKeySet {
 
+    let rc = this._validateParms(groupName, actionName, true, true, true);
+    if(!rc.ok) {
+      return rc;
+    }
+
+    let keySet = this.keyset[groupName][actionName];
+
+    let ls = window.localStorage;
+    let dbKey = "hotkey." + groupName + "." + actionName;
+    let cfg = {meta: keySet.meta.str, core: keySet.core.str};
+    ls.setItem(dbKey, JSON.stringify(cfg) );
+
+    return {ok: true, keySet: keySet};
+
+  }
+  clrAction<T>(groupName: string, actionName: string ): ResultOK {
+
+    let rc = this._validateParms(groupName, actionName, true, true, true);
+    if(!rc.ok) {
+      return rc;
+    }
+
+    let ls = window.localStorage;
+    let dbKey = "hotkey." + groupName + "." + actionName;
+    ls.removeItem(dbKey);
+    return {ok: true};
+  }
+  loadConfig<T>(groupName: string): ResultOK {
+
+    let rc = this._valGroupParm(groupName, true);
+    if(!rc.ok) {
+      console.log("loadConfig: rc: " + rc.msg);
+      return rc;
+    }
+
+    // TODO:
+    // - async load of config file for groupName (plugin)
+    // - load default for navigator.platform
+
+    // For now, just load any localStorage preferences
+
+    rc = this.getActions(groupName);
+    if (!rc.ok) {
+      return rc;
+    }
+    let actions = (<ResultActions>rc).actions;
+    let ls = window.localStorage;
+
+    for (let action in actions) {
+      if (actions.hasOwnProperty(action)) {
+        let dbKey = "hotkey." + groupName + "." + action;
+        let str = ls.getItem(dbKey);
+        if (str) {
+          let cfg = JSON.parse(str);
+          let rc = this.setAction(groupName, action, cfg.meta, cfg.core );
+          if (!rc.ok) {
+            console.error("hotKeyMgr.loadConfig: " + groupName + ": " + rc.msg);
+          }
+        }
+      }
+    }
+
+  }
+  // Test if KeyState in Input.KeyboardButton.Array
+  inKeyboardButtonArray<T>(keySet: KeySet, ikbArr: KeyState[] ): boolean {
+
+    if (keySet.meta == null) {
+      console.error("hotKeyMgr.inKeyboardButtonArray: Warning: bad keySet.meta");
+      return false;
+    }
+    if (keySet.core == null) {
+      console.error("hotKeyMgr.inKeyboardButtonArray: Warning: bad keySet.core");
+      return false;
+    }
     let ke: any = this.keyEvent;
-
-    let meta: KeyDef = keySet.meta;
-    let core: KeyDef = keySet.core;
+    let meta  = <KeyDef>keySet.meta;
+    let core  = <KeyDef>keySet.core;
 
     // simple test of both keymodifer and keycode in Input.KeyboardButton.Array[].isDown
 
     if (meta.asc !== ke.DOM_VK_NULL) {
-        if (ikbArr[meta.asc].isDown && ikbArr[core.asc].isDown) {
-            return true;
+        if (ikbArr[meta.asc].isDown) {
+
+          if (core.asc === ke.DOM_VK_NULL || ikbArr[core.asc].isDown) {
+              return true;
+          }
+
         }
     }
 
@@ -394,4 +511,3 @@ export default class HotKeyMgr {
     return false;
   }
 }
-
