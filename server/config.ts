@@ -19,3 +19,7 @@ export const defaults: Config = {
 
 // Loaded by start.ts
 export let server: Config = null;
+
+export function setServerConfig(serverConfig: Config) {
+  server = serverConfig;
+}

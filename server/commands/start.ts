@@ -63,7 +63,7 @@ export default function start(serverDataPath: string) {
 
   // SupCore
   (global as any).SupCore = SupCore;
-  SupCore.systemsPath = path.join(dataPath, "systems");
+  SupCore.setSystemsPath(path.join(dataPath, "systems"));
 
   // List available languages
   languageIds = fs.readdirSync(`${__dirname}/../../public/locales`);
@@ -168,7 +168,7 @@ function loadConfig() {
 
   const serverConfigPath = `${dataPath}/config.json`;
   if (fs.existsSync(serverConfigPath)) {
-    config.server = JSON.parse(fs.readFileSync(serverConfigPath, { encoding: "utf8" }));
+    config.setServerConfig(JSON.parse(fs.readFileSync(serverConfigPath, { encoding: "utf8" })));
     schemas.validate(config, "config");
 
     for (const key in config.defaults) {
@@ -176,7 +176,7 @@ function loadConfig() {
     }
   } else {
     mustWriteConfig = true;
-    config.server = {} as any;
+    config.setServerConfig({} as any);
     for (const key in config.defaults) config.server[key] = config.defaults[key];
   }
 
