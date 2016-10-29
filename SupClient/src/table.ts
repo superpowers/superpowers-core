@@ -1,44 +1,43 @@
 import { EventEmitter } from "events";
-import html from "./html";
 import FindAssetDialog from "./FindAssetDialog";
 
 export function createTable(parent?: HTMLElement) {
-  const table = html("table", { parent });
-  const tbody = html("tbody", { parent: table });
+  const table = SupClient.html("table", { parent });
+  const tbody = SupClient.html("tbody", { parent: table });
   return { table, tbody };
 }
 
 export function appendRow(parentTableBody: HTMLTableSectionElement, name: string, options?: { checkbox?: boolean; title?: string; }) {
-  const row = html("tr", { parent: parentTableBody});
-  const labelCell = html("th", { parent: row });
+  const row = SupClient.html("tr", { parent: parentTableBody});
+  const labelCell = SupClient.html("th", { parent: row });
 
   let checkbox: HTMLInputElement;
   if (options != null && options.checkbox) {
-    const container = html("div", { parent: labelCell });
-    html("div", { parent: container, textContent: name, title: options.title });
-    checkbox = html("input", { parent: container, type: "checkbox" }) as HTMLInputElement;
+    const container = SupClient.html("div", { parent: labelCell });
+    SupClient.html("div", { parent: container, textContent: name, title: options.title });
+    checkbox = SupClient.html("input", { parent: container, type: "checkbox" }) as HTMLInputElement;
   } else {
     labelCell.textContent = name;
     if (options != null && options.title != null) labelCell.title = options.title;
   }
 
-  const valueCell = html("td", { parent: row });
+  const valueCell = SupClient.html("td", { parent: row });
 
   return { row, labelCell, valueCell, checkbox };
 }
 
 export function appendHeader(parentTableBody: HTMLTableSectionElement, text: string) {
-  const headerRow = html("tr", { parent: parentTableBody });
-  html("th", { parent: headerRow, textContent: text, colSpan: 2 });
+  const headerRow = SupClient.html("tr", { parent: parentTableBody });
+  SupClient.html("th", { parent: headerRow, textContent: text, colSpan: 2 });
   return headerRow;
 }
 
 export function appendTextField(parent: HTMLElement, value: string) {
-  return html("input", { parent, type: "text", value }) as HTMLInputElement;
+  return SupClient.html("input", { parent, type: "text", value }) as HTMLInputElement;
 }
 
 export function appendTextAreaField(parent: HTMLElement, value: string) {
-  return html("textarea", { parent, value }) as HTMLTextAreaElement;
+  return SupClient.html("textarea", { parent, value }) as HTMLTextAreaElement;
 }
 
 interface NumberOptions {
@@ -48,7 +47,7 @@ interface NumberOptions {
 };
 
 export function appendNumberField(parent: HTMLElement, value: number|string, options?: NumberOptions) {
-  const input = html("input", { parent, type: "number", value: value.toString() }) as HTMLInputElement;
+  const input = SupClient.html("input", { parent, type: "number", value: value.toString() }) as HTMLInputElement;
 
   if (options != null) {
     if (options.min != null) input.min = options.min.toString();
@@ -60,7 +59,7 @@ export function appendNumberField(parent: HTMLElement, value: number|string, opt
 }
 
 export function appendNumberFields(parent: HTMLElement, values: (number|string)[], options?: NumberOptions) {
-  const inputsParent = html("div", "inputs", { parent });
+  const inputsParent = SupClient.html("div", "inputs", { parent });
 
   const inputs: HTMLInputElement[] = [];
   for (const value of values) inputs.push(appendNumberField(inputsParent, value, options));
@@ -68,11 +67,11 @@ export function appendNumberFields(parent: HTMLElement, values: (number|string)[
 }
 
 export function appendBooleanField(parent: HTMLElement, checked: boolean) {
-  return html("input", { parent, type: "checkbox", checked }) as HTMLInputElement;
+  return SupClient.html("input", { parent, type: "checkbox", checked }) as HTMLInputElement;
 }
 
 export function appendSelectBox(parent: HTMLElement, options: { [value: string]: string; }, initialValue = "") {
-  const selectInput = html("select", { parent }) as HTMLSelectElement;
+  const selectInput = SupClient.html("select", { parent }) as HTMLSelectElement;
   for (const value in options) appendSelectOption(selectInput, value, options[value]);
   selectInput.value = initialValue;
 
@@ -80,19 +79,19 @@ export function appendSelectBox(parent: HTMLElement, options: { [value: string]:
 }
 
 export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement, value: string, label: string) {
-  return html("option", { parent, value, textContent: label });
+  return SupClient.html("option", { parent, value, textContent: label });
 }
 
 export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupElement, label: string) {
-  return html("optgroup", { parent, label, textContent: label });
+  return SupClient.html("optgroup", { parent, label, textContent: label });
 }
 
 interface SliderOptions extends NumberOptions { sliderStep?: number|string; }
 
 export function appendSliderField(parent: HTMLElement, value: number|string, options?: SliderOptions) {
-  const sliderParent = html("div", "inputs", { parent });
+  const sliderParent = SupClient.html("div", "inputs", { parent });
 
-  const sliderField = html("input", { parent: sliderParent, type: "range", value: value.toString(), style: { flex: "2" } }) as HTMLInputElement;
+  const sliderField = SupClient.html("input", { parent: sliderParent, type: "range", value: value.toString(), style: { flex: "2" } }) as HTMLInputElement;
   if (options != null) {
     if (options.min != null) sliderField.min = options.min.toString();
     if (options.max != null) sliderField.max = options.max.toString();
@@ -139,12 +138,12 @@ class ColorField extends EventEmitter {
 }
 
 export function appendColorField(parent: HTMLElement, color: string) {
-  const colorParent = html("div", "inputs", { parent });
+  const colorParent = SupClient.html("div", "inputs", { parent });
 
   const textField = appendTextField(colorParent, "");
   textField.classList.add("color");
 
-  const pickerField = html("input", { parent: colorParent, type: "color" }) as HTMLInputElement;
+  const pickerField = SupClient.html("input", { parent: colorParent, type: "color" }) as HTMLInputElement;
 
   return new ColorField(textField, pickerField, color);
 }
@@ -189,10 +188,10 @@ class AssetFieldSubscriber extends EventEmitter {
 }
 
 export function appendAssetField(parent: HTMLElement, assetId: string, assetType: string, projectClient: SupClient.ProjectClient) {
-  const assetParent = html("div", "inputs", { parent });
+  const assetParent = SupClient.html("div", "inputs", { parent });
 
-  const textField = html("input", { parent: assetParent, type: "text", readOnly: true, style: { cursor: "pointer" } }) as HTMLInputElement;
-  const buttonElt = html("button", { parent: assetParent, disabled: true, textContent: SupClient.i18n.t("common:actions.select") }) as HTMLButtonElement;
+  const textField = SupClient.html("input", { parent: assetParent, type: "text", readOnly: true, style: { cursor: "pointer" } }) as HTMLInputElement;
+  const buttonElt = SupClient.html("button", { parent: assetParent, disabled: true, textContent: SupClient.i18n.t("common:actions.select") }) as HTMLButtonElement;
 
   let pluginPath: string;
 

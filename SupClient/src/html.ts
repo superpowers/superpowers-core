@@ -1,6 +1,6 @@
 const specialOptionKeys = [ "parent", "style", "dataset" ];
 
-export default function html(tag: string, classList?: string|string[]|SupClient.HTMLInputOptions, options?: SupClient.HTMLInputOptions) {
+export default function html(tag: string, classList?: string|string[]|SupClient.HTMLOptions, options?: SupClient.HTMLOptions) {
   if (options == null) {
     if (typeof classList === "object" && !Array.isArray(classList)) {
       options = classList;

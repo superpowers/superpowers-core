@@ -17,9 +17,14 @@
     "appApiVersion": 4
   },
   "devDependencies": {
+    "@types/electron": "^1.4.25",
+    "@types/js-cookie": "^2.0.28",
     "@types/lodash": "^4.14.37",
     "@types/node": "^6.0.46",
     "@types/socket.io": "^1.4.27",
+    "@types/socket.io-client": "^1.4.27",
+    "@types/tv4": "^1.2.28",
+    "@types/yargs": "0.0.34",
     "brfs": "^1.4.3",
     "browserify": "^13.0.0",
     "chalk": "^1.1.1",

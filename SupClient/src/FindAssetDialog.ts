@@ -4,7 +4,6 @@ import * as fuzzy from "fuzzy";
 import * as TreeView from "dnd-tree-view";
 import * as Dialogs from "simple-dialogs";
 import * as i18n from "./i18n";
-import html from "./html";
 
 type FindAssetResult = string;
 
@@ -22,8 +21,8 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
 
     this.dialogElt.classList.add("find-asset-dialog");
 
-    const searchGroup = html("div", "group", { parent: this.formElt, style: { display: "flex" } });
-    this.searchElt = html("input", {
+    const searchGroup = SupClient.html("div", "group", { parent: this.formElt, style: { display: "flex" } });
+    this.searchElt = SupClient.html("input", {
       parent: searchGroup, type: "search",
       placeholder: i18n.t("common:searchPlaceholder"),
       style: { flex: "1 1 0" }
@@ -32,7 +31,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     this.searchElt.addEventListener("keydown", this.onSearchKeyDown);
     this.searchElt.focus();
 
-    const treeViewContainer = html("div", "assets-tree-view", { parent: this.formElt });
+    const treeViewContainer = SupClient.html("div", "assets-tree-view", { parent: this.formElt });
     this.treeView = new TreeView(treeViewContainer, { multipleSelection: false });
     this.treeView.on("activate", () => { this.submit(); });
 

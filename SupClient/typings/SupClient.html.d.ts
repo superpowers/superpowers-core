@@ -16,6 +16,7 @@ declare namespace SupClient {
   export function html(tag: "li", options?: HTMLOptions): HTMLLIElement;
   export function html(tag: "a", options?: HTMLOptions): HTMLAnchorElement;
   export function html(tag: "link", options?: HTMLLinkOptions): HTMLLinkElement;
+  export function html(tag: "tr"|"th", options?: HTMLTableSectionOptions): HTMLTableSectionElement;
 
   export function html(tag: string, classList?: string|string[], options?: HTMLOptions): HTMLElement;
   export function html(tag: "div", classList?: string|string[], options?: HTMLOptions): HTMLDivElement;
@@ -34,6 +35,7 @@ declare namespace SupClient {
   export function html(tag: "li", classList?: string|string[], options?: HTMLOptions): HTMLLIElement;
   export function html(tag: "a", classList?: string|string[], options?: HTMLOptions): HTMLAnchorElement;
   export function html(tag: "link", classList?: string|string[], options?: HTMLLinkOptions): HTMLLinkElement;
+  export function html(tag: "tr"|"th", classList?: string|string[], options?: HTMLTableSectionOptions): HTMLTableSectionElement;
 
   interface HTMLOptions {
     id?: string;
@@ -75,6 +77,10 @@ declare namespace SupClient {
   interface HTMLOptionOptions extends HTMLOptions {
     label?: string;
     value?: string;
+  }
+
+  interface HTMLTableSectionOptions extends HTMLOptions {
+    colSpan?: number;
   }
 
   interface HTMLStyleOptions {

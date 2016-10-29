@@ -1,4 +1,3 @@
-/// <reference path="typings/tsd.d.ts" />
 /// <reference path="SupClient.d.ts" />
 /// <reference path ="../SupCore/SupCore.d.ts" />
 
