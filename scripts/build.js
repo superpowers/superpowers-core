@@ -48,14 +48,22 @@ function build() {
   const argv = yargs.option("verbose", { alias: "v", describe: "Verbose mode" }).argv;
 
   if (argv._.length > 0) {
-    const filter = argv._[0].replace(/[\\/]/g, path.sep);
+    const baseFilter = argv._[0].replace(/[\\/]/g, path.sep);
+    let actualFilter = baseFilter.toLowerCase();
+
+    const negated = actualFilter[0] === "!";
+    if (negated) actualFilter = actualFilter.substring(1);
+
+    const rooted = actualFilter[0] === ".";
+    if (rooted) actualFilter = actualFilter.substring(1);
+
     const oldPathCount = buildPaths.length;
-    if (filter[0] === "!") {
-      buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.slice(1).toLowerCase()) === -1);
-    } else {
-      buildPaths = buildPaths.filter((buildPath) => path.relative(rootPath, buildPath).toLowerCase().indexOf(filter.toLowerCase()) !== -1);
-    }
-    log(`Rebuilding "${filter}", leaving out ${oldPathCount - buildPaths.length} paths`);
+    buildPaths = buildPaths.filter((buildPath) => {
+      const index = (buildPath + path.sep).toLowerCase().indexOf(actualFilter);
+      const found = rooted ? index === 0 : index !== -1;
+      return negated ? !found : found;
+    });
+    log(`Rebuilding "${baseFilter}", leaving out ${oldPathCount - buildPaths.length} paths`);
   }
 
   // Build
@@ -106,7 +114,7 @@ function build() {
           const args = [ "run", "build" ];
           if (!argv.verbose) args.push("-s", "--", "--silent");
           const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
-    
+
           npm.on("close", (status) => {
             if (status !== 0) errors.push(`${relBuildPath}: "npm run build" exited with status code ${status}`);
             cb();
