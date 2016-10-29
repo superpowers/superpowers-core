@@ -26,7 +26,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-stylus": "^2.3.0",
     "gulp-tslint": "^4.3.1",
-    "gulp-typescript": "2.12.1",
+    "gulp-typescript": "3.1.1",
     "gulp-util": "^3.0.7",
     "simple-dialogs": "^1.2.0",
     "socket.io-client": "^1.4.4",
@@ -56,6 +56,7 @@
     "socket.io": "^1.4.4",
     "tab-strip": "^2.3.0",
     "tv4": "^1.2.7",
+    "typescript": "^2.0.6",
     "yargs": "^3.32.0",
     "yauzl": "^2.4.1"
   }
