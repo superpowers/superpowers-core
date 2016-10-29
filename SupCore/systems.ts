@@ -1,12 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export let systemsPath: string;
 export let systems: { [system: string]: System } = {};
-
-export function setSystemsPath(path: string) {
-  systemsPath = path;
-}
 
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 

@@ -2,6 +2,12 @@ import * as Data from "./Data";
 
 export { Data };
 
+export let systemsPath: string;
+
+export function setSystemsPath(path: string) {
+  systemsPath = path;
+}
+
 export * from "./systems";
 
 export function log(message: string): void {
