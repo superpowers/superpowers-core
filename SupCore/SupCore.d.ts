@@ -1,4 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
 /// <reference path="./ProjectServer.d.ts" />
 
 declare namespace SupCore {
@@ -352,5 +351,8 @@ declare namespace SupCore {
     listeners(event: string): Function[];
     emit(event: string, ...args: any[]): boolean;
     listenerCount(type: string): number;
+    prependListener(event: string | symbol, listener: Function): this;
+    prependOnceListener(event: string | symbol, listener: Function): this;
+    eventNames(): (string | symbol)[];
   }
 }
