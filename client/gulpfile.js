@@ -38,7 +38,7 @@ gulp.task("typescript", () => {
     .pipe(tslint())
     .pipe(tslint.report("prose", { emitError: true }))
     .on("error", (err) => { throw err; })
-    .pipe(ts(tsProject))
+    .pipe(tsProject())
     .on("error", () => { failed = true; })
     .on("end", () => { if (failed) throw new Error("There were TypeScript errors."); });
   return tsResult.js.pipe(gulp.dest("./"));
