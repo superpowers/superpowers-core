@@ -89,7 +89,8 @@ function initPlugin(systemFolderName: string, systemId: string, pluginName: stri
     "compilerOptions": {
       "module": "commonjs",
       "target": "es5",
-      "noImplicitAny": true
+      "noImplicitAny": true,
+      "typeRoots": [ "../../../../../node_modules/@types" ]
     },
     "exclude": [
       "node_modules",
