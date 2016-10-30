@@ -1,6 +1,7 @@
 /// <reference path="../SupCore/SupCore.d.ts" />
 /// <reference path="./typings/SupClient.html.d.ts" />
 /// <reference path="./typings/SupApp.d.ts" />
+/// <reference types="dnd-tree-view" />
 
 declare namespace SupClient {
   export const namePattern: string;
@@ -20,8 +21,8 @@ declare namespace SupClient {
   export function onDisconnected(): void;
   export function setupHelpCallback(callback: Function): void;
 
-  export function getTreeViewInsertionPoint(treeView: any /* TreeView */): { parentId: string; index: number };
-  export function getTreeViewSiblingInsertionPoint(treeView: any /* TreeView */): { parentId: string, index: number };
+  export function getTreeViewInsertionPoint(treeView: TreeView): { parentId: string; index: number };
+  export function getTreeViewSiblingInsertionPoint(treeView: TreeView): { parentId: string, index: number };
 
   export function getTreeViewDropPoint(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
   export function getListViewDropIndex(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
@@ -224,7 +225,7 @@ declare namespace SupClient {
   }
 
   interface BuildSettingsEditorConstructor {
-    new(container: HTMLDivElement, entries: SupCore.Data.Entries, entriesTreeView: any /* TreeView */): BuildSettingsEditor;
+    new(container: HTMLDivElement, entries: SupCore.Data.Entries, entriesTreeView: TreeView): BuildSettingsEditor;
   }
 
   export interface BuildPlugin {
