@@ -1,4 +1,4 @@
-/// <reference path="../typings/fuzzy.d.ts" />
+/// <reference path="./typings/fuzzy.d.ts" />
 
 import * as fuzzy from "fuzzy";
 import * as TreeView from "dnd-tree-view";

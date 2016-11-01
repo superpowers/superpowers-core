@@ -5,7 +5,7 @@ import * as _ from "lodash";
 
 import * as SupClient from "./index";
 
-export const languageIds = fs.readdirSync(`${__dirname}/../../public/locales`);
+export const languageIds = fs.readdirSync(`${__dirname}/../public/locales`);
 
 interface File {
   root: string;
