@@ -35,7 +35,7 @@
     "@types/socket.io": "^1.4.27",
     "@types/socket.io-client": "^1.4.27",
     "@types/tv4": "^1.2.28",
-    "@types/yargs": "0.0.34",
+    "@types/yargs": "0.0.36",
     "brfs": "^1.4.3",
     "browserify": "^13.0.0",
     "chalk": "^1.1.1",

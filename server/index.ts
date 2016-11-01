@@ -9,24 +9,22 @@ const argv = yargs
   .demand(1, "Enter a command")
   .describe("data-path", "Path to store/read data files from, including config and projects")
   .command("start", "Start the server", (yargs) => {
-    // FIXME: Remove any cast once yargs typings have been updated
-    // see https://github.com/DefinitelyTyped/DefinitelyTyped/pull/12336
-    (yargs as any).demand(1, 1, `The "start" command doesn't accept any arguments`).argv;
+    yargs.demand(1, 1, `The "start" command doesn't accept any arguments`).argv;
   })
   .command("registry", "List registry content", (yargs) => {
-    (yargs as any).demand(1, 1, `The "registry" command doesn't accept any arguments`).argv;
+    yargs.demand(1, 1, `The "registry" command doesn't accept any arguments`).argv;
   })
   .command("install", "Install a system or plugin", (yargs) => {
-    (yargs as any).demand(2, 2, `The "install" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
+    yargs.demand(2, 2, `The "install" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
   .command("uninstall", "Uninstall a system or plugin", (yargs) => {
-    (yargs as any).demand(2, 2, `The "uninstall" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
+    yargs.demand(2, 2, `The "uninstall" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
   .command("update", "Update the server, a system or a plugin", (yargs) => {
-    (yargs as any).demand(2, 2, `The "update" command requires a single argument: server, "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
+    yargs.demand(2, 2, `The "update" command requires a single argument: server, "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
   .command("init", "Generate a skeleton for a new system or plugin", (yargs) => {
-    (yargs as any).demand(2, 2, `The "init" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
+    yargs.demand(2, 2, `The "init" command requires a single argument: "systemId" or "systemId:pluginAuthor/pluginName"`).argv;
   })
   .help("h").alias("h", "help")
   .argv;
