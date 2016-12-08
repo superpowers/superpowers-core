@@ -1,5 +1,5 @@
 import * as TreeView from "dnd-tree-view";
-import { assetTypes, editorsByAssetType } from "../../tabs/assets/";
+import { assetTypes, editorsByAssetType } from "../../tabs/assets";
 
 type CreateAssetResult = { name: string; type: string; open: boolean; };
 

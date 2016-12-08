@@ -185,7 +185,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
         });
       }
 
-    ], (err) => {
+    ], (err: Error) => {
       if (err != null) callback(err.message);
       else callback(null);
     });

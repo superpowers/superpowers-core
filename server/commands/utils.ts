@@ -178,7 +178,7 @@ export function getRegistry(callback: (err: Error, registry: Registry) => any) {
               cb();
             }, cb);
           }, cb);
-        }, (err) => { callback(err, registry); });
+        }, (err: Error) => { callback(err, registry); });
       }
     });
   });

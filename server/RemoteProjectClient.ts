@@ -116,7 +116,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
             if(err == null) cb(null);
             else cb(new Error(err));
           });
-        }, (err) => {
+        }, (err: Error) => {
           if (err != null) callback(err.message, null);
           else callback(null, entry.id);
         });
