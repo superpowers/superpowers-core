@@ -87,7 +87,7 @@ export function open(name: string, state?: { [name: string]: any }) {
     if (state != null) iframe.addEventListener("load", () => { iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin); });
 
   } else if (state != null) {
-    const iframe = tabs.panesElt.querySelector(`iframe[data-name='${name}']`) as HTMLIFrameElement;
+    const iframe = tabs.panesElt.querySelector(`.pane-container[data-name='${name}'] iframe`) as HTMLIFrameElement;
     iframe.contentWindow.postMessage({ type: "setState", state }, window.location.origin);
   }
 
