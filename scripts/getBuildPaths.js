@@ -24,6 +24,7 @@ module.exports = (rootPath) => {
     if (shouldIgnoreFolder(systemName)) return;
 
     const systemPath = `${systemsPath}/${systemName}`;
+    buildPaths.push(systemPath);
 
     let isDevFolder = true;
     try { if (!fs.lstatSync(`${systemPath}/.git`).isDirectory()) isDevFolder = false; }
