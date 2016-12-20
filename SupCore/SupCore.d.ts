@@ -83,7 +83,7 @@ declare namespace SupCore {
       setProperty(id: string, key: string, value: any, callback: (err: string, value?: any) => any): void;
       save(id: string, revisionName: string, callback: (err: string, revisionId?: string) => void): void;
       client_save(id: string, revisionId: string, revisionName: string): void;
-      getForStorage(): EntryNode[];
+      getForStorage(ignoredEntryTypes?: string[]): EntryNode[];
       getStoragePathFromId(id: string): string;
     }
 

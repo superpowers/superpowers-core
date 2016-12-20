@@ -141,11 +141,13 @@ export default class Entries extends SupData.Base.TreeById {
     entry.revisions.push({ id: revisionId, name: revisionName });
   }
 
-  getForStorage() {
+  getForStorage(ignoredEntryTypes?: string[]) {
     const entries: SupCore.Data.EntryNode[] = [];
     const entriesById: {[id: string]: SupCore.Data.EntryNode} = {};
 
     this.walk((entry: SupCore.Data.EntryNode, parentEntry: SupCore.Data.EntryNode) => {
+      if (ignoredEntryTypes != null && ignoredEntryTypes.indexOf(entry.type) !== -1) return;
+
       const savedEntry: SupCore.Data.EntryNode = { id: entry.id, name: entry.name, type: entry.type };
       if (entry.children != null) savedEntry.children = [];
       entriesById[savedEntry.id] = savedEntry;
