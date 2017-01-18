@@ -33,7 +33,7 @@ if ((global as any).SupApp == null) {
 }
 
 // Initialize empty system
-SupCore.system = new SupCore.System("", "");
+SupCore.system = new SupCore.System("", "", "");
 
 const plugins: { [contextName: string]: { [pluginName: string]: { path: string; content: any; } } } = {};
 

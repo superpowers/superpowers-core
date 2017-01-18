@@ -1,13 +1,14 @@
 /// <reference path="index.d.ts" />
 
 import * as yargs from "yargs";
-import { dataPath } from "./commands/utils";
+import { dataPath, rwDataPath } from "./commands/utils";
 
 // Command line interface
 const argv = yargs
   .usage("Usage: $0 <command> [options]")
   .demand(1, "Enter a command")
-  .describe("data-path", "Path to store/read data files from, including config and projects")
+  .describe("data-path", "Path to read data files from")
+  .describe("rw-data-path", "Path to store/read data files from, including config and projects")
   .command("start", "Start the server", (yargs) => {
     yargs.demand(1, 1, `The "start" command doesn't accept any arguments`).argv;
   })
@@ -33,7 +34,7 @@ const command = argv._[0];
 const [ systemId, pluginFullName ] = argv._[1] != null ? argv._[1].split(":") : [ null, null ];
 switch (command) {
   /* tslint:disable */
-  case "start": require("./commands/start").default(dataPath); break;
+  case "start": require("./commands/start").default(dataPath, rwDataPath); break;
   case "registry": require("./commands/registry").default(); break;
   case "install": require("./commands/install").default(systemId, pluginFullName); break;
   case "uninstall": require("./commands/uninstall").default(systemId, pluginFullName); break;

@@ -16,16 +16,19 @@ export const pluginNameRegex = /^[A-Za-z0-9]+\/[A-Za-z0-9]+$/;
 
 // Data path
 const argv = yargs
-  .describe("data-path", "Path to store/read data files from, including config and projects")
+  .describe("data-path", "Path to read data files from")
+  .describe("rw-data-path", "Path to store/read data files from, including config and projects")
   .describe("download-url", "Url to download a release")
   .boolean("force")
   .argv;
 export const dataPath = argv["data-path"] != null ? path.resolve(argv["data-path"]) : path.resolve(`${__dirname}/../..`);
-mkdirp.sync(dataPath);
-mkdirp.sync(`${dataPath}/projects`);
-mkdirp.sync(`${dataPath}/builds`);
+export const rwDataPath = argv["rw-data-path"] != null ? path.resolve(argv["rw-data-path"]) : path.resolve(`${__dirname}/../..`);
+mkdirp.sync(rwDataPath);
+mkdirp.sync(`${rwDataPath}/projects`);
+mkdirp.sync(`${rwDataPath}/builds`);
 export const systemsPath = `${dataPath}/systems`;
-mkdirp.sync(systemsPath);
+export const rwSystemsPath = `${rwDataPath}/systems`;
+mkdirp.sync(rwSystemsPath);
 
 export const force = argv["force"];
 export const downloadURL = argv["download-url"];
@@ -39,56 +42,62 @@ export const systemsById: { [id: string]: {
   plugins: { [authorName: string]: { [pluginName: string]: { version: string; isDev: boolean; } } };
 } } = {};
 
-for (const entry of fs.readdirSync(systemsPath)) {
-  if (!folderNameRegex.test(entry)) continue;
-  if (!fs.statSync(`${systemsPath}/${entry}`).isDirectory) continue;
+const allSystemsPaths = [`${rwSystemsPath}`, `${systemsPath}`];
 
-  let systemId: string;
-  let systemVersion: string;
-  const systemPath = `${systemsPath}/${entry}`;
-  try {
-    const packageDataFile = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
-    const packageData = JSON.parse(packageDataFile);
-    systemId = packageData.superpowers.systemId;
-    systemVersion = packageData.version;
-  } catch (err) {
-    emitError(`Could not load system id from systems/${entry}/package.json:`, err.stack);
-  }
+for (const sysPath of allSystemsPaths) {
+  for (const entry of fs.readdirSync(sysPath)) {
+    if (!folderNameRegex.test(entry)) continue;
 
-  let isDev = true;
-  try { if (!fs.lstatSync(`${systemPath}/.git`).isDirectory()) isDev = false; }
-  catch (err) { isDev = false; }
+    const systemPath = `${sysPath}/${entry}`;
+    if (!fs.existsSync(`${systemPath}/package.json`)) continue;
 
-  systemsById[systemId] = { folderName: entry, version: systemVersion, isDev, plugins: {} };
-  let pluginAuthors: string[];
-  try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
-  if (pluginAuthors == null) continue;
+    let systemId: string;
+    let systemVersion: string;
+    try {
+      const packageDataFile = fs.readFileSync(`${systemPath}/package.json`, { encoding: "utf8" });
+      const packageData = JSON.parse(packageDataFile);
+      systemId = packageData.superpowers.systemId;
+      systemVersion = packageData.version;
+    } catch (err) {
+      emitError(`Could not load system id from systems/${entry}/package.json:`, err.stack);
+    }
 
-  for (const pluginAuthor of pluginAuthors) {
-    if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) continue;
-    if (!folderNameRegex.test(pluginAuthor)) continue;
+    let isDev = true;
+    try { if (!fs.lstatSync(`${systemPath}/.git`).isDirectory()) isDev = false; }
+    catch (err) { isDev = false; }
 
-    systemsById[systemId].plugins[pluginAuthor] = {};
-    for (const pluginName of fs.readdirSync(`${systemPath}/plugins/${pluginAuthor}`)) {
-      if (!folderNameRegex.test(pluginName)) continue;
+    if (systemId in systemsById) { continue; }
+    systemsById[systemId] = { folderName: entry, version: systemVersion, isDev, plugins: {} };
+    let pluginAuthors: string[];
+    try { pluginAuthors = fs.readdirSync(`${systemPath}/plugins`); } catch (err) { /* Ignore */ }
+    if (pluginAuthors == null) continue;
 
-      const pluginPath = `${systemPath}/plugins/${pluginAuthor}/${pluginName}`;
-      if (!fs.statSync(pluginPath).isDirectory) continue;
+    for (const pluginAuthor of pluginAuthors) {
+      if (builtInPluginAuthors.indexOf(pluginAuthor) !== -1) continue;
+      if (!folderNameRegex.test(pluginAuthor)) continue;
 
-      let pluginVersion: string;
-      try {
-        const packageDataFile = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
-        const packageData = JSON.parse(packageDataFile);
-        pluginVersion = packageData.version;
-      } catch (err) {
-        emitError(`Could not load plugin verson from systems/${entry}/${pluginAuthor}/${pluginName}/package.json:`, err.stack);
+      systemsById[systemId].plugins[pluginAuthor] = {};
+      for (const pluginName of fs.readdirSync(`${systemPath}/plugins/${pluginAuthor}`)) {
+        if (!folderNameRegex.test(pluginName)) continue;
+
+        const pluginPath = `${systemPath}/plugins/${pluginAuthor}/${pluginName}`;
+        if (!fs.statSync(pluginPath).isDirectory) continue;
+
+        let pluginVersion: string;
+        try {
+          const packageDataFile = fs.readFileSync(`${pluginPath}/package.json`, { encoding: "utf8" });
+          const packageData = JSON.parse(packageDataFile);
+          pluginVersion = packageData.version;
+        } catch (err) {
+          emitError(`Could not load plugin verson from systems/${entry}/${pluginAuthor}/${pluginName}/package.json:`, err.stack);
+        }
+
+        let isDev = true;
+        try { if (!fs.lstatSync(`${pluginPath}/.git`).isDirectory()) isDev = false; }
+        catch (err) { isDev = false; }
+
+        systemsById[systemId].plugins[pluginAuthor][pluginName] = { version: pluginVersion, isDev };
       }
-
-      let isDev = true;
-      try { if (!fs.lstatSync(`${pluginPath}/.git`).isDirectory()) isDev = false; }
-      catch (err) { isDev = false; }
-
-      systemsById[systemId].plugins[pluginAuthor][pluginName] = { version: pluginVersion, isDev };
     }
   }
 }

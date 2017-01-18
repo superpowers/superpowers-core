@@ -26,6 +26,7 @@ require("module").Module._initPaths();
 /* tslint:enable */
 
 let dataPath: string;
+let rwDataPath: string;
 let hub: ProjectHub = null;
 let mainApp: express.Express = null;
 let mainHttpServer: http.Server;
@@ -46,16 +47,17 @@ function onUncaughtException(err: Error) {
   process.exit(1);
 }
 
-export default function start(serverDataPath: string) {
+export default function start(serverDataPath: string, serverRwDataPath: string) {
   dataPath = serverDataPath;
-  SupCore.log(`Using data from ${dataPath}.`);
+  rwDataPath = serverRwDataPath;
+  SupCore.log(`Using data from ${dataPath} and ${rwDataPath}.`);
   process.on("uncaughtException", onUncaughtException);
 
   loadConfig();
 
   const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" }));
   SupCore.log(`Server v${version} starting...`);
-  fs.writeFileSync(`${__dirname}/../../public/superpowers.json`, JSON.stringify({
+  fs.writeFileSync(`${rwDataPath}/superpowers.json`, JSON.stringify({
     serverName: config.server.serverName,
     version, appApiVersion,
     hasPassword: config.server.password.length !== 0
@@ -63,7 +65,7 @@ export default function start(serverDataPath: string) {
 
   // SupCore
   (global as any).SupCore = SupCore;
-  SupCore.setSystemsPath(path.join(dataPath, "systems"));
+  SupCore.setSystemsPath(path.join(dataPath, "systems"), path.join(rwDataPath, "systems"));
 
   // List available languages
   languageIds = fs.readdirSync(`${__dirname}/../../public/locales`);
@@ -77,7 +79,7 @@ export default function start(serverDataPath: string) {
   memoryStore = new expressSession.MemoryStore();
 
   try {
-    const sessionsJSON = fs.readFileSync(`${__dirname}/../../sessions.json`, { encoding: "utf8" });
+    const sessionsJSON = fs.readFileSync(`${rwDataPath}/sessions.json`, { encoding: "utf8" });
     (memoryStore as any).sessions = JSON.parse(sessionsJSON);
   } catch (err) {
     // Ignore
@@ -112,6 +114,7 @@ export default function start(serverDataPath: string) {
   mainApp.get("/serverBuild", enforceAuth, serveServerBuildIndex);
 
   mainApp.use("/projects/:projectId/*", serveProjectWildcard);
+  mainApp.use("/superpowers.json", express.static(`${rwDataPath}/superpowers.json`));
   mainApp.use("/", express.static(`${__dirname}/../../public`));
 
   mainHttpServer = http.createServer(mainApp);
@@ -131,6 +134,7 @@ export default function start(serverDataPath: string) {
   buildApp.get("/", redirectToHub);
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
 
+  buildApp.use("/superpowers.json", express.static(`${rwDataPath}/superpowers.json`));
   buildApp.use("/", express.static(`${__dirname}/../../public`));
 
   buildApp.use((req, res, next) => {
@@ -166,7 +170,7 @@ export default function start(serverDataPath: string) {
 function loadConfig() {
   let mustWriteConfig = false;
 
-  const serverConfigPath = `${dataPath}/config.json`;
+  const serverConfigPath = `${rwDataPath}/config.json`;
   if (fs.existsSync(serverConfigPath)) {
     config.setServerConfig(JSON.parse(fs.readFileSync(serverConfigPath, { encoding: "utf8" })));
     schemas.validate(config, "config");
@@ -277,7 +281,7 @@ function onSystemsLoaded() {
   buildApp.use(handle404);
 
   // Project hub
-  hub = new ProjectHub(io, dataPath, (err: Error) => {
+  hub = new ProjectHub(io, dataPath, rwDataPath, (err: Error) => {
     if (err != null) { SupCore.log(`Failed to start server:\n${(err as any).stack}`); return; }
 
     SupCore.log(`Loaded ${Object.keys(hub.serversById).length} projects from ${hub.projectsPath}.`);
@@ -323,7 +327,7 @@ function onExit() {
     SupCore.log("Saving sessions...");
     try {
       const sessionsJSON = JSON.stringify((memoryStore as any).sessions, null, 2);
-      fs.writeFileSync(`${__dirname}/../../sessions.json`, sessionsJSON);
+      fs.writeFileSync(`${rwDataPath}/sessions.json`, sessionsJSON);
     } catch (err) {
       SupCore.log(`Failed to save sessions:\n${(err as any).stack}`);
       hadError = true;

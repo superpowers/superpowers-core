@@ -2,22 +2,35 @@ import * as path from "path";
 import * as fs from "fs";
 import * as express from "express";
 import * as async from "async";
+import * as mkdirp from "mkdirp";
 import getLocalizedFilename from "./getLocalizedFilename";
 
 function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".") !== -1 || pluginName === "node_modules"; }
 
 export default function(mainApp: express.Express, buildApp: express.Express, callback: Function) {
-  async.eachSeries(fs.readdirSync(SupCore.systemsPath), (systemFolderName, cb) => {
+  const rwDirs = fs.readdirSync(SupCore.rwSystemsPath).map((systemFolderName) => {
+    return [SupCore.rwSystemsPath, systemFolderName];
+  });
+  const dirs = fs.readdirSync(SupCore.systemsPath).map((systemFolderName) => {
+    return [SupCore.systemsPath, systemFolderName];
+  });
+  async.eachSeries(rwDirs.concat(dirs), (pathAndFolderName, cb) => {
+    const systemFolderName = pathAndFolderName[1];
     if (systemFolderName.indexOf(".") !== -1) { cb(); return; }
 
-    const systemPath = path.join(SupCore.systemsPath, systemFolderName);
+    const systemsPath = pathAndFolderName[0];
+    const systemPath = path.join(systemsPath, systemFolderName);
+    const rwSystemPath = path.join(SupCore.rwSystemsPath, systemFolderName);
     if (!fs.statSync(systemPath).isDirectory()) { cb(); return; }
+    const pkgJSONFile = path.join(systemPath, "package.json");
+    if (!fs.existsSync(pkgJSONFile)) { cb(); return; }
 
-    const systemId = JSON.parse(fs.readFileSync(path.join(SupCore.systemsPath, systemFolderName, "package.json"), { encoding: "utf8" })).superpowers.systemId;
-    SupCore.system = SupCore.systems[systemId] = new SupCore.System(systemId, systemFolderName);
+    const systemId = JSON.parse(fs.readFileSync(pkgJSONFile, { encoding: "utf8" })).superpowers.systemId;
+    if (systemId in SupCore.systems) {  cb(); return; }
+    SupCore.system = SupCore.systems[systemId] = new SupCore.System(systemsPath, systemId, systemFolderName);
 
     // Expose public stuff
-    try { fs.mkdirSync(`${systemPath}/public`); } catch (err) { /* Ignore */ }
+    try { fs.mkdirSync(`${rwSystemPath}/public`); } catch (err) { /* Ignore */ }
     mainApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
     buildApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
 
@@ -25,7 +38,12 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     let templatesList: string[] = [];
     const templatesFolder = `${systemPath}/public/templates`;
     if (fs.existsSync(templatesFolder)) templatesList = fs.readdirSync(templatesFolder);
-    fs.writeFileSync(`${systemPath}/public/templates.json`, JSON.stringify(templatesList, null, 2));
+    const systemPublicDir = `${rwSystemPath}/public`;
+    mkdirp.sync(systemPublicDir);
+    const templatesFile = `${systemPublicDir}/templates.json`;
+    fs.writeFileSync(templatesFile, JSON.stringify(templatesList, null, 2));
+    mainApp.use(`/systems/${systemId}/templates.json`, express.static(templatesFile));
+    buildApp.use(`/systems/${systemId}/templates.json`, express.static(templatesFile));
 
     // Load server-side system module
     const systemServerModulePath = `${systemPath}/server`;
@@ -37,12 +55,18 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
 
     // Load plugins
     const pluginsInfo = SupCore.system.pluginsInfo = loadPlugins(systemId, `${systemPath}/plugins`, mainApp, buildApp);
-    fs.writeFileSync(`${systemPath}/public/plugins.json`, JSON.stringify(pluginsInfo, null, 2));
+    const pluginsFile = `${systemPublicDir}/plugins.json`;
+    fs.writeFileSync(pluginsFile, JSON.stringify(pluginsInfo, null, 2));
+    mainApp.use(`/systems/${systemId}/plugins.json`, express.static(pluginsFile));
+    buildApp.use(`/systems/${systemId}/plugins.json`, express.static(pluginsFile));
 
     cb();
   }, () => {
     const systemsInfo: SupCore.SystemsInfo = { list: Object.keys(SupCore.systems) };
-    fs.writeFileSync(`${__dirname}/../public/systems.json`, JSON.stringify(systemsInfo, null, 2));
+    const systemsFile = `${SupCore.rwSystemsPath}/systems.json`;
+    fs.writeFileSync(systemsFile, JSON.stringify(systemsInfo, null, 2));
+    mainApp.use("/systems.json", express.static(systemsFile));
+    buildApp.use("/systems.json", express.static(systemsFile));
 
     SupCore.system = null;
     callback();
