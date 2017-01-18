@@ -1,0 +1,52 @@
+{
+  "activeLanguage": "한국어",
+
+  "namePatternDescription": "다음 문자는 사용이 불가능함: \\, /, :, *, ?, \", <, >, |, [, ].",
+  "none": "(없음)",
+  "searchPlaceholder": "에셋에서 찾기",
+
+  "actions": {
+    "applyChanges": "변경 적용",
+    "applyChangesWithErrors": "변경 적용 중 에러 발생",
+    "cancel": "취소",
+    "clear": "지움",
+    "close": "닫기",
+    "create": "생성",
+    "delete": "삭제",
+    "download": "다운로드",
+    "duplicate": "복제",
+    "export": "내보내기",
+    "filter": "필터",
+    "import": "불러오기",
+    "new": "새로 만들기",
+    "open": "열기",
+    "rename": "이름변경",
+    "restore": "복구",
+    "save": "저장",
+    "search": "검색",
+    "select": "선택",
+    "skip": "넘어가기",
+    "update": "업데이트",
+    "upload": "업로드",
+
+    "cut": "자르기",
+    "copy": "복사",
+    "paste": "붙여넣기"
+  },
+
+  "states": { 
+    "disabled": "꺼짐",
+    "enabled": "켜짐",
+    "loading": "불러오는중...",
+    "connecting": "연결중...",
+    "saving": "저장중..."
+  },
+  
+  "hotkeys": {
+    "control": "Ctrl",
+    "command": "Cmd",
+    "shift": "Shift",
+    "delete": "Del",
+    "return": "엔터(리턴)"
+  }
+}

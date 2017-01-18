@@ -1,0 +1,47 @@
+{
+  "title": "프로젝트",
+  "header": {
+    "goToHub": "허브로 이동",
+    "buildDisabled": "프로젝트 빌드 (기술상의 이유로 Superpwoers 앱에서만 동작)",
+    "stop": "프로젝트 중지",
+    "debug": "프로젝트 디버그 (F6)",
+    "run": "프로젝트 실행 (F5)",
+    "notifications": {
+      "enable": "눌러서 알림을 켜세요",
+      "disable": "눌러서 알람을 끄세요",
+      "new": "\"${projectName}\" 프로젝트에 새 채팅 메세지가 있습니다"
+    }
+  },
+  "treeView": {
+    "openInNewWindow": "새 창에서 열기",
+    "newAsset": {
+      "title": "새 에셋",
+      "prompt": "새 에셋의 형식을 선택하고 이름을 입력하세요.",
+      "placeholder": "에셋 이름 (부가 요소)",
+      "openAfterCreation": "생성 후 열기"
+    },
+    "newFolder": {
+      "title": "새 폴더",
+      "prompt": "새 폴더의 이름을 입력하세요.",
+      "placeholder": "폴더 이름",
+      "initialValue": "폴더"
+    },
+    "renamePrompt": "에셋의 새 이름을 입력하세요.",
+    "duplicatePrompt": "새 에셋 또는 폴더의 이름을 입력하세요.",
+    "trash": {
+      "title": "버리기",
+      "prompt": "선택 항목을 버리기 원하십니까?",
+      "warnBrokenDependency": "${entryName}은(는) ${dependentEntryNames}에서 사용중."
+    }
+  },
+  "build": {
+    "title": "프로젝트 빌드",
+    "build": "빌드"
+  },
+  "revision": {
+    "title": "리비전",
+    "prompt": "새 리비전의 이름을 입력하세요.",
+    "current": "현재 버전",
+    "restoring": "복구중..."
+  }
+}

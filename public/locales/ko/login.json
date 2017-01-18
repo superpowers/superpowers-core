@@ -1,0 +1,8 @@
+{
+  "title": "로그인",
+  "welcome": "Superpowers 서버에 오신 것을 환영합니다!",
+  "password": "서버 암호",
+  "username": "사용자 이름",
+  "usernamePatternDescription": "입력 가능한 문자: 알파벳, 숫자, 빼기(-), 밑줄(_)",
+  "logIn": "접속"
+}
