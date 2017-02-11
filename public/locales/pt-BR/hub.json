@@ -1,6 +1,11 @@
 {
+  "title": "Hub",
   "serverAddress": "${hostname} na porta ${port}",
   "newProject": {
+    "noSystemError": {
+      "header": "Não é possível criar o projeto",
+      "message": "O servidor não possui sistema algum instalado ainda. Por favor, instale algum através da aba Configurações do Servidor."
+    },
     "title": "Novo projeto",
     "prompt": "Insira um nome e selecione um tipo para o novo projeto.",
     "namePlaceholder": "Nome do projeto",
@@ -9,7 +14,7 @@
       "title": "Projeto vazio",
       "description": "Um projeto vazio para começar do zero."
     },
-    "autoOpen": "Abrir após a criação"
+    "autoOpen": "Abrir o projeto após criá-lo"
   },
   "editDetails": {
     "title": "Alterar detalhes",

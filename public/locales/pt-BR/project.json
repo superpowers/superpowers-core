@@ -1,8 +1,8 @@
 {
+  "title": "Projeto",
   "header": {
     "goToHub": "Ir para o hub",
-    "publish": "Publicar projeto",
-    "publishDisabled": "Publicar projeto (funciona apenas quando executado diretamente no Superpowers, por razões técnicas)",
+    "buildDisabled": "Publicar projeto (funciona apenas quando executado diretamente no Superpowers, por razões técnicas)",
     "stop": "Parar projeto",
     "debug": "Depurar projeto (F6)",
     "run": "Executar projeto (F5)",
@@ -26,13 +26,22 @@
       "placeholder": "Insira um nome",
       "initialValue": "Pasta"
     },
-    "renamePrompt": "Insira um novo nome para este asset.",
-    "duplicatePrompt": "Insira um nome para este novo asset.",
+    "renamePrompt": "Insira um novo nome para o asset.",
+    "duplicatePrompt": "Insira um nome para o novo asset ou pasta.",
     "trash": {
       "title": "Lixeira",
       "prompt": "Você certeza que deseja enviar os itens selecionados para a lixeira?",
       "warnBrokenDependency": "${entryName} está sendo usado por ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Pesquisar por assets"
+    }
+  },
+  "build": {
+    "title": "Publicar projeto",
+    "build": "Publicar"
+  },
+  "revision": {
+    "title": "Revisão",
+    "prompt": "Insira um nome para a nova revisão.",
+    "current": "Atual",
+    "restoring": "Restaurando..."
   }
 }
