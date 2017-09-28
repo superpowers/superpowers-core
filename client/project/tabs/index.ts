@@ -23,6 +23,8 @@ export function start() {
 
 export function onActivate(tabElement: HTMLLIElement) {
   const activeTab = tabStrip.tabsRoot.querySelector(".active");
+  if (activeTab === tabElement) return;
+
   if (activeTab != null) {
     activeTab.classList.remove("active");
 
