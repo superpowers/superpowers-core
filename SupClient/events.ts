@@ -40,7 +40,9 @@ let isBackspaceDown = false;
 
 function onKeyDown(event: KeyboardEvent) {
   // F12
-  if (event.keyCode === 123) sendHotkey("devtools");
+  if (event.keyCode === 123) {
+    sendHotkey("devtools"); return;
+  }
 
   // Backspace
   if (event.keyCode === 8) isBackspaceDown = true;
@@ -53,16 +55,18 @@ function onKeyDown(event: KeyboardEvent) {
     event.preventDefault();
     if (event.shiftKey) sendHotkey("newFolder");
     else sendHotkey("newAsset");
+
+    return;
   }
 
   // Ctrl+O or Ctrl+P
   if ((event.keyCode === 79 || event.keyCode === 80) && ctrlOrCmd) {
-    event.preventDefault(); sendHotkey("searchEntry");
+    event.preventDefault(); sendHotkey("searchEntry"); return;
   }
 
   // Ctrl+W
   if (event.keyCode === 87 && ctrlOrCmd) {
-    event.preventDefault(); sendHotkey("closeTab");
+    event.preventDefault(); sendHotkey("closeTab"); return;
   }
 
   // Ctrl+Tab or Ctrl+Shift+Tab
@@ -70,27 +74,47 @@ function onKeyDown(event: KeyboardEvent) {
     event.preventDefault();
     if (event.shiftKey) sendHotkey("previousTab");
     else sendHotkey("nextTab");
+
+    return;
   }
 
   // F1
   if (event.keyCode === 112) {
     event.preventDefault();
     if (helpCallback != null) helpCallback();
+
+    return;
   }
 
   // F5 or Cmd+P
   if (event.keyCode === 116 || (event.keyCode === 80 && event.metaKey)) {
-    event.preventDefault(); sendHotkey("run");
+    event.preventDefault(); sendHotkey("run"); return;
   }
 
   // F6 or Cmd+Shift-P
   if (event.keyCode === 117 || (event.keyCode === 80 && event.metaKey && event.shiftKey)) {
-    event.preventDefault(); sendHotkey("debug");
+    event.preventDefault(); sendHotkey("debug"); return;
+  }
+
+  // Forward message to active tab (iframe) when event comes from the main window and is not handled
+  if (window.top === window) {
+    window.postMessage({
+      type: "forwardKeyboardEventToActiveTab", eventType: "keydown", keyCode: event.keyCode,
+      ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey, metaKey: event.metaKey
+    }, window.location.origin);
   }
 }
 
 function onKeyUp(event: KeyboardEvent) {
   if (event.keyCode === 8 /* Backspace */) isBackspaceDown = false;
+
+  // Forward message to active tab (iframe) when event comes from the main window and is not handled
+  if (window.top === window) {
+    window.postMessage({
+      type: "forwardKeyboardEventToActiveTab", eventType: "keyup", keyCode: event.keyCode,
+      ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey, metaKey: event.metaKey
+    }, window.location.origin);
+  }
 }
 
 function onBeforeUnload(event: BeforeUnloadEvent) {

@@ -48,6 +48,7 @@ function onMessage(event: any) {
     case "setEntryRevisionDisabled": tabsAssets.setRevisionDisabled(event.data.id, event.data.disabled); break;
     case "openTool": tabsTools.open(event.data.name, event.data.state); break;
     case "error": onWindowDevError(); break;
+    case "forwardKeyboardEventToActiveTab": onForwardKeyboardEventToActiveTab(event.data.eventType, event.data.ctrlKey, event.data.altKey, event.shiftKey, event.metaKey, event.data.keyCode); break;
   }
 }
 
@@ -85,4 +86,13 @@ function onClickToggleNotifications(event: any) {
     event.target.classList.add("disabled");
     event.target.title = SupClient.i18n.t("project:header.notifications.enable");
   }
+}
+
+function onForwardKeyboardEventToActiveTab(eventType: string, ctrlKey: boolean, altKey: boolean, shiftKey: boolean, metaKey: boolean, keyCode: number) {
+  const event = new KeyboardEvent(eventType, { ctrlKey, altKey, shiftKey, metaKey });
+  Object.defineProperty(event, "keyCode", { value: keyCode });
+
+  const activePaneElt = tabs.panesElt.querySelector(".pane-container.active") as HTMLDivElement;
+  const activeIframe = activePaneElt.querySelector("iframe") as HTMLIFrameElement;
+  activeIframe.contentDocument.dispatchEvent(event);
 }
