@@ -28,6 +28,7 @@ export function hasDuplicateName(id: string, name: string, siblings: Array<{ id:
 
 export function ensureUniqueName(id: string, name: string, siblings: Array<{ id: string; name: string; }>): string {
   name = name.trim();
+  let candidateName = name;
   let nameNumber = 1;
 
   // Look for an already exiting number at the end of the name
@@ -36,8 +37,6 @@ export function ensureUniqueName(id: string, name: string, siblings: Array<{ id:
     name = name.substring(0, name.length - matches[0].length);
     nameNumber = parseInt(matches[0], 10);
   }
-
-  let candidateName = name;
 
   while (hasDuplicateName(id, candidateName, siblings)) candidateName = `${name}${++nameNumber}`;
   return candidateName;
