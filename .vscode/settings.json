@@ -5,8 +5,10 @@
 
   "files.exclude": {
     ".vscode": true,
-    "builds/**": true
-  },
+    "builds/**": true,
+    "**/*.js": { "when": "$(basename).ts"},
+    "**/*.js.map": true
+},
   "search.exclude": {
     "**/node_modules": true,
     "projects/**": true,
