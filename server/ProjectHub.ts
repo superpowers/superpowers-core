@@ -24,7 +24,7 @@ export default class ProjectHub {
     this.projectsPath = path.join(dataPath, "projects");
     this.buildsPath = path.join(dataPath, "builds");
 
-    const serveProjects = (callback: ErrorCallback<NodeJS.ErrnoException>) => {
+    const serveProjects = (callback: async.ErrorCallback<NodeJS.ErrnoException>) => {
       async.eachSeries(fs.readdirSync(this.projectsPath), (folderName: string, cb: (err: Error) => any) => {
         if (folderName.indexOf(".") !== -1) { cb(null); return; }
         this.loadingProjectFolderName = folderName;
