@@ -152,7 +152,7 @@ export default class ProjectServer {
     // prepareAssets() and prepareResources() is called after serve()
     // because badges rely on this.io being setup
     const prepareAssets = (callback: (err: Error) => any) => {
-      async.each(Object.keys(this.data.entries.byId), (assetId, cb) => {
+      async.eachLimit(Object.keys(this.data.entries.byId), 512, (assetId, cb) => {
         // Ignore folders
         if (this.data.entries.byId[assetId].type == null) { cb(); return; }
 
