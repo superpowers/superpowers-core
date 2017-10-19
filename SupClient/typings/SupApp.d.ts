@@ -3,6 +3,7 @@ type ChooseFileCallback = (filename: string) => void;
 
 declare namespace SupApp {
   export function onMessage(messageType: string, callback: Function): void;
+  export function sendMessage(windowId: number, message: string, args?: any[]): void;
 
   export function getCurrentWindow(): Electron.BrowserWindow;
   export function showMainWindow(): void;

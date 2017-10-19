@@ -8,12 +8,12 @@ document.addEventListener("keydown", (event) => {
 
 let socket: SocketIOClient.Socket;
 
-SupApp.onMessage("build", (buildSetup: BuildSetup) => {
+SupApp.onMessage("build", (buildSetup: BuildSetup, projectWindowId: number) => {
   socket = SupClient.connect(SupClient.query.project);
   socket.on("welcome", (clientId: number, config: { buildPort: number; supportsServerBuild: boolean; }) => {
     loadPlugins(buildSetup, () => {
       const buildPlugin = SupClient.getPlugins<SupClient.BuildPlugin>("build")[buildSetup.buildPluginName];
-      buildPlugin.content.build(socket, buildSetup.settings, config.buildPort);
+      buildPlugin.content.build(socket, buildSetup.settings, projectWindowId);
     });
   });
 });

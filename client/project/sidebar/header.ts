@@ -110,13 +110,28 @@ function destroyRunWindow() {
   }
 }
 
+let buildWindow: Electron.BrowserWindow;
+
 function openStartBuildDialog() {
   new StartBuildDialog(entries, entriesTreeView.widget, (buildSetup) => {
     if (buildSetup == null) return;
 
-    const buildWindow = SupApp.openWindow(`${window.location.origin}/build/?project=${SupClient.query.project}`, { size: { width: 600, height: 150 }, resizable: false });
-    buildWindow.webContents.addListener("did-finish-load", () => {
-      buildWindow.webContents.send("sup-app-message-build", buildSetup);
-    });
+    if (buildWindow != null) {
+      buildWindow.removeListener("closed", onCloseBuildWindow);
+      buildWindow.close();
+      buildWindow = null;
+    }
+
+    buildWindow = SupApp.openWindow(`${window.location.origin}/build/?project=${SupClient.query.project}`, { size: { width: 600, height: 150 }, resizable: false });
+    buildWindow.on("closed", onCloseBuildWindow);
+
+    buildButton.disabled = true;
+    SupApp.onMessage("build-finished", () => { buildButton.disabled = false; });
+    buildWindow.webContents.addListener("did-finish-load", () => { buildWindow.webContents.send("sup-app-message-build", buildSetup, SupApp.getCurrentWindow().id); });
   });
+}
+
+function onCloseBuildWindow() {
+  buildWindow = null;
+  buildButton.disabled = false;
 }
