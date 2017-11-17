@@ -111,6 +111,7 @@ function destroyRunWindow() {
 }
 
 let buildWindow: Electron.BrowserWindow;
+SupApp.onMessage("build-finished", () => { buildButton.disabled = false; });
 
 function openStartBuildDialog() {
   new StartBuildDialog(entries, entriesTreeView.widget, (buildSetup) => {
@@ -126,7 +127,6 @@ function openStartBuildDialog() {
     buildWindow.on("closed", onCloseBuildWindow);
 
     buildButton.disabled = true;
-    SupApp.onMessage("build-finished", () => { buildButton.disabled = false; });
     buildWindow.webContents.addListener("did-finish-load", () => { buildWindow.webContents.send("sup-app-message-build", buildSetup, SupApp.getCurrentWindow().id); });
   });
 }
