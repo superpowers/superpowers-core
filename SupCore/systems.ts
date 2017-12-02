@@ -12,12 +12,12 @@ export class System {
   pluginsInfo: SupCore.PluginsInfo;
   serverBuild: (server: ProjectServer, buildPath: string, callback: (err: string) => void) => void;
 
-  constructor(public id: string, public folderName: string) {
+  constructor(public systemPath: string, public id: string, public folderName: string) {
     this.data = new SystemData(this);
   }
 
   requireForAllPlugins(filePath: string) {
-    const pluginsPath = path.resolve(`${SupCore.systemsPath}/${this.folderName}/plugins`);
+    const pluginsPath = path.resolve(`${this.systemPath}/${this.folderName}/plugins`);
 
     for (const pluginAuthor of fs.readdirSync(pluginsPath)) {
       const pluginAuthorPath = `${pluginsPath}/${pluginAuthor}`;

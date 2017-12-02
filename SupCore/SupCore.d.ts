@@ -322,13 +322,14 @@ declare namespace SupCore {
   }
 
   class System {
+    systemPath: string;
     id: string;
     folderName: string;
     data: SystemData;
     pluginsInfo: PluginsInfo;
     serverBuild: (server: ProjectServer, buildPath: string, callback: (err: string) => void) => void;
 
-    constructor(id: string, folderName: string);
+    constructor(systemPath: string, id: string, folderName: string);
     requireForAllPlugins(filePath: string): void;
     registerPlugin<T>(contextName: string, pluginName: string, plugin: T): void;
     getPlugins<T>(contextName: string): { [pluginName: string]: T };
@@ -337,6 +338,7 @@ declare namespace SupCore {
   // All loaded systems (server-side only)
   export const systems: { [system: string]: System };
   export const systemsPath: string;
+  export const rwSystemsPath: string;
   // The currently active system
   export let system: System;
 

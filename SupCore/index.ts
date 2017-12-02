@@ -3,9 +3,11 @@ import * as Data from "./Data";
 export { Data };
 
 export let systemsPath: string;
+export let rwSystemsPath: string;
 
-export function setSystemsPath(path: string) {
+export function setSystemsPath(path: string, rwPath: string) {
   systemsPath = path;
+  rwSystemsPath = rwPath;
 }
 
 export * from "./systems";

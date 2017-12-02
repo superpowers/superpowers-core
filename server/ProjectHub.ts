@@ -19,10 +19,10 @@ export default class ProjectHub {
   serversById: { [serverId: string]: ProjectServer } = {};
   loadingProjectFolderName: string;
 
-  constructor(globalIO: SocketIO.Server, dataPath: string, callback: (err: Error) => any) {
+  constructor(globalIO: SocketIO.Server, dataPath: string, rwDataPath: string, callback: (err: Error) => any) {
     this.globalIO = globalIO;
-    this.projectsPath = path.join(dataPath, "projects");
-    this.buildsPath = path.join(dataPath, "builds");
+    this.projectsPath = path.join(rwDataPath, "projects");
+    this.buildsPath = path.join(rwDataPath, "builds");
 
     const serveProjects = (callback: async.ErrorCallback<NodeJS.ErrnoException>) => {
       async.eachSeries(fs.readdirSync(this.projectsPath), (folderName: string, cb: (err: Error) => any) => {
