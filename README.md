@@ -5,6 +5,7 @@
 [![Gitter](https://img.shields.io/gitter/room/superpowers/dev.svg)](https://gitter.im/superpowers/dev)  
 [![Patreon](https://img.shields.io/badge/patreon-support%20us-brightgreen.svg)](https://www.patreon.com/SparklinLabs)
 [![Twitter](https://img.shields.io/twitter/follow/SuperpowersDev.svg?style=social)](https://twitter.com/SuperpowersDev)
+[![Help Contribute to Open Source](https://www.codetriage.com/superpowers/superpowers-core/badges/users.svg)](https://www.codetriage.com/superpowers/superpowers-core)
 
 [Website](http://superpowers-html5.com/) —
 [Download](https://sparklinlabs.itch.io/superpowers) —
