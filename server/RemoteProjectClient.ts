@@ -111,7 +111,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         if (err != null) { callback(err, null); return; }
         this.server.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
 
-        async.each(entryToDuplicate.children, (child, cb) => {
+        async.eachSeries(entryToDuplicate.children, (child, cb) => {
           this.onDuplicateEntry(child.name, child.id, { parentId: entry.id, index: entryToDuplicate.children.indexOf(child) }, (err: string, duplicatedId?: string) => {
             if(err == null) cb(null);
             else cb(new Error(err));
