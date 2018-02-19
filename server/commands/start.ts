@@ -154,8 +154,8 @@ export default function start(serverDataPath: string) {
   });
 
   if (createBuildApp) {
-      buildHttpServer = http.createServer(buildApp);
-      buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
+    buildHttpServer = http.createServer(buildApp);
+    buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
   }
 
   loadSystems(mainApp, createBuildApp ? buildApp : null, onSystemsLoaded);
@@ -276,9 +276,9 @@ function serveSystemSupCore(req: express.Request, res: express.Response) {
 }
 
 function logServerStart(hostname: string) {
-    SupCore.log(`Main server started on port ${config.server.mainPort}, build server started on port ${config.server.buildPort}.`);
-    if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
-    if (process != null && process.send != null) process.send({ type: "started" });
+  SupCore.log(`Main server started on port ${config.server.mainPort}, build server started on port ${config.server.buildPort}.`);
+  if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
+  if (process != null && process.send != null) process.send({ type: "started" });
 }
 
 function onSystemsLoaded() {
@@ -314,7 +314,7 @@ function onExit() {
   if (isQuitting) return;
   isQuitting = true;
   mainHttpServer.close();
-  if(buildHttpServer != null) buildHttpServer.close();
+  if (buildHttpServer != null) buildHttpServer.close();
 
   if (hub == null) {
     process.exit(0);
