@@ -125,14 +125,19 @@ export default function start(serverDataPath: string) {
     store: sessionSettings.store
   }));
 
-  // Build HTTP server
-  let createBuildApp = config.server.mainPort !== config.server.buildPort;
-  buildApp = createBuildApp ? express() : mainApp;
+  // Build HTTP server or use the existing main one when the ports are the same
+  if (config.server.mainPort !== config.server.buildPort) {
+    buildApp = express();
+    buildApp.get("/", redirectToHub);
+    buildApp.use("/", express.static(`${__dirname}/../../public`));
 
-  if(createBuildApp) buildApp.get("/", redirectToHub);
+    buildHttpServer = http.createServer(buildApp);
+    buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
+  } else {
+    buildApp = mainApp;
+  }
+
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
-
-  if(createBuildApp) buildApp.use("/", express.static(`${__dirname}/../../public`));
 
   buildApp.use((req, res, next) => {
     const originValue = req.get("origin");
@@ -153,12 +158,7 @@ export default function start(serverDataPath: string) {
     res.sendFile(path.join(projectServer.buildsPath, buildId, req.params[0]));
   });
 
-  if (createBuildApp) {
-    buildHttpServer = http.createServer(buildApp);
-    buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
-  }
-
-  loadSystems(mainApp, createBuildApp ? buildApp : null, onSystemsLoaded);
+  loadSystems(mainApp, buildApp, onSystemsLoaded);
 
   // Save on exit and handle crashes
   process.on("SIGTERM", onExit);
@@ -283,7 +283,7 @@ function logServerStart(hostname: string) {
 
 function onSystemsLoaded() {
   mainApp.use(handle404);
-  buildApp.use(handle404);
+  if (buildApp !== mainApp) buildApp.use(handle404);
 
   // Project hub
   hub = new ProjectHub(io, dataPath, (err: Error) => {
