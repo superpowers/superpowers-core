@@ -126,12 +126,13 @@ export default function start(serverDataPath: string) {
   }));
 
   // Build HTTP server
-  buildApp = express();
+  let createBuildApp = config.server.mainPort !== config.server.buildPort;
+  buildApp = createBuildApp ? express() : mainApp;
 
-  buildApp.get("/", redirectToHub);
+  if(createBuildApp) buildApp.get("/", redirectToHub);
   buildApp.get("/systems/:systemId/SupCore.js", serveSystemSupCore);
 
-  buildApp.use("/", express.static(`${__dirname}/../../public`));
+  if(createBuildApp) buildApp.use("/", express.static(`${__dirname}/../../public`));
 
   buildApp.use((req, res, next) => {
     const originValue = req.get("origin");
@@ -152,10 +153,12 @@ export default function start(serverDataPath: string) {
     res.sendFile(path.join(projectServer.buildsPath, buildId, req.params[0]));
   });
 
-  buildHttpServer = http.createServer(buildApp);
-  buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
+  if (createBuildApp) {
+      buildHttpServer = http.createServer(buildApp);
+      buildHttpServer.on("error", onHttpServerError.bind(null, config.server.buildPort));
+  }
 
-  loadSystems(mainApp, buildApp, onSystemsLoaded);
+  loadSystems(mainApp, createBuildApp ? buildApp : null, onSystemsLoaded);
 
   // Save on exit and handle crashes
   process.on("SIGTERM", onExit);
@@ -272,6 +275,12 @@ function serveSystemSupCore(req: express.Request, res: express.Response) {
   res.sendFile("SupCore.js", { root: `${__dirname}/../../public` });
 }
 
+function logServerStart(hostname: string) {
+    SupCore.log(`Main server started on port ${config.server.mainPort}, build server started on port ${config.server.buildPort}.`);
+    if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
+    if (process != null && process.send != null) process.send({ type: "started" });
+}
+
 function onSystemsLoaded() {
   mainApp.use(handle404);
   buildApp.use(handle404);
@@ -285,11 +294,13 @@ function onSystemsLoaded() {
     const hostname = (config.server.password.length === 0) ? "localhost" : "";
 
     mainHttpServer.listen(config.server.mainPort, hostname, () => {
-      buildHttpServer.listen(config.server.buildPort, hostname, () => {
-        SupCore.log(`Main server started on port ${config.server.mainPort}, build server started on port ${config.server.buildPort}.`);
-        if (hostname === "localhost") SupCore.log("NOTE: Setup a password to allow other people to connect to your server.");
-        if (process != null && process.send != null) process.send({ type: "started" });
-      });
+      if (buildHttpServer != null) {
+        buildHttpServer.listen(config.server.buildPort, hostname, () => {
+          logServerStart(hostname);
+        });
+      } else {
+        logServerStart(hostname);
+      }
     });
   });
 }
@@ -303,7 +314,7 @@ function onExit() {
   if (isQuitting) return;
   isQuitting = true;
   mainHttpServer.close();
-  buildHttpServer.close();
+  if(buildHttpServer != null) buildHttpServer.close();
 
   if (hub == null) {
     process.exit(0);

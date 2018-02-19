@@ -1,4 +1,4 @@
-const port = (window.location.port.length === 0) ? "80" : window.location.port;
+const port = (window.location.port.length === 0) ? (window.location.protocol === "https" ? "443" : "80") : window.location.port;
 
 const connectingElt = document.querySelector(".connecting") as HTMLDivElement;
 const formElt = document.querySelector(".login") as HTMLDivElement;

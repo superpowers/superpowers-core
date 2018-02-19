@@ -19,7 +19,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     // Expose public stuff
     try { fs.mkdirSync(`${systemPath}/public`); } catch (err) { /* Ignore */ }
     mainApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
-    buildApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
+    if(buildApp != null) buildApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
 
     // Write templates list
     let templatesList: string[] = [];
@@ -131,15 +131,17 @@ function loadPlugins (systemId: string, pluginsPath: string, mainApp: express.Ex
       });
 
       for (const app of [mainApp, buildApp]) {
-        app.get(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}/bundles/*.js`, (req, res) => {
-          const bundleFile = req.path.split("/bundles/")[1];
-          const bundlePath = path.join(pluginPath, "public/bundles", bundleFile);
-          fs.exists(bundlePath, (exists) => {
-            if (exists) res.sendFile(bundlePath);
-            else res.send("");
-          });
-        });
-        app.use(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+        if (app != null) {
+            app.get(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}/bundles/*.js`, (req, res) => {
+                const bundleFile = req.path.split("/bundles/")[1];
+                const bundlePath = path.join(pluginPath, "public/bundles", bundleFile);
+                fs.exists(bundlePath, (exists) => {
+                    if (exists) res.sendFile(bundlePath);
+                    else res.send("");
+                });
+            });
+            app.use(`/systems/${systemId}/plugins/${pluginAuthor}/${pluginName}`, express.static(`${pluginPath}/public`));
+        }
       }
     });
   });
