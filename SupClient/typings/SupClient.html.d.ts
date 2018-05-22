@@ -9,7 +9,7 @@ declare namespace SupClient {
   export function html(tag: "label", options?: HTMLLabelOptions): HTMLLabelElement;
   export function html(tag: "textarea", options?: HTMLInputOptions): HTMLTextAreaElement;
   export function html(tag: "select", options?: HTMLInputOptions): HTMLSelectElement;
-  export function html(tag: "option", options?: HTMLOptionOptions): HTMLOptGroupElement;
+  export function html(tag: "option", options?: HTMLOptionOptions): HTMLOptionElement;
   export function html(tag: "optgroup", options?: HTMLOptionOptions): HTMLOptGroupElement;
   export function html(tag: "ol", options?: HTMLOptions): HTMLOListElement;
   export function html(tag: "ul", options?: HTMLOptions): HTMLUListElement;
