@@ -344,11 +344,13 @@ declare namespace SupCore {
     addListener(event: string, listener: Function): this;
     on(event: string, listener: Function): this;
     once(event: string, listener: Function): this;
+    off(event: string, listener: Function): this;
     removeListener(event: string, listener: Function): this;
     removeAllListeners(event?: string): this;
     setMaxListeners(n: number): this;
     getMaxListeners(): number;
     listeners(event: string): Function[];
+    rawListeners(event: string): Function[];
     emit(event: string, ...args: any[]): boolean;
     listenerCount(type: string): number;
     prependListener(event: string | symbol, listener: Function): this;

@@ -88,7 +88,7 @@ function initPlugin(systemFolderName: string, systemId: string, pluginName: stri
   const tsconfigJSON = JSON.stringify({
     "compilerOptions": {
       "module": "commonjs",
-      "target": "es5",
+      "target": "es6",
       "noImplicitAny": true,
       "typeRoots": [ "../../../../../node_modules/@types" ]
     },
