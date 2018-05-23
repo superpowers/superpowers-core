@@ -42,7 +42,7 @@
     "gulp": "^3.9.1",
     "gulp-concat-css": "^2.2.0",
     "gulp-jade": "^1.1.0",
-    "gulp-rename": "^1.2.3",
+    "gulp-rename": "1.2.2",
     "gulp-stylus": "^2.7.0",
     "gulp-tslint": "^4.3.1",
     "gulp-typescript": "4.0.2",
