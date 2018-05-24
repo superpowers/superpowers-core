@@ -166,8 +166,9 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         if (oldParent == null || oldParent.children.length > 0) return;
 
         const oldParentPath = path.join(this.server.projectPath, `assets/${this.server.data.entries.getStoragePathFromId(oldParent.id)}`);
-        fs.readdir(oldParentPath, (err, files) => { if (files != null && files.length === 0) fs.rmdir(oldParentPath); });
+        fs.readdir(oldParentPath, (err, files) => { if (files != null && files.length === 0) fs.rmdirSync(oldParentPath); });
       });
+
       this.server.io.in("sub:entries").emit("move:entries", id, parentId, actualIndex);
       callback(null);
     });
