@@ -26,7 +26,7 @@ export function start() {
   sidebar.openInNewWindowButton.addEventListener("click", onOpenInNewWindowClick);
 
   // Hot-keys
-  document.addEventListener("keydown", (event) => {
+  widget.treeRoot.addEventListener("keydown", (event) => {
     if (document.querySelector(".dialog") != null) return;
 
     if (event.keyCode === 113) { // F2
