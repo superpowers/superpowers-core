@@ -26,7 +26,7 @@ Here's the cool thing: Superpowers itself is actually engine-agnostic.
 It's just a piece of software for collaborating on projects that can be extended with new systems and plugins!
 
  * [Superpowers Game](https://github.com/superpowers/superpowers-game) — Make 2D+3D games with TypeScript, powered by Three.js
- * [Superpowers Web](http://github.com/superpowers/superpowers-web) — Make static websites with Jade and Stylus
+ * [Superpowers Web](http://github.com/superpowers/superpowers-web) — Make static websites with Pug and Stylus
  * [Superpowers LÖVE](https://github.com/superpowers/superpowers-love2d) — Make LÖVE 2D games with Lua
 
 Learn [how to extend Superpowers yourself](http://docs.superpowers-html5.com/en/development/extending-superpowers).

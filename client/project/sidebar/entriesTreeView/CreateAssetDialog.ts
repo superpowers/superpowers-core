@@ -97,9 +97,9 @@ export default class CreateAssetDialog extends SupClient.Dialogs.BaseDialog<Crea
     } else {
       this.selectedAssetType = this.treeView.selectedNodes[0].dataset["assetType"];
     }
-  };
+  }
 
   private onTreeViewActivate = () => {
     this.submit();
-  };
+  }
 }

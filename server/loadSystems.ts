@@ -20,7 +20,7 @@ export default function(mainApp: express.Express, buildApp: express.Express, cal
     try { fs.mkdirSync(`${systemPath}/public`); } catch (err) { /* Ignore */ }
 
     mainApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
-    if(buildApp !== mainApp) buildApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
+    if (buildApp !== mainApp) buildApp.use(`/systems/${systemId}`, express.static(`${systemPath}/public`));
 
     // Write templates list
     let templatesList: string[] = [];

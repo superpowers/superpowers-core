@@ -41,7 +41,7 @@ SupClient.i18n.load([{ root: "/", name: "project" }, { root: "/", name: "badges"
 
 window.addEventListener("message", onMessage);
 function onMessage(event: any) {
-  switch(event.data.type) {
+  switch (event.data.type) {
     case "chat": homeTab.onMessageChat(event.data.content); break;
     case "hotkey": onMessageHotKey(event.data.content); break;
     case "openEntry": tabsAssets.open(event.data.id, event.data.state); break;

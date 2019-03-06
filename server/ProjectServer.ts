@@ -231,7 +231,7 @@ export default class ProjectServer {
     for (const dependentAssetId of dependentAssetIds) {
       let missingAssetIds = [ missingAssetId ];
       const existingBadge = this.data.entries.badgesByEntryId[dependentAssetId].byId["missingDependencies"];
-      if (existingBadge != null) { missingAssetIds = missingAssetIds.concat(existingBadge.data.missingAssetIds); };
+      if (existingBadge != null) { missingAssetIds = missingAssetIds.concat(existingBadge.data.missingAssetIds); }
       this.setBadge(dependentAssetId, "missingDependencies", "error", { missingAssetIds });
     }
   }
@@ -247,7 +247,7 @@ export default class ProjectServer {
     const assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(id)}`);
     const saveCallback = item.save.bind(item, assetPath);
     this.scheduleSave(saveDelay, `assets:${id}`, saveCallback);
-  };
+  }
 
   private onAssetLoaded = (assetId: string, item: SupCore.Data.Base.Asset) => {
     item.on("change", () => { this.scheduleAssetSave(assetId); });
@@ -258,13 +258,13 @@ export default class ProjectServer {
 
     item.on("addDependencies", (dependencyEntryIds: string[]) => { this.addDependencies(assetId, dependencyEntryIds); });
     item.on("removeDependencies", (dependencyEntryIds: string[]) => { this.removeDependencies(assetId, dependencyEntryIds); });
-  };
+  }
 
   private onRoomLoaded = (roomId: string, item: SupCore.Data.Room) => {
     const roomPath = path.join(this.projectPath, `rooms/${roomId}`);
     const saveCallback = item.save.bind(item, roomPath);
     item.on("change", () => { this.scheduleSave(saveDelay, `rooms:${roomId}`, saveCallback); });
-  };
+  }
 
   private onResourceLoaded = (resourceId: string, item: SupCore.Data.Base.Resource) => {
     const resourcePath = path.join(this.projectPath, `resources/${resourceId}`);
@@ -274,12 +274,12 @@ export default class ProjectServer {
 
     item.on("setAssetBadge", (assetId: string, badgeId: string, type: string, data: any) => { this.setBadge(assetId, badgeId, type, data); });
     item.on("clearAssetBadge", (assetId: string, badgeId: string) => { this.clearBadge(assetId, badgeId); });
-  };
+  }
 
   private onAddSocket = (socket: SocketIO.Socket) => {
     const client = new RemoteProjectClient(this, (this.nextClientId++).toString(), socket);
     this.clientsBySocketId[socket.id] = client;
-  };
+  }
 
   private scheduleSave = (minimumSecondsElapsed: number, callbackName: string, callback: (callback: (err: Error) => any) => any) => {
     // this.log(`Scheduling a save: ${callbackName}`);
@@ -309,7 +309,7 @@ export default class ProjectServer {
       scheduledCallback.timeoutId = timeoutId;
       scheduledCallback.callback = callback;
     }
-  };
+  }
 
   private onManifestChanged = () => { this.scheduleSave(saveDelay, "manifest", this.saveManifest); };
   private onEntriesChanged = () => { this.scheduleSave(saveDelay, "entries", this.saveEntries); };
@@ -317,14 +317,14 @@ export default class ProjectServer {
   private saveManifest = (callback: (err: Error) => any) => {
     const manifestJSON = JSON.stringify(this.data.manifest.pub, null, 2);
     fs.writeFile(path.join(this.projectPath, "manifest.json"), manifestJSON, callback);
-  };
+  }
 
   private saveEntries = (callback: (err: Error) => any) => {
     const entriesJSON = JSON.stringify({ nextEntryId: this.data.entries.nextId, nodes: this.data.entries.getForStorage() }, null, 2);
     fs.writeFile(path.join(this.projectPath, "newEntries.json"), entriesJSON, () => {
       fs.rename(path.join(this.projectPath, "newEntries.json"), path.join(this.projectPath, "entries.json"), callback);
     });
-  };
+  }
 
   private setBadge(assetId: string, badgeId: string, type: string, data: any) {
     // console.log(`setBadge ${assetId} ${badgeId} ${type}`);

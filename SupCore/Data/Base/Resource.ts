@@ -61,7 +61,7 @@ export default class Resource extends Hash {
 
   unload() { this.removeAllListeners(); }
 
-  migrate(resourcePath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); };
+  migrate(resourcePath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); }
 
   save(resourcePath: string, callback: (err: Error) => any) {
     const json = JSON.stringify(this.pub, null, 2);

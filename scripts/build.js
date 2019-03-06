@@ -112,7 +112,6 @@ function build() {
         // Check if the package has a build script
         if (absBuildPath !== rootPath && packageJSON != null && packageJSON.scripts != null && packageJSON.scripts.build != null) {
           const args = [ "run", "build" ];
-          if (!argv.verbose) args.push("-s", "--", "--silent");
           const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
 
           npm.on("close", (status) => {
@@ -125,7 +124,7 @@ function build() {
         // Check if the package has a gulpfile instead
         if (fs.existsSync(`${absBuildPath}/gulpfile.js`)) {
           const args = [];
-          if (!argv.verbose) args.push("--silent");
+          // if (!argv.verbose) args.push("--silent");
           const gulp = child_process.spawn(`gulp${execSuffix ? ".cmd" : ""}`, args, spawnOptions);
 
           gulp.on("close", (status) => {

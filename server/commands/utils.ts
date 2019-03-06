@@ -20,7 +20,7 @@ const argv = yargs
   .describe("download-url", "Url to download a release")
   .boolean("force")
   .argv;
-export const dataPath = argv["data-path"] != null ? path.resolve(argv["data-path"]) : path.resolve(`${__dirname}/../..`);
+export const dataPath = argv["data-path"] != null ? path.resolve(argv["data-path"] as string) : path.resolve(`${__dirname}/../..`);
 mkdirp.sync(dataPath);
 mkdirp.sync(`${dataPath}/projects`);
 mkdirp.sync(`${dataPath}/builds`);
@@ -28,7 +28,7 @@ export const systemsPath = `${dataPath}/systems`;
 mkdirp.sync(systemsPath);
 
 export const force = argv["force"];
-export const downloadURL = argv["download-url"];
+export const downloadURL = argv["download-url"] as string;
 
 // Systems and plugins
 export const builtInPluginAuthors = [ "default", "common", "extra" ];
@@ -99,8 +99,8 @@ export function listAvailablePlugins(registry: Registry, systemId: string) {
   if (pluginAuthors.length === 0) {
     console.log(`No plugins found.`);
   } else {
-    let pluginCount = 0;
-    for (const pluginAuthor of pluginAuthors) pluginCount += Object.keys(registry.systems[systemId].plugins[pluginAuthor]).length;
+    /* let pluginCount = 0;
+    for (const pluginAuthor of pluginAuthors) pluginCount += Object.keys(registry.systems[systemId].plugins[pluginAuthor]).length; */
 
     for (const pluginAuthor of pluginAuthors) {
       console.log(`  ${pluginAuthor}/`);
@@ -111,7 +111,7 @@ export function listAvailablePlugins(registry: Registry, systemId: string) {
 
 const currentRegistryVersion = 2;
 
-interface ItemData { version: string; downloadURL: string; localVersion: string; isLocalDev: boolean; };
+interface ItemData { version: string; downloadURL: string; localVersion: string; isLocalDev: boolean; }
 interface SystemData extends ItemData {
   plugins: { [authorName: string]: { [pluginName: string]: ItemData; } };
 }

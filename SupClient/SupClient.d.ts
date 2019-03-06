@@ -203,20 +203,20 @@ declare namespace SupClient {
     onEntryAdded?(entry: any, parentId: string, index: number): void;
     onEntryMoved?(id: string, parentId: string, index: number): void;
     onSetEntryProperty?(id: string, key: string, value: any): void;
-    onEntrySaved?: (assetId: string, revisionId: string, revisionName: string) => void;
+    onEntrySaved?(assetId: string, revisionId: string, revisionName: string): void;
     onEntryTrashed?(id: string): void;
   }
 
   interface AssetSubscriber {
-    onAssetReceived?: (assetId: string, asset: SupCore.Data.Base.Asset) => void;
-    onAssetEdited?: (assetId: string, command: string, ...args: any[]) => void;
-    onAssetRestored?: (assetId: string, asset: SupCore.Data.Base.Asset) => void;
-    onAssetTrashed?: (assetId: string) => void;
+    onAssetReceived?(assetId: string, asset: SupCore.Data.Base.Asset): void;
+    onAssetEdited?(assetId: string, command: string, ...args: any[]): void;
+    onAssetRestored?(assetId: string, asset: SupCore.Data.Base.Asset): void;
+    onAssetTrashed?(assetId: string): void;
   }
 
   interface ResourceSubscriber {
-    onResourceReceived?: (resourceId: string, resource: SupCore.Data.Base.Resource) => void;
-    onResourceEdited?: (resourceId: string, command: string, ...args: any[]) => void;
+    onResourceReceived?(resourceId: string, resource: SupCore.Data.Base.Resource): void;
+    onResourceEdited?(resourceId: string, command: string, ...args: any[]): void;
   }
 
   export interface BuildSettingsEditor {

@@ -7,11 +7,11 @@ const ts = require("gulp-typescript");
 const tsProject = ts.createProject("./tsconfig.json");
 const tslint = require("gulp-tslint");
 
-gulp.task("typescript", function() {
+gulp.task("typescript", () => {
   let failed = false;
   const tsResult = tsProject.src()
-    .pipe(tslint())
-    .pipe(tslint.report("prose", { emitError: true }))
+    .pipe(tslint({ formatter: "prose" }))
+    .pipe(tslint.report({ emitError: true }))
     .on("error", (err) => { throw err; })
     .pipe(tsProject())
     .on("error", () => { failed = true; })
@@ -28,12 +28,12 @@ gulp.task("stylus", function() {
 // Browserify
 const browserify = require("browserify");
 const source = require("vinyl-source-stream");
-gulp.task("browserify", [ "typescript" ], () =>
+gulp.task("browserify", gulp.series("typescript", () =>
   browserify("./index.js", { standalone: "SupClient" })
     .transform("brfs").bundle()
     .pipe(source("SupClient.js"))
     .pipe(gulp.dest("../public"))
-);
+));
 
 // All
-gulp.task("default", [ "stylus", "typescript", "browserify" ]);
+gulp.task("default", gulp.parallel("stylus", gulp.series("typescript", "browserify")));

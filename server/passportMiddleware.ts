@@ -2,10 +2,10 @@ import * as passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { server as serverConfig } from "./config";
 
-// NOTE: The regex must match the pattern and min/max lengths in client/login/index.jade
+// NOTE: The regex must match the pattern and min/max lengths in client/login/index.pug
 const usernameRegex = /^[A-Za-z0-9_-]{3,20}$/;
 
-passport.serializeUser((user, done) => { done(null, user.username); });
+passport.serializeUser<any, string>((user, done) => { done(null, user.username); });
 passport.deserializeUser((username, done) => { done(null, { username }); });
 
 const strategy = new LocalStrategy((username, password, done) => {

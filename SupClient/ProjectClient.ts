@@ -164,7 +164,7 @@ export default class ProjectClient {
 
   private onWelcome = (clientId: string) => {
     this.id = clientId;
-  };
+  }
 
   private onAssetReceived = (assetId: string, assetType: string, err: string, assetData: any) => {
     // FIXME: The asset was probably trashed in the meantime, handle that
@@ -185,7 +185,7 @@ export default class ProjectClient {
     for (const subscriber of subscribers) {
       if (subscriber.onAssetReceived != null) subscriber.onAssetReceived(assetId, asset);
     }
-  };
+  }
 
   private onAssetEdited = (assetId: string, command: string, ...args: any[]) => {
     const subscribers = this.subscribersByAssetId[assetId];
@@ -197,7 +197,7 @@ export default class ProjectClient {
     for (const subscriber of subscribers) {
       if (subscriber.onAssetEdited != null) subscriber.onAssetEdited(assetId, command, ...args);
     }
-  };
+  }
 
   private onAssetTrashed = (assetId: string) => {
     const subscribers = this.subscribersByAssetId[assetId];
@@ -210,7 +210,7 @@ export default class ProjectClient {
     this.assetsById[assetId].client_unload();
     delete this.assetsById[assetId];
     delete this.subscribersByAssetId[assetId];
-  };
+  }
 
   private onAssetRestored = (assetId: string, assetType: string, assetData: any) => {
     const subscribers = this.subscribersByAssetId[assetId];
@@ -224,7 +224,7 @@ export default class ProjectClient {
     for (const subscriber of subscribers) {
       if (subscriber.onAssetRestored != null) subscriber.onAssetRestored(assetId, asset);
     }
-  };
+  }
 
   private onResourceReceived = (resourceId: string, err: string, resourceData: any) => {
     if (err != null) {
@@ -241,7 +241,7 @@ export default class ProjectClient {
     for (const subscriber of subscribers) {
       if (subscriber.onResourceReceived != null) subscriber.onResourceReceived(resourceId, resource);
     }
-  };
+  }
 
   private onResourceEdited = (resourceId: string, command: string, ...args: any[]) => {
     const subscribers = this.subscribersByResourceId[resourceId];
@@ -253,7 +253,7 @@ export default class ProjectClient {
     for (const subscriber of subscribers) {
       if (subscriber.onResourceEdited != null) subscriber.onResourceEdited(resourceId, command, ...args);
     }
-  };
+  }
 
   private onEntriesReceived = (err: string, entries: SupCore.Data.EntryNode[], nextEntryId: number) => {
     this.entries = new SupCore.Data.Entries(entries, nextEntryId);
@@ -267,40 +267,40 @@ export default class ProjectClient {
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onEntriesReceived != null) subscriber.onEntriesReceived(this.entries);
     }
-  };
+  }
 
   private onEntryAdded = (entry: any, parentId: string, index: number) => {
     this.entries.client_add(entry, parentId, index);
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onEntryAdded != null) subscriber.onEntryAdded(entry, parentId, index);
     }
-  };
+  }
 
   private onEntryMoved = (id: string, parentId: string, index: number) => {
     this.entries.client_move(id, parentId, index);
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onEntryMoved != null) subscriber.onEntryMoved(id, parentId, index);
     }
-  };
+  }
 
   private onSetEntryProperty = (id: string, key: string, value: any) => {
     this.entries.client_setProperty(id, key, value);
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onSetEntryProperty != null) subscriber.onSetEntryProperty(id, key, value);
     }
-  };
+  }
 
   private onEntrySaved = (id: string, revisionId: string, revisionName: string) => {
     this.entries.client_save(id, revisionId, revisionName);
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onEntrySaved != null) subscriber.onEntrySaved(id, revisionId, revisionName);
     }
-  };
+  }
 
   private onEntryTrashed = (id: string) => {
     this.entries.client_remove(id);
     for (const subscriber of this.entriesSubscribers) {
       if (subscriber.onEntryTrashed != null) subscriber.onEntryTrashed(id);
     }
-  };
+  }
 }

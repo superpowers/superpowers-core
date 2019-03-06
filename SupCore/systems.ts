@@ -7,10 +7,11 @@ function shouldIgnoreFolder(pluginName: string) { return pluginName.indexOf(".")
 
 export class System {
   data: SystemData;
-  private plugins: { [contextName: string]: { [pluginName: string]: any; } } = {};
 
   pluginsInfo: SupCore.PluginsInfo;
   serverBuild: (server: ProjectServer, buildPath: string, callback: (err: string) => void) => void;
+
+  private plugins: { [contextName: string]: { [pluginName: string]: any; } } = {};
 
   constructor(public id: string, public folderName: string) {
     this.data = new SystemData(this);

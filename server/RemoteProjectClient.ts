@@ -60,7 +60,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       this.server.io.in("sub:manifest").emit("setProperty:manifest", key, actualValue);
       callback(null, actualValue);
     });
-  };
+  }
 
   // Entries
 
@@ -93,7 +93,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         onEntryCreated();
       }
     });
-  };
+  }
 
   private onDuplicateEntry = (newName: string, id: string, options: any, callback: (err: string, duplicatedId?: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
@@ -113,7 +113,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
 
         async.eachSeries(entryToDuplicate.children, (child, cb) => {
           this.onDuplicateEntry(child.name, child.id, { parentId: entry.id, index: entryToDuplicate.children.indexOf(child) }, (err: string, duplicatedId?: string) => {
-            if(err == null) cb(null);
+            if (err == null) cb(null);
             else cb(new Error(err));
           });
         }, (err: Error) => {
@@ -151,7 +151,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       });
     }
-  };
+  }
 
   private onMoveEntry = (id: string, parentId: string, index: number, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
@@ -172,7 +172,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       this.server.io.in("sub:entries").emit("move:entries", id, parentId, actualIndex);
       callback(null);
     });
-  };
+  }
 
   private onTrashEntry = (id: string, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
@@ -304,7 +304,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       } else deleteFolder(path.join(this.server.projectPath, "assets", trashedAssetFolder), callback);
     });
-  };
+  }
 
   private onSetEntryProperty = (id: string, key: string, value: any, callback: (err: string) => any) => {
     if (!this.errorIfCant("editAssets", callback)) return;
@@ -319,7 +319,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
       this.server.io.in("sub:entries").emit("setProperty:entries", id, key, actualValue);
       callback(null);
     });
-  };
+  }
 
   private onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string, callback?: Function) => {
     let mustScheduleSave = false;
@@ -351,7 +351,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       }
     ]);
-  };
+  }
 
   private onSaveEntry = (entryId: string, revisionName: string, callback: (err: string) => void) => {
     if (!this.errorIfCant("editAssets", callback)) return;
@@ -382,7 +382,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       });
     });
-  };
+  }
 
   // Assets
   private onEditAsset = (id: string, command: string, ...args: any[]) => {
@@ -410,7 +410,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         callback(null, ack);
       });
     });
-  };
+  }
 
   private onRestoreAsset = (assetId: string, revisionId: string, callback: (err: string) => void) => {
     const entry = this.server.data.entries.byId[assetId];
@@ -440,7 +440,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         callback(null);
       });
     });
-  };
+  }
 
   private onGetAssetRevision = (assetId: string, revisionId: string, callback: (err: string, assetData?: any) => void) => {
     const entry = this.server.data.entries.byId[assetId];
@@ -479,7 +479,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         callback(null, ack);
       });
     });
-  };
+  }
 
   // Rooms
   private onEditRoom = (id: string, command: string, ...args: any[]) => {
@@ -505,7 +505,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         callback(null, (callbackArgs[0] != null) ? callbackArgs[0].id : null);
       });
     });
-  };
+  }
 
   // Project
   private onVacuumProject = (callback: (err: string, deletedCount?: number) => any) => {
@@ -529,7 +529,7 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       }, () => { callback(null, removedFolderCount); });
     });
-  };
+  }
 
   private onBuildProject = (callback: (err: string, buildId?: string, files?: string[]) => any) => {
     if (!this.errorIfCant("buildProject", callback)) return;
@@ -571,5 +571,5 @@ export default class RemoteProjectClient extends BaseRemoteClient {
         });
       });
     });
-  };
+  }
 }

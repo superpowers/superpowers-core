@@ -81,9 +81,7 @@ export default class ProjectHub {
   }
 
   private onAddSocket = (socket: SocketIO.Socket) => {
-    /* tslint:disable:no-unused-variable */
-    const client = new RemoteHubClient(this, socket);
+    /* const client = */ new RemoteHubClient(this, socket);
     // this.clients.push(client);
-    /* tslint:enable:no-unused-variable */
-  };
+  }
 }

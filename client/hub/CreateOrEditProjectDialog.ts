@@ -13,7 +13,7 @@ type NewProjectResult = {
     icon: File;
   };
   open: boolean;
-}
+};
 
 export interface SystemsData {
   [value: string]: string[];
@@ -110,8 +110,8 @@ export default class CreateOrEditProjectDialog extends SupClient.Dialogs.BaseDia
     if (options.existingProject == null) {
       // Project type
       this.projectTypeSelectElt = SupClient.html("select", { parent: this.formElt, style: { marginBottom: "0.5em" } });
-      for (const systemId in systemsById) {
-        const systemInfo = systemsById[systemId];
+      for (const systemId in this.systemsById) {
+        const systemInfo = this.systemsById[systemId];
 
         const optGroupElt = SupClient.html("optgroup", {
           parent: this.projectTypeSelectElt,
@@ -222,14 +222,14 @@ export default class CreateOrEditProjectDialog extends SupClient.Dialogs.BaseDia
       reader.addEventListener("load", (event) => { this.iconElt.src = (event.target as any).result; });
       reader.readAsDataURL(this.iconFile);
     }
-  };
+  }
 
   private onFieldKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 13 /* Return */) {
       event.preventDefault();
       this.submit();
     }
-  };
+  }
 
   private onProjectTypeChange = () => {
     if (this.projectType != null) {
@@ -253,7 +253,7 @@ export default class CreateOrEditProjectDialog extends SupClient.Dialogs.BaseDia
     if (systemDescription.length === 0 && template.description.length === 0) {
       this.systemDescriptionElt.textContent = "(No description provided)";
     }
-  };
+  }
 
   private getTemplate(systemId: string, templateName: string) {
     if (templateName !== "empty") {

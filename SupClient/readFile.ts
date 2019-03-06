@@ -5,7 +5,7 @@ export default function readFile(file: File, type: string, callback: (err: Error
     let data: any;
 
     if (type === "json") {
-      try { data = JSON.parse((event.target as FileReader).result); }
+      try { data = JSON.parse((event.target as FileReader).result as string); }
       catch (err) { callback(err, null); return; }
     } else{
       data = (event.target as FileReader).result;

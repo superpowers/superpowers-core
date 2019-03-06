@@ -9,7 +9,7 @@ type EditorManifest = {
   pluginPath: string;
   // assetType: string; <- for asset editors, soon
   revision: boolean;
-}
+};
 
 export let assetTypes: string[];
 export let editorsByAssetType: { [assetType: string]: EditorManifest };

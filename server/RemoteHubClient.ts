@@ -13,7 +13,7 @@ interface ProjectDetails {
   template: string;
   icon: Buffer;
 }
-interface AddProjectCallback { (err: string, projectId?: string): any; };
+interface AddProjectCallback { (err: string, projectId?: string): any; }
 
 export default class RemoteHubClient extends BaseRemoteClient {
   constructor(public server: ProjectHub, socket: SocketIO.Socket) {
@@ -51,7 +51,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
     const originalProjectFolder = projectFolder;
     let projectFolderNumber = 1;
 
-    while(true) {
+    while (true) {
       try { fs.mkdirSync(path.join(this.server.projectsPath, projectFolder)); }
       catch (e) {
         projectFolder = `${originalProjectFolder}-${projectFolderNumber++}`;
@@ -131,7 +131,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
         fs.mkdir(path.join(projectPath, folder), cb);
       }, onFoldersCreated);
     }
-  };
+  }
 
   private writeIcon = (projectPath: string, icon: Buffer, callback: (err?: NodeJS.ErrnoException) => any) => {
     if (icon == null) { callback(); return; }
@@ -139,7 +139,7 @@ export default class RemoteHubClient extends BaseRemoteClient {
       if (err != null && err.code !== "EEXIST") { callback(err); return; }
       fs.writeFile(path.join(projectPath, "public/icon.png"), icon, callback);
     });
-  };
+  }
 
   private onEditProject = (projectId: string, details: ProjectDetails, callback: (err: string) => any) => {
     if (!this.errorIfCant("editProjects", callback)) return;
@@ -189,5 +189,5 @@ export default class RemoteHubClient extends BaseRemoteClient {
       if (err != null) callback(err.message);
       else callback(null);
     });
-  };
+  }
 }

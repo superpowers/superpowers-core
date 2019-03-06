@@ -129,7 +129,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
     this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
     this.validateButtonElt.disabled = false;
     this.validateButtonElt.focus();
-  };
+  }
 
   private onTreeViewSelectionChange = () => {
     if (this.treeView.selectedNodes.length === 0) {
@@ -140,7 +140,7 @@ export default class StartBuildDialog extends SupClient.Dialogs.BaseDialog<Build
       previousSelectedPluginName = this.selectedPluginName;
       this.settingsEditorsByName[this.selectedPluginName].setVisible(true);
     }
-  };
+  }
 }
 
 function loadBuildPlugins(callback: Function) {

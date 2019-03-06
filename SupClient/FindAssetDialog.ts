@@ -96,7 +96,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     }
 
     this.treeView.addToSelection(this.treeView.treeRoot.firstChild as HTMLLIElement);
-  };
+  }
 
   private onSearchKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 38 /* Up */) {
@@ -108,7 +108,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       event.preventDefault();
       this.treeView.moveVertically(1);
     }
-  };
+  }
 
   submit() {
     if (this.treeView.selectedNodes.length === 0) return;

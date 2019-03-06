@@ -47,7 +47,7 @@ export default class Asset extends Hash {
 
   unload() { this.removeAllListeners(); }
 
-  migrate(assetPath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); };
+  migrate(assetPath: string, pub: any, callback: (hasMigrated: boolean) => void) { callback(false); }
 
   client_load() { /* Override */ }
   client_unload() { /* Override */ }

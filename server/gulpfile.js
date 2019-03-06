@@ -7,11 +7,11 @@ const ts = require("gulp-typescript");
 const tsProject = ts.createProject("./tsconfig.json");
 const tslint = require("gulp-tslint");
 
-gulp.task("typescript", function() {
+gulp.task("typescript", () => {
   let failed = false;
   const tsResult = tsProject.src()
-    .pipe(tslint())
-    .pipe(tslint.report("prose", { emitError: true }))
+    .pipe(tslint({ formatter: "prose" }))
+    .pipe(tslint.report({ emitError: true }))
     .on("error", (err) => { throw err; })
     .pipe(tsProject())
     .on("error", () => { failed = true; })
@@ -20,4 +20,4 @@ gulp.task("typescript", function() {
 });
 
 // All
-gulp.task("default", [ "typescript" ]);
+gulp.task("default", gulp.series("typescript"));

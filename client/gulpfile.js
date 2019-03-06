@@ -1,10 +1,11 @@
 "use strict";
 
 const gulp = require("gulp");
-const tasks = [];
 
-// Jade
-const jade = require("gulp-jade");
+// Pug
+const pugTasks = [];
+
+const pug = require("gulp-pug");
 const rename = require("gulp-rename");
 const fs = require("fs");
 
@@ -14,18 +15,17 @@ languageCodes.push("none");
 
 for (const languageCode of languageCodes) {
   const locale = i18n.loadLocale(languageCode);
-  gulp.task(`jade-${languageCode}`, () => {
-    const result = gulp.src("./**/index.jade").pipe(jade({ locals: { t: i18n.makeT(locale) } }));
-    if (languageCode !== "en") result.pipe(rename({ extname: `.${languageCode}.html` }));
+  gulp.task(`pug-${languageCode}`, () => {
+    let result = gulp.src("./**/index.pug").pipe(pug({ locals: { t: i18n.makeT(locale) } }));
+    if (languageCode !== "en") result = result.pipe(rename({ extname: `.${languageCode}.html` }));
     return result.pipe(gulp.dest("../public"));
   });
-  tasks.push(`jade-${languageCode}`);
+  pugTasks.push(`pug-${languageCode}`);
 }
 
 // Stylus
 const stylus = require("gulp-stylus");
 gulp.task("stylus", () => gulp.src("./**/index.styl").pipe(stylus({ errors: true, compress: true })).pipe(gulp.dest("../public")));
-tasks.push("stylus");
 
 // TypeScript
 const ts = require("gulp-typescript");
@@ -35,25 +35,26 @@ const tslint = require("gulp-tslint");
 gulp.task("typescript", () => {
   let failed = false;
   const tsResult = tsProject.src()
-    .pipe(tslint())
-    .pipe(tslint.report("prose", { emitError: true }))
+    .pipe(tslint({ formatter: "prose" }))
+    .pipe(tslint.report({ emitError: true }))
     .on("error", (err) => { throw err; })
     .pipe(tsProject())
     .on("error", () => { failed = true; })
     .on("end", () => { if (failed) throw new Error("There were TypeScript errors."); });
   return tsResult.js.pipe(gulp.dest("./"));
 });
-tasks.push("typescript");
 
 // Browserify
 const browserify = require("browserify");
 const source = require("vinyl-source-stream");
 
-gulp.task("browserify-login", [ "typescript" ], () => browserify("./login/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/login")));
-gulp.task("browserify-hub", [ "typescript" ], () => browserify("./hub/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/hub")));
-gulp.task("browserify-project", [ "typescript" ], () => browserify("./project/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/project")));
-gulp.task("browserify-build", [ "typescript" ], () => browserify("./build/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/build")));
-tasks.push("browserify-login", "browserify-hub", "browserify-project", "browserify-build");
+gulp.task("browserify-login", gulp.series("typescript", () => browserify("./login/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/login"))));
+gulp.task("browserify-hub", gulp.series("typescript", () => browserify("./hub/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/hub"))));
+gulp.task("browserify-project", gulp.series("typescript", () => browserify("./project/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/project"))));
+gulp.task("browserify-build", gulp.series("typescript", () => browserify("./build/index.js").bundle().pipe(source("index.js")).pipe(gulp.dest("../public/build"))));
 
 // All
-gulp.task("default", tasks);
+gulp.task("default", gulp.parallel(
+  gulp.parallel(pugTasks),
+  "stylus",
+  gulp.series("typescript", "browserify-login", "browserify-hub", "browserify-project", "browserify-build")));

@@ -44,7 +44,7 @@ export default class ListById extends EventEmitter {
       const value = item[key];
       const rule = this.schema[key];
       if (rule == null) {
-        if(key === "id" && value == null) continue;
+        if (key === "id" && value == null) continue;
         callback(`Invalid key: ${key}`);
         return;
       }

@@ -55,7 +55,7 @@ export default class TreeById extends EventEmitter {
   getPathFromId(id: string): string {
     let name = this.byId[id].name;
     let parent = this.parentNodesById[id];
-    while(true) {
+    while (true) {
       if (parent == null) break;
       name = `${parent.name}/${name}`;
       parent = this.parentNodesById[parent.id];
@@ -81,7 +81,7 @@ export default class TreeById extends EventEmitter {
       const value = node[key];
       const rule = this.schema[key];
       if (rule == null) {
-        if(key === "id" && value == null) continue;
+        if (key === "id" && value == null) continue;
         callback(`Invalid key: ${key}`);
         return;
       }

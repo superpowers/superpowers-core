@@ -21,7 +21,7 @@ export default class BaseRemoteClient {
     return true;
   }
 
-  can(action: string) { throw new Error("BaseRemoteClient.can() must be overridden"); }
+  can(action: string): boolean { throw new Error("BaseRemoteClient.can() must be overridden"); }
 
   /*
   _error(message: string) {
@@ -39,7 +39,7 @@ export default class BaseRemoteClient {
     }
 
     this.server.removeRemoteClient(this.socket.id);
-  };
+  }
 
   private onSubscribe = (endpoint: string, id: string, callback: (err: string, pubData?: any, optionalArg?: any) => any) => {
     const roomName = ((id != null) ? `sub:${endpoint}:${id}` : `sub:${endpoint}`);
@@ -79,7 +79,7 @@ export default class BaseRemoteClient {
         return;
       });
     });
-  };
+  }
 
   private onUnsubscribe = (endpoint: string, id: string) => {
     const data = this.server.data[endpoint];
@@ -97,5 +97,5 @@ export default class BaseRemoteClient {
       this.subscriptions.splice(index, 1);
       unlockRoom();
     });
-  };
+    }
 }

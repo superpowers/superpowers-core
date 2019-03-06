@@ -33,5 +33,5 @@ export default class Projects extends ListById {
     }
 
     return id;
-  };
+  }
 }

@@ -44,7 +44,7 @@ interface NumberOptions {
   min?: number|string;
   max?: number|string;
   step?: number|string;
-};
+}
 
 export function appendNumberField(parent: HTMLElement, value: number|string, options?: NumberOptions) {
   const input = SupClient.html("input", { parent, type: "number", value: value.toString() }) as HTMLInputElement;

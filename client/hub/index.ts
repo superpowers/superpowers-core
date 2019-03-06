@@ -65,11 +65,6 @@ loadSystemsInfo(() => {
   });
 });
 
-interface SystemManifest {
-  title: string;
-  description: string;
-}
-
 function loadSystemsInfo(callback: Function) {
   data.systemsById = {};
 
