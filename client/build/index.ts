@@ -13,7 +13,7 @@ SupApp.onMessage("build", (buildSetup: BuildSetup, projectWindowId: number) => {
   socket.on("welcome", (clientId: number, config: { buildPort: number; supportsServerBuild: boolean; }) => {
     loadPlugins(buildSetup, () => {
       const buildPlugin = SupClient.getPlugins<SupClient.BuildPlugin>("build")[buildSetup.buildPluginName];
-      buildPlugin.content.build(socket, buildSetup.settings, projectWindowId);
+      buildPlugin.content.build(socket, buildSetup.settings, projectWindowId, config.buildPort);
     });
   });
 });

@@ -230,6 +230,6 @@ declare namespace SupClient {
 
   export interface BuildPlugin {
     settingsEditor: BuildSettingsEditorConstructor;
-    build: (socket: SocketIOClient.Socket, settings: any, projectWindowId: number) => void;
+    build: (socket: SocketIOClient.Socket, settings: any, projectWindowId: number, buildPort: number) => void;
   }
 }
