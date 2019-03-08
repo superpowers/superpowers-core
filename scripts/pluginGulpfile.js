@@ -56,7 +56,7 @@ const source = require("vinyl-source-stream");
 
 function makeBrowserify(src, dest, output) {
   gulp.task(`${output}-browserify`, () => {
-    if (!fs.existsSync(src)) return;
+    if (!fs.existsSync(src)) return Promise.resolve("No source.");
 
     return browserify(src)
       .transform("brfs").bundle()
