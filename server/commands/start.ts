@@ -6,6 +6,9 @@ import * as express from "express";
 import * as url from "url";
 import * as socketio from "socket.io";
 
+import * as basicAuth from "basic-auth";
+import * as tsscmp from "tsscmp";
+
 import passportMiddleware from "../passportMiddleware";
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
@@ -56,9 +59,8 @@ export default function start(serverDataPath: string) {
   const { version, superpowers: { appApiVersion: appApiVersion } } = JSON.parse(fs.readFileSync(`${__dirname}/../../package.json`, { encoding: "utf8" }));
   SupCore.log(`Server v${version} starting...`);
   fs.writeFileSync(`${__dirname}/../../public/superpowers.json`, JSON.stringify({
-    serverName: config.server.serverName,
-    version, appApiVersion,
-    hasPassword: config.server.password.length !== 0
+    serverName: config.server.serverName, buildPort: config.server.buildPort,
+    version, appApiVersion
   }, null, 2));
 
   // SupCore
@@ -92,6 +94,21 @@ export default function start(serverDataPath: string) {
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }
   };
 
+  function doHttpBasicAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+    const credentials = basicAuth(req);
+
+    if (credentials == null || !tsscmp(credentials.pass, config.server.password)) {
+      res.status(401);
+      res.setHeader("WWW-Authenticate", `Basic realm="Superpowers server"`);
+      res.end("Access denied.");
+      return;
+    }
+
+    next();
+  }
+
+  if (config.server.password.length > 0) mainApp.use(doHttpBasicAuth);
+
   mainApp.use(cookieParser());
   mainApp.use(bodyParser.urlencoded({ extended: false }));
   mainApp.use(handleLanguage);
@@ -117,7 +134,7 @@ export default function start(serverDataPath: string) {
   mainHttpServer = http.createServer(mainApp);
   mainHttpServer.on("error", onHttpServerError.bind(null, config.server.mainPort));
 
-  io = socketio(mainHttpServer, { transports: [ "websocket" ] });
+  io = socketio(mainHttpServer, { transports: ["websocket"] });
   io.use(passportSocketIo.authorize({
     cookieParser: cookieParser,
     key: sessionSettings.name,
@@ -128,6 +145,9 @@ export default function start(serverDataPath: string) {
   // Build HTTP server or use the existing main one when the ports are the same
   if (config.server.mainPort !== config.server.buildPort) {
     buildApp = express();
+
+    if (config.server.password.length > 0) buildApp.use(doHttpBasicAuth);
+
     buildApp.get("/", redirectToHub);
     buildApp.use("/", express.static(`${__dirname}/../../public`));
 
@@ -232,8 +252,8 @@ function serveProjectIndex(req: express.Request, res: express.Response) {
 }
 
 function ensurePasswordFieldIsntEmpty(req: express.Request, res: express.Response, next: Function) {
-  // This is required so that passport-local doesn't reject logins on servers without a password
-  if (req.body.password === "" || req.body.password == null) req.body.password = "_";
+  // This is required so that passport-local doesn't reject logins
+  req.body.password = "_";
   next();
 }
 
@@ -264,7 +284,7 @@ function onHttpServerError(port: number, err: NodeJS.ErrnoException) {
   if (err.code === "EADDRINUSE") {
     SupCore.log(`Could not start the server: another application is already listening on port ${port}.`);
     process.exit(1);
-  } else throw(err);
+  } else throw (err);
 }
 
 function redirectToHub(req: express.Request, res: express.Response) {

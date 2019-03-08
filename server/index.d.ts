@@ -20,3 +20,9 @@ declare module "passport.socketio" {
 
   export function authorize(options: AuthorizeOptions): (socket: any, fn: (err?: any) => void) => void;
 }
+
+declare module "tsscmp" {
+  function compare(a: string, b: string): boolean;
+  namespace compare {}
+  export = compare;
+}

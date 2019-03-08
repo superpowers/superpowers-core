@@ -2,20 +2,20 @@ const port = (window.location.port.length === 0) ? (window.location.protocol ===
 
 const connectingElt = document.querySelector(".connecting") as HTMLDivElement;
 const formElt = document.querySelector(".login") as HTMLDivElement;
-const serverPasswordElt = document.querySelector(".server-password") as HTMLInputElement;
 
 formElt.hidden = true;
 
-SupClient.fetch("superpowers.json", "json", (err, data) => {
-  serverPasswordElt.parentElement.parentElement.hidden = data.hasPassword === false;
-  SupClient.i18n.load([{ root: "/", name: "hub" }, { root: "/", name: "login" }], start);
+let serverName: string;
 
-  let serverName = data.serverName;
-  if (serverName == null) serverName = SupClient.i18n.t(`hub:serverAddress`, { hostname: window.location.hostname, port });
-  document.querySelector(".server-name").textContent = serverName;
+SupClient.fetch("superpowers.json", "json", (err, data) => {
+  serverName = data.serverName;
+  SupClient.i18n.load([{ root: "/", name: "hub" }, { root: "/", name: "login" }], start);
 });
 
 function start() {
+  if (serverName == null) serverName = SupClient.i18n.t(`hub:serverAddress`, { hostname: window.location.hostname, port });
+  document.querySelector(".server-name").textContent = serverName;
+
   formElt.hidden = false;
   connectingElt.hidden = true;
 }
