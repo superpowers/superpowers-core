@@ -8,6 +8,7 @@ import * as socketio from "socket.io";
 
 import * as basicAuth from "basic-auth";
 import * as tsscmp from "tsscmp";
+import * as RateLimiter from "express-rate-limit";
 
 import passportMiddleware from "../passportMiddleware";
 import * as bodyParser from "body-parser";
@@ -94,17 +95,21 @@ export default function start(serverDataPath: string) {
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }
   };
 
+  const authLimiter = new RateLimiter({ windowMs: 5 * 60 * 1000, max: 5 });
+
   function doHttpBasicAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const credentials = basicAuth(req);
+    authLimiter(req, res, () => {
+      const credentials = basicAuth(req);
 
-    if (credentials == null || !tsscmp(credentials.pass, config.server.password)) {
-      res.status(401);
-      res.setHeader("WWW-Authenticate", `Basic realm="Superpowers server"`);
-      res.end("Access denied.");
-      return;
-    }
+      if (credentials == null || !tsscmp(credentials.pass, config.server.password)) {
+        res.status(401);
+        res.setHeader("WWW-Authenticate", `Basic realm="Superpowers server"`);
+        res.end("Access denied.");
+        return;
+      }
 
-    next();
+      next();
+    });
   }
 
   if (config.server.password.length > 0) mainApp.use(doHttpBasicAuth);
