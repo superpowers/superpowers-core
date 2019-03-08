@@ -7,8 +7,8 @@ formElt.hidden = true;
 
 let serverName: string;
 
-SupClient.fetch("superpowers.json", "json", (err, data) => {
-  serverName = data.serverName;
+SupClient.fetch("superpowers.json", "json", (err, serverInfo) => {
+  serverName = serverInfo.serverName;
   SupClient.i18n.load([{ root: "/", name: "hub" }, { root: "/", name: "login" }], start);
 });
 
