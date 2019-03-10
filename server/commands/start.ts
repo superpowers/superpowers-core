@@ -108,6 +108,8 @@ export default function start(serverDataPath: string) {
         return;
       }
 
+      (authLimiter as any).resetKey(req.ip);
+
       next();
     });
   }
