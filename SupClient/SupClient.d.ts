@@ -6,7 +6,7 @@
 declare namespace SupClient {
   export const namePattern: string;
 
-  export const query: { project: string, asset: string; [key: string]: string; };
+  export const query: { project: string; asset: string; [key: string]: string; };
   export const cookies: Cookies.CookiesStatic;
 
   export function fetch(url: string, responseType: string, callback: (err: Error, data: any) => void): void;
@@ -24,9 +24,9 @@ declare namespace SupClient {
   export function getTreeViewInsertionPoint(treeView: TreeView): { parentId: string; index: number };
   export function getTreeViewSiblingInsertionPoint(treeView: TreeView): { parentId: string, index: number };
 
-  export function getTreeViewDropPoint(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
-  export function getListViewDropIndex(dropLocation: { target: HTMLLIElement|HTMLOListElement; where: string; }, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
-  export function findEntryByPath(entries: any, path: string|string[]): any;
+  export function getTreeViewDropPoint(dropLocation: { target: HTMLLIElement | HTMLOListElement; where: string; }, treeById: SupCore.Data.Base.TreeById): { parentId: string; index: number };
+  export function getListViewDropIndex(dropLocation: { target: HTMLLIElement | HTMLOListElement; where: string; }, listById: SupCore.Data.Base.ListById, reversed?: boolean): number;
+  export function findEntryByPath(entries: any, path: string | string[]): any;
 
   export function openEntry(entryId: string, state?: any): void;
   export function setEntryRevisionDisabled(disabled: boolean): void;
@@ -43,34 +43,34 @@ declare namespace SupClient {
     }
 
     interface NumberOptions {
-      min?: number|string;
-      max?: number|string;
-      step?: number|string;
+      min?: number | string;
+      max?: number | string;
+      step?: number | string;
     }
 
-    interface SliderOptions extends NumberOptions { sliderStep?: number|string; }
+    interface SliderOptions extends NumberOptions { sliderStep?: number | string; }
 
     export function createTable(parent?: HTMLElement): { table: HTMLTableElement; tbody: HTMLTableSectionElement; };
     export function appendRow(parentTableBody: HTMLTableSectionElement, name: string,
-    options?: { checkbox?: boolean; title?: string; }): RowParts;
+      options?: { checkbox?: boolean; title?: string; }): RowParts;
     export function appendHeader(parentTableBody: HTMLTableSectionElement, text: string): HTMLTableRowElement;
     export function appendTextField(parentCell: HTMLElement, value: string): HTMLInputElement;
     export function appendTextAreaField(parent: HTMLElement, value: string): HTMLTextAreaElement;
-    export function appendNumberField(parentCell: HTMLElement, value: number|string,
-    options?: NumberOptions): HTMLInputElement;
-    export function appendNumberFields(parentCell: HTMLElement, values: (number|string)[],
-    options?: NumberOptions): HTMLInputElement[];
+    export function appendNumberField(parentCell: HTMLElement, value: number | string,
+      options?: NumberOptions): HTMLInputElement;
+    export function appendNumberFields(parentCell: HTMLElement, values: (number | string)[],
+      options?: NumberOptions): HTMLInputElement[];
     export function appendBooleanField(parentCell: HTMLElement, value: boolean): HTMLInputElement;
     export function appendSelectBox(parentCell: HTMLElement,
-    options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
-    export function appendSelectOption(parent: HTMLSelectElement|HTMLOptGroupElement, value: string, label: string): HTMLOptionElement;
-    export function appendSelectOptionGroup(parent: HTMLSelectElement|HTMLOptGroupElement, label: string): HTMLOptGroupElement;
-    export function appendSliderField(parent: HTMLElement, value: number|string,
-    options?: SliderOptions): { sliderField: HTMLInputElement; numberField: HTMLInputElement; };
+      options: { [value: string]: string; }, initialValue?: string): HTMLSelectElement;
+    export function appendSelectOption(parent: HTMLSelectElement | HTMLOptGroupElement, value: string, label: string): HTMLOptionElement;
+    export function appendSelectOptionGroup(parent: HTMLSelectElement | HTMLOptGroupElement, label: string): HTMLOptGroupElement;
+    export function appendSliderField(parent: HTMLElement, value: number | string,
+      options?: SliderOptions): { sliderField: HTMLInputElement; numberField: HTMLInputElement; };
 
     export class ColorField extends SupCore.EventEmitter {
       constructor(textField: HTMLInputElement, pickerField: HTMLInputElement);
-      setValue(color: string) : void;
+      setValue(color: string): void;
       setDisabled(disabled: boolean): void;
     }
     export function appendColorField(parent: HTMLElement, value: string): ColorField;
@@ -166,7 +166,7 @@ declare namespace SupClient {
     }
 
     export function load(files: File[], callback: Function): void;
-    export function t(key: string, variables?: { [key: string]: string|number }): string;
+    export function t(key: string, variables?: { [key: string]: string | number }): string;
   }
 
   class ProjectClient {
@@ -176,11 +176,11 @@ declare namespace SupClient {
     entries: SupCore.Data.Entries;
     entriesSubscribers: EntriesSubscriber[];
 
-    assetsById: {[assetId: string]: SupCore.Data.Base.Asset };
-    subscribersByAssetId: {[assetId: string]: AssetSubscriber[]};
+    assetsById: { [assetId: string]: SupCore.Data.Base.Asset };
+    subscribersByAssetId: { [assetId: string]: AssetSubscriber[] };
 
-    resourcesById: {[resourceId: string]: SupCore.Data.Base.Resource };
-    subscribersByResourceId: {[assetId: string]: ResourceSubscriber[]};
+    resourcesById: { [resourceId: string]: SupCore.Data.Base.Resource };
+    subscribersByResourceId: { [assetId: string]: ResourceSubscriber[] };
 
     constructor(socket: SocketIOClient.Socket, options?: { subEntries: boolean; });
 
