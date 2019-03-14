@@ -30,6 +30,7 @@ export function onNewAssetClick() {
 
 export function onNewFolderClick() {
   const options = {
+    header: SupClient.i18n.t("project:treeView.newFolder.title"),
     placeholder: SupClient.i18n.t("project:treeView.newFolder.placeholder"),
     initialValue: SupClient.i18n.t("project:treeView.newFolder.initialValue"),
     validationLabel: SupClient.i18n.t("common:actions.create"),
@@ -51,6 +52,7 @@ export function onRenameEntryClick() {
   const entry = entries.byId[selectedNode.dataset["id"]];
 
   const options = {
+    header: SupClient.i18n.t("common:actions.rename"),
     initialValue: entry.name,
     validationLabel: SupClient.i18n.t("common:actions.rename"),
     pattern: SupClient.namePattern,
@@ -73,6 +75,7 @@ export function onDuplicateEntryClick() {
   const entry = entries.byId[selectedNode.dataset["id"]];
 
   const options = {
+    header: SupClient.i18n.t("common:actions.duplicate"),
     initialValue: entry.name,
     validationLabel: SupClient.i18n.t("common:actions.duplicate"),
     pattern: SupClient.namePattern,
@@ -95,10 +98,15 @@ export function onTrashEntryClick() {
   function checkNextEntry() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
-      const confirmLabel = SupClient.i18n.t("project:treeView.trash.prompt");
-      const validationLabel = SupClient.i18n.t("project:treeView.trash.title");
+      const confirmLabel = SupClient.i18n.t("project:treeView.trash.prompt"), ;
 
-      new SupClient.Dialogs.ConfirmDialog(confirmLabel, { validationLabel }, (confirm) => {
+      const options = {
+        header: SupClient.i18n.t("project:treeView.trash.title"),
+        validationLabel: SupClient.i18n.t("project:treeView.trash.title"),
+        checkboxLabel: SupClient.i18n.t("project:treeView.trash.checkbox")
+      };
+
+      new SupClient.Dialogs.ConfirmDialog(confirmLabel, options, (confirm) => {
         if (!confirm) return;
 
         for (const selectedNode of entriesTreeView.widget.selectedNodes) {

@@ -31,6 +31,7 @@
     "trash": {
       "title": "Trash",
       "prompt": "Are you sure you want to trash the selected entries?",
+      "checkbox": "I understand this cannot be undone.",
       "warnBrokenDependency": "${entryName} is used in ${dependentEntryNames}."
     }
   },

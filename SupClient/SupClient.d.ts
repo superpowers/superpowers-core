@@ -107,6 +107,7 @@ declare namespace SupClient {
       header?: string;
       validationLabel?: string;
       cancelLabel?: string;
+      checkboxLabel?: string;
     }
     type ConfirmResult = boolean;
     export class ConfirmDialog extends BaseDialog<ConfirmResult> {
