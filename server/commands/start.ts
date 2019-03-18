@@ -80,8 +80,11 @@ export default function start(serverDataPath: string) {
   memoryStore = new expressSession.MemoryStore();
 
   try {
-    const sessionsJSON = fs.readFileSync(`${__dirname}/../../sessions.json`, { encoding: "utf8" });
-    (memoryStore as any).sessions = JSON.parse(sessionsJSON);
+    const sessionFileJson = fs.readFileSync(`${__dirname}/../../sessions.json`, { encoding: "utf8" });
+    const sessionFile = JSON.parse(sessionFileJson);
+    if (sessionFile.password === config.server.password) {
+      (memoryStore as any).sessions = sessionFile.sessions;
+    }
   } catch (err) {
     // Ignore
   }
@@ -360,8 +363,8 @@ function onExit() {
 
     SupCore.log("Saving sessions...");
     try {
-      const sessionsJSON = JSON.stringify((memoryStore as any).sessions, null, 2);
-      fs.writeFileSync(`${__dirname}/../../sessions.json`, sessionsJSON);
+      const sessionsFileJSON = JSON.stringify({ password: config.server.password, sessions: (memoryStore as any).sessions }, null, 2);
+      fs.writeFileSync(`${__dirname}/../../sessions.json`, sessionsFileJSON);
     } catch (err) {
       SupCore.log(`Failed to save sessions:\n${(err as any).stack}`);
       hadError = true;
