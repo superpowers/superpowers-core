@@ -98,7 +98,7 @@ export function onTrashEntryClick() {
   function checkNextEntry() {
     selectedEntries.splice(0, 1);
     if (selectedEntries.length === 0) {
-      const confirmLabel = SupClient.i18n.t("project:treeView.trash.prompt"), ;
+      const confirmLabel = SupClient.i18n.t("project:treeView.trash.prompt");
 
       const options = {
         header: SupClient.i18n.t("project:treeView.trash.title"),
