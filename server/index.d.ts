@@ -14,8 +14,8 @@ declare module "passport.socketio" {
     secret?: string;
     store?: any;
     cookieParser?: any;
-    success?: (data: any, accept: boolean) => void;
-    fail?: (data: any, message: string, critical: boolean, accept: boolean) => void;
+    success?: (data: any, accept: (error?: Error) => void) => void;
+    fail?: (data: any, message: string, critical: boolean, accept: (error?: Error) => void) => void;
   }
 
   export function authorize(options: AuthorizeOptions): (socket: any, fn: (err?: any) => void) => void;
