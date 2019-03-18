@@ -35,7 +35,12 @@ function shouldIgnore(file) {
   file = file.substring(sourceRootPath.length + 1).replace(/\\/g, "/");
 
   // Protected folders
-  if (file.indexOf("node_modules/") !== -1) return false;
+  if (file.indexOf("node_modules/") !== -1) {
+    // We don't need .bin files and they contain symlinks, messing up pruning
+    // So let's never copy them
+    if (file.indexOf("node_modules/.bin") !== -1) return true;
+    return false;
+  }
   if (file.indexOf("public/") !== -1) return false;
 
   if (file[0] === "." || file.indexOf("/.") !== -1) return true;
@@ -76,6 +81,7 @@ readdirRecursive(sourceRootPath, [ shouldIgnore ], (err, files) => {
 
   async.eachSeries(buildPaths, (buildPath, cb) => {
     if (!fs.existsSync(`${buildPath}/package.json`)) { cb(); return; }
+
     const spawnOptions = { cwd: buildPath, env: process.env, stdio: "inherit" };
     const npm = child_process.spawn(`npm${execSuffix ? ".cmd" : ""}`, [ "prune", "--production" ], spawnOptions);
 
