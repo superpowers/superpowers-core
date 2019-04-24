@@ -69,7 +69,8 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
   }
 
   private onSearchInput = (event: UIEvent) => {
-    let results = fuzzy.filter(this.searchElt.value, this.pathsList);
+    const query = this.searchElt.value.trim().replace(/ /g, "");
+    let results = fuzzy.filter(query, this.pathsList);
     const resultsWithoutSlashes = fuzzy.filter(this.searchElt.value, this.pathsWithoutSlashesList);
     results = results.concat(resultsWithoutSlashes);
 
