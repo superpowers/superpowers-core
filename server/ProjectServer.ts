@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as mkdirp from "mkdirp";
 import * as path from "path";
 import * as async from "async";
 
@@ -428,5 +429,327 @@ export default class ProjectServer {
     if (assetDependencies.length === 0) {
       delete this.data.entries.dependenciesByAssetId[assetId];
     }
+  }
+
+  addEntry = (clientSocketId: string, name: string, type: string, options: any, callback: (err: string, newId?: string) => any) => {
+    if (!this.clientsBySocketId[clientSocketId].errorIfCant("editAssets", callback)) return;
+
+    name = name.trim();
+    if (name.length === 0) { callback("Entry name cannot be empty"); return; }
+    if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
+
+    const entry: SupCore.Data.EntryNode = { id: null, name, type, badges: [], dependentAssetIds: [] };
+    if (options == null) options = {};
+
+    this.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
+      if (err != null) { callback(err, null); return; }
+
+      const onEntryCreated = () => {
+        this.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+        callback(null, entry.id);
+      };
+
+      if (entry.type != null) {
+        const assetClass = this.system.data.assetClasses[entry.type];
+        const asset = new assetClass(entry.id, null, this);
+        asset.init({ name: entry.name }, () => {
+          const assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(entry.id)}`);
+          mkdirp(assetPath, () => { asset.save(assetPath, onEntryCreated); });
+        });
+      } else {
+        onEntryCreated();
+      }
+    });
+  }
+
+  duplicateEntry = (clientSocketId: string, newName: string, originalEntryId: string, options: any, callback: (err: string, duplicatedId?: string) => any) => {
+    if (!this.clientsBySocketId[clientSocketId].errorIfCant("editAssets", callback)) return;
+
+    const entryToDuplicate = this.data.entries.byId[originalEntryId];
+    if (entryToDuplicate == null) { callback(`Entry ${originalEntryId} doesn't exist`); return; }
+    const entry: SupCore.Data.EntryNode = {
+      id: null, name: newName, type: entryToDuplicate.type,
+      badges: [], dependentAssetIds: []
+    };
+    if (options == null) options = {};
+
+    if (entryToDuplicate.type == null) {
+      this.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
+        if (err != null) { callback(err, null); return; }
+        this.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+
+        async.eachSeries(entryToDuplicate.children, (child, cb) => {
+          this.duplicateEntry(clientSocketId, child.name, child.id, { parentId: entry.id, index: entryToDuplicate.children.indexOf(child) }, (err: string, duplicatedId?: string) => {
+            if (err == null) cb(null);
+            else cb(new Error(err));
+          });
+        }, (err: Error) => {
+          if (err != null) callback(err.message, null);
+          else callback(null, entry.id);
+        });
+      });
+    } else {
+      this.data.entries.add(entry, options.parentId, options.index, (err: string, actualIndex: number) => {
+        if (err != null) { callback(err); return; }
+
+        const newAssetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(entry.id)}`);
+        this.data.assets.acquire(originalEntryId, null, (err, referenceAsset) => {
+          mkdirp(newAssetPath, () => {
+            referenceAsset.save(newAssetPath, (err: Error) => {
+              this.data.assets.release(originalEntryId, null);
+
+              if (err != null) {
+                this.log(`Failed to save duplicated asset at ${newAssetPath} (duplicating ${originalEntryId})`);
+                this.log(err.toString());
+                this.data.entries.remove(entry.id, (err) => { if (err != null) this.log(err); });
+                callback("Could not save asset");
+                return;
+              }
+
+              this.data.assets.acquire(entry.id, null, (err, newAsset) => {
+                this.data.assets.release(entry.id, null);
+
+                this.io.in("sub:entries").emit("add:entries", entry, options.parentId, actualIndex);
+                newAsset.restore();
+                callback(null, entry.id);
+              });
+            });
+          });
+        });
+      });
+    }
+  }
+
+  moveEntry = (clientSocketId: string, entryId: string, parentId: string, index: number, callback: (err: string) => any) => {
+    if (!this.clientsBySocketId[clientSocketId].errorIfCant("editAssets", callback)) return;
+
+    const oldFullAssetPath = this.data.entries.getStoragePathFromId(entryId);
+    const oldParent = this.data.entries.parentNodesById[entryId];
+
+    this.data.entries.move(entryId, parentId, index, (err, actualIndex) => {
+      if (err != null) { callback(err); return; }
+
+      this.onEntryChangeFullPath(entryId, oldFullAssetPath, () => {
+        if (oldParent == null || oldParent.children.length > 0) return;
+
+        const oldParentPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(oldParent.id)}`);
+        fs.readdir(oldParentPath, (err, files) => { if (files != null && files.length === 0) fs.rmdirSync(oldParentPath); });
+      });
+
+      this.io.in("sub:entries").emit("move:entries", entryId, parentId, actualIndex);
+      callback(null);
+    });
+  }
+
+  trashEntry = (clientSocketId: string, entryId: string, callback: (err: string) => any) => {
+    if (!this.clientsBySocketId[clientSocketId].errorIfCant("editAssets", callback)) return;
+
+    const trashEntryRecursively = (entry: SupCore.Data.EntryNode, callback: (err: Error) => void) => {
+      const finishTrashEntry = (err: Error) => {
+        if (err != null) { callback(err); return; }
+
+        // Clear all dependencies for this entry
+        const dependentAssetIds = (entry != null) ? entry.dependentAssetIds : null;
+
+        const dependencies = this.data.entries.dependenciesByAssetId[entry.id];
+        if (dependencies != null) {
+          const removedDependencyEntryIds = [] as string[];
+          for (const depId of dependencies) {
+            const depEntry = this.data.entries.byId[depId];
+            if (depEntry == null) continue;
+
+            const dependentAssetIds = depEntry.dependentAssetIds;
+            const index = dependentAssetIds.indexOf(entry.id);
+            if (index !== -1) {
+              dependentAssetIds.splice(index, 1);
+              removedDependencyEntryIds.push(depId);
+            }
+          }
+
+          if (removedDependencyEntryIds.length > 0) {
+            this.io.in("sub:entries").emit("remove:dependencies", entry.id, dependencies);
+          }
+          delete this.data.entries.dependenciesByAssetId[entry.id];
+        }
+
+        let asset: SupCore.Data.Base.Asset;
+        async.series([
+          (cb) => {
+            if (entry.type != null) {
+              this.data.assets.acquire(entry.id, null, (err, acquiredAsset) => {
+                if (err != null) { cb(err); return; }
+                asset = acquiredAsset;
+                cb(null);
+              });
+            } else cb(null);
+          }, (cb) => {
+            // Apply and clear any scheduled saved
+            const scheduledSaveCallback = this.scheduledSaveCallbacks[`assets:${entry.id}`];
+            if (scheduledSaveCallback == null) { cb(); return; }
+
+            if (scheduledSaveCallback.timeoutId != null) clearTimeout(scheduledSaveCallback.timeoutId);
+            delete this.scheduledSaveCallbacks[`assets:${entry.id}`];
+
+            const assetPath = path.join(this.projectPath, `assets/${this.data.entries.getStoragePathFromId(entry.id)}`);
+            asset.save(assetPath, cb);
+
+          }, (cb) => {
+            // Delete the entry
+            this.data.entries.remove(entry.id, (err) => {
+              if (err != null) { cb(new Error(err)); return; }
+
+              this.io.in("sub:entries").emit("trash:entries", entry.id);
+
+              // Notify and clear all asset subscribers
+              const roomName = `sub:assets:${entry.id}`;
+              this.io.in(roomName).emit("trash:assets", entry.id);
+
+              const room = this.io.adapter.rooms[roomName]; // room is null when the asset isn't open in any client
+              if (room != null) {
+                for (const socketId in room.sockets) {
+                  const remoteClient = this.clientsBySocketId[socketId];
+                  remoteClient.socket.leave(roomName);
+                  remoteClient.subscriptions.splice(remoteClient.subscriptions.indexOf(roomName), 1);
+                }
+              }
+
+              // Generate badges for any assets depending on this entry
+              if (dependentAssetIds != null) this.markMissingDependency(dependentAssetIds, entryId);
+
+              // Skip asset destruction & release if trashing a folder
+              if (asset == null) { cb(null); return; }
+
+              // NOTE: It is important that we destroy the asset after having removed its entry
+              // from the tree so that nobody can subscribe to it after it's been destroyed
+              asset.destroy(() => {
+                this.data.assets.releaseAll(entry.id);
+                cb(null);
+              });
+            });
+          }
+        ], callback);
+      };
+
+      if (entry.type == null) {
+        async.each(entry.children, (entry, cb) => { trashEntryRecursively(entry, cb); }
+        , finishTrashEntry);
+      } else finishTrashEntry(null);
+    };
+
+    const trashedAssetFolder = this.data.entries.getStoragePathFromId(entryId);
+    const entry = this.data.entries.byId[entryId];
+    const gotChildren = entry.type == null && entry.children.length > 0;
+    const parentEntry = this.data.entries.parentNodesById[entryId];
+    trashEntryRecursively(entry, (err: Error) => {
+      if (err != null) { callback(err.message); return; }
+
+      // After the trash on memory, move folder to trashed assets and clean up empty folders
+      const deleteFolder = (folderPath: string, callback: (error: string) => void) => {
+        fs.readdir(folderPath, (err, files) => {
+          if (err != null) {
+            if (err.code !== "ENOENT") callback(err.message);
+            else callback(null);
+            return;
+          }
+
+          if (files.length === 0) {
+            fs.rmdir(folderPath, (err) => {
+              if (err != null) { callback(err.message); return; }
+              callback(null);
+            });
+          } else callback(null);
+        });
+      };
+
+      if (entry.type != null || gotChildren) {
+        this.moveAssetFolderToTrash(trashedAssetFolder, (err) => {
+          if (err != null) { callback(err.message); return; }
+
+          if (parentEntry != null && parentEntry.children.length === 0)
+            deleteFolder(path.join(this.projectPath, "assets", this.data.entries.getStoragePathFromId(parentEntry.id)), callback);
+          else callback(null);
+        });
+      } else deleteFolder(path.join(this.projectPath, "assets", trashedAssetFolder), callback);
+    });
+  }
+
+  renameEntry = (clientSocketId: string, entryId: string, name: string, callback: (err: string) => any) => {
+    if (!this.clientsBySocketId[clientSocketId].errorIfCant("editAssets", callback)) return;
+
+    if (name.indexOf("/") !== -1) { callback("Entry name cannot contain slashes"); return; }
+
+    const oldFullAssetPath = this.data.entries.getStoragePathFromId(entryId);
+
+    this.data.entries.setProperty(entryId, "name", name, (err: string, actualName: any) => {
+      if (err != null) { callback(err); return; }
+
+      this.onEntryChangeFullPath(entryId, oldFullAssetPath);
+      this.io.in("sub:entries").emit("setProperty:entries", entryId, "name", actualName);
+      callback(null);
+    });
+  }
+
+  private onEntryChangeFullPath = (assetId: string, oldFullAssetPath: string, callback?: Function) => {
+    let mustScheduleSave = false;
+
+    const scheduledSaveCallback = this.scheduledSaveCallbacks[`assets:${assetId}`];
+    if (scheduledSaveCallback != null && scheduledSaveCallback.timeoutId != null) {
+      clearTimeout(scheduledSaveCallback.timeoutId);
+      scheduledSaveCallback.timeoutId = null;
+      scheduledSaveCallback.callback = null;
+      mustScheduleSave = true;
+    }
+
+    const assetPath = this.data.entries.getStoragePathFromId(assetId);
+    async.series([
+      (cb) => {
+        const index = assetPath.lastIndexOf("/");
+        if (index !== -1) {
+          const parentPath = assetPath.slice(0, index);
+          mkdirp(path.join(this.projectPath, `assets/${parentPath}`), cb);
+        } else cb(null);
+      }, (cb) => {
+        const oldDirPath = path.join(this.projectPath, `assets/${oldFullAssetPath}`);
+        const dirPath = path.join(this.projectPath, `assets/${assetPath}`);
+
+        fs.rename(oldDirPath, dirPath, (err) => {
+          if (mustScheduleSave) this.scheduleAssetSave(assetId);
+
+          if (callback != null) callback();
+        });
+      }
+    ]);
+  }
+
+  saveEntry = (clientSocketId: string, entryId: string, revisionName: string, callback: (err: string) => void) => {
+    if (!this.clientsBySocketId[clientSocketId].errorIfCant("editAssets", callback)) return;
+
+    if (revisionName.length === 0) { callback("Revision name can't be empty"); return; }
+
+    this.data.entries.save(entryId, revisionName, (err, revisionId) => {
+      if (err != null) { callback(err); return; }
+
+      this.data.assets.acquire(entryId, null, (err, asset) => {
+        if (err != null) { callback("Could not acquire asset"); return; }
+
+        this.data.assets.release(entryId, null);
+
+        const revisionPath = path.join(this.projectPath, `assetRevisions/${entryId}/${revisionId}-${revisionName}`);
+        mkdirp(revisionPath, (err) => {
+          if (err != null) { callback("Could not write the save"); return; }
+
+          asset.save(revisionPath, (err: Error) => {
+            if (err != null) {
+              callback("Could not write the save");
+              console.log(err);
+              return;
+            }
+
+            this.io.in("sub:entries").emit("save:entries", entryId, revisionId, revisionName);
+            callback(null);
+          });
+        });
+      });
+    });
   }
 }
