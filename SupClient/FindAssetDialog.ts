@@ -5,6 +5,7 @@ import * as TreeView from "dnd-tree-view";
 import * as Dialogs from "simple-dialogs";
 import * as i18n from "./i18n";
 
+const maxResultsVisible = 100;
 type FindAssetResult = string;
 
 export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult> {
@@ -14,7 +15,8 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
   private entriesByPath: { [path: string]: SupCore.Data.EntryNode; } = {};
   private pathsList: string[] = [];
   private pathsWithoutSlashesList: string[] = [];
-  private entryElts: HTMLLIElement[] = [];
+  private cachedElts: HTMLLIElement[] = [];
+  private tooManyResultsElt: HTMLLIElement;
 
   constructor(private entries: SupCore.Data.Entries, private editorsByAssetType: { [assetType: string]: { pluginPath: string; } }, callback: (result: FindAssetResult) => void) {
     super(callback);
@@ -34,6 +36,9 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     const treeViewContainer = SupClient.html("div", "assets-tree-view", { parent: this.formElt });
     this.treeView = new TreeView(treeViewContainer, { multipleSelection: false });
     this.treeView.on("activate", () => { this.submit(); });
+    this.treeView.on("selectionChange", () => {
+      if (this.treeView.selectedNodes[0] === this.tooManyResultsElt) this.treeView.clearSelection();
+    });
 
     this.entries.walk((node: SupCore.Data.EntryNode) => {
       if (node.type == null || editorsByAssetType[node.type] == null) return;
@@ -42,61 +47,72 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       this.entriesByPath[path] = node;
       this.pathsList.push(path);
       this.pathsWithoutSlashesList.push(path.replace(/\//g, " "));
-
-      const liElt = this.createEntryElement(node);
-      this.entryElts.push(liElt);
-      this.treeView.append(liElt, "item");
     });
 
-    this.treeView.addToSelection(this.treeView.treeRoot.firstChild as HTMLLIElement);
-  }
+    for (let i = 0; i < maxResultsVisible; i++) {
+      const liElt = SupClient.html("li");
+      SupClient.html("img", { parent: liElt, draggable: false});
+      SupClient.html("span", "name", { parent: liElt });
 
-  private createEntryElement(entry: SupCore.Data.EntryNode) {
-    const liElt = document.createElement("li");
-    liElt.dataset["id"] = entry.id;
+      this.cachedElts.push(liElt);
+    }
 
-    const iconElt = document.createElement("img");
-    iconElt.draggable = false;
-    iconElt.src = `/systems/${SupCore.system.id}/plugins/${this.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
-    liElt.appendChild(iconElt);
-
-    const nameSpan = document.createElement("span");
-    nameSpan.className = "name";
-    nameSpan.textContent = this.entries.getPathFromId(entry.id);
-    liElt.appendChild(nameSpan);
-
-    return liElt;
+    this.tooManyResultsElt = SupClient.html("li");
+    SupClient.html("span", "name", { parent: this.tooManyResultsElt });
   }
 
   private onSearchInput = (event: UIEvent) => {
-    const query = this.searchElt.value.trim().replace(/ /g, "");
-    let results = fuzzy.filter(query, this.pathsList);
-    const resultsWithoutSlashes = fuzzy.filter(this.searchElt.value, this.pathsWithoutSlashesList);
-    results = results.concat(resultsWithoutSlashes);
-
     this.treeView.clearSelection();
     this.treeView.treeRoot.innerHTML = "";
-    if (results.length === 0) return;
 
-    results.sort((a, b) => b.score - a.score);
-    let index = results.length - 1;
-    for (let i = 0; i < results.length; i++) {
-      const result = results[index];
+    const query = this.searchElt.value.trim();
+    if (query === "") return;
 
-      if (result.original.search(new RegExp(this.searchElt.value, "i")) !== -1) {
-        results.splice(index, 1);
-        results.unshift(result);
-      } else {
-        index -= 1;
+    let searchResults = (query: string, paths: string[]) => {
+      let results = fuzzy.filter(query, paths);
+      const totalResultsCount = results.length;
+      results = results.sort((a, b) => b.score - a.score).slice(0, Math.min(results.length, maxResultsVisible));
+
+      let index = results.length - 1;
+      for (let i = 0; i < results.length; i++) {
+        const result = results[index];
+
+        if (result.original.search(new RegExp(query, "i")) !== -1) {
+          results.splice(index, 1);
+          results.unshift(result);
+        } else {
+          index -= 1;
+        }
       }
-    }
 
-    for (const result of results) {
-      const liElt = this.entryElts[result.index];
+      return { troncedList: results, totalCount: totalResultsCount };
+    };
+
+    const results = searchResults(query.replace(/ /g, ""), this.pathsList);
+    const resultsWithoutSlashes = searchResults(query, this.pathsWithoutSlashesList);
+    const finalResults = resultsWithoutSlashes.troncedList.concat(results.troncedList);
+    if (finalResults.length === 0) return;
+
+    for (let i = 0; i < Math.min(finalResults.length, maxResultsVisible); i++) {
+      const entryPath = this.pathsList[finalResults[i].index];
+      const entry = this.entriesByPath[entryPath];
+
+      const liElt = this.cachedElts[i];
+      liElt.dataset["id"] = entry.id;
+      liElt.querySelector("img").src = `/systems/${SupCore.system.id}/plugins/${this.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
+      liElt.querySelector("span").textContent = this.entries.getPathFromId(entry.id);
+
       this.treeView.append(liElt, "item");
     }
 
-    this.treeView.addToSelection(this.treeView.treeRoot.firstChild as HTMLLIElement);
+    const totalResultsCount = Math.max(results.totalCount, resultsWithoutSlashes.totalCount);
+    if (totalResultsCount >= maxResultsVisible) {
+      this.tooManyResultsElt.querySelector("span").textContent = `and ${totalResultsCount - maxResultsVisible} more results...`;
+      this.treeView.append(this.tooManyResultsElt, "item");
+    }
+
+    this.treeView.addToSelection(this.cachedElts[0]);
+    this.treeView.scrollIntoView(this.cachedElts[0]);
   }
 
   private onSearchKeyDown = (event: KeyboardEvent) => {
