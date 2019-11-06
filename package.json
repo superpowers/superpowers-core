@@ -60,7 +60,7 @@
     "basic-auth": "^2.0.1",
     "body-parser": "^1.15.2",
     "cookie-parser": "^1.4.1",
-    "dnd-tree-view": "^4.0.0",
+    "dnd-tree-view": "^4.0.1",
     "express": "^4.13.3",
     "express-rate-limit": "^3.4.0",
     "express-session": "^1.13.0",
