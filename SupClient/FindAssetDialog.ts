@@ -51,7 +51,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
 
     for (let i = 0; i < maxResultsVisible; i++) {
       const liElt = SupClient.html("li");
-      SupClient.html("img", { parent: liElt, draggable: false});
+      SupClient.html("img", { parent: liElt, draggable: false });
       SupClient.html("span", "name", { parent: liElt });
 
       this.cachedElts.push(liElt);
@@ -68,13 +68,15 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     const query = this.searchElt.value.trim();
     if (query === "") return;
 
-    const caseInsensitiveQueryRegex = new RegExp(query, "i");
+    const duplicatedResults = fuzzy.filter(query.replace(/ /g, ""), this.pathsList);
+    duplicatedResults.concat(fuzzy.filter(query, this.pathsWithoutSlashesList));
 
-    const resultsWithSlashes = fuzzy.filter(query.replace(/ /g, ""), this.pathsList).map(x => { x.score += x.original.search(caseInsensitiveQueryRegex) !== -1 ? 100000 : 0; return x; });
-    const resultsWithoutSlashes = fuzzy.filter(query, this.pathsWithoutSlashesList).map(x => { x.score += x.original.search(caseInsensitiveQueryRegex) !== -1 ? 100000 : 0; return x; });
+    // Increase score if exact match
+    const caseInsensitiveQueryRegex = new RegExp(query, "i");
+    duplicatedResults.forEach((x) => x.score += x.original.search(caseInsensitiveQueryRegex) !== -1 ? 100000 : 0);
 
     const resultScoresByIndex: { [index: number]: number } = {};
-    for (const result of [].concat(resultsWithoutSlashes).concat(resultsWithSlashes)) {
+    for (const result of duplicatedResults) {
       const existingScore = resultScoresByIndex[result.index];
       resultScoresByIndex[result.index] = existingScore == null ? result.score : Math.max(result.score, existingScore);
     }
@@ -86,7 +88,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     const finalResults = allResults.length > maxResultsVisible ? allResults.slice(0, maxResultsVisible) : allResults;
     if (finalResults.length === 0) return;
 
-    for (let i = 0; i < Math.min(finalResults.length, maxResultsVisible); i++) {
+    for (let i = 0; i < finalResults.length; i++) {
       const entryPath = this.pathsList[finalResults[i].index];
       const entry = this.entriesByPath[entryPath];
 
@@ -98,9 +100,8 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       this.treeView.append(liElt, "item");
     }
 
-    const totalResultsCount = allResults.length;
-    if (totalResultsCount >= maxResultsVisible) {
-      this.tooManyResultsElt.querySelector("span").textContent = `and ${totalResultsCount - maxResultsVisible} more results...`;
+    if (allResults.length > maxResultsVisible) {
+      this.tooManyResultsElt.querySelector("span").textContent = `and ${allResults.length - maxResultsVisible} more results...`;
       this.treeView.append(this.tooManyResultsElt, "item");
     }
 
