@@ -68,29 +68,22 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     const query = this.searchElt.value.trim();
     if (query === "") return;
 
-    let searchResults = (query: string, paths: string[]) => {
-      let results = fuzzy.filter(query, paths);
-      const totalResultsCount = results.length;
-      results = results.sort((a, b) => b.score - a.score).slice(0, Math.min(results.length, maxResultsVisible));
+    const caseInsensitiveQueryRegex = new RegExp(query, "i");
 
-      let index = results.length - 1;
-      for (let i = 0; i < results.length; i++) {
-        const result = results[index];
+    const resultsWithSlashes = fuzzy.filter(query.replace(/ /g, ""), this.pathsList).map(x => { x.score += x.original.search(caseInsensitiveQueryRegex) !== -1 ? 100000 : 0; return x; });
+    const resultsWithoutSlashes = fuzzy.filter(query, this.pathsWithoutSlashesList).map(x => { x.score += x.original.search(caseInsensitiveQueryRegex) !== -1 ? 100000 : 0; return x; });
 
-        if (result.original.search(new RegExp(query, "i")) !== -1) {
-          results.splice(index, 1);
-          results.unshift(result);
-        } else {
-          index -= 1;
-        }
-      }
+    const resultScoresByIndex: { [index: number]: number } = {};
+    for (const result of [].concat(resultsWithoutSlashes).concat(resultsWithSlashes)) {
+      const existingScore = resultScoresByIndex[result.index];
+      resultScoresByIndex[result.index] = existingScore == null ? result.score : Math.max(result.score, existingScore);
+    }
 
-      return { troncedList: results, totalCount: totalResultsCount };
-    };
+    const allResults: { index: number, score: number }[] = [];
+    for (const index in resultScoresByIndex) allResults.push({ index: parseInt(index, 10), score: resultScoresByIndex[index] });
+    allResults.sort((a, b) => b.score - a.score);
 
-    const results = searchResults(query.replace(/ /g, ""), this.pathsList);
-    const resultsWithoutSlashes = searchResults(query, this.pathsWithoutSlashesList);
-    const finalResults = resultsWithoutSlashes.troncedList.concat(results.troncedList);
+    const finalResults = allResults.length > maxResultsVisible ? allResults.slice(0, maxResultsVisible) : allResults;
     if (finalResults.length === 0) return;
 
     for (let i = 0; i < Math.min(finalResults.length, maxResultsVisible); i++) {
@@ -105,7 +98,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       this.treeView.append(liElt, "item");
     }
 
-    const totalResultsCount = Math.max(results.totalCount, resultsWithoutSlashes.totalCount);
+    const totalResultsCount = allResults.length;
     if (totalResultsCount >= maxResultsVisible) {
       this.tooManyResultsElt.querySelector("span").textContent = `and ${totalResultsCount - maxResultsVisible} more results...`;
       this.treeView.append(this.tooManyResultsElt, "item");
