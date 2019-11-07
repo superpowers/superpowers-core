@@ -45,7 +45,7 @@
     "gulp-tslint": "^8.1.4",
     "gulp-typescript": "^5.0.0",
     "gulp-util": "^3.0.7",
-    "simple-dialogs": "^2.1.1",
+    "simple-dialogs": "^2.1.2",
     "socket.io-client": "^2.2.0",
     "tslint": "^5.13.1",
     "vinyl-source-stream": "^2.0.0",
