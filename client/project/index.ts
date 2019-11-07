@@ -93,6 +93,8 @@ function onForwardKeyboardEventToActiveTab(eventType: string, ctrlKey: boolean, 
   Object.defineProperty(event, "keyCode", { value: keyCode });
 
   const activePaneElt = tabs.panesElt.querySelector(".pane-container.active") as HTMLDivElement;
+  if (activePaneElt == null) return;
+
   const activeIframe = activePaneElt.querySelector("iframe") as HTMLIFrameElement;
   activeIframe.contentDocument.dispatchEvent(event);
 }
