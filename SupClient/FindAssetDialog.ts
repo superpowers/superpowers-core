@@ -18,6 +18,8 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
   private cachedElts: HTMLLIElement[] = [];
   private tooManyResultsElt: HTMLLIElement;
 
+  private searchTimeoutId: NodeJS.Timeout;
+
   constructor(private entries: SupCore.Data.Entries, private editorsByAssetType: { [assetType: string]: { pluginPath: string; } }, callback: (result: FindAssetResult) => void) {
     super(callback);
 
@@ -64,6 +66,13 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
   private onSearchInput = (event: UIEvent) => {
     this.treeView.clearSelection();
     this.treeView.treeRoot.innerHTML = "";
+
+    if (this.searchTimeoutId != null) clearTimeout(this.searchTimeoutId);
+    this.searchTimeoutId = setTimeout(this.searchResults, 150);
+  }
+
+  private searchResults = () => {
+    this.searchTimeoutId = null;
 
     const query = this.searchElt.value.trim();
     if (query === "") return;
