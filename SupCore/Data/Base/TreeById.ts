@@ -125,8 +125,10 @@ export default class TreeById extends EventEmitter {
     let parentNode: TreeNode = null;
     if (parentId != null) {
       parentNode = this.byId[parentId];
-      if (parentNode == null || parentNode.children == null) { callback(`Invalid parent node id: ${parentId}`); return; }
+      if (parentNode == null || parentNode.children == null) { callback(`Invalid parent node id: ${parentId}. This node doesn't exist or has no children.`); return; }
     }
+
+    if (id === parentId) { callback(`Invalid parent node id: ${parentId}. Can't attach a node to itself.`); return; }
 
     // Adjust insertion index if needed
     const siblings = (parentNode != null) ? parentNode.children : this.pub;
