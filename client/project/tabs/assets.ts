@@ -102,12 +102,9 @@ export function open(id: string, state?: {[name: string]: any}) {
           if (revisionName == null) return;
 
           socket.emit("save:entries", id, revisionName, (err: string) => {
-            if (err != null) {
-              /* tslint:disable:no-unused-expression */
-              new SupClient.Dialogs.InfoDialog(err);
-              /* tslint:enable:no-unused-expression */
-              return;
-            }
+            if (err != null) { new SupClient.Dialogs.InfoDialog(err); return; }
+
+            iframe.contentWindow.postMessage({ type: "revisionCreated", revisionName }, window.location.origin);
           });
         });
 
