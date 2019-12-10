@@ -4,6 +4,10 @@
   "namePatternDescription": "Die folgenden Zeichen dürfen nicht verwendet werden: \\, /, :, *, ?, \", <, >, |, [ und ].",
   "none": "(Keine)",
 
+  "findAsset": {
+    "placeholder": "Suche nach Assets"
+  },
+
   "actions": {
     "applyChanges": "Änderungen anwenden",
     "applyChangesWithErrors": "Änderungen mit Fehlern anwenden",

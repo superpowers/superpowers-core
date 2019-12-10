@@ -3,7 +3,11 @@
 
   "namePatternDescription": "The following characters cannot be used: \\, /, :, *, ?, \", <, >, |, [ and ].",
   "none": "(None)",
-  "searchPlaceholder": "Search for assets",
+
+  "findAsset": {
+    "placeholder": "Search for assets",
+    "moreResults": "and ${results} more results..."
+  },
 
   "actions": {
     "applyChanges": "Apply changes",

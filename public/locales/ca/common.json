@@ -4,6 +4,10 @@
   "namePatternDescription": "Els següents caràcters no es poden fer servir: \\, /, :, *, ?, \", <, >, |, [ i ].",
   "none": "(Ningún)",
 
+  "findAsset": {
+    "placeholder": "Buscar assets"
+  },
+
   "actions": {
     "applyChanges": "Aplicar canvis",
     "applyChangesWithErrors": "Aplicar canvis amb errors",

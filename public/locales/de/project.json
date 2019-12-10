@@ -32,7 +32,6 @@
       "title": "Papierkorb",
       "prompt": "Bist du sicher das du die ausgewählten Einträge löschen willst?",
       "warnBrokenDependency": "${entryName} wird verwendet in ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Suche nach Assets"
+    }
   }
 }

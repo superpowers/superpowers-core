@@ -33,7 +33,6 @@
       "prompt": "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?",
       "checkbox": "Je comprends que cette action ne peut pas être annulée.",
       "warnBrokenDependency": "${entryName} est utilisé dans ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Rechercher des assets"
+    }
   }
 }

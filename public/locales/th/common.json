@@ -4,6 +4,10 @@
   "namePatternDescription": "ห้ามใช้ตัวอักษรต่อไปนี้ : \\, /, :, *, ?, \", <, >, |, [ และ ]",
   "none": "(ปกติ)",
 
+  "findAsset": {
+    "placeholder": "ค้นหาทรัพยากร"
+  },
+
   "actions": {
     "applyChanges": "นำไปใช้",
     "applyChangesWithErrors": "นำไปใช้ด้วยข้อผิดพลาด",

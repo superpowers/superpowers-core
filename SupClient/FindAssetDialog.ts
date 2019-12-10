@@ -28,7 +28,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     const searchGroup = SupClient.html("div", "group", { parent: this.formElt, style: { display: "flex" } });
     this.searchElt = SupClient.html("input", {
       parent: searchGroup, type: "search",
-      placeholder: i18n.t("common:searchPlaceholder"),
+      placeholder: i18n.t("common:findAsset.placeholder"),
       style: { flex: "1 1 0" }
     }) as HTMLInputElement;
     this.searchElt.addEventListener("input", this.onSearchInput);
@@ -110,7 +110,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     }
 
     if (allResults.length > maxResultsVisible) {
-      this.tooManyResultsElt.querySelector("span").textContent = `and ${allResults.length - maxResultsVisible} more results...`;
+      this.tooManyResultsElt.querySelector("span").textContent = i18n.t("common:findAsset.moreResults", { results: allResults.length - maxResultsVisible });
       this.treeView.append(this.tooManyResultsElt, "item");
     }
 

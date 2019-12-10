@@ -4,6 +4,10 @@
   "namePatternDescription": "以下字元無法使用: \\, /, :, *, ?, \", <, >, |, [ and ].",
   "none": "(None)",
 
+  "findAsset": {
+    "placeholder": "搜尋素材"
+  },
+
   "actions": {
     "applyChanges": "更新",
     "applyChangesWithErrors": "忽略錯誤並更新",

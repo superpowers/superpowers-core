@@ -32,7 +32,6 @@
       "title": "削除",
       "prompt": "選択したものをゴミ箱に移動しますがよろしいですか?",
       "warnBrokenDependency": "${entryName} は ${dependentEntryNames} で使われています。"
-    },
-    "searchPlaceholder": "アセットの検索"
+    }
   }
 }

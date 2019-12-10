@@ -3,7 +3,10 @@
 
   "namePatternDescription": "Non è possibile utilizzare i seguenti caratteri: \\, /, :, *, ?, \", <, >, |, [ and ].",
   "none": "(Nessuno)",
-  "searchPlaceholder": "Cerca asset",
+
+  "findAsset": {
+    "placeholder": "Cerca asset"
+  },
 
   "actions": {
     "applyChanges": "Applica le modifiche",

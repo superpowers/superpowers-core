@@ -32,7 +32,6 @@
       "title": "Esborrar",
       "prompt": "Segur que vols esborrar els elements seleccionats?",
       "warnBrokenDependency": "${entryName} s'está fent servir en ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Buscar assets"
+    }
   }
 }

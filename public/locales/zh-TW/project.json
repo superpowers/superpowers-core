@@ -32,7 +32,6 @@
       "title": "移至垃圾桶",
       "prompt": "你確定要將這些素材移至垃圾桶？",
       "warnBrokenDependency": "${entryName} 仍使用在 ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "搜尋素材"
+    }
   }
 }

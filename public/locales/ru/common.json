@@ -3,7 +3,10 @@
 
   "namePatternDescription": "Не используйте следующие символы: \\, /, :, *, ?, \", <, >, |, [ и ].",
   "none": "(пусто)",
-  "searchPlaceholder": "Поиск по ассетам",
+
+  "findAsset": {
+    "placeholder": "Поиск по ассетам"
+  },
 
   "actions": {
     "applyChanges": "Применить изменения",

@@ -4,6 +4,10 @@
   "namePatternDescription": "Les caractères suivants ne peuvent pas être utilisés : \\, /, :, *, ?, \", <, >, |, [ et ].",
   "none": "(Vide)",
 
+  "findAsset": {
+    "placeholder": "Rechercher des assets"
+  },
+
   "actions": {
     "applyChanges": "Appliquer les modifications",
     "applyChangesWithErrors": "Appliquer les modifications avec erreurs",

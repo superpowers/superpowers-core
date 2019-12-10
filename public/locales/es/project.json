@@ -32,7 +32,6 @@
       "title": "Borrar",
       "prompt": "¿Seguro que quieres borrar los elementos seleccionados?",
       "warnBrokenDependency": "${entryName} está siendo usado en ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Buscar assets"
+    }
   }
 }

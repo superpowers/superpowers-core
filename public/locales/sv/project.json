@@ -32,7 +32,6 @@
       "title": "Soptunna",
       "prompt": "Är du säker på att du vill slänga valda poster?",
       "warnBrokenDependency": "${entryName} används i ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "Sök resurser"
+    }
   }
 }

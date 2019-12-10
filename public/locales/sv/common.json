@@ -4,6 +4,10 @@
   "namePatternDescription": "Följande tecken kan ej användas: \\, /, :, *, ?, \", <, >, |, [ and ].",
   "none": "(Inget)",
 
+  "findAsset": {
+    "placeholder": "Sök resurser"
+  },
+
   "actions": {
     "applyChanges": "Spara ändringar",
     "applyChangesWithErrors": "Spara ändringar med fel",

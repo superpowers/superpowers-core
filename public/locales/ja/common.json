@@ -4,6 +4,10 @@
   "namePatternDescription": "次の文字は使えません: \\, /, :, *, ?, \", <, >, |, [ and ].",
   "none": "(None)",
 
+  "findAsset": {
+    "placeholder": "アセットの検索"
+  },
+
   "actions": {
     "applyChanges": "Apply changes",
     "applyChangesWithErrors": "Apply changes with errors",

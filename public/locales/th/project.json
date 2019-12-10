@@ -32,7 +32,6 @@
       "title": "ทิ้งลงถังขยะ",
       "prompt": "คุณแน่ใจหรือที่จะทิ้งสิ่งนี้ลงถังขยะ?",
       "warnBrokenDependency": "${entryName} ถูกใช้ใน ${dependentEntryNames}."
-    },
-    "searchPlaceholder": "ค้นหาทรัพยากร"
+    }
   }
 }
