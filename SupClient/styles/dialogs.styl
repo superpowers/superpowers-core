@@ -42,6 +42,16 @@
 
   input[type=search] { height: 28px; }
 
+  .filter-container {
+    flex-wrap: wrap;
+
+    img { padding: 2px; width: 28px; height: 28px; }
+    img.toggle-all { content: url(/images/entries/filter-all.svg); }
+    img:hover { background: #ccc; }
+    img.filtered { opacity: 0.3; }
+    img.filtered:hover { opacity: 0.5; }
+  }
+
   .assets-tree-view {
     border: 1px solid #aaa;
     overflow-y: auto;

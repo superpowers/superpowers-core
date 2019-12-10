@@ -6,7 +6,9 @@
 
   "findAsset": {
     "placeholder": "Search for assets",
-    "moreResults": "and ${results} more results..."
+    "searching": "Searching...",
+    "moreResults": "and ${results} more results...",
+    "noResults": "No results found."
   },
 
   "actions": {

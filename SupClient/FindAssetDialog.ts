@@ -10,11 +10,12 @@ type FindAssetResult = string;
 
 export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult> {
   private searchElt: HTMLInputElement;
+  private filterContainer: HTMLDivElement;
   private treeView: TreeView;
 
-  private entriesByPath: { [path: string]: SupCore.Data.EntryNode; } = {};
-  private pathsList: string[] = [];
-  private pathsWithoutSlashesList: string[] = [];
+  private entriesByPath: { [path: string]: SupCore.Data.EntryNode; };
+  private pathsList: string[];
+  private pathsWithoutSlashesList: string[];
   private cachedElts: HTMLLIElement[] = [];
   private tooManyResultsElt: HTMLLIElement;
 
@@ -31,24 +32,29 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       placeholder: i18n.t("common:findAsset.placeholder"),
       style: { flex: "1 1 0" }
     }) as HTMLInputElement;
-    this.searchElt.addEventListener("input", this.onSearchInput);
+    this.searchElt.addEventListener("input", () => this.scheduleSearch() );
     this.searchElt.addEventListener("keydown", this.onSearchKeyDown);
     this.searchElt.focus();
+
+    const filterEnabled = Object.keys(this.editorsByAssetType).length > 1;
+
+    if (filterEnabled) {
+      this.filterContainer = SupClient.html("div", ["group", "filter-container"], { parent: this.formElt, style: { display: "flex" } });
+      const toggleAllElt = SupClient.html("img", "toggle-all", { parent: this.filterContainer, draggable: false });
+      toggleAllElt.addEventListener("click", this.onToggleAllFilterClick);
+
+      for (const assetType in editorsByAssetType) {
+        const iconElt = SupClient.html("img", { parent: this.filterContainer, dataset: { assetType }, draggable: false });
+        iconElt.src = `/systems/${SupCore.system.id}/plugins/${editorsByAssetType[assetType].pluginPath}/editors/${assetType}/icon.svg`;
+        iconElt.addEventListener("click", this.onToggleAssetTypeFilterClick);
+      }
+    }
 
     const treeViewContainer = SupClient.html("div", "assets-tree-view", { parent: this.formElt });
     this.treeView = new TreeView(treeViewContainer, { multipleSelection: false });
     this.treeView.on("activate", () => { this.submit(); });
     this.treeView.on("selectionChange", () => {
       if (this.treeView.selectedNodes[0] === this.tooManyResultsElt) this.treeView.clearSelection();
-    });
-
-    this.entries.walk((node: SupCore.Data.EntryNode) => {
-      if (node.type == null || editorsByAssetType[node.type] == null) return;
-
-      const path = this.entries.getPathFromId(node.id);
-      this.entriesByPath[path] = node;
-      this.pathsList.push(path);
-      this.pathsWithoutSlashesList.push(path.replace(/\//g, " "));
     });
 
     for (let i = 0; i < maxResultsVisible; i++) {
@@ -61,11 +67,34 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
 
     this.tooManyResultsElt = SupClient.html("li");
     SupClient.html("span", "name", { parent: this.tooManyResultsElt });
+
+    this.parseEntries();
   }
 
-  private onSearchInput = (event: UIEvent) => {
+  private parseEntries() {
+    this.entriesByPath = {};
+    this.pathsList = [];
+    this.pathsWithoutSlashesList = [];
+
+    const filterEnabled = Object.keys(this.editorsByAssetType).length > 1;
+
+    this.entries.walk((node: SupCore.Data.EntryNode) => {
+      if (node.type == null || this.editorsByAssetType[node.type] == null) return;
+      if (filterEnabled && this.filterContainer.querySelector(`[data-asset-type='${node.type}']`).classList.contains("filtered")) return;
+
+      const path = this.entries.getPathFromId(node.id);
+      this.entriesByPath[path] = node;
+      this.pathsList.push(path);
+      this.pathsWithoutSlashesList.push(path.replace(/\//g, " "));
+    });
+  }
+
+  private scheduleSearch() {
     this.treeView.clearSelection();
     this.treeView.treeRoot.innerHTML = "";
+
+    this.tooManyResultsElt.querySelector("span").textContent = i18n.t("common:findAsset.searching");
+    this.treeView.append(this.tooManyResultsElt, "item");
 
     if (this.searchTimeoutId != null) clearTimeout(this.searchTimeoutId);
     this.searchTimeoutId = setTimeout(this.searchResults, 150);
@@ -73,6 +102,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
 
   private searchResults = () => {
     this.searchTimeoutId = null;
+    this.treeView.remove(this.tooManyResultsElt);
 
     const query = this.searchElt.value.trim();
     if (query === "") return;
@@ -95,7 +125,11 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     allResults.sort((a, b) => b.score - a.score);
 
     const finalResults = allResults.length > maxResultsVisible ? allResults.slice(0, maxResultsVisible) : allResults;
-    if (finalResults.length === 0) return;
+    if (finalResults.length === 0) {
+      this.tooManyResultsElt.querySelector("span").textContent = i18n.t("common:findAsset.noResults");
+      this.treeView.append(this.tooManyResultsElt, "item");
+      return;
+    }
 
     for (let i = 0; i < finalResults.length; i++) {
       const entryPath = this.pathsList[finalResults[i].index];
@@ -128,6 +162,32 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       event.preventDefault();
       this.treeView.moveVertically(1);
     }
+  }
+
+  private onToggleAllFilterClick = () => {
+    const enableAllFilters = !(this.filterContainer.querySelector(".toggle-all") as HTMLElement).classList.contains("filtered");
+    const filterElts = this.filterContainer.querySelectorAll("img") as any as HTMLImageElement[];
+
+    for (const filterElt of filterElts) filterElt.classList.toggle("filtered", enableAllFilters);
+
+    this.parseEntries();
+    this.scheduleSearch();
+  }
+
+  private onToggleAssetTypeFilterClick = (event: KeyboardEvent) => {
+    const filterElt = event.target as HTMLElement;
+    filterElt.classList.toggle("filtered");
+
+    let allAssetTypesFiltered = true;
+    for (const assetType in this.editorsByAssetType) {
+      const filtered = this.filterContainer.querySelector(`[data-asset-type='${assetType}']`).classList.contains("filtered");
+      if (!filtered) { allAssetTypesFiltered = false; break; }
+    }
+
+    this.filterContainer.querySelector(`.toggle-all`).classList.toggle("filtered", allAssetTypesFiltered);
+
+    this.parseEntries();
+    this.scheduleSearch();
   }
 
   submit() {
