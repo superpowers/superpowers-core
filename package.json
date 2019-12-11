@@ -65,7 +65,7 @@
     "express-rate-limit": "^3.4.0",
     "express-session": "^1.13.0",
     "follow-redirects": "0.0.7",
-    "fuzzy": "^0.1.1",
+    "fuzzysort": "^1.1.4",
     "js-cookie": "^2.1.0",
     "lodash": "^4.17.15",
     "mkdirp": "^0.5.1",

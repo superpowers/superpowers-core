@@ -1,6 +1,5 @@
-/// <reference path="./typings/fuzzy.d.ts" />
 
-import * as fuzzy from "fuzzy";
+import * as fuzzysort from "fuzzysort";
 import * as TreeView from "dnd-tree-view";
 import * as Dialogs from "simple-dialogs";
 import * as i18n from "./i18n";
@@ -8,18 +7,20 @@ import * as i18n from "./i18n";
 const maxResultsVisible = 100;
 type FindAssetResult = string;
 
+type FuzzyEntry = {
+  id: string;
+  type: string;
+  path: Fuzzysort.Prepared;
+};
+
 export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult> {
   private searchElt: HTMLInputElement;
   private filterContainer: HTMLDivElement;
   private treeView: TreeView;
 
-  private entriesByPath: { [path: string]: SupCore.Data.EntryNode; };
-  private pathsList: string[];
-  private pathsWithoutSlashesList: string[];
+  private fuzzyEntries: FuzzyEntry[];
   private cachedElts: HTMLLIElement[] = [];
   private tooManyResultsElt: HTMLLIElement;
-
-  private searchTimeoutId: NodeJS.Timeout;
 
   constructor(private entries: SupCore.Data.Entries, private editorsByAssetType: { [assetType: string]: { pluginPath: string; } }, callback: (result: FindAssetResult) => void) {
     super(callback);
@@ -32,7 +33,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       placeholder: i18n.t("common:findAsset.placeholder"),
       style: { flex: "1 1 0" }
     }) as HTMLInputElement;
-    this.searchElt.addEventListener("input", () => this.scheduleSearch() );
+    this.searchElt.addEventListener("input", () => this.searchResults() );
     this.searchElt.addEventListener("keydown", this.onSearchKeyDown);
     this.searchElt.focus();
 
@@ -72,9 +73,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
   }
 
   private parseEntries() {
-    this.entriesByPath = {};
-    this.pathsList = [];
-    this.pathsWithoutSlashesList = [];
+    this.fuzzyEntries = [];
 
     const filterEnabled = Object.keys(this.editorsByAssetType).length > 1;
 
@@ -83,68 +82,39 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
       if (filterEnabled && this.filterContainer.querySelector(`[data-asset-type='${node.type}']`).classList.contains("filtered")) return;
 
       const path = this.entries.getPathFromId(node.id);
-      this.entriesByPath[path] = node;
-      this.pathsList.push(path);
-      this.pathsWithoutSlashesList.push(path.replace(/\//g, " "));
+      this.fuzzyEntries.push({ id: node.id, type: node.type, path: fuzzysort.prepare(path) });
     });
   }
 
-  private scheduleSearch() {
+  private searchResults() {
     this.treeView.clearSelection();
     this.treeView.treeRoot.innerHTML = "";
 
-    this.tooManyResultsElt.querySelector("span").textContent = i18n.t("common:findAsset.searching");
-    this.treeView.append(this.tooManyResultsElt, "item");
-
-    if (this.searchTimeoutId != null) clearTimeout(this.searchTimeoutId);
-    this.searchTimeoutId = setTimeout(this.searchResults, 150);
-  }
-
-  private searchResults = () => {
-    this.searchTimeoutId = null;
-    this.treeView.remove(this.tooManyResultsElt);
-
-    const query = this.searchElt.value.trim();
+    const query = this.searchElt.value.replace(/ /g, "");
     if (query === "") return;
 
-    const duplicatedResults = fuzzy.filter(query.replace(/ /g, ""), this.pathsList);
-    duplicatedResults.concat(fuzzy.filter(query, this.pathsWithoutSlashesList));
+    const options: Fuzzysort.KeyOptions = { allowTypo: true, threshold: -100000, key: "path" };
+    const results = fuzzysort.go<FuzzyEntry>(query, this.fuzzyEntries, options);
 
-    // Increase score if exact match
-    const caseInsensitiveQueryRegex = new RegExp(query, "i");
-    duplicatedResults.forEach((x) => x.score += x.original.search(caseInsensitiveQueryRegex) !== -1 ? 100000 : 0);
-
-    const resultScoresByIndex: { [index: number]: number } = {};
-    for (const result of duplicatedResults) {
-      const existingScore = resultScoresByIndex[result.index];
-      resultScoresByIndex[result.index] = existingScore == null ? result.score : Math.max(result.score, existingScore);
-    }
-
-    const allResults: { index: number, score: number }[] = [];
-    for (const index in resultScoresByIndex) allResults.push({ index: parseInt(index, 10), score: resultScoresByIndex[index] });
-    allResults.sort((a, b) => b.score - a.score);
-
-    const finalResults = allResults.length > maxResultsVisible ? allResults.slice(0, maxResultsVisible) : allResults;
-    if (finalResults.length === 0) {
+    if (results.length === 0) {
       this.tooManyResultsElt.querySelector("span").textContent = i18n.t("common:findAsset.noResults");
       this.treeView.append(this.tooManyResultsElt, "item");
       return;
     }
 
-    for (let i = 0; i < finalResults.length; i++) {
-      const entryPath = this.pathsList[finalResults[i].index];
-      const entry = this.entriesByPath[entryPath];
+    for (let i = 0; i < Math.min(results.length, maxResultsVisible); i++) {
+      const result = results[i];
 
       const liElt = this.cachedElts[i];
-      liElt.dataset["id"] = entry.id;
-      liElt.querySelector("img").src = `/systems/${SupCore.system.id}/plugins/${this.editorsByAssetType[entry.type].pluginPath}/editors/${entry.type}/icon.svg`;
-      liElt.querySelector("span").textContent = this.entries.getPathFromId(entry.id);
+      liElt.dataset["id"] = result.obj.id;
+      liElt.querySelector("img").src = `/systems/${SupCore.system.id}/plugins/${this.editorsByAssetType[result.obj.type].pluginPath}/editors/${result.obj.type}/icon.svg`;
+      liElt.querySelector("span").innerHTML = fuzzysort.highlight(result, "<b>", "</b>");
 
       this.treeView.append(liElt, "item");
     }
 
-    if (allResults.length > maxResultsVisible) {
-      this.tooManyResultsElt.querySelector("span").textContent = i18n.t("common:findAsset.moreResults", { results: allResults.length - maxResultsVisible });
+    if (results.length > maxResultsVisible) {
+      this.tooManyResultsElt.querySelector("span").textContent = i18n.t("common:findAsset.moreResults", { results: results.length - maxResultsVisible });
       this.treeView.append(this.tooManyResultsElt, "item");
     }
 
@@ -171,7 +141,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     for (const filterElt of filterElts) filterElt.classList.toggle("filtered", enableAllFilters);
 
     this.parseEntries();
-    this.scheduleSearch();
+    this.searchResults();
   }
 
   private onToggleAssetTypeFilterClick = (event: KeyboardEvent) => {
@@ -187,7 +157,7 @@ export default class FindAssetDialog extends Dialogs.BaseDialog<FindAssetResult>
     this.filterContainer.querySelector(`.toggle-all`).classList.toggle("filtered", allAssetTypesFiltered);
 
     this.parseEntries();
-    this.scheduleSearch();
+    this.searchResults();
   }
 
   submit() {
