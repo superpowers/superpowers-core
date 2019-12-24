@@ -1,0 +1,25 @@
+{
+  "title": "허브",
+  "serverAddress": "${hostname}의 포트 번호: ${port}",
+  "newProject": {
+    "noSystemError": {
+      "header": "새 프로젝트를 생성할 수 없습니다",
+      "message": "이 서버는 어떤 시스템도 설치되어 있지 않습니다. 서버 설정 탭에서 하나 이상 설치해 주세요."
+    },
+    "title": "새 프로젝트",
+    "prompt": "새 프로젝트의 이름과 형식을 입력하세요.",
+    "namePlaceholder": "프로젝트 이름",
+    "descriptionPlaceholder": "내용설명 (부가 요소)",
+    "emptyProject": {
+      "title": "빈 프로젝트",
+      "description": "비어있는 상태에서 시작합니다."
+    },
+    "autoOpen": "생성 후 열기"
+  },
+  "editDetails": {
+    "title": "세부 사항 수정",
+    "prompt": "프로젝트의 세부 사항을 수정합니다."
+  },
+  "openProject": "프로젝트 열기",
+  "language": "언어"
+}
